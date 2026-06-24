@@ -1,0 +1,7 @@
+package: api
+generate:
+  std-http-server: true
+  models: true
+output: redfish_openapi_gen.go
+output-options:
+  name-normalizer: ToCamelCaseWithInitialisms
