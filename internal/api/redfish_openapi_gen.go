@@ -1021,6 +1021,129 @@ type ActionInfoV160Parameters_DataType struct {
 	union json.RawMessage
 }
 
+// BiosV130Actions The available actions for this resource.
+type BiosV130Actions struct {
+	// HashBiosChangePassword This action changes a BIOS password.
+	HashBiosChangePassword *BiosV130ChangePassword `json:"#Bios.ChangePassword,omitempty"`
+
+	// HashBiosResetBios This action resets the BIOS attributes to default.
+	HashBiosResetBios *BiosV130ResetBios `json:"#Bios.ResetBios,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *BiosV130OemActions `json:"Oem,omitempty"`
+}
+
+// BiosV130Attributes The list of BIOS attributes and their values as determined by the manufacturer or provider.
+type BiosV130Attributes = map[string]interface{}
+
+// BiosV130Bios The `Bios` schema contains properties related to the BIOS attribute registry.  The attribute registry describes the system-specific BIOS attributes and actions for changing to BIOS settings.  Changes to the BIOS typically require a system reset before they take effect.  It is likely that a client finds the `@Redfish.Settings` term in this resource, and if it is found, the client makes requests to change BIOS settings by modifying the resource identified by the `@Redfish.Settings` term.
+type BiosV130Bios struct {
+	// RedfishSettings The resource settings.
+	RedfishSettings *SettingsV150Settings `json:"@Redfish.Settings,omitempty"`
+
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *BiosV130Actions `json:"Actions,omitempty"`
+
+	// AttributeRegistry The resource ID of the attribute registry that has the system-specific information about a BIOS resource.
+	AttributeRegistry *string `json:"AttributeRegistry,omitempty"`
+
+	// Attributes The list of BIOS attributes and their values as determined by the manufacturer or provider.
+	Attributes  *BiosV130Attributes       `json:"Attributes,omitempty"`
+	Description *BiosV130Bios_Description `json:"Description,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// Links The links to other resources that are related to this resource.
+	Links *BiosV130Links `json:"Links,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// Passwords The list of BIOS passwords specific to the manufacturer or provider.
+	Passwords *BiosV130Passwords `json:"Passwords,omitempty"`
+
+	// ResetBiosToDefaultsPending An indication of whether there is a pending request to reset the BIOS attributes to default values.
+	ResetBiosToDefaultsPending *bool `json:"ResetBiosToDefaultsPending,omitempty"`
+}
+
+// BiosV130BiosDescription1 defines model for .
+type BiosV130BiosDescription1 = interface{}
+
+// BiosV130Bios_Description defines model for BiosV130Bios.Description.
+type BiosV130Bios_Description struct {
+	union json.RawMessage
+}
+
+// BiosV130ChangePassword This action changes a BIOS password.
+type BiosV130ChangePassword struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// BiosV130Links The links to other resources that are related to this resource.
+type BiosV130Links struct {
+	// ActiveSoftwareImage A reference to a resource.
+	ActiveSoftwareImage *OdataV4IdRef `json:"ActiveSoftwareImage,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// SoftwareImages The images that are associated with this BIOS.
+	SoftwareImages *[]OdataV4IdRef `json:"SoftwareImages,omitempty"`
+
+	// SoftwareImagesOdataCount The number of items in a collection.
+	SoftwareImagesOdataCount *OdataV4Count `json:"SoftwareImages@odata.count,omitempty"`
+}
+
+// BiosV130OemActions The available OEM-specific actions for this resource.
+type BiosV130OemActions map[string]interface{}
+
+// BiosV130Password Information about a BIOS password specific to the manufacturer or provider.
+type BiosV130Password struct {
+	// Name The name of the password specific to the manufacturer or provider.  The value is used with the `PasswordName` parameter for the `ChangePassword` action.
+	Name *string `json:"Name,omitempty"`
+
+	// Set Indicates if this password is set.
+	Set *bool `json:"Set,omitempty"`
+}
+
+// BiosV130Passwords The list of BIOS passwords specific to the manufacturer or provider.
+type BiosV130Passwords struct {
+	// Boot Information about a BIOS password specific to the manufacturer or provider.
+	Boot *BiosV130Password `json:"Boot,omitempty"`
+
+	// Setup Information about a BIOS password specific to the manufacturer or provider.
+	Setup *BiosV130Password `json:"Setup,omitempty"`
+}
+
+// BiosV130ResetBios This action resets the BIOS attributes to default.
+type BiosV130ResetBios struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
 // ComputerSystemCollectionComputerSystemCollection The collection of `ComputerSystem` resource instances.
 type ComputerSystemCollectionComputerSystemCollection struct {
 	// OdataContext The OData description of a payload.
@@ -2814,6 +2937,18 @@ type PutRedfishV1SystemsComputerSystemIDJSONRequestBody = ComputerSystemV1280Com
 // PostRedfishV1SystemsComputerSystemIDActionsComputerSystemResetJSONRequestBody defines body for PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset for application/json ContentType.
 type PostRedfishV1SystemsComputerSystemIDActionsComputerSystemResetJSONRequestBody = ComputerSystemV1280ResetRequestBody
 
+// PatchRedfishV1SystemsComputerSystemIDBiosJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDBios for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDBiosJSONRequestBody = BiosV130Bios
+
+// PutRedfishV1SystemsComputerSystemIDBiosJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDBios for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDBiosJSONRequestBody = BiosV130Bios
+
+// PatchRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDBiosSettings for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130Bios
+
+// PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDBiosSettings for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130Bios
+
 // AsActionInfoV160ParameterTypes returns the union data inside the ActionInfoV160Parameters_DataType as a ActionInfoV160ParameterTypes
 func (t ActionInfoV160Parameters_DataType) AsActionInfoV160ParameterTypes() (ActionInfoV160ParameterTypes, error) {
 	var body ActionInfoV160ParameterTypes
@@ -2872,6 +3007,68 @@ func (t ActionInfoV160Parameters_DataType) MarshalJSON() ([]byte, error) {
 }
 
 func (t *ActionInfoV160Parameters_DataType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the BiosV130Bios_Description as a ResourceDescription
+func (t BiosV130Bios_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the BiosV130Bios_Description as the provided ResourceDescription
+func (t *BiosV130Bios_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the BiosV130Bios_Description, using the provided ResourceDescription
+func (t *BiosV130Bios_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsBiosV130BiosDescription1 returns the union data inside the BiosV130Bios_Description as a BiosV130BiosDescription1
+func (t BiosV130Bios_Description) AsBiosV130BiosDescription1() (BiosV130BiosDescription1, error) {
+	var body BiosV130BiosDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromBiosV130BiosDescription1 overwrites any union data inside the BiosV130Bios_Description as the provided BiosV130BiosDescription1
+func (t *BiosV130Bios_Description) FromBiosV130BiosDescription1(v BiosV130BiosDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeBiosV130BiosDescription1 performs a merge with any union data inside the BiosV130Bios_Description, using the provided BiosV130BiosDescription1
+func (t *BiosV130Bios_Description) MergeBiosV130BiosDescription1(v BiosV130BiosDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t BiosV130Bios_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *BiosV130Bios_Description) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -5382,6 +5579,24 @@ type ServerInterface interface {
 
 	// (POST /redfish/v1/Systems/{ComputerSystemId}/Actions/ComputerSystem.Reset)
 	PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/Bios)
+	GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/Bios)
+	PatchRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/Bios)
+	PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/Bios/Settings)
+	GetRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/Bios/Settings)
+	PatchRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/Bios/Settings)
+	PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -5565,6 +5780,162 @@ func (siw *ServerInterfaceWrapper) PostRedfishV1SystemsComputerSystemIDActionsCo
 	handler.ServeHTTP(w, r)
 }
 
+// GetRedfishV1SystemsComputerSystemIDBios operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDBios operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDBios operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDBiosSettings operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDBiosSettings(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDBiosSettings operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDBiosSettings(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDBiosSettings operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDBiosSettings(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -5693,6 +6064,12 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}", wrapper.PatchRedfishV1SystemsComputerSystemID)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}", wrapper.PutRedfishV1SystemsComputerSystemID)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Actions/ComputerSystem.Reset", wrapper.PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios", wrapper.GetRedfishV1SystemsComputerSystemIDBios)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios", wrapper.PatchRedfishV1SystemsComputerSystemIDBios)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios", wrapper.PutRedfishV1SystemsComputerSystemIDBios)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.GetRedfishV1SystemsComputerSystemIDBiosSettings)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PatchRedfishV1SystemsComputerSystemIDBiosSettings)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PutRedfishV1SystemsComputerSystemIDBiosSettings)
 
 	return m
 }

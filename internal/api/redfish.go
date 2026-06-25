@@ -181,3 +181,111 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 	responseNoContent(w)
 }
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(computerSystemID)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	biosAttributes := BiosV130Attributes{}
+
+	_, ok := instance.Devices["vtpm"]
+	if ok {
+		biosAttributes["vTPM"] = "On"
+	}
+
+	response(w, BiosV130Bios{
+		RedfishSettings: ref(SettingsV150Settings{
+			SettingsObject: &OdataV4IdRef{
+				OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios/Settings", s.instanceName)),
+			},
+		}),
+		OdataID:    ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
+		OdataType:  ref("#Bios.v1_3_0.Bios"),
+		Attributes: &biosAttributes,
+		ID:         "Bios",
+		Name:       "BIOS Configuration Current Settings",
+	})
+}
+
+func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	request := BiosV130Bios{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	instance, etag, err := s.client.GetInstance(computerSystemID)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if instance.Status != "Stopped" {
+		responseErrWithMessage(w, http.StatusPreconditionFailed, fmt.Sprintf("instance %q is not stopped", computerSystemID))
+		return
+	}
+
+	if request.Attributes == nil {
+		responseNoContent(w)
+	}
+
+	value, ok := (*request.Attributes)["vTPM"]
+	if ok {
+		tpmValue, ok := value.(string)
+		if ok {
+			if instance.Devices == nil {
+				instance.Devices = incusapi.DevicesMap{}
+			}
+
+			if tpmValue == "On" {
+				instance.Devices["vtpm"] = map[string]string{"type": "tpm"}
+			} else {
+				delete(instance.Devices, "vtpm")
+			}
+		}
+	}
+
+	op, err := s.client.UpdateInstance(computerSystemID, instance.Writable(), etag)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = op.Wait()
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responseNoContent(w)
+}
+
+func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	s.GetRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+}
+
+func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	s.PatchRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+}
+
+func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	responseNotImplemented(w)
+}
