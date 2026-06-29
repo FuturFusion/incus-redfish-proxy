@@ -23,6 +23,12 @@ var _ api0.IncusClient = &IncusClientMock{}
 //
 //		// make and configure a mocked api0.IncusClient
 //		mockedIncusClient := &IncusClientMock{
+//			CreateStoragePoolVolumeFromISOFunc: func(pool string, args incus.StorageVolumeBackupArgs) (incus.Operation, error) {
+//				panic("mock out the CreateStoragePoolVolumeFromISO method")
+//			},
+//			DeleteStoragePoolVolumeFunc: func(pool string, volType string, name string) error {
+//				panic("mock out the DeleteStoragePoolVolume method")
+//			},
 //			GetInstanceFunc: func(name string) (*api.Instance, string, error) {
 //				panic("mock out the GetInstance method")
 //			},
@@ -39,6 +45,12 @@ var _ api0.IncusClient = &IncusClientMock{}
 //
 //	}
 type IncusClientMock struct {
+	// CreateStoragePoolVolumeFromISOFunc mocks the CreateStoragePoolVolumeFromISO method.
+	CreateStoragePoolVolumeFromISOFunc func(pool string, args incus.StorageVolumeBackupArgs) (incus.Operation, error)
+
+	// DeleteStoragePoolVolumeFunc mocks the DeleteStoragePoolVolume method.
+	DeleteStoragePoolVolumeFunc func(pool string, volType string, name string) error
+
 	// GetInstanceFunc mocks the GetInstance method.
 	GetInstanceFunc func(name string) (*api.Instance, string, error)
 
@@ -50,6 +62,22 @@ type IncusClientMock struct {
 
 	// calls tracks calls to the methods.
 	calls struct {
+		// CreateStoragePoolVolumeFromISO holds details about calls to the CreateStoragePoolVolumeFromISO method.
+		CreateStoragePoolVolumeFromISO []struct {
+			// Pool is the pool argument value.
+			Pool string
+			// Args is the args argument value.
+			Args incus.StorageVolumeBackupArgs
+		}
+		// DeleteStoragePoolVolume holds details about calls to the DeleteStoragePoolVolume method.
+		DeleteStoragePoolVolume []struct {
+			// Pool is the pool argument value.
+			Pool string
+			// VolType is the volType argument value.
+			VolType string
+			// Name is the name argument value.
+			Name string
+		}
 		// GetInstance holds details about calls to the GetInstance method.
 		GetInstance []struct {
 			// Name is the name argument value.
@@ -74,9 +102,87 @@ type IncusClientMock struct {
 			ETag string
 		}
 	}
-	lockGetInstance         sync.RWMutex
-	lockUpdateInstance      sync.RWMutex
-	lockUpdateInstanceState sync.RWMutex
+	lockCreateStoragePoolVolumeFromISO sync.RWMutex
+	lockDeleteStoragePoolVolume        sync.RWMutex
+	lockGetInstance                    sync.RWMutex
+	lockUpdateInstance                 sync.RWMutex
+	lockUpdateInstanceState            sync.RWMutex
+}
+
+// CreateStoragePoolVolumeFromISO calls CreateStoragePoolVolumeFromISOFunc.
+func (mock *IncusClientMock) CreateStoragePoolVolumeFromISO(pool string, args incus.StorageVolumeBackupArgs) (incus.Operation, error) {
+	if mock.CreateStoragePoolVolumeFromISOFunc == nil {
+		panic("IncusClientMock.CreateStoragePoolVolumeFromISOFunc: method is nil but IncusClient.CreateStoragePoolVolumeFromISO was just called")
+	}
+	callInfo := struct {
+		Pool string
+		Args incus.StorageVolumeBackupArgs
+	}{
+		Pool: pool,
+		Args: args,
+	}
+	mock.lockCreateStoragePoolVolumeFromISO.Lock()
+	mock.calls.CreateStoragePoolVolumeFromISO = append(mock.calls.CreateStoragePoolVolumeFromISO, callInfo)
+	mock.lockCreateStoragePoolVolumeFromISO.Unlock()
+	return mock.CreateStoragePoolVolumeFromISOFunc(pool, args)
+}
+
+// CreateStoragePoolVolumeFromISOCalls gets all the calls that were made to CreateStoragePoolVolumeFromISO.
+// Check the length with:
+//
+//	len(mockedIncusClient.CreateStoragePoolVolumeFromISOCalls())
+func (mock *IncusClientMock) CreateStoragePoolVolumeFromISOCalls() []struct {
+	Pool string
+	Args incus.StorageVolumeBackupArgs
+} {
+	var calls []struct {
+		Pool string
+		Args incus.StorageVolumeBackupArgs
+	}
+	mock.lockCreateStoragePoolVolumeFromISO.RLock()
+	calls = mock.calls.CreateStoragePoolVolumeFromISO
+	mock.lockCreateStoragePoolVolumeFromISO.RUnlock()
+	return calls
+}
+
+// DeleteStoragePoolVolume calls DeleteStoragePoolVolumeFunc.
+func (mock *IncusClientMock) DeleteStoragePoolVolume(pool string, volType string, name string) error {
+	if mock.DeleteStoragePoolVolumeFunc == nil {
+		panic("IncusClientMock.DeleteStoragePoolVolumeFunc: method is nil but IncusClient.DeleteStoragePoolVolume was just called")
+	}
+	callInfo := struct {
+		Pool    string
+		VolType string
+		Name    string
+	}{
+		Pool:    pool,
+		VolType: volType,
+		Name:    name,
+	}
+	mock.lockDeleteStoragePoolVolume.Lock()
+	mock.calls.DeleteStoragePoolVolume = append(mock.calls.DeleteStoragePoolVolume, callInfo)
+	mock.lockDeleteStoragePoolVolume.Unlock()
+	return mock.DeleteStoragePoolVolumeFunc(pool, volType, name)
+}
+
+// DeleteStoragePoolVolumeCalls gets all the calls that were made to DeleteStoragePoolVolume.
+// Check the length with:
+//
+//	len(mockedIncusClient.DeleteStoragePoolVolumeCalls())
+func (mock *IncusClientMock) DeleteStoragePoolVolumeCalls() []struct {
+	Pool    string
+	VolType string
+	Name    string
+} {
+	var calls []struct {
+		Pool    string
+		VolType string
+		Name    string
+	}
+	mock.lockDeleteStoragePoolVolume.RLock()
+	calls = mock.calls.DeleteStoragePoolVolume
+	mock.lockDeleteStoragePoolVolume.RUnlock()
+	return calls
 }
 
 // GetInstance calls GetInstanceFunc.

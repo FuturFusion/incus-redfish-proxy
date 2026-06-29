@@ -635,6 +635,168 @@ func (e ComputerSystemV1280WatchdogWarningActions) Valid() bool {
 	}
 }
 
+// Defines values for ManagerV1250CommandConnectTypesSupported.
+const (
+	ManagerV1250CommandConnectTypesSupportedIPMI   ManagerV1250CommandConnectTypesSupported = "IPMI"
+	ManagerV1250CommandConnectTypesSupportedOem    ManagerV1250CommandConnectTypesSupported = "Oem"
+	ManagerV1250CommandConnectTypesSupportedSSH    ManagerV1250CommandConnectTypesSupported = "SSH"
+	ManagerV1250CommandConnectTypesSupportedTelnet ManagerV1250CommandConnectTypesSupported = "Telnet"
+)
+
+// Valid indicates whether the value is a known member of the ManagerV1250CommandConnectTypesSupported enum.
+func (e ManagerV1250CommandConnectTypesSupported) Valid() bool {
+	switch e {
+	case ManagerV1250CommandConnectTypesSupportedIPMI:
+		return true
+	case ManagerV1250CommandConnectTypesSupportedOem:
+		return true
+	case ManagerV1250CommandConnectTypesSupportedSSH:
+		return true
+	case ManagerV1250CommandConnectTypesSupportedTelnet:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ManagerV1250DateTimeSource.
+const (
+	DHCP     ManagerV1250DateTimeSource = "DHCP"
+	Firmware ManagerV1250DateTimeSource = "Firmware"
+	Host     ManagerV1250DateTimeSource = "Host"
+	NTP      ManagerV1250DateTimeSource = "NTP"
+	PTP      ManagerV1250DateTimeSource = "PTP"
+	RTC      ManagerV1250DateTimeSource = "RTC"
+)
+
+// Valid indicates whether the value is a known member of the ManagerV1250DateTimeSource enum.
+func (e ManagerV1250DateTimeSource) Valid() bool {
+	switch e {
+	case DHCP:
+		return true
+	case Firmware:
+		return true
+	case Host:
+		return true
+	case NTP:
+		return true
+	case PTP:
+		return true
+	case RTC:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ManagerV1250GraphicalConnectTypesSupported.
+const (
+	ManagerV1250GraphicalConnectTypesSupportedKVMIP ManagerV1250GraphicalConnectTypesSupported = "KVMIP"
+	ManagerV1250GraphicalConnectTypesSupportedOem   ManagerV1250GraphicalConnectTypesSupported = "Oem"
+)
+
+// Valid indicates whether the value is a known member of the ManagerV1250GraphicalConnectTypesSupported enum.
+func (e ManagerV1250GraphicalConnectTypesSupported) Valid() bool {
+	switch e {
+	case ManagerV1250GraphicalConnectTypesSupportedKVMIP:
+		return true
+	case ManagerV1250GraphicalConnectTypesSupportedOem:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ManagerV1250ManagerType.
+const (
+	ManagerV1250ManagerTypeAuxiliaryController  ManagerV1250ManagerType = "AuxiliaryController"
+	ManagerV1250ManagerTypeBMC                  ManagerV1250ManagerType = "BMC"
+	ManagerV1250ManagerTypeEnclosureManager     ManagerV1250ManagerType = "EnclosureManager"
+	ManagerV1250ManagerTypeFabricManager        ManagerV1250ManagerType = "FabricManager"
+	ManagerV1250ManagerTypeManagementController ManagerV1250ManagerType = "ManagementController"
+	ManagerV1250ManagerTypeRackManager          ManagerV1250ManagerType = "RackManager"
+	ManagerV1250ManagerTypeService              ManagerV1250ManagerType = "Service"
+)
+
+// Valid indicates whether the value is a known member of the ManagerV1250ManagerType enum.
+func (e ManagerV1250ManagerType) Valid() bool {
+	switch e {
+	case ManagerV1250ManagerTypeAuxiliaryController:
+		return true
+	case ManagerV1250ManagerTypeBMC:
+		return true
+	case ManagerV1250ManagerTypeEnclosureManager:
+		return true
+	case ManagerV1250ManagerTypeFabricManager:
+		return true
+	case ManagerV1250ManagerTypeManagementController:
+		return true
+	case ManagerV1250ManagerTypeRackManager:
+		return true
+	case ManagerV1250ManagerTypeService:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ManagerV1250SecurityModeTypes.
+const (
+	ManagerV1250SecurityModeTypesCNSA10   ManagerV1250SecurityModeTypes = "CNSA_1_0"
+	ManagerV1250SecurityModeTypesCNSA20   ManagerV1250SecurityModeTypes = "CNSA_2_0"
+	ManagerV1250SecurityModeTypesDefault  ManagerV1250SecurityModeTypes = "Default"
+	ManagerV1250SecurityModeTypesFIPS1402 ManagerV1250SecurityModeTypes = "FIPS_140_2"
+	ManagerV1250SecurityModeTypesFIPS1403 ManagerV1250SecurityModeTypes = "FIPS_140_3"
+	ManagerV1250SecurityModeTypesOEM      ManagerV1250SecurityModeTypes = "OEM"
+	ManagerV1250SecurityModeTypesSuiteB   ManagerV1250SecurityModeTypes = "SuiteB"
+)
+
+// Valid indicates whether the value is a known member of the ManagerV1250SecurityModeTypes enum.
+func (e ManagerV1250SecurityModeTypes) Valid() bool {
+	switch e {
+	case ManagerV1250SecurityModeTypesCNSA10:
+		return true
+	case ManagerV1250SecurityModeTypesCNSA20:
+		return true
+	case ManagerV1250SecurityModeTypesDefault:
+		return true
+	case ManagerV1250SecurityModeTypesFIPS1402:
+		return true
+	case ManagerV1250SecurityModeTypesFIPS1403:
+		return true
+	case ManagerV1250SecurityModeTypesOEM:
+		return true
+	case ManagerV1250SecurityModeTypesSuiteB:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ManagerV1250SerialConnectTypesSupported.
+const (
+	ManagerV1250SerialConnectTypesSupportedIPMI   ManagerV1250SerialConnectTypesSupported = "IPMI"
+	ManagerV1250SerialConnectTypesSupportedOem    ManagerV1250SerialConnectTypesSupported = "Oem"
+	ManagerV1250SerialConnectTypesSupportedSSH    ManagerV1250SerialConnectTypesSupported = "SSH"
+	ManagerV1250SerialConnectTypesSupportedTelnet ManagerV1250SerialConnectTypesSupported = "Telnet"
+)
+
+// Valid indicates whether the value is a known member of the ManagerV1250SerialConnectTypesSupported enum.
+func (e ManagerV1250SerialConnectTypesSupported) Valid() bool {
+	switch e {
+	case ManagerV1250SerialConnectTypesSupportedIPMI:
+		return true
+	case ManagerV1250SerialConnectTypesSupportedOem:
+		return true
+	case ManagerV1250SerialConnectTypesSupportedSSH:
+		return true
+	case ManagerV1250SerialConnectTypesSupportedTelnet:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for RedundancyV170RedundancyMode.
 const (
 	Failover     RedundancyV170RedundancyMode = "Failover"
@@ -724,31 +886,31 @@ func (e ResourceHealth) Valid() bool {
 
 // Defines values for ResourcePowerState.
 const (
-	ResourcePowerStateHibernating ResourcePowerState = "Hibernating"
-	ResourcePowerStateOff         ResourcePowerState = "Off"
-	ResourcePowerStateOn          ResourcePowerState = "On"
-	ResourcePowerStatePaused      ResourcePowerState = "Paused"
-	ResourcePowerStatePoweringOff ResourcePowerState = "PoweringOff"
-	ResourcePowerStatePoweringOn  ResourcePowerState = "PoweringOn"
-	ResourcePowerStateSleeping    ResourcePowerState = "Sleeping"
+	Hibernating ResourcePowerState = "Hibernating"
+	Off         ResourcePowerState = "Off"
+	On          ResourcePowerState = "On"
+	Paused      ResourcePowerState = "Paused"
+	PoweringOff ResourcePowerState = "PoweringOff"
+	PoweringOn  ResourcePowerState = "PoweringOn"
+	Sleeping    ResourcePowerState = "Sleeping"
 )
 
 // Valid indicates whether the value is a known member of the ResourcePowerState enum.
 func (e ResourcePowerState) Valid() bool {
 	switch e {
-	case ResourcePowerStateHibernating:
+	case Hibernating:
 		return true
-	case ResourcePowerStateOff:
+	case Off:
 		return true
-	case ResourcePowerStateOn:
+	case On:
 		return true
-	case ResourcePowerStatePaused:
+	case Paused:
 		return true
-	case ResourcePowerStatePoweringOff:
+	case PoweringOff:
 		return true
-	case ResourcePowerStatePoweringOn:
+	case PoweringOn:
 		return true
-	case ResourcePowerStateSleeping:
+	case Sleeping:
 		return true
 	default:
 		return false
@@ -884,6 +1046,117 @@ func (e ResourceV1220ConditionType) Valid() bool {
 	}
 }
 
+// Defines values for ResourceV1240LocationType.
+const (
+	Backplane ResourceV1240LocationType = "Backplane"
+	Bay       ResourceV1240LocationType = "Bay"
+	Connector ResourceV1240LocationType = "Connector"
+	Embedded  ResourceV1240LocationType = "Embedded"
+	Slot      ResourceV1240LocationType = "Slot"
+	Socket    ResourceV1240LocationType = "Socket"
+)
+
+// Valid indicates whether the value is a known member of the ResourceV1240LocationType enum.
+func (e ResourceV1240LocationType) Valid() bool {
+	switch e {
+	case Backplane:
+		return true
+	case Bay:
+		return true
+	case Connector:
+		return true
+	case Embedded:
+		return true
+	case Slot:
+		return true
+	case Socket:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ResourceV1240Orientation.
+const (
+	BackToFront ResourceV1240Orientation = "BackToFront"
+	BottomToTop ResourceV1240Orientation = "BottomToTop"
+	FrontToBack ResourceV1240Orientation = "FrontToBack"
+	LeftToRight ResourceV1240Orientation = "LeftToRight"
+	RightToLeft ResourceV1240Orientation = "RightToLeft"
+	TopToBottom ResourceV1240Orientation = "TopToBottom"
+)
+
+// Valid indicates whether the value is a known member of the ResourceV1240Orientation enum.
+func (e ResourceV1240Orientation) Valid() bool {
+	switch e {
+	case BackToFront:
+		return true
+	case BottomToTop:
+		return true
+	case FrontToBack:
+		return true
+	case LeftToRight:
+		return true
+	case RightToLeft:
+		return true
+	case TopToBottom:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ResourceV1240RackUnits.
+const (
+	EIA310 ResourceV1240RackUnits = "EIA_310"
+	OpenU  ResourceV1240RackUnits = "OpenU"
+)
+
+// Valid indicates whether the value is a known member of the ResourceV1240RackUnits enum.
+func (e ResourceV1240RackUnits) Valid() bool {
+	switch e {
+	case EIA310:
+		return true
+	case OpenU:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ResourceV1240Reference.
+const (
+	Bottom ResourceV1240Reference = "Bottom"
+	Front  ResourceV1240Reference = "Front"
+	Left   ResourceV1240Reference = "Left"
+	Middle ResourceV1240Reference = "Middle"
+	Rear   ResourceV1240Reference = "Rear"
+	Right  ResourceV1240Reference = "Right"
+	Top    ResourceV1240Reference = "Top"
+)
+
+// Valid indicates whether the value is a known member of the ResourceV1240Reference enum.
+func (e ResourceV1240Reference) Valid() bool {
+	switch e {
+	case Bottom:
+		return true
+	case Front:
+		return true
+	case Left:
+		return true
+	case Middle:
+		return true
+	case Rear:
+		return true
+	case Right:
+		return true
+	case Top:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SettingsV150ApplyTime.
 const (
 	AtMaintenanceWindowStart   SettingsV150ApplyTime = "AtMaintenanceWindowStart"
@@ -913,49 +1186,181 @@ func (e SettingsV150ApplyTime) Valid() bool {
 
 // Defines values for TaskV174TaskState.
 const (
-	Cancelled   TaskV174TaskState = "Cancelled"
-	Cancelling  TaskV174TaskState = "Cancelling"
-	Completed   TaskV174TaskState = "Completed"
-	Exception   TaskV174TaskState = "Exception"
-	Interrupted TaskV174TaskState = "Interrupted"
-	Killed      TaskV174TaskState = "Killed"
-	New         TaskV174TaskState = "New"
-	Pending     TaskV174TaskState = "Pending"
-	Running     TaskV174TaskState = "Running"
-	Service     TaskV174TaskState = "Service"
-	Starting    TaskV174TaskState = "Starting"
-	Stopping    TaskV174TaskState = "Stopping"
-	Suspended   TaskV174TaskState = "Suspended"
+	TaskV174TaskStateCancelled   TaskV174TaskState = "Cancelled"
+	TaskV174TaskStateCancelling  TaskV174TaskState = "Cancelling"
+	TaskV174TaskStateCompleted   TaskV174TaskState = "Completed"
+	TaskV174TaskStateException   TaskV174TaskState = "Exception"
+	TaskV174TaskStateInterrupted TaskV174TaskState = "Interrupted"
+	TaskV174TaskStateKilled      TaskV174TaskState = "Killed"
+	TaskV174TaskStateNew         TaskV174TaskState = "New"
+	TaskV174TaskStatePending     TaskV174TaskState = "Pending"
+	TaskV174TaskStateRunning     TaskV174TaskState = "Running"
+	TaskV174TaskStateService     TaskV174TaskState = "Service"
+	TaskV174TaskStateStarting    TaskV174TaskState = "Starting"
+	TaskV174TaskStateStopping    TaskV174TaskState = "Stopping"
+	TaskV174TaskStateSuspended   TaskV174TaskState = "Suspended"
 )
 
 // Valid indicates whether the value is a known member of the TaskV174TaskState enum.
 func (e TaskV174TaskState) Valid() bool {
 	switch e {
-	case Cancelled:
+	case TaskV174TaskStateCancelled:
 		return true
-	case Cancelling:
+	case TaskV174TaskStateCancelling:
 		return true
-	case Completed:
+	case TaskV174TaskStateCompleted:
 		return true
-	case Exception:
+	case TaskV174TaskStateException:
 		return true
-	case Interrupted:
+	case TaskV174TaskStateInterrupted:
 		return true
-	case Killed:
+	case TaskV174TaskStateKilled:
 		return true
-	case New:
+	case TaskV174TaskStateNew:
 		return true
-	case Pending:
+	case TaskV174TaskStatePending:
 		return true
-	case Running:
+	case TaskV174TaskStateRunning:
 		return true
-	case Service:
+	case TaskV174TaskStateService:
 		return true
-	case Starting:
+	case TaskV174TaskStateStarting:
 		return true
-	case Stopping:
+	case TaskV174TaskStateStopping:
 		return true
-	case Suspended:
+	case TaskV174TaskStateSuspended:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for VirtualMediaV165ConnectedVia.
+const (
+	VirtualMediaV165ConnectedViaApplet       VirtualMediaV165ConnectedVia = "Applet"
+	VirtualMediaV165ConnectedViaNotConnected VirtualMediaV165ConnectedVia = "NotConnected"
+	VirtualMediaV165ConnectedViaOem          VirtualMediaV165ConnectedVia = "Oem"
+	VirtualMediaV165ConnectedViaURI          VirtualMediaV165ConnectedVia = "URI"
+)
+
+// Valid indicates whether the value is a known member of the VirtualMediaV165ConnectedVia enum.
+func (e VirtualMediaV165ConnectedVia) Valid() bool {
+	switch e {
+	case VirtualMediaV165ConnectedViaApplet:
+		return true
+	case VirtualMediaV165ConnectedViaNotConnected:
+		return true
+	case VirtualMediaV165ConnectedViaOem:
+		return true
+	case VirtualMediaV165ConnectedViaURI:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for VirtualMediaV165EjectPolicy.
+const (
+	AfterUse   VirtualMediaV165EjectPolicy = "AfterUse"
+	OnPowerOff VirtualMediaV165EjectPolicy = "OnPowerOff"
+	Persistent VirtualMediaV165EjectPolicy = "Persistent"
+	Session    VirtualMediaV165EjectPolicy = "Session"
+	Timed      VirtualMediaV165EjectPolicy = "Timed"
+)
+
+// Valid indicates whether the value is a known member of the VirtualMediaV165EjectPolicy enum.
+func (e VirtualMediaV165EjectPolicy) Valid() bool {
+	switch e {
+	case AfterUse:
+		return true
+	case OnPowerOff:
+		return true
+	case Persistent:
+		return true
+	case Session:
+		return true
+	case Timed:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for VirtualMediaV165MediaType.
+const (
+	CD       VirtualMediaV165MediaType = "CD"
+	DVD      VirtualMediaV165MediaType = "DVD"
+	Floppy   VirtualMediaV165MediaType = "Floppy"
+	USBStick VirtualMediaV165MediaType = "USBStick"
+)
+
+// Valid indicates whether the value is a known member of the VirtualMediaV165MediaType enum.
+func (e VirtualMediaV165MediaType) Valid() bool {
+	switch e {
+	case CD:
+		return true
+	case DVD:
+		return true
+	case Floppy:
+		return true
+	case USBStick:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for VirtualMediaV165TransferMethod.
+const (
+	Stream VirtualMediaV165TransferMethod = "Stream"
+	Upload VirtualMediaV165TransferMethod = "Upload"
+)
+
+// Valid indicates whether the value is a known member of the VirtualMediaV165TransferMethod enum.
+func (e VirtualMediaV165TransferMethod) Valid() bool {
+	switch e {
+	case Stream:
+		return true
+	case Upload:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for VirtualMediaV165TransferProtocolType.
+const (
+	CIFS  VirtualMediaV165TransferProtocolType = "CIFS"
+	FTP   VirtualMediaV165TransferProtocolType = "FTP"
+	HTTP  VirtualMediaV165TransferProtocolType = "HTTP"
+	HTTPS VirtualMediaV165TransferProtocolType = "HTTPS"
+	NFS   VirtualMediaV165TransferProtocolType = "NFS"
+	OEM   VirtualMediaV165TransferProtocolType = "OEM"
+	SCP   VirtualMediaV165TransferProtocolType = "SCP"
+	SFTP  VirtualMediaV165TransferProtocolType = "SFTP"
+	TFTP  VirtualMediaV165TransferProtocolType = "TFTP"
+)
+
+// Valid indicates whether the value is a known member of the VirtualMediaV165TransferProtocolType enum.
+func (e VirtualMediaV165TransferProtocolType) Valid() bool {
+	switch e {
+	case CIFS:
+		return true
+	case FTP:
+		return true
+	case HTTP:
+		return true
+	case HTTPS:
+		return true
+	case NFS:
+		return true
+	case OEM:
+		return true
+	case SCP:
+		return true
+	case SFTP:
+		return true
+	case TFTP:
 		return true
 	default:
 		return false
@@ -2151,6 +2556,473 @@ type ComputerSystemV1280WebSocketConsole struct {
 	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
 }
 
+// ManagerCollectionManagerCollection The collection of `Manager` resource instances.
+type ManagerCollectionManagerCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                    `json:"@odata.type,omitempty"`
+	Description *ManagerCollectionManagerCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// ManagerCollectionManagerCollectionDescription1 defines model for .
+type ManagerCollectionManagerCollectionDescription1 = interface{}
+
+// ManagerCollectionManagerCollection_Description defines model for ManagerCollectionManagerCollection.Description.
+type ManagerCollectionManagerCollection_Description struct {
+	union json.RawMessage
+}
+
+// ManagerV1250Actions The available actions for this resource.
+type ManagerV1250Actions struct {
+	// HashManagerForceFailover The `ForceFailover` action forces a failover of this manager to the manager used in the parameter.
+	HashManagerForceFailover *ManagerV1250ForceFailover `json:"#Manager.ForceFailover,omitempty"`
+
+	// HashManagerModifyRedundancySet The `ModifyRedundancySet` operation adds members to or removes members from a redundant group of managers.
+	HashManagerModifyRedundancySet *ManagerV1250ModifyRedundancySet `json:"#Manager.ModifyRedundancySet,omitempty"`
+
+	// HashManagerReset The reset action resets/reboots the manager.
+	HashManagerReset *ManagerV1250Reset `json:"#Manager.Reset,omitempty"`
+
+	// HashManagerResetToDefaults The reset action resets the manager settings to factory defaults.  This can cause the manager to reset.
+	HashManagerResetToDefaults *ManagerV1250ResetToDefaults `json:"#Manager.ResetToDefaults,omitempty"`
+
+	// HashManagerUpdateSecurityMode The update security mode action updates the security mode for the manager.  This can cause the manager to reset and reset other settings to factory defaults.  Services might require the `ResetToDefaults` action to clear the security mode.
+	HashManagerUpdateSecurityMode *ManagerV1250UpdateSecurityMode `json:"#Manager.UpdateSecurityMode,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *ManagerV1250OemActions `json:"Oem,omitempty"`
+}
+
+// ManagerV1250CommandConnectTypesSupported defines model for Manager_v1_25_0_CommandConnectTypesSupported.
+type ManagerV1250CommandConnectTypesSupported string
+
+// ManagerV1250CommandShell The information about a command shell service that this manager provides.
+type ManagerV1250CommandShell struct {
+	// ConnectTypesSupported This property enumerates the command shell connection types that the implementation allows.
+	ConnectTypesSupported *[]ManagerV1250CommandConnectTypesSupported `json:"ConnectTypesSupported,omitempty"`
+
+	// MaxConcurrentSessions The maximum number of service sessions, regardless of protocol, that this manager can support.
+	MaxConcurrentSessions *int64 `json:"MaxConcurrentSessions,omitempty"`
+
+	// ServiceEnabled An indication of whether the service is enabled for this manager.
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+}
+
+// ManagerV1250DateTimeSource defines model for Manager_v1_25_0_DateTimeSource.
+type ManagerV1250DateTimeSource string
+
+// ManagerV1250DaylightSavingTime The daylight saving time settings for a manager.
+type ManagerV1250DaylightSavingTime struct {
+	// EndDateTime The end date and time with UTC offset of daylight saving time.
+	EndDateTime *time.Time `json:"EndDateTime,omitempty"`
+
+	// OffsetMinutes The daylight saving time offset in minutes.
+	OffsetMinutes *int64 `json:"OffsetMinutes,omitempty"`
+
+	// StartDateTime The start date and time with UTC offset of daylight saving time.
+	StartDateTime *time.Time `json:"StartDateTime,omitempty"`
+
+	// TimeZoneName The time zone of the manager when daylight saving time is in effect.
+	TimeZoneName *string `json:"TimeZoneName,omitempty"`
+}
+
+// ManagerV1250ForceFailover The `ForceFailover` action forces a failover of this manager to the manager used in the parameter.
+type ManagerV1250ForceFailover struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ManagerV1250GraphicalConnectTypesSupported defines model for Manager_v1_25_0_GraphicalConnectTypesSupported.
+type ManagerV1250GraphicalConnectTypesSupported string
+
+// ManagerV1250GraphicalConsole The information about a graphical console service that this manager provides.
+type ManagerV1250GraphicalConsole struct {
+	// ConnectTypesSupported This property enumerates the graphical console connection types that the implementation allows.
+	ConnectTypesSupported *[]ManagerV1250GraphicalConnectTypesSupported `json:"ConnectTypesSupported,omitempty"`
+
+	// MaxConcurrentSessions The maximum number of service sessions, regardless of protocol, that this manager can support.
+	MaxConcurrentSessions *int64 `json:"MaxConcurrentSessions,omitempty"`
+
+	// ServiceEnabled An indication of whether the service is enabled for this manager.
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+}
+
+// ManagerV1250Links The links to other resources that are related to this resource.
+type ManagerV1250Links struct {
+	// ActiveSoftwareImage A reference to a resource.
+	ActiveSoftwareImage *OdataV4IdRef `json:"ActiveSoftwareImage,omitempty"`
+
+	// ManagedBy The array of links to the managers responsible for managing this manager.
+	ManagedBy *[]OdataV4IdRef `json:"ManagedBy,omitempty"`
+
+	// ManagedByOdataCount The number of items in a collection.
+	ManagedByOdataCount *OdataV4Count `json:"ManagedBy@odata.count,omitempty"`
+
+	// ManagerForChassis An array of links to the chassis this manager controls.
+	ManagerForChassis *[]OdataV4IdRef `json:"ManagerForChassis,omitempty"`
+
+	// ManagerForChassisOdataCount The number of items in a collection.
+	ManagerForChassisOdataCount *OdataV4Count `json:"ManagerForChassis@odata.count,omitempty"`
+
+	// ManagerForFabrics An array of links to the fabrics that this manager controls.
+	ManagerForFabrics *[]OdataV4IdRef `json:"ManagerForFabrics,omitempty"`
+
+	// ManagerForFabricsOdataCount The number of items in a collection.
+	ManagerForFabricsOdataCount *OdataV4Count `json:"ManagerForFabrics@odata.count,omitempty"`
+
+	// ManagerForManagers An array of links to the managers that are managed by this manager.
+	ManagerForManagers *[]OdataV4IdRef `json:"ManagerForManagers,omitempty"`
+
+	// ManagerForManagersOdataCount The number of items in a collection.
+	ManagerForManagersOdataCount *OdataV4Count `json:"ManagerForManagers@odata.count,omitempty"`
+
+	// ManagerForServers An array of links to the systems that this manager controls.
+	ManagerForServers *[]OdataV4IdRef `json:"ManagerForServers,omitempty"`
+
+	// ManagerForServersOdataCount The number of items in a collection.
+	ManagerForServersOdataCount *OdataV4Count `json:"ManagerForServers@odata.count,omitempty"`
+
+	// ManagerForSwitches An array of links to the switches that this manager controls.
+	ManagerForSwitches *[]OdataV4IdRef `json:"ManagerForSwitches,omitempty"`
+
+	// ManagerForSwitchesOdataCount The number of items in a collection.
+	ManagerForSwitchesOdataCount *OdataV4Count `json:"ManagerForSwitches@odata.count,omitempty"`
+
+	// ManagerInChassis A reference to a resource.
+	ManagerInChassis *OdataV4IdRef `json:"ManagerInChassis,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// SelectedNetworkPort The network port currently used by this manager.  This allows selection of shared or dedicated ports for managers that support one or the other.  For managers that always have their dedicated port enabled, this allows the selection of which shared port to use.
+	SelectedNetworkPort *ManagerV1250Links_SelectedNetworkPort `json:"SelectedNetworkPort,omitempty"`
+
+	// SoftwareImages The images that are associated with this manager.
+	SoftwareImages *[]OdataV4IdRef `json:"SoftwareImages,omitempty"`
+
+	// SoftwareImagesOdataCount The number of items in a collection.
+	SoftwareImagesOdataCount *OdataV4Count `json:"SoftwareImages@odata.count,omitempty"`
+}
+
+// ManagerV1250LinksSelectedNetworkPort1 defines model for .
+type ManagerV1250LinksSelectedNetworkPort1 = interface{}
+
+// ManagerV1250Links_SelectedNetworkPort The network port currently used by this manager.  This allows selection of shared or dedicated ports for managers that support one or the other.  For managers that always have their dedicated port enabled, this allows the selection of which shared port to use.
+type ManagerV1250Links_SelectedNetworkPort struct {
+	union json.RawMessage
+}
+
+// ManagerV1250Manager In Redfish, a manager is a systems management entity that can implement or provide access to a Redfish service.  Examples of managers are BMCs (baseboard management controllers), enclosure managers, management controllers, and other subsystems that are assigned manageability functions.  An implementation can have multiple managers, which might be directly accessible through a Redfish-defined interface.
+type ManagerV1250Manager struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *ManagerV1250Actions `json:"Actions,omitempty"`
+
+	// AdditionalFirmwareVersions Additional versions.
+	AdditionalFirmwareVersions *SoftwareInventoryV1140AdditionalVersions `json:"AdditionalFirmwareVersions,omitempty"`
+
+	// AutoDSTEnabled An indication of whether the manager is configured for automatic Daylight Saving Time (DST) adjustment.
+	AutoDSTEnabled *bool `json:"AutoDSTEnabled,omitempty"`
+
+	// Certificates A reference to a resource.
+	Certificates *OdataV4IdRef `json:"Certificates,omitempty"`
+
+	// CommandShell The information about a command shell service that this manager provides.
+	CommandShell *ManagerV1250CommandShell `json:"CommandShell,omitempty"`
+
+	// DateTime The current date and time with UTC offset of the manager.
+	DateTime *time.Time `json:"DateTime,omitempty"`
+
+	// DateTimeLocalOffset The time offset from UTC that the `DateTime` property is in `+HH:MM` format.
+	DateTimeLocalOffset *string `json:"DateTimeLocalOffset,omitempty"`
+
+	// DateTimeSource The source of the date and time of this manager, such as NTP, RTC, or firmware.
+	DateTimeSource *ManagerV1250Manager_DateTimeSource `json:"DateTimeSource,omitempty"`
+
+	// DaylightSavingTime The daylight saving time settings for a manager.
+	DaylightSavingTime *ManagerV1250DaylightSavingTime `json:"DaylightSavingTime,omitempty"`
+
+	// DedicatedNetworkPorts A reference to a resource.
+	DedicatedNetworkPorts *OdataV4IdRef                    `json:"DedicatedNetworkPorts,omitempty"`
+	Description           *ManagerV1250Manager_Description `json:"Description,omitempty"`
+
+	// EthernetInterfaces A reference to a resource.
+	EthernetInterfaces *OdataV4IdRef `json:"EthernetInterfaces,omitempty"`
+
+	// FirmwareVersion The firmware version of this manager.
+	FirmwareVersion *string `json:"FirmwareVersion,omitempty"`
+
+	// GraphicalConsole The information about a graphical console service that this manager provides.
+	GraphicalConsole *ManagerV1250GraphicalConsole `json:"GraphicalConsole,omitempty"`
+
+	// HostInterfaces A reference to a resource.
+	HostInterfaces *OdataV4IdRef `json:"HostInterfaces,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// LastResetTime The date and time when the manager was last reset or rebooted.
+	LastResetTime *time.Time `json:"LastResetTime,omitempty"`
+
+	// Links The links to other resources that are related to this resource.
+	Links *ManagerV1250Links `json:"Links,omitempty"`
+
+	// Location The location of a resource.
+	Location *ResourceV1240Location `json:"Location,omitempty"`
+
+	// LocationIndicatorActive An indicator allowing an operator to physically locate this resource.
+	LocationIndicatorActive *bool `json:"LocationIndicatorActive,omitempty"`
+
+	// LogServices A reference to a resource.
+	LogServices *OdataV4IdRef `json:"LogServices,omitempty"`
+
+	// ManagerDiagnosticData The diagnostic data for this manager.
+	ManagerDiagnosticData *ManagerV1250Manager_ManagerDiagnosticData `json:"ManagerDiagnosticData,omitempty"`
+	ManagerType           *ManagerV1250ManagerType                   `json:"ManagerType,omitempty"`
+
+	// Manufacturer The manufacturer of this manager.
+	Manufacturer *string `json:"Manufacturer,omitempty"`
+
+	// Measurements An array of DSP0274-defined measurement blocks.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Measurements *[]SoftwareInventoryV1140MeasurementBlock `json:"Measurements,omitempty"`
+
+	// Model The model information of this manager, as defined by the manufacturer.
+	Model *string `json:"Model,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// NetworkProtocol A reference to a resource.
+	NetworkProtocol *OdataV4IdRef `json:"NetworkProtocol,omitempty"`
+
+	// OEMSecurityMode The OEM-specific security compliance mode(s) that the manager is currently configured to enforce.
+	OEMSecurityMode *string `json:"OEMSecurityMode,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// PartNumber The part number of the manager.
+	PartNumber *string `json:"PartNumber,omitempty"`
+
+	// PowerState The current power state of the manager.
+	PowerState *ManagerV1250Manager_PowerState `json:"PowerState,omitempty"`
+
+	// ReadyToRemove An indication of whether the manager is prepared by the system for removal.
+	ReadyToRemove *bool `json:"ReadyToRemove,omitempty"`
+
+	// Redundancy The redundancy information for the managers of this system.
+	Redundancy *[]RedundancyV170Redundancy `json:"Redundancy,omitempty"`
+
+	// RedundancyOdataCount The number of items in a collection.
+	RedundancyOdataCount *OdataV4Count `json:"Redundancy@odata.count,omitempty"`
+
+	// RemoteAccountService A reference to a resource.
+	RemoteAccountService *OdataV4IdRef `json:"RemoteAccountService,omitempty"`
+
+	// RemoteRedfishServiceURI The URI of the Redfish service root for the remote manager that this resource represents.
+	RemoteRedfishServiceURI *string                        `json:"RemoteRedfishServiceUri,omitempty"`
+	SecurityMode            *ManagerV1250SecurityModeTypes `json:"SecurityMode,omitempty"`
+
+	// SecurityPolicy The security policy settings for this manager.
+	SecurityPolicy *ManagerV1250Manager_SecurityPolicy `json:"SecurityPolicy,omitempty"`
+
+	// SerialConsole The information about a serial console service that this manager provides.
+	SerialConsole *ManagerV1250SerialConsole `json:"SerialConsole,omitempty"`
+
+	// SerialInterfaces A reference to a resource.
+	SerialInterfaces *OdataV4IdRef `json:"SerialInterfaces,omitempty"`
+
+	// SerialNumber The serial number of the manager.
+	SerialNumber *string `json:"SerialNumber,omitempty"`
+
+	// ServiceEntryPointUUID The UUID of the Redfish service that is hosted by this manager.
+	ServiceEntryPointUUID *ManagerV1250Manager_ServiceEntryPointUUID `json:"ServiceEntryPointUUID,omitempty"`
+
+	// ServiceIdentification A product instance identifier displayed in the Redfish service root.
+	ServiceIdentification *string `json:"ServiceIdentification,omitempty"`
+
+	// ServiceUseNotification The usage notification message displayed in the Redfish service root.
+	ServiceUseNotification *string `json:"ServiceUseNotification,omitempty"`
+
+	// SharedNetworkPorts A reference to a resource.
+	SharedNetworkPorts *OdataV4IdRef `json:"SharedNetworkPorts,omitempty"`
+
+	// SparePartNumber The spare part number of the manager.
+	SparePartNumber *string `json:"SparePartNumber,omitempty"`
+
+	// Status The status and health of a resource and its children.
+	Status *ResourceStatus `json:"Status,omitempty"`
+
+	// TimeZoneName The time zone of the manager.
+	TimeZoneName *string `json:"TimeZoneName,omitempty"`
+
+	// USBPorts A reference to a resource.
+	USBPorts *OdataV4IdRef `json:"USBPorts,omitempty"`
+
+	// UUID The UUID for this manager.
+	UUID *ManagerV1250Manager_UUID `json:"UUID,omitempty"`
+
+	// Version The hardware version of this manager.
+	Version *string `json:"Version,omitempty"`
+
+	// VirtualMedia A reference to a resource.
+	VirtualMedia *OdataV4IdRef `json:"VirtualMedia,omitempty"`
+}
+
+// ManagerV1250ManagerDateTimeSource1 defines model for .
+type ManagerV1250ManagerDateTimeSource1 = interface{}
+
+// ManagerV1250Manager_DateTimeSource The source of the date and time of this manager, such as NTP, RTC, or firmware.
+type ManagerV1250Manager_DateTimeSource struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerDescription1 defines model for .
+type ManagerV1250ManagerDescription1 = interface{}
+
+// ManagerV1250Manager_Description defines model for ManagerV1250Manager.Description.
+type ManagerV1250Manager_Description struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerManagerDiagnosticData1 defines model for .
+type ManagerV1250ManagerManagerDiagnosticData1 = interface{}
+
+// ManagerV1250Manager_ManagerDiagnosticData The diagnostic data for this manager.
+type ManagerV1250Manager_ManagerDiagnosticData struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerPowerState1 defines model for .
+type ManagerV1250ManagerPowerState1 = interface{}
+
+// ManagerV1250Manager_PowerState The current power state of the manager.
+type ManagerV1250Manager_PowerState struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerSecurityPolicy1 defines model for .
+type ManagerV1250ManagerSecurityPolicy1 = interface{}
+
+// ManagerV1250Manager_SecurityPolicy The security policy settings for this manager.
+type ManagerV1250Manager_SecurityPolicy struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerServiceEntryPointUUID1 defines model for .
+type ManagerV1250ManagerServiceEntryPointUUID1 = interface{}
+
+// ManagerV1250Manager_ServiceEntryPointUUID The UUID of the Redfish service that is hosted by this manager.
+type ManagerV1250Manager_ServiceEntryPointUUID struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerUUID1 defines model for .
+type ManagerV1250ManagerUUID1 = interface{}
+
+// ManagerV1250Manager_UUID The UUID for this manager.
+type ManagerV1250Manager_UUID struct {
+	union json.RawMessage
+}
+
+// ManagerV1250ManagerType defines model for Manager_v1_25_0_ManagerType.
+type ManagerV1250ManagerType string
+
+// ManagerV1250ModifyRedundancySet The `ModifyRedundancySet` operation adds members to or removes members from a redundant group of managers.
+type ManagerV1250ModifyRedundancySet struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ManagerV1250OemActions The available OEM-specific actions for this resource.
+type ManagerV1250OemActions map[string]interface{}
+
+// ManagerV1250Reset The reset action resets/reboots the manager.
+type ManagerV1250Reset struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ManagerV1250ResetToDefaults The reset action resets the manager settings to factory defaults.  This can cause the manager to reset.
+type ManagerV1250ResetToDefaults struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ManagerV1250SecurityModeTypes defines model for Manager_v1_25_0_SecurityModeTypes.
+type ManagerV1250SecurityModeTypes string
+
+// ManagerV1250SerialConnectTypesSupported defines model for Manager_v1_25_0_SerialConnectTypesSupported.
+type ManagerV1250SerialConnectTypesSupported string
+
+// ManagerV1250SerialConsole The information about a serial console service that this manager provides.
+type ManagerV1250SerialConsole struct {
+	// ConnectTypesSupported This property enumerates the serial console connection types that the implementation allows.
+	ConnectTypesSupported *[]ManagerV1250SerialConnectTypesSupported `json:"ConnectTypesSupported,omitempty"`
+
+	// MaxConcurrentSessions The maximum number of service sessions, regardless of protocol, that this manager can support.
+	MaxConcurrentSessions *int64 `json:"MaxConcurrentSessions,omitempty"`
+
+	// ServiceEnabled An indication of whether the service is enabled for this manager.
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+}
+
+// ManagerV1250UpdateSecurityMode The update security mode action updates the security mode for the manager.  This can cause the manager to reset and reset other settings to factory defaults.  Services might require the `ResetToDefaults` action to clear the security mode.
+type ManagerV1250UpdateSecurityMode struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
 // MessageV130Message The message that the Redfish service returns.
 type MessageV130Message struct {
 	// Message The human-readable message.
@@ -2443,6 +3315,282 @@ type ResourceUUID = string
 // ResourceV1220ConditionType defines model for Resource_v1_22_0_ConditionType.
 type ResourceV1220ConditionType string
 
+// ResourceV1240ContactInfo Contact information for this resource.
+type ResourceV1240ContactInfo struct {
+	// ContactName Name of this contact.
+	ContactName *string `json:"ContactName,omitempty"`
+
+	// EmailAddress Email address for this contact.
+	EmailAddress *string `json:"EmailAddress,omitempty"`
+
+	// PhoneNumber Phone number for this contact.
+	PhoneNumber *string `json:"PhoneNumber,omitempty"`
+}
+
+// ResourceV1240Location The location of a resource.
+type ResourceV1240Location struct {
+	// AltitudeMeters The altitude of the resource in meters.
+	AltitudeMeters *float32 `json:"AltitudeMeters,omitempty"`
+
+	// Contacts An array of contact information.
+	Contacts *[]ResourceV1240Location_Contacts_Item `json:"Contacts,omitempty"`
+
+	// Info The location of the resource.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Info *string `json:"Info,omitempty"`
+
+	// InfoFormat The format of the `Info` property.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	InfoFormat *string `json:"InfoFormat,omitempty"`
+
+	// Latitude The latitude of the resource.
+	Latitude *float32 `json:"Latitude,omitempty"`
+
+	// Longitude The longitude of the resource in degree units.
+	Longitude *float32 `json:"Longitude,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// PartLocation The part location for a resource within an enclosure.
+	PartLocation *ResourceV1240PartLocation `json:"PartLocation,omitempty"`
+
+	// PartLocationContext Human-readable string to enable differentiation between `PartLocation` values for parts in the same enclosure, which might include hierarchical information of containing `PartLocation` values for the part.
+	PartLocationContext *string `json:"PartLocationContext,omitempty"`
+
+	// PhysicalAddress The physical address for a resource.
+	PhysicalAddress *ResourceV1240PhysicalAddress `json:"PhysicalAddress,omitempty"`
+
+	// Placement The placement within the addressed location.
+	Placement *ResourceV1240Placement `json:"Placement,omitempty"`
+
+	// PostalAddress The postal address for a resource.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	PostalAddress *ResourceV1240PostalAddress `json:"PostalAddress,omitempty"`
+}
+
+// ResourceV1240LocationContacts1 defines model for .
+type ResourceV1240LocationContacts1 = interface{}
+
+// ResourceV1240Location_Contacts_Item defines model for Resource_v1_24_0_Location.Contacts.Item.
+type ResourceV1240Location_Contacts_Item struct {
+	union json.RawMessage
+}
+
+// ResourceV1240LocationType The types of locations for a part within an enclosure.
+type ResourceV1240LocationType string
+
+// ResourceV1240Orientation The orientations for the ordering of the part location ordinal value.
+type ResourceV1240Orientation string
+
+// ResourceV1240PartLocation The part location for a resource within an enclosure.
+type ResourceV1240PartLocation struct {
+	// LocationOrdinalValue The number that represents the location of the part.  For example, if `LocationType` is `Slot` and this unit is in slot 2, the LocationOrdinalValue is `2`.
+	LocationOrdinalValue *int64 `json:"LocationOrdinalValue,omitempty"`
+
+	// LocationType The type of location of the part.
+	LocationType *ResourceV1240PartLocation_LocationType `json:"LocationType,omitempty"`
+
+	// Orientation The orientation for the ordering of the slot enumeration used by the `LocationOrdinalValue` property.
+	Orientation *ResourceV1240PartLocation_Orientation `json:"Orientation,omitempty"`
+
+	// Reference The reference point for the part location.  Provides guidance about the general location of the part.
+	Reference *ResourceV1240PartLocation_Reference `json:"Reference,omitempty"`
+
+	// ServiceLabel The label of the part location, such as a silk-screened name or a printed label.
+	ServiceLabel *string `json:"ServiceLabel,omitempty"`
+}
+
+// ResourceV1240PartLocationLocationType1 defines model for .
+type ResourceV1240PartLocationLocationType1 = interface{}
+
+// ResourceV1240PartLocation_LocationType The type of location of the part.
+type ResourceV1240PartLocation_LocationType struct {
+	union json.RawMessage
+}
+
+// ResourceV1240PartLocationOrientation1 defines model for .
+type ResourceV1240PartLocationOrientation1 = interface{}
+
+// ResourceV1240PartLocation_Orientation The orientation for the ordering of the slot enumeration used by the `LocationOrdinalValue` property.
+type ResourceV1240PartLocation_Orientation struct {
+	union json.RawMessage
+}
+
+// ResourceV1240PartLocationReference1 defines model for .
+type ResourceV1240PartLocationReference1 = interface{}
+
+// ResourceV1240PartLocation_Reference The reference point for the part location.  Provides guidance about the general location of the part.
+type ResourceV1240PartLocation_Reference struct {
+	union json.RawMessage
+}
+
+// ResourceV1240PhysicalAddress The physical address for a resource.
+type ResourceV1240PhysicalAddress struct {
+	// City City, township, or shi (JP).
+	City *string `json:"City,omitempty"`
+
+	// Country The country.
+	Country *string `json:"Country,omitempty"`
+
+	// ISOCountryCode The ISO 3166-1 country code.
+	ISOCountryCode *string `json:"ISOCountryCode,omitempty"`
+
+	// ISOSubdivisionCode ISO 3166-2 subdivision code.
+	ISOSubdivisionCode *string `json:"ISOSubdivisionCode,omitempty"`
+
+	// PostalCode The postal code.
+	PostalCode *string `json:"PostalCode,omitempty"`
+
+	// StateOrProvince State or province.
+	StateOrProvince *string `json:"StateOrProvince,omitempty"`
+
+	// StreetAddress The street-level address, including building, room, or other identifiers.
+	StreetAddress *string `json:"StreetAddress,omitempty"`
+}
+
+// ResourceV1240Placement The placement within the addressed location.
+type ResourceV1240Placement struct {
+	// AdditionalInfo Area designation or other additional info.
+	AdditionalInfo *string `json:"AdditionalInfo,omitempty"`
+
+	// FacilityName The name of the facility.
+	FacilityName *string `json:"FacilityName,omitempty"`
+
+	// Rack The name of a rack location within a row.
+	Rack *string `json:"Rack,omitempty"`
+
+	// RackOffset The vertical location of the item, in terms of RackOffsetUnits.
+	RackOffset *int64 `json:"RackOffset,omitempty"`
+
+	// RackOffsetUnits The type of rack units in use.
+	RackOffsetUnits *ResourceV1240Placement_RackOffsetUnits `json:"RackOffsetUnits,omitempty"`
+
+	// Room The name or number of the room.
+	Room *string `json:"Room,omitempty"`
+
+	// Row The name of the row.
+	Row *string `json:"Row,omitempty"`
+}
+
+// ResourceV1240PlacementRackOffsetUnits1 defines model for .
+type ResourceV1240PlacementRackOffsetUnits1 = interface{}
+
+// ResourceV1240Placement_RackOffsetUnits The type of rack units in use.
+type ResourceV1240Placement_RackOffsetUnits struct {
+	union json.RawMessage
+}
+
+// ResourceV1240PostalAddress The postal address for a resource.
+type ResourceV1240PostalAddress struct {
+	// AdditionalCode The additional code.
+	AdditionalCode *string `json:"AdditionalCode,omitempty"`
+
+	// AdditionalInfo The room designation or other additional information.
+	AdditionalInfo *string `json:"AdditionalInfo,omitempty"`
+
+	// Building The name of the building.
+	Building *string `json:"Building,omitempty"`
+
+	// City City, township, or shi (JP).
+	City *string `json:"City,omitempty"`
+
+	// Community The postal community name.
+	Community *string `json:"Community,omitempty"`
+
+	// Country The country.
+	Country *string `json:"Country,omitempty"`
+
+	// District A county, parish, gun (JP), or district (IN).
+	District *string `json:"District,omitempty"`
+
+	// Division City division, borough, city district, ward, or chou (JP).
+	Division *string `json:"Division,omitempty"`
+
+	// Floor The floor.
+	Floor *string `json:"Floor,omitempty"`
+
+	// GPSCoords The GPS coordinates of the part.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	GPSCoords *string `json:"GPSCoords,omitempty"`
+
+	// HouseNumber The numeric portion of house number.
+	HouseNumber *int64 `json:"HouseNumber,omitempty"`
+
+	// HouseNumberSuffix The house number suffix.
+	HouseNumberSuffix *string `json:"HouseNumberSuffix,omitempty"`
+
+	// Landmark The landmark.
+	Landmark *string `json:"Landmark,omitempty"`
+
+	// LeadingStreetDirection A leading street direction.
+	LeadingStreetDirection *string `json:"LeadingStreetDirection,omitempty"`
+
+	// Location The room designation or other additional information.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Location *string `json:"Location,omitempty"`
+
+	// Name The name.
+	Name *string `json:"Name,omitempty"`
+
+	// Neighborhood Neighborhood or block.
+	Neighborhood *string `json:"Neighborhood,omitempty"`
+
+	// POBox The post office box (PO box).
+	POBox *string `json:"POBox,omitempty"`
+
+	// PlaceType The description of the type of place that is addressed.
+	PlaceType *string `json:"PlaceType,omitempty"`
+
+	// PostalCode The postal code or zip code.
+	PostalCode *string `json:"PostalCode,omitempty"`
+
+	// Road The primary road or street.
+	Road *string `json:"Road,omitempty"`
+
+	// RoadBranch The road branch.
+	RoadBranch *string `json:"RoadBranch,omitempty"`
+
+	// RoadPostModifier The road post-modifier.
+	RoadPostModifier *string `json:"RoadPostModifier,omitempty"`
+
+	// RoadPreModifier The road pre-modifier.
+	RoadPreModifier *string `json:"RoadPreModifier,omitempty"`
+
+	// RoadSection The road section.
+	RoadSection *string `json:"RoadSection,omitempty"`
+
+	// RoadSubBranch The road sub branch.
+	RoadSubBranch *string `json:"RoadSubBranch,omitempty"`
+
+	// Room The name or number of the room.
+	Room *string `json:"Room,omitempty"`
+
+	// Seat The seat, such as the desk, cubicle, or workstation.
+	Seat *string `json:"Seat,omitempty"`
+
+	// Street Street name.
+	Street *string `json:"Street,omitempty"`
+
+	// StreetSuffix Avenue, Platz, Street, Circle.
+	StreetSuffix *string `json:"StreetSuffix,omitempty"`
+
+	// Territory A top-level subdivision within a country.
+	Territory *string `json:"Territory,omitempty"`
+
+	// TrailingStreetSuffix A trailing street suffix.
+	TrailingStreetSuffix *string `json:"TrailingStreetSuffix,omitempty"`
+
+	// Unit The name or number of the apartment unit or suite.
+	Unit *string `json:"Unit,omitempty"`
+}
+
+// ResourceV1240RackUnits The type of rack unit in use.
+type ResourceV1240RackUnits string
+
+// ResourceV1240Reference The reference areas for the location of the part within an enclosure.
+type ResourceV1240Reference string
+
 // ServiceRootV1210DeepOperations The information about deep operations that the service supports.
 type ServiceRootV1210DeepOperations struct {
 	// DeepPATCH An indication of whether the service supports the deep `PATCH` operation.
@@ -2698,6 +3846,30 @@ type SettingsV150Settings struct {
 	Time *time.Time `json:"Time,omitempty"`
 }
 
+// SoftwareInventoryV1140AdditionalVersions Additional versions.
+type SoftwareInventoryV1140AdditionalVersions struct {
+	// BootParameters The version of the configuration file that contains the initial boot parameters of this software, such as parameters for U-Boot.
+	BootParameters *string `json:"BootParameters,omitempty"`
+
+	// Bootloader The bootloader version contained in this software, such as U-Boot or UEFI.
+	Bootloader *string `json:"Bootloader,omitempty"`
+
+	// FactoryConfiguration The version of the configuration that contains the factory default runtime configuration parameters of this software.
+	FactoryConfiguration *string `json:"FactoryConfiguration,omitempty"`
+
+	// Kernel The kernel version contained in this software.
+	Kernel *string `json:"Kernel,omitempty"`
+
+	// Microcode The microcode version contained in this software, such as processor microcode.
+	Microcode *string `json:"Microcode,omitempty"`
+
+	// OSDistribution The operating system name of this software.
+	OSDistribution *string `json:"OSDistribution,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
 // SoftwareInventoryV1140MeasurementBlock The DSP0274-defined measurement block information.
 type SoftwareInventoryV1140MeasurementBlock struct {
 	// Measurement The hexadecimal string representation of the numeric value of the DSP0274-defined 'Measurement' field of the measurement block.
@@ -2820,6 +3992,232 @@ type TaskV174Task_Description struct {
 // TaskV174TaskState defines model for Task_v1_7_4_TaskState.
 type TaskV174TaskState string
 
+// VirtualMediaCollectionVirtualMediaCollection The collection of `VirtualMedia` resource instances.
+type VirtualMediaCollectionVirtualMediaCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                              `json:"@odata.type,omitempty"`
+	Description *VirtualMediaCollectionVirtualMediaCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// VirtualMediaCollectionVirtualMediaCollectionDescription1 defines model for .
+type VirtualMediaCollectionVirtualMediaCollectionDescription1 = interface{}
+
+// VirtualMediaCollectionVirtualMediaCollection_Description defines model for VirtualMediaCollectionVirtualMediaCollection.Description.
+type VirtualMediaCollectionVirtualMediaCollection_Description struct {
+	union json.RawMessage
+}
+
+// VirtualMediaV165Actions The available actions for this resource.
+type VirtualMediaV165Actions struct {
+	// HashVirtualMediaEjectMedia This action detaches remote media from virtual media.
+	HashVirtualMediaEjectMedia *VirtualMediaV165EjectMedia `json:"#VirtualMedia.EjectMedia,omitempty"`
+
+	// HashVirtualMediaInsertMedia This action attaches remote media to virtual media.
+	HashVirtualMediaInsertMedia *VirtualMediaV165InsertMedia `json:"#VirtualMedia.InsertMedia,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *VirtualMediaV165OemActions `json:"Oem,omitempty"`
+}
+
+// VirtualMediaV165ConnectedVia defines model for VirtualMedia_v1_6_5_ConnectedVia.
+type VirtualMediaV165ConnectedVia string
+
+// VirtualMediaV165EjectMedia This action detaches remote media from virtual media.
+type VirtualMediaV165EjectMedia struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// VirtualMediaV165EjectMediaRequestBody This action detaches remote media from virtual media.
+type VirtualMediaV165EjectMediaRequestBody = map[string]interface{}
+
+// VirtualMediaV165EjectPolicy defines model for VirtualMedia_v1_6_5_EjectPolicy.
+type VirtualMediaV165EjectPolicy string
+
+// VirtualMediaV165InsertMedia This action attaches remote media to virtual media.
+type VirtualMediaV165InsertMedia struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// VirtualMediaV165InsertMediaRequestBody This action attaches remote media to virtual media.
+type VirtualMediaV165InsertMediaRequestBody struct {
+	// Image The URI of the media to attach to the virtual media.
+	Image string `json:"Image"`
+
+	// Inserted An indication of whether the image is treated as mounted and visible to the host system upon completion of the action.  The default is `true`.
+	Inserted *bool `json:"Inserted,omitempty"`
+
+	// Password The password to access the URI specified by the `Image` parameter.
+	Password             *string                               `json:"Password,omitempty"`
+	TransferMethod       *VirtualMediaV165TransferMethod       `json:"TransferMethod,omitempty"`
+	TransferProtocolType *VirtualMediaV165TransferProtocolType `json:"TransferProtocolType,omitempty"`
+
+	// UserName The username to access the URI specified by the `Image` parameter.
+	UserName *string `json:"UserName,omitempty"`
+
+	// WriteProtected An indication of whether the remote media is treated as write-protected.  The default is `true`.
+	WriteProtected *bool `json:"WriteProtected,omitempty"`
+}
+
+// VirtualMediaV165MediaType defines model for VirtualMedia_v1_6_5_MediaType.
+type VirtualMediaV165MediaType string
+
+// VirtualMediaV165OemActions The available OEM-specific actions for this resource.
+type VirtualMediaV165OemActions map[string]interface{}
+
+// VirtualMediaV165TransferMethod defines model for VirtualMedia_v1_6_5_TransferMethod.
+type VirtualMediaV165TransferMethod string
+
+// VirtualMediaV165TransferProtocolType defines model for VirtualMedia_v1_6_5_TransferProtocolType.
+type VirtualMediaV165TransferProtocolType string
+
+// VirtualMediaV165VirtualMedia The `VirtualMedia` schema contains properties related to the monitor and control of an instance of virtual media, such as a remote CD, DVD, or USB device.  A manager for a system or device provides virtual media functionality.
+type VirtualMediaV165VirtualMedia struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *VirtualMediaV165Actions `json:"Actions,omitempty"`
+
+	// Certificates A reference to a resource.
+	Certificates *OdataV4IdRef `json:"Certificates,omitempty"`
+
+	// ClientCertificates A reference to a resource.
+	ClientCertificates *OdataV4IdRef `json:"ClientCertificates,omitempty"`
+
+	// ConnectedVia The current virtual media connection method.
+	ConnectedVia *VirtualMediaV165VirtualMedia_ConnectedVia `json:"ConnectedVia,omitempty"`
+	Description  *VirtualMediaV165VirtualMedia_Description  `json:"Description,omitempty"`
+
+	// EjectPolicy The ejection policy for the virtual media.
+	EjectPolicy *VirtualMediaV165VirtualMedia_EjectPolicy `json:"EjectPolicy,omitempty"`
+
+	// EjectTimeout Timeout value before the virtual media is automatically ejected.
+	EjectTimeout *string `json:"EjectTimeout,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// Image The URI of the location of the selected image.
+	Image *string `json:"Image,omitempty"`
+
+	// ImageName The current image name.
+	ImageName *string `json:"ImageName,omitempty"`
+
+	// Inserted An indication of whether the media is mounted and visible to the host system.
+	Inserted *bool `json:"Inserted,omitempty"`
+
+	// MediaTypes The media types supported as virtual media.
+	MediaTypes *[]VirtualMediaV165MediaType `json:"MediaTypes,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// Password The password to access the URI specified by the `Image` property.  The value is `null` in responses.
+	Password *string `json:"Password,omitempty"`
+
+	// Status The status and health of a resource and its children.
+	Status *ResourceStatus `json:"Status,omitempty"`
+
+	// TransferMethod The transfer method to use with the image.
+	TransferMethod *VirtualMediaV165VirtualMedia_TransferMethod `json:"TransferMethod,omitempty"`
+
+	// TransferProtocolType The network protocol to use with the URI specified by the `Image` property.
+	TransferProtocolType *VirtualMediaV165VirtualMedia_TransferProtocolType `json:"TransferProtocolType,omitempty"`
+
+	// UserName The username to access the URI specified by the `Image` property.
+	UserName *string `json:"UserName,omitempty"`
+
+	// VerifyCertificate An indication of whether the service will verify the certificate of the server referenced by the `Image` property prior to completing the remote media connection.
+	VerifyCertificate *bool `json:"VerifyCertificate,omitempty"`
+
+	// WriteProtected An indication of whether the media is write-protected.
+	WriteProtected *bool `json:"WriteProtected,omitempty"`
+}
+
+// VirtualMediaV165VirtualMediaConnectedVia1 defines model for .
+type VirtualMediaV165VirtualMediaConnectedVia1 = interface{}
+
+// VirtualMediaV165VirtualMedia_ConnectedVia The current virtual media connection method.
+type VirtualMediaV165VirtualMedia_ConnectedVia struct {
+	union json.RawMessage
+}
+
+// VirtualMediaV165VirtualMediaDescription1 defines model for .
+type VirtualMediaV165VirtualMediaDescription1 = interface{}
+
+// VirtualMediaV165VirtualMedia_Description defines model for VirtualMediaV165VirtualMedia.Description.
+type VirtualMediaV165VirtualMedia_Description struct {
+	union json.RawMessage
+}
+
+// VirtualMediaV165VirtualMediaEjectPolicy1 defines model for .
+type VirtualMediaV165VirtualMediaEjectPolicy1 = interface{}
+
+// VirtualMediaV165VirtualMedia_EjectPolicy The ejection policy for the virtual media.
+type VirtualMediaV165VirtualMedia_EjectPolicy struct {
+	union json.RawMessage
+}
+
+// VirtualMediaV165VirtualMediaTransferMethod1 defines model for .
+type VirtualMediaV165VirtualMediaTransferMethod1 = interface{}
+
+// VirtualMediaV165VirtualMedia_TransferMethod The transfer method to use with the image.
+type VirtualMediaV165VirtualMedia_TransferMethod struct {
+	union json.RawMessage
+}
+
+// VirtualMediaV165VirtualMediaTransferProtocolType1 defines model for .
+type VirtualMediaV165VirtualMediaTransferProtocolType1 = interface{}
+
+// VirtualMediaV165VirtualMedia_TransferProtocolType The network protocol to use with the URI specified by the `Image` property.
+type VirtualMediaV165VirtualMedia_TransferProtocolType struct {
+	union json.RawMessage
+}
+
 // OdataV4Context The OData description of a payload.
 type OdataV4Context = string
 
@@ -2924,6 +4322,24 @@ type SchemasResolutionStepV110ResolutionStep_ResolutionType struct {
 
 // SchemasResourceOem The OEM extension.
 type SchemasResourceOem map[string]interface{}
+
+// PatchRedfishV1ManagersManagerIDJSONRequestBody defines body for PatchRedfishV1ManagersManagerID for application/json ContentType.
+type PatchRedfishV1ManagersManagerIDJSONRequestBody = ManagerV1250Manager
+
+// PutRedfishV1ManagersManagerIDJSONRequestBody defines body for PutRedfishV1ManagersManagerID for application/json ContentType.
+type PutRedfishV1ManagersManagerIDJSONRequestBody = ManagerV1250Manager
+
+// PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody defines body for PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID for application/json ContentType.
+type PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody = VirtualMediaV165VirtualMedia
+
+// PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody defines body for PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID for application/json ContentType.
+type PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody = VirtualMediaV165VirtualMedia
+
+// PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMediaJSONRequestBody defines body for PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia for application/json ContentType.
+type PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMediaJSONRequestBody = VirtualMediaV165EjectMediaRequestBody
+
+// PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMediaJSONRequestBody defines body for PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia for application/json ContentType.
+type PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMediaJSONRequestBody = VirtualMediaV165InsertMediaRequestBody
 
 // PostRedfishV1SystemsJSONRequestBody defines body for PostRedfishV1Systems for application/json ContentType.
 type PostRedfishV1SystemsJSONRequestBody = ComputerSystemV1280ComputerSystem
@@ -4809,6 +6225,564 @@ func (t *ComputerSystemV1280WatchdogTimer_WarningAction) UnmarshalJSON(b []byte)
 	return err
 }
 
+// AsResourceDescription returns the union data inside the ManagerCollectionManagerCollection_Description as a ResourceDescription
+func (t ManagerCollectionManagerCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the ManagerCollectionManagerCollection_Description as the provided ResourceDescription
+func (t *ManagerCollectionManagerCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the ManagerCollectionManagerCollection_Description, using the provided ResourceDescription
+func (t *ManagerCollectionManagerCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerCollectionManagerCollectionDescription1 returns the union data inside the ManagerCollectionManagerCollection_Description as a ManagerCollectionManagerCollectionDescription1
+func (t ManagerCollectionManagerCollection_Description) AsManagerCollectionManagerCollectionDescription1() (ManagerCollectionManagerCollectionDescription1, error) {
+	var body ManagerCollectionManagerCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerCollectionManagerCollectionDescription1 overwrites any union data inside the ManagerCollectionManagerCollection_Description as the provided ManagerCollectionManagerCollectionDescription1
+func (t *ManagerCollectionManagerCollection_Description) FromManagerCollectionManagerCollectionDescription1(v ManagerCollectionManagerCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerCollectionManagerCollectionDescription1 performs a merge with any union data inside the ManagerCollectionManagerCollection_Description, using the provided ManagerCollectionManagerCollectionDescription1
+func (t *ManagerCollectionManagerCollection_Description) MergeManagerCollectionManagerCollectionDescription1(v ManagerCollectionManagerCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerCollectionManagerCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerCollectionManagerCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOdataV4IdRef returns the union data inside the ManagerV1250Links_SelectedNetworkPort as a OdataV4IdRef
+func (t ManagerV1250Links_SelectedNetworkPort) AsOdataV4IdRef() (OdataV4IdRef, error) {
+	var body OdataV4IdRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOdataV4IdRef overwrites any union data inside the ManagerV1250Links_SelectedNetworkPort as the provided OdataV4IdRef
+func (t *ManagerV1250Links_SelectedNetworkPort) FromOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOdataV4IdRef performs a merge with any union data inside the ManagerV1250Links_SelectedNetworkPort, using the provided OdataV4IdRef
+func (t *ManagerV1250Links_SelectedNetworkPort) MergeOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250LinksSelectedNetworkPort1 returns the union data inside the ManagerV1250Links_SelectedNetworkPort as a ManagerV1250LinksSelectedNetworkPort1
+func (t ManagerV1250Links_SelectedNetworkPort) AsManagerV1250LinksSelectedNetworkPort1() (ManagerV1250LinksSelectedNetworkPort1, error) {
+	var body ManagerV1250LinksSelectedNetworkPort1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250LinksSelectedNetworkPort1 overwrites any union data inside the ManagerV1250Links_SelectedNetworkPort as the provided ManagerV1250LinksSelectedNetworkPort1
+func (t *ManagerV1250Links_SelectedNetworkPort) FromManagerV1250LinksSelectedNetworkPort1(v ManagerV1250LinksSelectedNetworkPort1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250LinksSelectedNetworkPort1 performs a merge with any union data inside the ManagerV1250Links_SelectedNetworkPort, using the provided ManagerV1250LinksSelectedNetworkPort1
+func (t *ManagerV1250Links_SelectedNetworkPort) MergeManagerV1250LinksSelectedNetworkPort1(v ManagerV1250LinksSelectedNetworkPort1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Links_SelectedNetworkPort) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Links_SelectedNetworkPort) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsManagerV1250DateTimeSource returns the union data inside the ManagerV1250Manager_DateTimeSource as a ManagerV1250DateTimeSource
+func (t ManagerV1250Manager_DateTimeSource) AsManagerV1250DateTimeSource() (ManagerV1250DateTimeSource, error) {
+	var body ManagerV1250DateTimeSource
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250DateTimeSource overwrites any union data inside the ManagerV1250Manager_DateTimeSource as the provided ManagerV1250DateTimeSource
+func (t *ManagerV1250Manager_DateTimeSource) FromManagerV1250DateTimeSource(v ManagerV1250DateTimeSource) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250DateTimeSource performs a merge with any union data inside the ManagerV1250Manager_DateTimeSource, using the provided ManagerV1250DateTimeSource
+func (t *ManagerV1250Manager_DateTimeSource) MergeManagerV1250DateTimeSource(v ManagerV1250DateTimeSource) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerDateTimeSource1 returns the union data inside the ManagerV1250Manager_DateTimeSource as a ManagerV1250ManagerDateTimeSource1
+func (t ManagerV1250Manager_DateTimeSource) AsManagerV1250ManagerDateTimeSource1() (ManagerV1250ManagerDateTimeSource1, error) {
+	var body ManagerV1250ManagerDateTimeSource1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerDateTimeSource1 overwrites any union data inside the ManagerV1250Manager_DateTimeSource as the provided ManagerV1250ManagerDateTimeSource1
+func (t *ManagerV1250Manager_DateTimeSource) FromManagerV1250ManagerDateTimeSource1(v ManagerV1250ManagerDateTimeSource1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerDateTimeSource1 performs a merge with any union data inside the ManagerV1250Manager_DateTimeSource, using the provided ManagerV1250ManagerDateTimeSource1
+func (t *ManagerV1250Manager_DateTimeSource) MergeManagerV1250ManagerDateTimeSource1(v ManagerV1250ManagerDateTimeSource1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_DateTimeSource) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_DateTimeSource) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the ManagerV1250Manager_Description as a ResourceDescription
+func (t ManagerV1250Manager_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the ManagerV1250Manager_Description as the provided ResourceDescription
+func (t *ManagerV1250Manager_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the ManagerV1250Manager_Description, using the provided ResourceDescription
+func (t *ManagerV1250Manager_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerDescription1 returns the union data inside the ManagerV1250Manager_Description as a ManagerV1250ManagerDescription1
+func (t ManagerV1250Manager_Description) AsManagerV1250ManagerDescription1() (ManagerV1250ManagerDescription1, error) {
+	var body ManagerV1250ManagerDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerDescription1 overwrites any union data inside the ManagerV1250Manager_Description as the provided ManagerV1250ManagerDescription1
+func (t *ManagerV1250Manager_Description) FromManagerV1250ManagerDescription1(v ManagerV1250ManagerDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerDescription1 performs a merge with any union data inside the ManagerV1250Manager_Description, using the provided ManagerV1250ManagerDescription1
+func (t *ManagerV1250Manager_Description) MergeManagerV1250ManagerDescription1(v ManagerV1250ManagerDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOdataV4IdRef returns the union data inside the ManagerV1250Manager_ManagerDiagnosticData as a OdataV4IdRef
+func (t ManagerV1250Manager_ManagerDiagnosticData) AsOdataV4IdRef() (OdataV4IdRef, error) {
+	var body OdataV4IdRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOdataV4IdRef overwrites any union data inside the ManagerV1250Manager_ManagerDiagnosticData as the provided OdataV4IdRef
+func (t *ManagerV1250Manager_ManagerDiagnosticData) FromOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOdataV4IdRef performs a merge with any union data inside the ManagerV1250Manager_ManagerDiagnosticData, using the provided OdataV4IdRef
+func (t *ManagerV1250Manager_ManagerDiagnosticData) MergeOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerManagerDiagnosticData1 returns the union data inside the ManagerV1250Manager_ManagerDiagnosticData as a ManagerV1250ManagerManagerDiagnosticData1
+func (t ManagerV1250Manager_ManagerDiagnosticData) AsManagerV1250ManagerManagerDiagnosticData1() (ManagerV1250ManagerManagerDiagnosticData1, error) {
+	var body ManagerV1250ManagerManagerDiagnosticData1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerManagerDiagnosticData1 overwrites any union data inside the ManagerV1250Manager_ManagerDiagnosticData as the provided ManagerV1250ManagerManagerDiagnosticData1
+func (t *ManagerV1250Manager_ManagerDiagnosticData) FromManagerV1250ManagerManagerDiagnosticData1(v ManagerV1250ManagerManagerDiagnosticData1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerManagerDiagnosticData1 performs a merge with any union data inside the ManagerV1250Manager_ManagerDiagnosticData, using the provided ManagerV1250ManagerManagerDiagnosticData1
+func (t *ManagerV1250Manager_ManagerDiagnosticData) MergeManagerV1250ManagerManagerDiagnosticData1(v ManagerV1250ManagerManagerDiagnosticData1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_ManagerDiagnosticData) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_ManagerDiagnosticData) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourcePowerState returns the union data inside the ManagerV1250Manager_PowerState as a ResourcePowerState
+func (t ManagerV1250Manager_PowerState) AsResourcePowerState() (ResourcePowerState, error) {
+	var body ResourcePowerState
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourcePowerState overwrites any union data inside the ManagerV1250Manager_PowerState as the provided ResourcePowerState
+func (t *ManagerV1250Manager_PowerState) FromResourcePowerState(v ResourcePowerState) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourcePowerState performs a merge with any union data inside the ManagerV1250Manager_PowerState, using the provided ResourcePowerState
+func (t *ManagerV1250Manager_PowerState) MergeResourcePowerState(v ResourcePowerState) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerPowerState1 returns the union data inside the ManagerV1250Manager_PowerState as a ManagerV1250ManagerPowerState1
+func (t ManagerV1250Manager_PowerState) AsManagerV1250ManagerPowerState1() (ManagerV1250ManagerPowerState1, error) {
+	var body ManagerV1250ManagerPowerState1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerPowerState1 overwrites any union data inside the ManagerV1250Manager_PowerState as the provided ManagerV1250ManagerPowerState1
+func (t *ManagerV1250Manager_PowerState) FromManagerV1250ManagerPowerState1(v ManagerV1250ManagerPowerState1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerPowerState1 performs a merge with any union data inside the ManagerV1250Manager_PowerState, using the provided ManagerV1250ManagerPowerState1
+func (t *ManagerV1250Manager_PowerState) MergeManagerV1250ManagerPowerState1(v ManagerV1250ManagerPowerState1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_PowerState) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_PowerState) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOdataV4IdRef returns the union data inside the ManagerV1250Manager_SecurityPolicy as a OdataV4IdRef
+func (t ManagerV1250Manager_SecurityPolicy) AsOdataV4IdRef() (OdataV4IdRef, error) {
+	var body OdataV4IdRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOdataV4IdRef overwrites any union data inside the ManagerV1250Manager_SecurityPolicy as the provided OdataV4IdRef
+func (t *ManagerV1250Manager_SecurityPolicy) FromOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOdataV4IdRef performs a merge with any union data inside the ManagerV1250Manager_SecurityPolicy, using the provided OdataV4IdRef
+func (t *ManagerV1250Manager_SecurityPolicy) MergeOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerSecurityPolicy1 returns the union data inside the ManagerV1250Manager_SecurityPolicy as a ManagerV1250ManagerSecurityPolicy1
+func (t ManagerV1250Manager_SecurityPolicy) AsManagerV1250ManagerSecurityPolicy1() (ManagerV1250ManagerSecurityPolicy1, error) {
+	var body ManagerV1250ManagerSecurityPolicy1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerSecurityPolicy1 overwrites any union data inside the ManagerV1250Manager_SecurityPolicy as the provided ManagerV1250ManagerSecurityPolicy1
+func (t *ManagerV1250Manager_SecurityPolicy) FromManagerV1250ManagerSecurityPolicy1(v ManagerV1250ManagerSecurityPolicy1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerSecurityPolicy1 performs a merge with any union data inside the ManagerV1250Manager_SecurityPolicy, using the provided ManagerV1250ManagerSecurityPolicy1
+func (t *ManagerV1250Manager_SecurityPolicy) MergeManagerV1250ManagerSecurityPolicy1(v ManagerV1250ManagerSecurityPolicy1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_SecurityPolicy) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_SecurityPolicy) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceUUID returns the union data inside the ManagerV1250Manager_ServiceEntryPointUUID as a ResourceUUID
+func (t ManagerV1250Manager_ServiceEntryPointUUID) AsResourceUUID() (ResourceUUID, error) {
+	var body ResourceUUID
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceUUID overwrites any union data inside the ManagerV1250Manager_ServiceEntryPointUUID as the provided ResourceUUID
+func (t *ManagerV1250Manager_ServiceEntryPointUUID) FromResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceUUID performs a merge with any union data inside the ManagerV1250Manager_ServiceEntryPointUUID, using the provided ResourceUUID
+func (t *ManagerV1250Manager_ServiceEntryPointUUID) MergeResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerServiceEntryPointUUID1 returns the union data inside the ManagerV1250Manager_ServiceEntryPointUUID as a ManagerV1250ManagerServiceEntryPointUUID1
+func (t ManagerV1250Manager_ServiceEntryPointUUID) AsManagerV1250ManagerServiceEntryPointUUID1() (ManagerV1250ManagerServiceEntryPointUUID1, error) {
+	var body ManagerV1250ManagerServiceEntryPointUUID1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerServiceEntryPointUUID1 overwrites any union data inside the ManagerV1250Manager_ServiceEntryPointUUID as the provided ManagerV1250ManagerServiceEntryPointUUID1
+func (t *ManagerV1250Manager_ServiceEntryPointUUID) FromManagerV1250ManagerServiceEntryPointUUID1(v ManagerV1250ManagerServiceEntryPointUUID1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerServiceEntryPointUUID1 performs a merge with any union data inside the ManagerV1250Manager_ServiceEntryPointUUID, using the provided ManagerV1250ManagerServiceEntryPointUUID1
+func (t *ManagerV1250Manager_ServiceEntryPointUUID) MergeManagerV1250ManagerServiceEntryPointUUID1(v ManagerV1250ManagerServiceEntryPointUUID1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_ServiceEntryPointUUID) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_ServiceEntryPointUUID) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceUUID returns the union data inside the ManagerV1250Manager_UUID as a ResourceUUID
+func (t ManagerV1250Manager_UUID) AsResourceUUID() (ResourceUUID, error) {
+	var body ResourceUUID
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceUUID overwrites any union data inside the ManagerV1250Manager_UUID as the provided ResourceUUID
+func (t *ManagerV1250Manager_UUID) FromResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceUUID performs a merge with any union data inside the ManagerV1250Manager_UUID, using the provided ResourceUUID
+func (t *ManagerV1250Manager_UUID) MergeResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsManagerV1250ManagerUUID1 returns the union data inside the ManagerV1250Manager_UUID as a ManagerV1250ManagerUUID1
+func (t ManagerV1250Manager_UUID) AsManagerV1250ManagerUUID1() (ManagerV1250ManagerUUID1, error) {
+	var body ManagerV1250ManagerUUID1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromManagerV1250ManagerUUID1 overwrites any union data inside the ManagerV1250Manager_UUID as the provided ManagerV1250ManagerUUID1
+func (t *ManagerV1250Manager_UUID) FromManagerV1250ManagerUUID1(v ManagerV1250ManagerUUID1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeManagerV1250ManagerUUID1 performs a merge with any union data inside the ManagerV1250Manager_UUID, using the provided ManagerV1250ManagerUUID1
+func (t *ManagerV1250Manager_UUID) MergeManagerV1250ManagerUUID1(v ManagerV1250ManagerUUID1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ManagerV1250Manager_UUID) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ManagerV1250Manager_UUID) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsRedundancyV170RedundancyMode returns the union data inside the RedundancyV170Redundancy_Mode as a RedundancyV170RedundancyMode
 func (t RedundancyV170Redundancy_Mode) AsRedundancyV170RedundancyMode() (RedundancyV170RedundancyMode, error) {
 	var body RedundancyV170RedundancyMode
@@ -5305,6 +7279,316 @@ func (t *ResourceStatus_State) UnmarshalJSON(b []byte) error {
 	return err
 }
 
+// AsResourceV1240ContactInfo returns the union data inside the ResourceV1240Location_Contacts_Item as a ResourceV1240ContactInfo
+func (t ResourceV1240Location_Contacts_Item) AsResourceV1240ContactInfo() (ResourceV1240ContactInfo, error) {
+	var body ResourceV1240ContactInfo
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240ContactInfo overwrites any union data inside the ResourceV1240Location_Contacts_Item as the provided ResourceV1240ContactInfo
+func (t *ResourceV1240Location_Contacts_Item) FromResourceV1240ContactInfo(v ResourceV1240ContactInfo) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240ContactInfo performs a merge with any union data inside the ResourceV1240Location_Contacts_Item, using the provided ResourceV1240ContactInfo
+func (t *ResourceV1240Location_Contacts_Item) MergeResourceV1240ContactInfo(v ResourceV1240ContactInfo) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsResourceV1240LocationContacts1 returns the union data inside the ResourceV1240Location_Contacts_Item as a ResourceV1240LocationContacts1
+func (t ResourceV1240Location_Contacts_Item) AsResourceV1240LocationContacts1() (ResourceV1240LocationContacts1, error) {
+	var body ResourceV1240LocationContacts1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240LocationContacts1 overwrites any union data inside the ResourceV1240Location_Contacts_Item as the provided ResourceV1240LocationContacts1
+func (t *ResourceV1240Location_Contacts_Item) FromResourceV1240LocationContacts1(v ResourceV1240LocationContacts1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240LocationContacts1 performs a merge with any union data inside the ResourceV1240Location_Contacts_Item, using the provided ResourceV1240LocationContacts1
+func (t *ResourceV1240Location_Contacts_Item) MergeResourceV1240LocationContacts1(v ResourceV1240LocationContacts1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ResourceV1240Location_Contacts_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ResourceV1240Location_Contacts_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceV1240LocationType returns the union data inside the ResourceV1240PartLocation_LocationType as a ResourceV1240LocationType
+func (t ResourceV1240PartLocation_LocationType) AsResourceV1240LocationType() (ResourceV1240LocationType, error) {
+	var body ResourceV1240LocationType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240LocationType overwrites any union data inside the ResourceV1240PartLocation_LocationType as the provided ResourceV1240LocationType
+func (t *ResourceV1240PartLocation_LocationType) FromResourceV1240LocationType(v ResourceV1240LocationType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240LocationType performs a merge with any union data inside the ResourceV1240PartLocation_LocationType, using the provided ResourceV1240LocationType
+func (t *ResourceV1240PartLocation_LocationType) MergeResourceV1240LocationType(v ResourceV1240LocationType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsResourceV1240PartLocationLocationType1 returns the union data inside the ResourceV1240PartLocation_LocationType as a ResourceV1240PartLocationLocationType1
+func (t ResourceV1240PartLocation_LocationType) AsResourceV1240PartLocationLocationType1() (ResourceV1240PartLocationLocationType1, error) {
+	var body ResourceV1240PartLocationLocationType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240PartLocationLocationType1 overwrites any union data inside the ResourceV1240PartLocation_LocationType as the provided ResourceV1240PartLocationLocationType1
+func (t *ResourceV1240PartLocation_LocationType) FromResourceV1240PartLocationLocationType1(v ResourceV1240PartLocationLocationType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240PartLocationLocationType1 performs a merge with any union data inside the ResourceV1240PartLocation_LocationType, using the provided ResourceV1240PartLocationLocationType1
+func (t *ResourceV1240PartLocation_LocationType) MergeResourceV1240PartLocationLocationType1(v ResourceV1240PartLocationLocationType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ResourceV1240PartLocation_LocationType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ResourceV1240PartLocation_LocationType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceV1240Orientation returns the union data inside the ResourceV1240PartLocation_Orientation as a ResourceV1240Orientation
+func (t ResourceV1240PartLocation_Orientation) AsResourceV1240Orientation() (ResourceV1240Orientation, error) {
+	var body ResourceV1240Orientation
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240Orientation overwrites any union data inside the ResourceV1240PartLocation_Orientation as the provided ResourceV1240Orientation
+func (t *ResourceV1240PartLocation_Orientation) FromResourceV1240Orientation(v ResourceV1240Orientation) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240Orientation performs a merge with any union data inside the ResourceV1240PartLocation_Orientation, using the provided ResourceV1240Orientation
+func (t *ResourceV1240PartLocation_Orientation) MergeResourceV1240Orientation(v ResourceV1240Orientation) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsResourceV1240PartLocationOrientation1 returns the union data inside the ResourceV1240PartLocation_Orientation as a ResourceV1240PartLocationOrientation1
+func (t ResourceV1240PartLocation_Orientation) AsResourceV1240PartLocationOrientation1() (ResourceV1240PartLocationOrientation1, error) {
+	var body ResourceV1240PartLocationOrientation1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240PartLocationOrientation1 overwrites any union data inside the ResourceV1240PartLocation_Orientation as the provided ResourceV1240PartLocationOrientation1
+func (t *ResourceV1240PartLocation_Orientation) FromResourceV1240PartLocationOrientation1(v ResourceV1240PartLocationOrientation1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240PartLocationOrientation1 performs a merge with any union data inside the ResourceV1240PartLocation_Orientation, using the provided ResourceV1240PartLocationOrientation1
+func (t *ResourceV1240PartLocation_Orientation) MergeResourceV1240PartLocationOrientation1(v ResourceV1240PartLocationOrientation1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ResourceV1240PartLocation_Orientation) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ResourceV1240PartLocation_Orientation) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceV1240Reference returns the union data inside the ResourceV1240PartLocation_Reference as a ResourceV1240Reference
+func (t ResourceV1240PartLocation_Reference) AsResourceV1240Reference() (ResourceV1240Reference, error) {
+	var body ResourceV1240Reference
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240Reference overwrites any union data inside the ResourceV1240PartLocation_Reference as the provided ResourceV1240Reference
+func (t *ResourceV1240PartLocation_Reference) FromResourceV1240Reference(v ResourceV1240Reference) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240Reference performs a merge with any union data inside the ResourceV1240PartLocation_Reference, using the provided ResourceV1240Reference
+func (t *ResourceV1240PartLocation_Reference) MergeResourceV1240Reference(v ResourceV1240Reference) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsResourceV1240PartLocationReference1 returns the union data inside the ResourceV1240PartLocation_Reference as a ResourceV1240PartLocationReference1
+func (t ResourceV1240PartLocation_Reference) AsResourceV1240PartLocationReference1() (ResourceV1240PartLocationReference1, error) {
+	var body ResourceV1240PartLocationReference1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240PartLocationReference1 overwrites any union data inside the ResourceV1240PartLocation_Reference as the provided ResourceV1240PartLocationReference1
+func (t *ResourceV1240PartLocation_Reference) FromResourceV1240PartLocationReference1(v ResourceV1240PartLocationReference1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240PartLocationReference1 performs a merge with any union data inside the ResourceV1240PartLocation_Reference, using the provided ResourceV1240PartLocationReference1
+func (t *ResourceV1240PartLocation_Reference) MergeResourceV1240PartLocationReference1(v ResourceV1240PartLocationReference1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ResourceV1240PartLocation_Reference) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ResourceV1240PartLocation_Reference) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceV1240RackUnits returns the union data inside the ResourceV1240Placement_RackOffsetUnits as a ResourceV1240RackUnits
+func (t ResourceV1240Placement_RackOffsetUnits) AsResourceV1240RackUnits() (ResourceV1240RackUnits, error) {
+	var body ResourceV1240RackUnits
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240RackUnits overwrites any union data inside the ResourceV1240Placement_RackOffsetUnits as the provided ResourceV1240RackUnits
+func (t *ResourceV1240Placement_RackOffsetUnits) FromResourceV1240RackUnits(v ResourceV1240RackUnits) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240RackUnits performs a merge with any union data inside the ResourceV1240Placement_RackOffsetUnits, using the provided ResourceV1240RackUnits
+func (t *ResourceV1240Placement_RackOffsetUnits) MergeResourceV1240RackUnits(v ResourceV1240RackUnits) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsResourceV1240PlacementRackOffsetUnits1 returns the union data inside the ResourceV1240Placement_RackOffsetUnits as a ResourceV1240PlacementRackOffsetUnits1
+func (t ResourceV1240Placement_RackOffsetUnits) AsResourceV1240PlacementRackOffsetUnits1() (ResourceV1240PlacementRackOffsetUnits1, error) {
+	var body ResourceV1240PlacementRackOffsetUnits1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceV1240PlacementRackOffsetUnits1 overwrites any union data inside the ResourceV1240Placement_RackOffsetUnits as the provided ResourceV1240PlacementRackOffsetUnits1
+func (t *ResourceV1240Placement_RackOffsetUnits) FromResourceV1240PlacementRackOffsetUnits1(v ResourceV1240PlacementRackOffsetUnits1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceV1240PlacementRackOffsetUnits1 performs a merge with any union data inside the ResourceV1240Placement_RackOffsetUnits, using the provided ResourceV1240PlacementRackOffsetUnits1
+func (t *ResourceV1240Placement_RackOffsetUnits) MergeResourceV1240PlacementRackOffsetUnits1(v ResourceV1240PlacementRackOffsetUnits1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ResourceV1240Placement_RackOffsetUnits) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ResourceV1240Placement_RackOffsetUnits) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsResourceDescription returns the union data inside the ServiceRootV1210ServiceRoot_Description as a ResourceDescription
 func (t ServiceRootV1210ServiceRoot_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
@@ -5425,6 +7709,378 @@ func (t TaskV174Task_Description) MarshalJSON() ([]byte, error) {
 }
 
 func (t *TaskV174Task_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the VirtualMediaCollectionVirtualMediaCollection_Description as a ResourceDescription
+func (t VirtualMediaCollectionVirtualMediaCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the VirtualMediaCollectionVirtualMediaCollection_Description as the provided ResourceDescription
+func (t *VirtualMediaCollectionVirtualMediaCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the VirtualMediaCollectionVirtualMediaCollection_Description, using the provided ResourceDescription
+func (t *VirtualMediaCollectionVirtualMediaCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVirtualMediaCollectionVirtualMediaCollectionDescription1 returns the union data inside the VirtualMediaCollectionVirtualMediaCollection_Description as a VirtualMediaCollectionVirtualMediaCollectionDescription1
+func (t VirtualMediaCollectionVirtualMediaCollection_Description) AsVirtualMediaCollectionVirtualMediaCollectionDescription1() (VirtualMediaCollectionVirtualMediaCollectionDescription1, error) {
+	var body VirtualMediaCollectionVirtualMediaCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaCollectionVirtualMediaCollectionDescription1 overwrites any union data inside the VirtualMediaCollectionVirtualMediaCollection_Description as the provided VirtualMediaCollectionVirtualMediaCollectionDescription1
+func (t *VirtualMediaCollectionVirtualMediaCollection_Description) FromVirtualMediaCollectionVirtualMediaCollectionDescription1(v VirtualMediaCollectionVirtualMediaCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaCollectionVirtualMediaCollectionDescription1 performs a merge with any union data inside the VirtualMediaCollectionVirtualMediaCollection_Description, using the provided VirtualMediaCollectionVirtualMediaCollectionDescription1
+func (t *VirtualMediaCollectionVirtualMediaCollection_Description) MergeVirtualMediaCollectionVirtualMediaCollectionDescription1(v VirtualMediaCollectionVirtualMediaCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VirtualMediaCollectionVirtualMediaCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VirtualMediaCollectionVirtualMediaCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsVirtualMediaV165ConnectedVia returns the union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as a VirtualMediaV165ConnectedVia
+func (t VirtualMediaV165VirtualMedia_ConnectedVia) AsVirtualMediaV165ConnectedVia() (VirtualMediaV165ConnectedVia, error) {
+	var body VirtualMediaV165ConnectedVia
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165ConnectedVia overwrites any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as the provided VirtualMediaV165ConnectedVia
+func (t *VirtualMediaV165VirtualMedia_ConnectedVia) FromVirtualMediaV165ConnectedVia(v VirtualMediaV165ConnectedVia) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165ConnectedVia performs a merge with any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia, using the provided VirtualMediaV165ConnectedVia
+func (t *VirtualMediaV165VirtualMedia_ConnectedVia) MergeVirtualMediaV165ConnectedVia(v VirtualMediaV165ConnectedVia) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVirtualMediaV165VirtualMediaConnectedVia1 returns the union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as a VirtualMediaV165VirtualMediaConnectedVia1
+func (t VirtualMediaV165VirtualMedia_ConnectedVia) AsVirtualMediaV165VirtualMediaConnectedVia1() (VirtualMediaV165VirtualMediaConnectedVia1, error) {
+	var body VirtualMediaV165VirtualMediaConnectedVia1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165VirtualMediaConnectedVia1 overwrites any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as the provided VirtualMediaV165VirtualMediaConnectedVia1
+func (t *VirtualMediaV165VirtualMedia_ConnectedVia) FromVirtualMediaV165VirtualMediaConnectedVia1(v VirtualMediaV165VirtualMediaConnectedVia1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165VirtualMediaConnectedVia1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia, using the provided VirtualMediaV165VirtualMediaConnectedVia1
+func (t *VirtualMediaV165VirtualMedia_ConnectedVia) MergeVirtualMediaV165VirtualMediaConnectedVia1(v VirtualMediaV165VirtualMediaConnectedVia1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VirtualMediaV165VirtualMedia_ConnectedVia) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VirtualMediaV165VirtualMedia_ConnectedVia) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the VirtualMediaV165VirtualMedia_Description as a ResourceDescription
+func (t VirtualMediaV165VirtualMedia_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the VirtualMediaV165VirtualMedia_Description as the provided ResourceDescription
+func (t *VirtualMediaV165VirtualMedia_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the VirtualMediaV165VirtualMedia_Description, using the provided ResourceDescription
+func (t *VirtualMediaV165VirtualMedia_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVirtualMediaV165VirtualMediaDescription1 returns the union data inside the VirtualMediaV165VirtualMedia_Description as a VirtualMediaV165VirtualMediaDescription1
+func (t VirtualMediaV165VirtualMedia_Description) AsVirtualMediaV165VirtualMediaDescription1() (VirtualMediaV165VirtualMediaDescription1, error) {
+	var body VirtualMediaV165VirtualMediaDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165VirtualMediaDescription1 overwrites any union data inside the VirtualMediaV165VirtualMedia_Description as the provided VirtualMediaV165VirtualMediaDescription1
+func (t *VirtualMediaV165VirtualMedia_Description) FromVirtualMediaV165VirtualMediaDescription1(v VirtualMediaV165VirtualMediaDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165VirtualMediaDescription1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_Description, using the provided VirtualMediaV165VirtualMediaDescription1
+func (t *VirtualMediaV165VirtualMedia_Description) MergeVirtualMediaV165VirtualMediaDescription1(v VirtualMediaV165VirtualMediaDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VirtualMediaV165VirtualMedia_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VirtualMediaV165VirtualMedia_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsVirtualMediaV165EjectPolicy returns the union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as a VirtualMediaV165EjectPolicy
+func (t VirtualMediaV165VirtualMedia_EjectPolicy) AsVirtualMediaV165EjectPolicy() (VirtualMediaV165EjectPolicy, error) {
+	var body VirtualMediaV165EjectPolicy
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165EjectPolicy overwrites any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as the provided VirtualMediaV165EjectPolicy
+func (t *VirtualMediaV165VirtualMedia_EjectPolicy) FromVirtualMediaV165EjectPolicy(v VirtualMediaV165EjectPolicy) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165EjectPolicy performs a merge with any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy, using the provided VirtualMediaV165EjectPolicy
+func (t *VirtualMediaV165VirtualMedia_EjectPolicy) MergeVirtualMediaV165EjectPolicy(v VirtualMediaV165EjectPolicy) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVirtualMediaV165VirtualMediaEjectPolicy1 returns the union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as a VirtualMediaV165VirtualMediaEjectPolicy1
+func (t VirtualMediaV165VirtualMedia_EjectPolicy) AsVirtualMediaV165VirtualMediaEjectPolicy1() (VirtualMediaV165VirtualMediaEjectPolicy1, error) {
+	var body VirtualMediaV165VirtualMediaEjectPolicy1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165VirtualMediaEjectPolicy1 overwrites any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as the provided VirtualMediaV165VirtualMediaEjectPolicy1
+func (t *VirtualMediaV165VirtualMedia_EjectPolicy) FromVirtualMediaV165VirtualMediaEjectPolicy1(v VirtualMediaV165VirtualMediaEjectPolicy1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165VirtualMediaEjectPolicy1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy, using the provided VirtualMediaV165VirtualMediaEjectPolicy1
+func (t *VirtualMediaV165VirtualMedia_EjectPolicy) MergeVirtualMediaV165VirtualMediaEjectPolicy1(v VirtualMediaV165VirtualMediaEjectPolicy1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VirtualMediaV165VirtualMedia_EjectPolicy) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VirtualMediaV165VirtualMedia_EjectPolicy) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsVirtualMediaV165TransferMethod returns the union data inside the VirtualMediaV165VirtualMedia_TransferMethod as a VirtualMediaV165TransferMethod
+func (t VirtualMediaV165VirtualMedia_TransferMethod) AsVirtualMediaV165TransferMethod() (VirtualMediaV165TransferMethod, error) {
+	var body VirtualMediaV165TransferMethod
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165TransferMethod overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferMethod as the provided VirtualMediaV165TransferMethod
+func (t *VirtualMediaV165VirtualMedia_TransferMethod) FromVirtualMediaV165TransferMethod(v VirtualMediaV165TransferMethod) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165TransferMethod performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferMethod, using the provided VirtualMediaV165TransferMethod
+func (t *VirtualMediaV165VirtualMedia_TransferMethod) MergeVirtualMediaV165TransferMethod(v VirtualMediaV165TransferMethod) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVirtualMediaV165VirtualMediaTransferMethod1 returns the union data inside the VirtualMediaV165VirtualMedia_TransferMethod as a VirtualMediaV165VirtualMediaTransferMethod1
+func (t VirtualMediaV165VirtualMedia_TransferMethod) AsVirtualMediaV165VirtualMediaTransferMethod1() (VirtualMediaV165VirtualMediaTransferMethod1, error) {
+	var body VirtualMediaV165VirtualMediaTransferMethod1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165VirtualMediaTransferMethod1 overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferMethod as the provided VirtualMediaV165VirtualMediaTransferMethod1
+func (t *VirtualMediaV165VirtualMedia_TransferMethod) FromVirtualMediaV165VirtualMediaTransferMethod1(v VirtualMediaV165VirtualMediaTransferMethod1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165VirtualMediaTransferMethod1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferMethod, using the provided VirtualMediaV165VirtualMediaTransferMethod1
+func (t *VirtualMediaV165VirtualMedia_TransferMethod) MergeVirtualMediaV165VirtualMediaTransferMethod1(v VirtualMediaV165VirtualMediaTransferMethod1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VirtualMediaV165VirtualMedia_TransferMethod) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VirtualMediaV165VirtualMedia_TransferMethod) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsVirtualMediaV165TransferProtocolType returns the union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as a VirtualMediaV165TransferProtocolType
+func (t VirtualMediaV165VirtualMedia_TransferProtocolType) AsVirtualMediaV165TransferProtocolType() (VirtualMediaV165TransferProtocolType, error) {
+	var body VirtualMediaV165TransferProtocolType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165TransferProtocolType overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as the provided VirtualMediaV165TransferProtocolType
+func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) FromVirtualMediaV165TransferProtocolType(v VirtualMediaV165TransferProtocolType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165TransferProtocolType performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType, using the provided VirtualMediaV165TransferProtocolType
+func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) MergeVirtualMediaV165TransferProtocolType(v VirtualMediaV165TransferProtocolType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsVirtualMediaV165VirtualMediaTransferProtocolType1 returns the union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as a VirtualMediaV165VirtualMediaTransferProtocolType1
+func (t VirtualMediaV165VirtualMedia_TransferProtocolType) AsVirtualMediaV165VirtualMediaTransferProtocolType1() (VirtualMediaV165VirtualMediaTransferProtocolType1, error) {
+	var body VirtualMediaV165VirtualMediaTransferProtocolType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromVirtualMediaV165VirtualMediaTransferProtocolType1 overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as the provided VirtualMediaV165VirtualMediaTransferProtocolType1
+func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) FromVirtualMediaV165VirtualMediaTransferProtocolType1(v VirtualMediaV165VirtualMediaTransferProtocolType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeVirtualMediaV165VirtualMediaTransferProtocolType1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType, using the provided VirtualMediaV165VirtualMediaTransferProtocolType1
+func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) MergeVirtualMediaV165VirtualMediaTransferProtocolType1(v VirtualMediaV165VirtualMediaTransferProtocolType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t VirtualMediaV165VirtualMedia_TransferProtocolType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -5559,6 +8215,36 @@ type ServerInterface interface {
 	// (GET /redfish/v1/)
 	GetRedfishV1(w http.ResponseWriter, r *http.Request)
 
+	// (GET /redfish/v1/Managers)
+	GetRedfishV1Managers(w http.ResponseWriter, r *http.Request)
+
+	// (GET /redfish/v1/Managers/{ManagerId})
+	GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string)
+
+	// (PATCH /redfish/v1/Managers/{ManagerId})
+	PatchRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string)
+
+	// (PUT /redfish/v1/Managers/{ManagerId})
+	PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string)
+
+	// (GET /redfish/v1/Managers/{ManagerId}/VirtualMedia)
+	GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request, managerID string)
+
+	// (GET /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId})
+	GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string)
+
+	// (PATCH /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId})
+	PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string)
+
+	// (PUT /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId})
+	PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string)
+
+	// (POST /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.EjectMedia)
+	PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string)
+
+	// (POST /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.InsertMedia)
+	PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string)
+
 	// (GET /redfish/v1/Systems)
 	GetRedfishV1Systems(w http.ResponseWriter, r *http.Request)
 
@@ -5613,6 +8299,299 @@ func (siw *ServerInterfaceWrapper) GetRedfishV1(w http.ResponseWriter, r *http.R
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.GetRedfishV1(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1Managers operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1Managers(w http.ResponseWriter, r *http.Request) {
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1Managers(w, r)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1ManagersManagerID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1ManagersManagerID(w, r, managerID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1ManagersManagerID operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1ManagersManagerID(w, r, managerID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1ManagersManagerID operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1ManagersManagerID(w, r, managerID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1ManagersManagerIDVirtualMedia operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1ManagersManagerIDVirtualMedia(w, r, managerID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "VirtualMediaId" -------------
+	var virtualMediaID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "VirtualMediaId", r.PathValue("VirtualMediaId"), &virtualMediaID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "VirtualMediaId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w, r, managerID, virtualMediaID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "VirtualMediaId" -------------
+	var virtualMediaID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "VirtualMediaId", r.PathValue("VirtualMediaId"), &virtualMediaID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "VirtualMediaId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w, r, managerID, virtualMediaID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "VirtualMediaId" -------------
+	var virtualMediaID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "VirtualMediaId", r.PathValue("VirtualMediaId"), &virtualMediaID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "VirtualMediaId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w, r, managerID, virtualMediaID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia operation middleware
+func (siw *ServerInterfaceWrapper) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "VirtualMediaId" -------------
+	var virtualMediaID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "VirtualMediaId", r.PathValue("VirtualMediaId"), &virtualMediaID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "VirtualMediaId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(w, r, managerID, virtualMediaID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia operation middleware
+func (siw *ServerInterfaceWrapper) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ManagerId" -------------
+	var managerID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ManagerId", r.PathValue("ManagerId"), &managerID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ManagerId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "VirtualMediaId" -------------
+	var virtualMediaID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "VirtualMediaId", r.PathValue("VirtualMediaId"), &virtualMediaID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "VirtualMediaId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w, r, managerID, virtualMediaID)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -6057,6 +9036,16 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	}
 
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/", wrapper.GetRedfishV1)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Managers", wrapper.GetRedfishV1Managers)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}", wrapper.GetRedfishV1ManagersManagerID)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}", wrapper.PatchRedfishV1ManagersManagerID)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}", wrapper.PutRedfishV1ManagersManagerID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}/VirtualMedia", wrapper.GetRedfishV1ManagersManagerIDVirtualMedia)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}", wrapper.GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}", wrapper.PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}", wrapper.PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.EjectMedia", wrapper.PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.InsertMedia", wrapper.PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems", wrapper.GetRedfishV1Systems)
 	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Systems", wrapper.PostRedfishV1Systems)
 	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}", wrapper.DeleteRedfishV1SystemsComputerSystemID)

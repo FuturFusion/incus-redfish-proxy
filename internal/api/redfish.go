@@ -13,6 +13,9 @@ type IncusClient interface {
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
+
+	CreateStoragePoolVolumeFromISO(pool string, args incusclient.StorageVolumeBackupArgs) (op incusclient.Operation, err error)
+	DeleteStoragePoolVolume(pool string, volType string, name string) (err error)
 }
 
 type IncusOperation = incusclient.Operation
@@ -41,9 +44,9 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 		// 		OdataID: ref("/redfish/v1/SessionService/Sessions"),
 		// 	},
 		// },
-		// Managers: &OdataV4IDRef{
-		// 	OdataID: ref("/redfish/v1/Managers"),
-		// },
+		Managers: &OdataV4IdRef{
+			OdataID: ref("/redfish/v1/Managers"),
+		},
 		Name:           "Root Service",
 		RedfishVersion: ref("1.21.0"),
 		// SessionService: &OdataV4IdRef{
@@ -53,6 +56,205 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 			OdataID: ref("/redfish/v1/Systems"),
 		},
 	})
+}
+
+const managerName = "bmc1"
+
+func (s redfishServer) GetRedfishV1Managers(w http.ResponseWriter, r *http.Request) {
+	response(w, ManagerCollectionManagerCollection{
+		OdataID:   ref("/redfish/v1/Managers"),
+		OdataType: ref("#ManagerCollection.ManagerCollection"),
+		Members: &[]OdataV4IdRef{
+			{
+				OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s", managerName)),
+			},
+		},
+		MembersOdataCount: ref(OdataV4Count(1)),
+		Name:              "Manager Collection",
+	})
+}
+
+func (s redfishServer) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string) {
+	if managerID != managerName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	response(w, ManagerV1250Manager{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s", managerName)),
+		OdataType: ref("#Manager.v1_25_0.Manager"),
+		VirtualMedia: &OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
+		},
+		Name: managerName,
+	})
+}
+
+func (s redfishServer) PatchRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string) {
+	responseNotImplemented(w)
+}
+
+const virtualMediaName = "CD"
+
+func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request, managerID string) {
+	response(w, VirtualMediaCollectionVirtualMediaCollection{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
+		OdataType: ref("#VirtualMediaCollection.VirtualMediaCollection"),
+		Members: &[]OdataV4IdRef{
+			{
+				OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)),
+			},
+		},
+		MembersOdataCount: ref(OdataV4Count(1)),
+		Name:              "Virtual Media Collection",
+	})
+}
+
+func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	if virtualMediaID != virtualMediaName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, inserted := instance.Devices["boot-media"]
+
+	connectedViaURI := VirtualMediaV165VirtualMedia_ConnectedVia{}
+	_ = connectedViaURI.FromVirtualMediaV165ConnectedVia(VirtualMediaV165ConnectedViaURI)
+
+	response(w, VirtualMediaV165VirtualMedia{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)),
+		OdataType: ref("#VirtualMedia.v1_6_5.VirtualMedia"),
+		Name:      ResourceName(virtualMediaName),
+		MediaTypes: &[]VirtualMediaV165MediaType{
+			CD,
+			DVD,
+		},
+		Image:             ref(fmt.Sprintf("%s-boot-media.iso", s.instanceName)),
+		ConnectedVia:      ref(connectedViaURI),
+		Inserted:          ref(inserted),
+		WriteProtected:    ref(true),
+		VerifyCertificate: ref(false),
+	})
+}
+
+func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	if virtualMediaID != virtualMediaName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	request := VirtualMediaV165VirtualMedia{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	instance, etag, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, inserted := instance.Devices["boot-media"]
+
+	// eject
+	if !deref(request.Inserted) {
+		if !inserted {
+			responseNoContent(w)
+			return
+		}
+
+		delete(instance.Devices, "boot-media")
+
+		op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
+		if err != nil {
+			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		err = op.Wait()
+		if err != nil {
+			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		err = s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
+		if err != nil {
+			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		responseNoContent(w)
+		return
+	}
+
+	// insert
+	resp, err := http.Get(deref(request.Image))
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	defer func() {
+		_ = resp.Body.Close()
+	}()
+
+	op, err := s.client.CreateStoragePoolVolumeFromISO("default", incusclient.StorageVolumeBackupArgs{
+		Name:       fmt.Sprintf("%s-boot-media.iso", s.instanceName),
+		BackupFile: resp.Body,
+	})
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = op.Wait()
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	instance.Devices["boot-media"] = map[string]string{
+		"boot.priority": "10",
+		"pool":          "default",
+		"source":        fmt.Sprintf("%s-boot-media.iso", s.instanceName),
+		"type":          "disk",
+	}
+
+	op, err = s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = op.Wait()
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+}
+
+func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	responseNotImplemented(w)
 }
 
 func (s redfishServer) GetRedfishV1Systems(w http.ResponseWriter, r *http.Request) {
@@ -92,13 +294,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 	powerState := ComputerSystemV1280ComputerSystem_PowerState{}
 	switch instance.Status {
 	case "Running":
-		_ = powerState.FromResourcePowerState(ResourcePowerStateOn)
+		_ = powerState.FromResourcePowerState(On)
 
 	case "Stopped":
 		fallthrough
 
 	default:
-		_ = powerState.FromResourcePowerState(ResourcePowerStateOff)
+		_ = powerState.FromResourcePowerState(Off)
 	}
 
 	response(w, ComputerSystemV1280ComputerSystem{
