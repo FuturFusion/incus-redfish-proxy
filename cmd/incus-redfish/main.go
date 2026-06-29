@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"io"
+	"net"
+	"net/http"
 	"os"
 	"slices"
 
@@ -19,6 +22,9 @@ var commands = []string{
 	"get-bios-settings",
 	"add-tpm",
 	"remove-tpm",
+	"get-virtual-media",
+	"insert-virtual-media",
+	"eject-virtual-media",
 }
 
 func main() {
@@ -95,6 +101,43 @@ func main() {
 
 		err = bios.UpdateBiosAttributesApplyAt(bios.Attributes, schemas.OnResetSettingsApplyTime)
 		die(err)
+
+	case "get-virtual-media":
+		virtualMedia := getManagerVirtualMedia(c)
+
+		err = enc.Encode(virtualMedia.Entity)
+		die(err)
+
+	case "insert-virtual-media":
+		if len(pflag.Args()) < 2 {
+			fmt.Println("file to insert as boot media missing")
+			usage()
+			os.Exit(1)
+		}
+
+		virtualMedia := getManagerVirtualMedia(c)
+
+		address, shutdown := serveFileOnce(pflag.Arg(1))
+		defer shutdown()
+
+		taskMonitor, err := virtualMedia.InsertMedia(&schemas.VirtualMediaInsertMediaParameters{
+			Image:                address,
+			Inserted:             ref(true),
+			TransferMethod:       ref(schemas.StreamTransferMethod),
+			TransferProtocolType: ref(schemas.HTTPTransferProtocolType),
+			WriteProtected:       ref(true),
+		})
+		die(err)
+
+		_ = taskMonitor
+
+	case "eject-virtual-media":
+		virtualMedia := getManagerVirtualMedia(c)
+
+		taskMonitor, err := virtualMedia.EjectMedia()
+		die(err)
+
+		_ = taskMonitor
 	}
 }
 
@@ -107,6 +150,61 @@ func getSystem(c *gofish.APIClient) *schemas.ComputerSystem {
 	}
 
 	return systems[0]
+}
+
+func getManagerVirtualMedia(c *gofish.APIClient) *schemas.VirtualMedia {
+	managers, err := c.Service.Managers()
+	die(err)
+
+	if len(managers) < 1 {
+		die(fmt.Errorf("no manager found"))
+	}
+
+	manager := managers[0]
+
+	virtualMedias, err := manager.VirtualMedia()
+	die(err)
+
+	if len(virtualMedias) < 1 {
+		die(fmt.Errorf("no virtual media found"))
+	}
+
+	return virtualMedias[0]
+}
+
+func serveFileOnce(filename string) (string, func()) {
+	ln, err := net.Listen("tcp", ":0")
+	die(err)
+
+	srv := &http.Server{}
+	done := make(chan struct{})
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		defer close(done)
+		http.ServeFile(w, r, filename)
+	})
+
+	port := ln.Addr().(*net.TCPAddr).Port
+	address := fmt.Sprintf("http://localhost:%d/", port)
+
+	shutdown := func() {
+		<-done
+		err = srv.Shutdown(context.Background())
+		die(err)
+	}
+
+	go func() {
+		err = srv.Serve(ln)
+		if err != http.ErrServerClosed {
+			die(err)
+		}
+	}()
+
+	return address, shutdown
+}
+
+func ref[T any](v T) *T {
+	return &v
 }
 
 func usage() {
