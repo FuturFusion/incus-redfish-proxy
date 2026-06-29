@@ -11,9 +11,13 @@ import (
 )
 
 var includedPaths = map[string]bool{
-	"/redfish/v1/": true,
-	// "/redfish/v1/Managers":                   true,
-	// "/redfish/v1/Managers/{ManagerId}":       true,
+	"/redfish/v1/":                                                   true,
+	"/redfish/v1/Managers":                                           true,
+	"/redfish/v1/Managers/{ManagerId}":                               true,
+	"/redfish/v1/Managers/{ManagerId}/VirtualMedia":                  true,
+	"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}": true,
+	"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.EjectMedia":  true,
+	"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.InsertMedia": true,
 	"/redfish/v1/Systems":                                                 true,
 	"/redfish/v1/Systems/{ComputerSystemId}":                              true,
 	"/redfish/v1/Systems/{ComputerSystemId}/Actions/ComputerSystem.Reset": true,
