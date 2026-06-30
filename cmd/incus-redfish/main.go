@@ -32,9 +32,15 @@ var commands = []string{
 
 func main() {
 	var debug bool
+	var endpoint string
+	var user string
+	var password string
 
 	pflag.Usage = usage
 	pflag.BoolVar(&debug, "debug", false, "debug output")
+	pflag.StringVar(&endpoint, "endpoint", "http://localhost:8080", "Redfish API base URL")
+	pflag.StringVar(&user, "user", "", "Redfish API user name")
+	pflag.StringVar(&password, "password", "", "Redfish API password")
 
 	pflag.Parse()
 
@@ -51,7 +57,10 @@ func main() {
 	}
 
 	c, err := gofish.Connect(gofish.ClientConfig{
-		Endpoint: "http://localhost:8080",
+		Endpoint: endpoint,
+		Username: user,
+		Password: password,
+		Insecure: true,
 
 		ReuseConnections: true,
 
