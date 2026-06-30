@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strings"
 
 	incusclient "github.com/lxc/incus/v6/client"
 	incusapi "github.com/lxc/incus/v6/shared/api"
@@ -419,9 +420,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 
 	biosAttributes := BiosV130Attributes{}
 
-	_, ok := instance.Devices["vtpm"]
-	if ok {
-		biosAttributes["vTPM"] = "On"
+	for configKey, configValue := range instance.Config {
+		biosAttributes[fmt.Sprintf("incus.config.%s", configKey)] = configValue
+	}
+
+	for deviceName, deviceConfig := range instance.Devices {
+		deviceConfigJSON, _ := json.Marshal(deviceConfig)
+		biosAttributes[fmt.Sprintf("incus.devices.%s", deviceName)] = string(deviceConfigJSON)
 	}
 
 	response(w, BiosV130Bios{
@@ -466,19 +471,42 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		responseNoContent(w)
 	}
 
-	value, ok := (*request.Attributes)["vTPM"]
-	if ok {
-		tpmValue, ok := value.(string)
-		if ok {
-			if instance.Devices == nil {
-				instance.Devices = incusapi.DevicesMap{}
+	for name, value := range *request.Attributes {
+		valueStr, ok := value.(string)
+		if !ok {
+			responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q has invalid type %T, string expected", name, value))
+			return
+		}
+
+		switch {
+		case strings.HasPrefix(name, "incus.config."):
+			configKey := name[:len("incus.config.")]
+			if valueStr == "" {
+				delete(instance.Config, configKey)
+				continue
 			}
 
-			if tpmValue == "On" {
-				instance.Devices["vtpm"] = map[string]string{"type": "tpm"}
-			} else {
-				delete(instance.Devices, "vtpm")
+			instance.Config[configKey] = valueStr
+
+		case strings.HasPrefix(name, "incus.devices."):
+			deviceName := name[:len("incus.devices.")]
+			if valueStr == "" {
+				delete(instance.Devices, deviceName)
+				continue
 			}
+
+			var deviceConfig map[string]string
+
+			err = json.Unmarshal([]byte(valueStr), &deviceConfig)
+			if err != nil {
+				responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("invalid value for device %q, JSON string expected: %v", deviceName, err))
+				return
+			}
+
+			instance.Devices[deviceName] = deviceConfig
+
+		default:
+			continue
 		}
 	}
 
