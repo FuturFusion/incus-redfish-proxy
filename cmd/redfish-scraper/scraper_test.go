@@ -14,6 +14,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stmcginnis/gofish/schemas"
 	"github.com/stretchr/testify/require"
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/boom"
@@ -100,7 +101,7 @@ func TestScraper_Run(t *testing.T) {
 	log := slog.New(slog.DiscardHandler)
 	getter := &httpGetter{client: srv.Client(), base: srv.URL}
 
-	scraper := NewScraper(getter, outDir, base, 4, log, nil)
+	scraper := NewScraper(getter, outDir, base, 4, false, log, nil)
 
 	err = scraper.Run(context.Background())
 	require.NoError(t, err)
@@ -124,6 +125,12 @@ type mockGetter struct {
 	mu        sync.Mutex
 	responses map[string]stubResponse
 	calls     map[string]int
+
+	// gofishStyle makes Get mimic gofish's APIClient.Get: non-2xx responses
+	// are reported as a nil *http.Response plus a wrapped *schemas.Error
+	// carrying the status code, instead of a populated *http.Response with a
+	// nil error.
+	gofishStyle bool
 }
 
 type stubResponse struct {
@@ -139,11 +146,19 @@ func (s *mockGetter) Get(path string) (*http.Response, error) {
 
 	r, ok := s.responses[path]
 	if !ok {
+		if s.gofishStyle {
+			return nil, schemas.ConstructError(http.StatusNotFound, nil)
+		}
+
 		return &http.Response{StatusCode: http.StatusNotFound, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(""))}, nil
 	}
 
 	if r.err != nil {
 		return nil, r.err
+	}
+
+	if s.gofishStyle && (r.status < 200 || r.status >= 300) {
+		return nil, schemas.ConstructError(r.status, nil)
 	}
 
 	header := http.Header{}
@@ -180,7 +195,7 @@ func TestScraper_Run_CollectsErrorsAndContinuesCrawl(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(getter, outDir, base, 1, log, nil)
+	scraper := NewScraper(getter, outDir, base, 1, false, log, nil)
 
 	err = scraper.Run(context.Background())
 	boom.ErrorIs(t, err)
@@ -196,6 +211,116 @@ func TestScraper_Run_CollectsErrorsAndContinuesCrawl(t *testing.T) {
 
 	_, statErr = os.Stat(filepath.Join(badDir, "index.json"))
 	require.Error(t, statErr)
+}
+
+func TestScraper_Run_PersistsAndSkips404WhenRemember404IsSet(t *testing.T) {
+	getter := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {
+				status: http.StatusOK,
+				body:   `{"@odata.id": "/redfish/v1/", "Missing": {"@odata.id": "/redfish/v1/Missing"}}`,
+			},
+			"/redfish/v1/Missing": {
+				status: http.StatusNotFound,
+			},
+		},
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(getter, outDir, base, 1, true, log, nil)
+
+	err = scraper.Run(context.Background())
+	require.NoError(t, err, "a 404 persisted as a marker is handled and must not be reported as a scrape error")
+
+	missingDir, err := resourceDir(outDir, "/redfish/v1/Missing")
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(missingDir, "index.404.json"))
+
+	// Re-run the scrape against a getter that would fail the test if the
+	// previously-404 resource were fetched again.
+	getter2 := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {
+				status: http.StatusOK,
+				body:   `{"@odata.id": "/redfish/v1/", "Missing": {"@odata.id": "/redfish/v1/Missing"}}`,
+			},
+		},
+	}
+
+	scraper2 := NewScraper(getter2, outDir, base, 1, true, log, nil)
+
+	err = scraper2.Run(context.Background())
+	require.NoError(t, err)
+
+	require.Zero(t, getter2.calls["/redfish/v1/Missing"], "a resource previously recorded as 404 must not be re-fetched")
+}
+
+func TestScraper_Run_Refetches404WhenRemember404IsNotSet(t *testing.T) {
+	getter := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {
+				status: http.StatusOK,
+				body:   `{"@odata.id": "/redfish/v1/", "Missing": {"@odata.id": "/redfish/v1/Missing"}}`,
+			},
+			"/redfish/v1/Missing": {
+				status: http.StatusNotFound,
+			},
+		},
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(getter, outDir, base, 1, false, log, nil)
+
+	err = scraper.Run(context.Background())
+	require.ErrorContains(t, err, "returned status 404")
+
+	missingDir, err := resourceDir(outDir, "/redfish/v1/Missing")
+	require.NoError(t, err)
+	require.NoFileExists(t, filepath.Join(missingDir, "index.404.json"))
+}
+
+func TestScraper_Run_Persists404FromGofishStyleError(t *testing.T) {
+	getter := &mockGetter{
+		gofishStyle: true,
+		calls:       map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {
+				status: http.StatusOK,
+				body:   `{"@odata.id": "/redfish/v1/", "Missing": {"@odata.id": "/redfish/v1/Missing"}}`,
+			},
+			"/redfish/v1/Missing": {
+				status: http.StatusNotFound,
+			},
+		},
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(getter, outDir, base, 1, true, log, nil)
+
+	err = scraper.Run(context.Background())
+	require.NoError(t, err, "a 404 persisted as a marker is handled and must not be reported as a scrape error")
+
+	missingDir, err := resourceDir(outDir, "/redfish/v1/Missing")
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(missingDir, "index.404.json"))
 }
 
 func TestScraper_Run_RejectsPathTraversal(t *testing.T) {
@@ -221,7 +346,7 @@ func TestScraper_Run_RejectsPathTraversal(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(getter, outDir, base, 1, log, nil)
+	scraper := NewScraper(getter, outDir, base, 1, false, log, nil)
 
 	err = scraper.Run(context.Background())
 	require.ErrorContains(t, err, "unsafe resource path")
@@ -254,7 +379,7 @@ func TestNewScraper_ConcurrencyDefaultsToOne(t *testing.T) {
 	base, err := url.Parse("http://bmc.example.com")
 	require.NoError(t, err)
 
-	s := NewScraper(getter, t.TempDir(), base, 0, slog.New(slog.DiscardHandler), nil)
+	s := NewScraper(getter, t.TempDir(), base, 0, false, slog.New(slog.DiscardHandler), nil)
 
 	require.Equal(t, 1, cap(s.sem))
 }
@@ -287,7 +412,51 @@ func TestScraper_Run_RetriesAfter401WithFreshSession(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(stale, outDir, base, 1, log, relogin)
+	scraper := NewScraper(stale, outDir, base, 1, false, log, relogin)
+
+	err = scraper.Run(context.Background())
+	require.NoError(t, err)
+
+	require.Equal(t, 1, reloginCalls, "expected exactly one re-login attempt")
+	require.Equal(t, 1, stale.calls["/redfish/v1/"], "expected the stale session to be tried exactly once")
+	require.Equal(t, 1, fresh.calls["/redfish/v1/"], "expected the retry to go through the fresh session")
+
+	dir, err := resourceDir(outDir, "/redfish/v1/")
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(dir, "index.json"))
+}
+
+func TestScraper_Run_RetriesAfter401WithFreshSession_GofishStyleError(t *testing.T) {
+	stale := &mockGetter{
+		gofishStyle: true,
+		calls:       map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusUnauthorized},
+		},
+	}
+	fresh := &mockGetter{
+		gofishStyle: true,
+		calls:       map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusOK, body: `{"@odata.id": "/redfish/v1/"}`},
+		},
+	}
+
+	var reloginCalls int
+
+	relogin := func(_ context.Context) (redfishGetter, error) {
+		reloginCalls++
+
+		return fresh, nil
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(stale, outDir, base, 1, false, log, relogin)
 
 	err = scraper.Run(context.Background())
 	require.NoError(t, err)
@@ -319,7 +488,7 @@ func TestScraper_Run_ReportsFailureWhenReloginFails(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(stale, outDir, base, 1, log, relogin)
+	scraper := NewScraper(stale, outDir, base, 1, false, log, relogin)
 
 	err = scraper.Run(context.Background())
 	boom.ErrorIs(t, err)
@@ -364,7 +533,7 @@ func TestScraper_Run_ResumesFromPreviouslyScrapedResources(t *testing.T) {
 
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(getter, outDir, base, 1, log, nil)
+	scraper := NewScraper(getter, outDir, base, 1, false, log, nil)
 
 	err = scraper.Run(context.Background())
 	require.NoError(t, err)
@@ -395,7 +564,7 @@ func TestScraper_Run_RefetchesWhenCachedResourceIsCorrupt(t *testing.T) {
 
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(getter, outDir, base, 1, log, nil)
+	scraper := NewScraper(getter, outDir, base, 1, false, log, nil)
 
 	err = scraper.Run(context.Background())
 	require.NoError(t, err)
@@ -427,7 +596,7 @@ func TestScraper_Run_ReportsFailureWhenRetryAlsoUnauthorized(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(stale, outDir, base, 1, log, relogin)
+	scraper := NewScraper(stale, outDir, base, 1, false, log, relogin)
 
 	err = scraper.Run(context.Background())
 	require.ErrorContains(t, err, "returned status 401")

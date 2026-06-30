@@ -42,6 +42,21 @@ func TestReadResource_NotYetScraped(t *testing.T) {
 	require.Nil(t, header)
 }
 
+func TestWriteNotFoundMarker_ReadNotFoundMarker_RoundTrip(t *testing.T) {
+	dir := t.TempDir()
+
+	notFound, err := readNotFoundMarker(dir)
+	require.NoError(t, err)
+	require.False(t, notFound)
+
+	err = writeNotFoundMarker(dir)
+	require.NoError(t, err)
+
+	notFound, err = readNotFoundMarker(dir)
+	require.NoError(t, err)
+	require.True(t, notFound)
+}
+
 func TestReadResource_CorruptIndexJSON(t *testing.T) {
 	dir := t.TempDir()
 

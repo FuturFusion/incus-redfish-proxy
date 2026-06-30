@@ -3,16 +3,40 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 	"sync"
+
+	"github.com/stmcginnis/gofish/schemas"
 )
 
 type redfishGetter interface {
 	Get(path string) (*http.Response, error)
+}
+
+// responseStatusCode extracts the HTTP status code of a redfishGetter
+// response, accommodating two different shapes of redfishGetter
+// implementation: one that always returns the *http.Response and a nil error
+// for non-2xx statuses (e.g. a plain http.Client), and gofish's APIClient,
+// which instead returns a nil response and reports the status code through a
+// wrapped *schemas.Error. ok is false if no HTTP status code could be
+// determined, e.g. because err is a non-HTTP failure such as a network
+// error.
+func responseStatusCode(resp *http.Response, err error) (code int, ok bool) {
+	if resp != nil {
+		return resp.StatusCode, true
+	}
+
+	var redfishErr *schemas.Error
+	if errors.As(err, &redfishErr) && redfishErr.HTTPReturnedStatusCode != 0 {
+		return redfishErr.HTTPReturnedStatusCode, true
+	}
+
+	return 0, false
 }
 
 // reloginFunc establishes a fresh, authenticated redfishGetter. It is used to
@@ -24,12 +48,13 @@ type reloginFunc func(ctx context.Context) (redfishGetter, error)
 // response headers) and writes each resource to outDir preserving the
 // directory layout.
 type Scraper struct {
-	outDir  string
-	base    *url.URL
-	log     *slog.Logger
-	sem     chan struct{}
-	wg      sync.WaitGroup
-	relogin reloginFunc
+	outDir      string
+	base        *url.URL
+	log         *slog.Logger
+	sem         chan struct{}
+	wg          sync.WaitGroup
+	relogin     reloginFunc
+	remember404 bool
 
 	clientMu sync.RWMutex
 	client   redfishGetter
@@ -45,20 +70,23 @@ type Scraper struct {
 // service. concurrency limits the number of in-flight GET requests; a value
 // less than 1 is treated as 1. relogin, if non-nil, is invoked to obtain a
 // fresh authenticated client whenever a request comes back with a 401,
-// before the request is retried once.
-func NewScraper(client redfishGetter, outDir string, base *url.URL, concurrency int, log *slog.Logger, relogin reloginFunc) *Scraper {
+// before the request is retried once. If remember404 is set, resources that
+// return HTTP 404 are persisted as such and skipped on future scrapes,
+// treating the 404 as a permanent error rather than retrying it forever.
+func NewScraper(client redfishGetter, outDir string, base *url.URL, concurrency int, remember404 bool, log *slog.Logger, relogin reloginFunc) *Scraper {
 	if concurrency < 1 {
 		concurrency = 1
 	}
 
 	return &Scraper{
-		client:  client,
-		outDir:  outDir,
-		base:    base,
-		log:     log,
-		sem:     make(chan struct{}, concurrency),
-		relogin: relogin,
-		visited: map[string]bool{},
+		client:      client,
+		outDir:      outDir,
+		base:        base,
+		log:         log,
+		sem:         make(chan struct{}, concurrency),
+		relogin:     relogin,
+		remember404: remember404,
+		visited:     map[string]bool{},
 	}
 }
 
@@ -122,6 +150,17 @@ func (s *Scraper) visit(ctx context.Context, path string) {
 		return
 	}
 
+	if s.remember404 {
+		notFound, err := readNotFoundMarker(dir)
+		if err != nil {
+			s.log.DebugContext(ctx, "failed to read previous 404 marker, re-fetching", slog.String("path", path), slog.Any("error", err))
+		} else if notFound {
+			s.log.DebugContext(ctx, "skipping resource that previously returned 404", slog.String("path", path))
+
+			return
+		}
+	}
+
 	decoded, header, cached, err := readResource(dir)
 	if err != nil {
 		s.log.DebugContext(ctx, "failed to read previously scraped resource, re-fetching", slog.String("path", path), slog.Any("error", err))
@@ -135,17 +174,39 @@ func (s *Scraper) visit(ctx context.Context, path string) {
 		s.log.DebugContext(ctx, "fetching resource", slog.String("path", path))
 
 		resp, err := s.get(ctx, path)
+
+		code, hasCode := responseStatusCode(resp, err)
+
+		if hasCode && code == http.StatusNotFound && s.remember404 {
+			err := writeNotFoundMarker(dir)
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if err != nil {
+				s.log.ErrorContext(ctx, "failed to persist 404 marker", slog.String("path", path), slog.Any("error", err))
+				s.addErr(fmt.Errorf("failed to persist 404 marker for %q: %w", path, err))
+
+				return
+			}
+
+			s.log.DebugContext(ctx, "resource not found, persisted marker", slog.String("path", path))
+
+			return
+		}
+
 		if err != nil {
 			s.log.ErrorContext(ctx, "failed to fetch resource", slog.String("path", path), slog.Any("error", err))
 			s.addErr(fmt.Errorf("failed to fetch %q: %w", path, err))
 
 			return
 		}
+
 		defer resp.Body.Close()
 
-		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-			s.log.ErrorContext(ctx, "resource returned non-2xx status", slog.String("path", path), slog.Int("status_code", resp.StatusCode))
-			s.addErr(fmt.Errorf("%q returned status %d", path, resp.StatusCode))
+		if code < 200 || code >= 300 {
+			s.log.ErrorContext(ctx, "resource returned non-2xx status", slog.String("path", path), slog.Int("status_code", code))
+			s.addErr(fmt.Errorf("%q returned status %d", path, code))
 
 			return
 		}
@@ -196,11 +257,15 @@ func (s *Scraper) get(ctx context.Context, path string) (*http.Response, error) 
 	s.clientMu.RUnlock()
 
 	resp, err := client.Get(path)
-	if err != nil || resp.StatusCode != http.StatusUnauthorized || s.relogin == nil {
+
+	code, ok := responseStatusCode(resp, err)
+	if !ok || code != http.StatusUnauthorized || s.relogin == nil {
 		return resp, err
 	}
 
-	resp.Body.Close()
+	if resp != nil {
+		resp.Body.Close()
+	}
 
 	s.log.DebugContext(ctx, "refresh client")
 
