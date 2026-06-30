@@ -18,13 +18,15 @@ var includedPaths = map[string]bool{
 	"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}": true,
 	"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.EjectMedia":  true,
 	"/redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/VirtualMedia.InsertMedia": true,
-	"/redfish/v1/Systems":                                                 true,
-	"/redfish/v1/Systems/{ComputerSystemId}":                              true,
-	"/redfish/v1/Systems/{ComputerSystemId}/Actions/ComputerSystem.Reset": true,
-	"/redfish/v1/Systems/{ComputerSystemId}/Bios":                         true,
-	// "/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases":                                           true,
-	// "/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}":                              true,
-	// "/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}": true,
+	"/redfish/v1/Systems":                                                                                             true,
+	"/redfish/v1/Systems/{ComputerSystemId}":                                                                          true,
+	"/redfish/v1/Systems/{ComputerSystemId}/Actions/ComputerSystem.Reset":                                             true,
+	"/redfish/v1/Systems/{ComputerSystemId}/Bios":                                                                     true,
+	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot":                                                               true,
+	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases":                                           true,
+	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}":                              true,
+	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates":                 true,
+	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}": true,
 }
 
 var incudedPathPrefixes = []string{
