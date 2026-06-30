@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"slices"
+	"sort"
 
 	"github.com/spf13/pflag"
 	"github.com/stmcginnis/gofish"
@@ -25,6 +26,8 @@ var commands = []string{
 	"get-virtual-media",
 	"insert-virtual-media",
 	"eject-virtual-media",
+	"get-secureboot-certificates",
+	"get-secureboot-certificate",
 }
 
 func main() {
@@ -110,7 +113,7 @@ func main() {
 
 	case "insert-virtual-media":
 		if len(pflag.Args()) < 2 {
-			fmt.Println("file to insert as boot media missing")
+			fmt.Println("error: file to insert as boot media missing")
 			usage()
 			os.Exit(1)
 		}
@@ -138,6 +141,37 @@ func main() {
 		die(err)
 
 		_ = taskMonitor
+
+	case "get-secureboot-certificates":
+		for _, certificate := range getSecureBootCertificates(c) {
+			fmt.Printf("%s, %s\n", certificate.ID, certificate.Name)
+		}
+
+	case "get-secureboot-certificate":
+		if len(pflag.Args()) < 2 {
+			fmt.Println("error: certificate name missing")
+			usage()
+			os.Exit(1)
+		}
+
+		certificateID := pflag.Arg(1)
+		var certificate *schemas.Certificate
+
+		found := false
+		for _, certificate = range getSecureBootCertificates(c) {
+			if certificate.ID == certificateID {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			fmt.Printf("certificate ID %s not found", certificateID)
+			os.Exit(1)
+		}
+
+		err = enc.Encode(certificate.Entity)
+		die(err)
 	}
 }
 
@@ -148,6 +182,8 @@ func getSystem(c *gofish.APIClient) *schemas.ComputerSystem {
 	if len(systems) < 1 {
 		die(fmt.Errorf("no system found"))
 	}
+
+	sort.Slice(systems, func(i, j int) bool { return systems[i].ID < systems[j].ID })
 
 	return systems[0]
 }
@@ -160,6 +196,8 @@ func getManagerVirtualMedia(c *gofish.APIClient) *schemas.VirtualMedia {
 		die(fmt.Errorf("no manager found"))
 	}
 
+	sort.Slice(managers, func(i, j int) bool { return managers[i].ID < managers[j].ID })
+
 	manager := managers[0]
 
 	virtualMedias, err := manager.VirtualMedia()
@@ -169,7 +207,34 @@ func getManagerVirtualMedia(c *gofish.APIClient) *schemas.VirtualMedia {
 		die(fmt.Errorf("no virtual media found"))
 	}
 
+	sort.Slice(virtualMedias, func(i, j int) bool { return virtualMedias[i].ID < virtualMedias[j].ID })
+
 	return virtualMedias[0]
+}
+
+func getSecureBootCertificates(c *gofish.APIClient) []*schemas.Certificate {
+	system := getSystem(c)
+
+	secureboot, err := system.SecureBoot()
+	die(err)
+
+	sercureBootDBs, err := secureboot.SecureBootDatabases()
+	die(err)
+
+	if len(sercureBootDBs) < 1 {
+		die(fmt.Errorf("no secure boot database found"))
+	}
+
+	sort.Slice(sercureBootDBs, func(i, j int) bool { return sercureBootDBs[i].ID < sercureBootDBs[j].ID })
+
+	secureBootDB := sercureBootDBs[0]
+
+	certificates, err := secureBootDB.Certificates()
+	die(err)
+
+	sort.Slice(certificates, func(i, j int) bool { return certificates[i].ID < certificates[j].ID })
+
+	return certificates
 }
 
 func serveFileOnce(filename string) (string, func()) {
