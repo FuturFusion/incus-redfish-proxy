@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -42,4 +43,38 @@ func writeResource(dir string, body any, header http.Header) error {
 	}
 
 	return nil
+}
+
+// readResource reads back a resource previously written by writeResource.
+// ok is false if dir does not contain a scraped resource yet (no
+// index.json), which is not an error: it just means the resource still
+// needs to be fetched. header is reconstructed on a best-effort basis from
+// headers.json and is empty if that file is missing or unreadable.
+func readResource(dir string) (body any, header http.Header, ok bool, err error) {
+	indexJSON, err := os.ReadFile(filepath.Join(dir, "index.json"))
+	if errors.Is(err, os.ErrNotExist) {
+		return nil, nil, false, nil
+	} else if err != nil {
+		return nil, nil, false, fmt.Errorf("failed to read index.json: %w", err)
+	}
+
+	err = json.Unmarshal(indexJSON, &body)
+	if err != nil {
+		return nil, nil, false, fmt.Errorf("failed to decode index.json: %w", err)
+	}
+
+	header = http.Header{}
+
+	headersJSON, err := os.ReadFile(filepath.Join(dir, "headers.json"))
+	if err == nil {
+		var stored map[string]map[string]string
+
+		if json.Unmarshal(headersJSON, &stored) == nil {
+			for key, value := range stored["GET"] {
+				header.Set(key, value)
+			}
+		}
+	}
+
+	return body, header, true, nil
 }

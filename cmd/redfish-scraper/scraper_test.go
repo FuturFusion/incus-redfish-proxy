@@ -329,6 +329,80 @@ func TestScraper_Run_ReportsFailureWhenReloginFails(t *testing.T) {
 	require.NoFileExists(t, filepath.Join(dir, "index.json"))
 }
 
+func TestScraper_Run_ResumesFromPreviouslyScrapedResources(t *testing.T) {
+	outDir := t.TempDir()
+
+	cachedDir, err := resourceDir(outDir, "/redfish/v1/")
+	require.NoError(t, err)
+
+	cachedHeader := http.Header{}
+	cachedHeader.Set("Content-Type", "application/json")
+	cachedHeader.Set("Link", "</redfish/v1/Systems/1/NetworkInterfaces>; path=/NetworkInterfaces")
+
+	err = writeResource(cachedDir, map[string]any{
+		"@odata.id": "/redfish/v1/",
+		"Systems":   map[string]any{"@odata.id": "/redfish/v1/Systems"},
+	}, cachedHeader)
+	require.NoError(t, err)
+
+	getter := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/Systems": {
+				status: http.StatusOK,
+				body:   `{"@odata.id": "/redfish/v1/Systems"}`,
+			},
+			"/redfish/v1/Systems/1/NetworkInterfaces": {
+				status: http.StatusOK,
+				body:   `{"@odata.id": "/redfish/v1/Systems/1/NetworkInterfaces"}`,
+			},
+		},
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(getter, outDir, base, 1, log, nil)
+
+	err = scraper.Run(context.Background())
+	require.NoError(t, err)
+
+	require.Zero(t, getter.calls["/redfish/v1/"], "the cached resource must not be re-fetched over the network")
+	require.Equal(t, 1, getter.calls["/redfish/v1/Systems"], "a resource discovered via the cached body must still be fetched")
+	require.Equal(t, 1, getter.calls["/redfish/v1/Systems/1/NetworkInterfaces"], "a resource discovered via the cached Link header must still be fetched")
+}
+
+func TestScraper_Run_RefetchesWhenCachedResourceIsCorrupt(t *testing.T) {
+	outDir := t.TempDir()
+
+	dir, err := resourceDir(outDir, "/redfish/v1/")
+	require.NoError(t, err)
+
+	require.NoError(t, os.MkdirAll(dir, 0o700))
+	require.NoError(t, os.WriteFile(filepath.Join(dir, "index.json"), []byte("not valid json"), 0o600))
+
+	getter := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusOK, body: `{"@odata.id": "/redfish/v1/"}`},
+		},
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(getter, outDir, base, 1, log, nil)
+
+	err = scraper.Run(context.Background())
+	require.NoError(t, err)
+
+	require.Equal(t, 1, getter.calls["/redfish/v1/"], "a corrupt cache entry must trigger a re-fetch")
+}
+
 func TestScraper_Run_ReportsFailureWhenRetryAlsoUnauthorized(t *testing.T) {
 	stale := &mockGetter{
 		calls: map[string]int{},

@@ -27,6 +27,7 @@ func main() {
 	var debug bool
 	var opts clientOptions
 	var concurrency int
+	var clearOutput bool
 
 	pflag.BoolVar(&debug, "debug", false, "debug output")
 	pflag.StringVar(&opts.endpoint, "endpoint", "http://localhost:8080", "Redfish API base URL")
@@ -34,6 +35,7 @@ func main() {
 	pflag.StringVar(&opts.password, "password", "", "Redfish API password")
 	pflag.BoolVar(&opts.insecure, "insecure", false, "skip TLS certificate verification")
 	pflag.IntVarP(&concurrency, "concurrency", "c", 1, "maximum number of concurrent requests")
+	pflag.BoolVar(&clearOutput, "clear", false, "remove the output directory before scraping, instead of resuming from previously scraped resources")
 
 	pflag.Parse()
 
@@ -54,17 +56,24 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	err := run(ctx, log, opts, output, concurrency, debug)
+	err := run(ctx, log, opts, output, concurrency, debug, clearOutput)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "scrape failed:\n%s\n", err)
 		os.Exit(1)
 	}
 }
 
-func run(ctx context.Context, log *slog.Logger, opts clientOptions, output string, concurrency int, debug bool) error {
+func run(ctx context.Context, log *slog.Logger, opts clientOptions, output string, concurrency int, debug, clearOutput bool) error {
 	base, err := url.Parse(opts.endpoint)
 	if err != nil {
 		return fmt.Errorf("failed to parse endpoint %q: %w", opts.endpoint, err)
+	}
+
+	if clearOutput {
+		err = os.RemoveAll(output)
+		if err != nil {
+			return fmt.Errorf("failed to clear output directory %q: %w", output, err)
+		}
 	}
 
 	dumpWriter := io.Writer(nil)

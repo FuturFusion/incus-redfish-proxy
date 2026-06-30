@@ -114,63 +114,74 @@ func (s *Scraper) visit(ctx context.Context, path string) {
 
 	defer func() { <-s.sem }()
 
-	s.log.DebugContext(ctx, "fetching resource", slog.String("path", path))
-
-	resp, err := s.get(ctx, path)
+	dir, err := resourceDir(s.outDir, path)
 	if err != nil {
-		s.log.ErrorContext(ctx, "failed to fetch resource", slog.String("path", path), slog.Any("error", err))
-		s.addErr(fmt.Errorf("failed to fetch %q: %w", path, err))
-
-		return
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		s.log.ErrorContext(ctx, "resource returned non-2xx status", slog.String("path", path), slog.Int("status_code", resp.StatusCode))
-		s.addErr(fmt.Errorf("%q returned status %d", path, resp.StatusCode))
+		s.log.ErrorContext(ctx, "refusing to process resource", slog.String("path", path), slog.Any("error", err))
+		s.addErr(fmt.Errorf("refusing to process %q: %w", path, err))
 
 		return
 	}
 
-	contentType := resp.Header.Get("Content-Type")
-	if !strings.HasPrefix(contentType, "application/json") {
-		s.log.DebugContext(ctx, "skipping non-JSON resource", slog.String("path", path), slog.String("content_type", contentType))
-
-		return
-	}
-
-	var decoded any
-
-	err = json.NewDecoder(resp.Body).Decode(&decoded)
+	decoded, header, cached, err := readResource(dir)
 	if err != nil {
-		s.log.ErrorContext(ctx, "failed to decode resource body", slog.String("path", path), slog.Any("error", err))
-		s.addErr(fmt.Errorf("failed to decode body of %q: %w", path, err))
+		s.log.DebugContext(ctx, "failed to read previously scraped resource, re-fetching", slog.String("path", path), slog.Any("error", err))
 
-		return
+		cached = false
+	}
+
+	if cached {
+		s.log.DebugContext(ctx, "using previously scraped resource", slog.String("path", path))
+	} else {
+		s.log.DebugContext(ctx, "fetching resource", slog.String("path", path))
+
+		resp, err := s.get(ctx, path)
+		if err != nil {
+			s.log.ErrorContext(ctx, "failed to fetch resource", slog.String("path", path), slog.Any("error", err))
+			s.addErr(fmt.Errorf("failed to fetch %q: %w", path, err))
+
+			return
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			s.log.ErrorContext(ctx, "resource returned non-2xx status", slog.String("path", path), slog.Int("status_code", resp.StatusCode))
+			s.addErr(fmt.Errorf("%q returned status %d", path, resp.StatusCode))
+
+			return
+		}
+
+		contentType := resp.Header.Get("Content-Type")
+		if !strings.HasPrefix(contentType, "application/json") {
+			s.log.DebugContext(ctx, "skipping non-JSON resource", slog.String("path", path), slog.String("content_type", contentType))
+
+			return
+		}
+
+		err = json.NewDecoder(resp.Body).Decode(&decoded)
+		if err != nil {
+			s.log.ErrorContext(ctx, "failed to decode resource body", slog.String("path", path), slog.Any("error", err))
+			s.addErr(fmt.Errorf("failed to decode body of %q: %w", path, err))
+
+			return
+		}
+
+		header = resp.Header
+
+		err = writeResource(dir, decoded, header)
+		if err != nil {
+			s.log.ErrorContext(ctx, "failed to write resource", slog.String("path", path), slog.Any("error", err))
+			s.addErr(fmt.Errorf("failed to write %q: %w", path, err))
+
+			return
+		}
 	}
 
 	for _, child := range extractODataIDs(decoded) {
 		s.scheduleIfSameEndpoint(ctx, child)
 	}
 
-	for _, child := range parseLinkHeader(resp.Header.Values("Link")) {
+	for _, child := range parseLinkHeader(header.Values("Link")) {
 		s.scheduleIfSameEndpoint(ctx, child)
-	}
-
-	dir, err := resourceDir(s.outDir, path)
-	if err != nil {
-		s.log.ErrorContext(ctx, "refusing to write resource", slog.String("path", path), slog.Any("error", err))
-		s.addErr(fmt.Errorf("refusing to write %q: %w", path, err))
-
-		return
-	}
-
-	err = writeResource(dir, decoded, resp.Header)
-	if err != nil {
-		s.log.ErrorContext(ctx, "failed to write resource", slog.String("path", path), slog.Any("error", err))
-		s.addErr(fmt.Errorf("failed to write %q: %w", path, err))
-
-		return
 	}
 }
 
@@ -190,6 +201,8 @@ func (s *Scraper) get(ctx context.Context, path string) (*http.Response, error) 
 	}
 
 	resp.Body.Close()
+
+	s.log.DebugContext(ctx, "refresh client")
 
 	fresh, err := s.refreshClient(ctx, client)
 	if err != nil {
