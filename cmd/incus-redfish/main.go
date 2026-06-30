@@ -91,7 +91,7 @@ func main() {
 		bios, err := getSystem(c).Bios()
 		die(err)
 
-		bios.Attributes["vTPM"] = "On"
+		bios.Attributes["incus.devices.vtpm"] = `{"type": "tpm"}`
 
 		err = bios.UpdateBiosAttributesApplyAt(bios.Attributes, schemas.OnResetSettingsApplyTime)
 		die(err)
@@ -100,7 +100,7 @@ func main() {
 		bios, err := getSystem(c).Bios()
 		die(err)
 
-		bios.Attributes["vTPM"] = "Off"
+		bios.Attributes["incus.devices.vtpm"] = ""
 
 		err = bios.UpdateBiosAttributesApplyAt(bios.Attributes, schemas.OnResetSettingsApplyTime)
 		die(err)
