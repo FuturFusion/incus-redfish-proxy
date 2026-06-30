@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
 	"github.com/spf13/pflag"
@@ -71,22 +72,52 @@ func run(ctx context.Context, log *slog.Logger, opts clientOptions, output strin
 		dumpWriter = os.Stderr
 	}
 
-	client, err := gofish.ConnectContext(ctx, gofish.ClientConfig{
-		Endpoint: opts.endpoint,
-		Username: opts.user,
-		Password: opts.password,
-		Insecure: opts.insecure,
+	var (
+		clientsMu sync.Mutex
+		clients   []*gofish.APIClient
+	)
 
-		ReuseConnections: true,
+	connect := func(ctx context.Context) (*gofish.APIClient, error) {
+		c, err := gofish.ConnectContext(ctx, gofish.ClientConfig{
+			Endpoint: opts.endpoint,
+			Username: opts.user,
+			Password: opts.password,
+			Insecure: opts.insecure,
 
-		DumpWriter: dumpWriter,
-	})
+			ReuseConnections: true,
+
+			DumpWriter: dumpWriter,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		clientsMu.Lock()
+		clients = append(clients, c)
+		clientsMu.Unlock()
+
+		return c, nil
+	}
+
+	client, err := connect(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to connect to %q: %w", opts.endpoint, err)
 	}
-	defer client.Logout()
 
-	scraper := NewScraper(client, output, base, concurrency, log)
+	defer func() {
+		clientsMu.Lock()
+		defer clientsMu.Unlock()
+
+		for _, c := range clients {
+			c.Logout()
+		}
+	}()
+
+	relogin := func(ctx context.Context) (redfishGetter, error) {
+		return connect(ctx)
+	}
+
+	scraper := NewScraper(client, output, base, concurrency, log, relogin)
 
 	return scraper.Run(ctx)
 }

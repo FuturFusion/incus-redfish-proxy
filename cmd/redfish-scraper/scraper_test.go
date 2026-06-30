@@ -100,7 +100,7 @@ func TestScraper_Run(t *testing.T) {
 	log := slog.New(slog.DiscardHandler)
 	getter := &httpGetter{client: srv.Client(), base: srv.URL}
 
-	scraper := NewScraper(getter, outDir, base, 4, log)
+	scraper := NewScraper(getter, outDir, base, 4, log, nil)
 
 	err = scraper.Run(context.Background())
 	require.NoError(t, err)
@@ -180,7 +180,7 @@ func TestScraper_Run_CollectsErrorsAndContinuesCrawl(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(getter, outDir, base, 1, log)
+	scraper := NewScraper(getter, outDir, base, 1, log, nil)
 
 	err = scraper.Run(context.Background())
 	boom.ErrorIs(t, err)
@@ -221,7 +221,7 @@ func TestScraper_Run_RejectsPathTraversal(t *testing.T) {
 	outDir := t.TempDir()
 	log := slog.New(slog.DiscardHandler)
 
-	scraper := NewScraper(getter, outDir, base, 1, log)
+	scraper := NewScraper(getter, outDir, base, 1, log, nil)
 
 	err = scraper.Run(context.Background())
 	require.ErrorContains(t, err, "unsafe resource path")
@@ -254,7 +254,112 @@ func TestNewScraper_ConcurrencyDefaultsToOne(t *testing.T) {
 	base, err := url.Parse("http://bmc.example.com")
 	require.NoError(t, err)
 
-	s := NewScraper(getter, t.TempDir(), base, 0, slog.New(slog.DiscardHandler))
+	s := NewScraper(getter, t.TempDir(), base, 0, slog.New(slog.DiscardHandler), nil)
 
 	require.Equal(t, 1, cap(s.sem))
+}
+
+func TestScraper_Run_RetriesAfter401WithFreshSession(t *testing.T) {
+	stale := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusUnauthorized},
+		},
+	}
+	fresh := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusOK, body: `{"@odata.id": "/redfish/v1/"}`},
+		},
+	}
+
+	var reloginCalls int
+
+	relogin := func(_ context.Context) (redfishGetter, error) {
+		reloginCalls++
+
+		return fresh, nil
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(stale, outDir, base, 1, log, relogin)
+
+	err = scraper.Run(context.Background())
+	require.NoError(t, err)
+
+	require.Equal(t, 1, reloginCalls, "expected exactly one re-login attempt")
+	require.Equal(t, 1, stale.calls["/redfish/v1/"], "expected the stale session to be tried exactly once")
+	require.Equal(t, 1, fresh.calls["/redfish/v1/"], "expected the retry to go through the fresh session")
+
+	dir, err := resourceDir(outDir, "/redfish/v1/")
+	require.NoError(t, err)
+	require.FileExists(t, filepath.Join(dir, "index.json"))
+}
+
+func TestScraper_Run_ReportsFailureWhenReloginFails(t *testing.T) {
+	stale := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusUnauthorized},
+		},
+	}
+
+	relogin := func(_ context.Context) (redfishGetter, error) {
+		return nil, boom.Error
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(stale, outDir, base, 1, log, relogin)
+
+	err = scraper.Run(context.Background())
+	boom.ErrorIs(t, err)
+
+	dir, err := resourceDir(outDir, "/redfish/v1/")
+	require.NoError(t, err)
+	require.NoFileExists(t, filepath.Join(dir, "index.json"))
+}
+
+func TestScraper_Run_ReportsFailureWhenRetryAlsoUnauthorized(t *testing.T) {
+	stale := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusUnauthorized},
+		},
+	}
+	fresh := &mockGetter{
+		calls: map[string]int{},
+		responses: map[string]stubResponse{
+			"/redfish/v1/": {status: http.StatusUnauthorized},
+		},
+	}
+
+	relogin := func(_ context.Context) (redfishGetter, error) {
+		return fresh, nil
+	}
+
+	base, err := url.Parse("http://bmc.example.com")
+	require.NoError(t, err)
+
+	outDir := t.TempDir()
+	log := slog.New(slog.DiscardHandler)
+
+	scraper := NewScraper(stale, outDir, base, 1, log, relogin)
+
+	err = scraper.Run(context.Background())
+	require.ErrorContains(t, err, "returned status 401")
+	require.Equal(t, 1, fresh.calls["/redfish/v1/"], "expected exactly one retry, no relogin loop")
+
+	dir, err := resourceDir(outDir, "/redfish/v1/")
+	require.NoError(t, err)
+	require.NoFileExists(t, filepath.Join(dir, "index.json"))
 }
