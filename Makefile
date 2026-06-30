@@ -20,6 +20,16 @@ bld:
 	mkdir -p ./bin/
 	CGO_ENABLED=0 GOARCH=amd64 $(GO) build -o ./bin/incus-redfish-proxy.linux.amd64 ./cmd/incus-redfish-proxy
 
+.PHONY: build-redfish-scraper
+build-redfish-scraper:
+	mkdir -p ./bin/
+	CGO_ENABLED=0 GOARCH=amd64 $(GO) build -o ./bin/redfish-scraper.linux.amd64 ./cmd/redfish-scraper
+	CGO_ENABLED=0 GOARCH=arm64 $(GO) build -o ./bin/redfish-scraper.linux.arm64 ./cmd/redfish-scraper
+	GOOS=darwin GOARCH=amd64 $(GO) build -o ./bin/redfish-scraper.macos.amd64 ./cmd/redfish-scraper
+	GOOS=darwin GOARCH=arm64 $(GO) build -o ./bin/redfish-scraper.macos.arm64 ./cmd/redfish-scraper
+	GOOS=windows GOARCH=amd64 $(GO) build -o ./bin/redfish-scraper.windows.amd64.exe ./cmd/redfish-scraper
+	GOOS=windows GOARCH=arm64 $(GO) build -o ./bin/redfish-scraper.windows.arm64.exe ./cmd/redfish-scraper
+
 .PHONY: build-all-packages
 build-all-packages:
 	$(GO) mod tidy
