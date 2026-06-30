@@ -47,6 +47,132 @@ func (e ActionInfoV160ParameterTypes) Valid() bool {
 	}
 }
 
+// Defines values for CertificateCertificateType.
+const (
+	PEM      CertificateCertificateType = "PEM"
+	PEMchain CertificateCertificateType = "PEMchain"
+	PKCS12   CertificateCertificateType = "PKCS12"
+	PKCS7    CertificateCertificateType = "PKCS7"
+)
+
+// Valid indicates whether the value is a known member of the CertificateCertificateType enum.
+func (e CertificateCertificateType) Valid() bool {
+	switch e {
+	case PEM:
+		return true
+	case PEMchain:
+		return true
+	case PKCS12:
+		return true
+	case PKCS7:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CertificateCertificateUsageType.
+const (
+	CertificateCertificateUsageTypeBIOS     CertificateCertificateUsageType = "BIOS"
+	CertificateCertificateUsageTypeDevice   CertificateCertificateUsageType = "Device"
+	CertificateCertificateUsageTypeEK       CertificateCertificateUsageType = "EK"
+	CertificateCertificateUsageTypeIAK      CertificateCertificateUsageType = "IAK"
+	CertificateCertificateUsageTypeIDevID   CertificateCertificateUsageType = "IDevID"
+	CertificateCertificateUsageTypeLAK      CertificateCertificateUsageType = "LAK"
+	CertificateCertificateUsageTypeLDevID   CertificateCertificateUsageType = "LDevID"
+	CertificateCertificateUsageTypePlatform CertificateCertificateUsageType = "Platform"
+	CertificateCertificateUsageTypeSSH      CertificateCertificateUsageType = "SSH"
+	CertificateCertificateUsageTypeUser     CertificateCertificateUsageType = "User"
+	CertificateCertificateUsageTypeWeb      CertificateCertificateUsageType = "Web"
+)
+
+// Valid indicates whether the value is a known member of the CertificateCertificateUsageType enum.
+func (e CertificateCertificateUsageType) Valid() bool {
+	switch e {
+	case CertificateCertificateUsageTypeBIOS:
+		return true
+	case CertificateCertificateUsageTypeDevice:
+		return true
+	case CertificateCertificateUsageTypeEK:
+		return true
+	case CertificateCertificateUsageTypeIAK:
+		return true
+	case CertificateCertificateUsageTypeIDevID:
+		return true
+	case CertificateCertificateUsageTypeLAK:
+		return true
+	case CertificateCertificateUsageTypeLDevID:
+		return true
+	case CertificateCertificateUsageTypePlatform:
+		return true
+	case CertificateCertificateUsageTypeSSH:
+		return true
+	case CertificateCertificateUsageTypeUser:
+		return true
+	case CertificateCertificateUsageTypeWeb:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for CertificateKeyUsage.
+const (
+	CRLSigning           CertificateKeyUsage = "CRLSigning"
+	ClientAuthentication CertificateKeyUsage = "ClientAuthentication"
+	CodeSigning          CertificateKeyUsage = "CodeSigning"
+	DataEncipherment     CertificateKeyUsage = "DataEncipherment"
+	DecipherOnly         CertificateKeyUsage = "DecipherOnly"
+	DigitalSignature     CertificateKeyUsage = "DigitalSignature"
+	EmailProtection      CertificateKeyUsage = "EmailProtection"
+	EncipherOnly         CertificateKeyUsage = "EncipherOnly"
+	KeyAgreement         CertificateKeyUsage = "KeyAgreement"
+	KeyCertSign          CertificateKeyUsage = "KeyCertSign"
+	KeyEncipherment      CertificateKeyUsage = "KeyEncipherment"
+	NonRepudiation       CertificateKeyUsage = "NonRepudiation"
+	OCSPSigning          CertificateKeyUsage = "OCSPSigning"
+	ServerAuthentication CertificateKeyUsage = "ServerAuthentication"
+	Timestamping         CertificateKeyUsage = "Timestamping"
+)
+
+// Valid indicates whether the value is a known member of the CertificateKeyUsage enum.
+func (e CertificateKeyUsage) Valid() bool {
+	switch e {
+	case CRLSigning:
+		return true
+	case ClientAuthentication:
+		return true
+	case CodeSigning:
+		return true
+	case DataEncipherment:
+		return true
+	case DecipherOnly:
+		return true
+	case DigitalSignature:
+		return true
+	case EmailProtection:
+		return true
+	case EncipherOnly:
+		return true
+	case KeyAgreement:
+		return true
+	case KeyCertSign:
+		return true
+	case KeyEncipherment:
+		return true
+	case NonRepudiation:
+		return true
+	case OCSPSigning:
+		return true
+	case ServerAuthentication:
+		return true
+	case Timestamping:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ComputerSystemBootSource.
 const (
 	ComputerSystemBootSourceBiosSetup    ComputerSystemBootSource = "BiosSetup"
@@ -1157,6 +1283,48 @@ func (e ResourceV1240Reference) Valid() bool {
 	}
 }
 
+// Defines values for SecureBootV120SecureBootCurrentBootType.
+const (
+	Disabled SecureBootV120SecureBootCurrentBootType = "Disabled"
+	Enabled  SecureBootV120SecureBootCurrentBootType = "Enabled"
+)
+
+// Valid indicates whether the value is a known member of the SecureBootV120SecureBootCurrentBootType enum.
+func (e SecureBootV120SecureBootCurrentBootType) Valid() bool {
+	switch e {
+	case Disabled:
+		return true
+	case Enabled:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SecureBootV120SecureBootModeType.
+const (
+	AuditMode    SecureBootV120SecureBootModeType = "AuditMode"
+	DeployedMode SecureBootV120SecureBootModeType = "DeployedMode"
+	SetupMode    SecureBootV120SecureBootModeType = "SetupMode"
+	UserMode     SecureBootV120SecureBootModeType = "UserMode"
+)
+
+// Valid indicates whether the value is a known member of the SecureBootV120SecureBootModeType enum.
+func (e SecureBootV120SecureBootModeType) Valid() bool {
+	switch e {
+	case AuditMode:
+		return true
+	case DeployedMode:
+		return true
+	case SetupMode:
+		return true
+	case UserMode:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for SettingsV150ApplyTime.
 const (
 	AtMaintenanceWindowStart   SettingsV150ApplyTime = "AtMaintenanceWindowStart"
@@ -1237,22 +1405,22 @@ func (e TaskV174TaskState) Valid() bool {
 
 // Defines values for VirtualMediaV165ConnectedVia.
 const (
-	VirtualMediaV165ConnectedViaApplet       VirtualMediaV165ConnectedVia = "Applet"
-	VirtualMediaV165ConnectedViaNotConnected VirtualMediaV165ConnectedVia = "NotConnected"
-	VirtualMediaV165ConnectedViaOem          VirtualMediaV165ConnectedVia = "Oem"
-	VirtualMediaV165ConnectedViaURI          VirtualMediaV165ConnectedVia = "URI"
+	Applet       VirtualMediaV165ConnectedVia = "Applet"
+	NotConnected VirtualMediaV165ConnectedVia = "NotConnected"
+	Oem          VirtualMediaV165ConnectedVia = "Oem"
+	URI          VirtualMediaV165ConnectedVia = "URI"
 )
 
 // Valid indicates whether the value is a known member of the VirtualMediaV165ConnectedVia enum.
 func (e VirtualMediaV165ConnectedVia) Valid() bool {
 	switch e {
-	case VirtualMediaV165ConnectedViaApplet:
+	case Applet:
 		return true
-	case VirtualMediaV165ConnectedViaNotConnected:
+	case NotConnected:
 		return true
-	case VirtualMediaV165ConnectedViaOem:
+	case Oem:
 		return true
-	case VirtualMediaV165ConnectedViaURI:
+	case URI:
 		return true
 	default:
 		return false
@@ -1547,6 +1715,278 @@ type BiosV130ResetBios struct {
 
 	// Title Friendly action name
 	Title *string `json:"title,omitempty"`
+}
+
+// CertificateCollectionCertificateCollection The collection of `Certificate` resource instances.
+type CertificateCollectionCertificateCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                            `json:"@odata.type,omitempty"`
+	Description *CertificateCollectionCertificateCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// CertificateCollectionCertificateCollectionDescription1 defines model for .
+type CertificateCollectionCertificateCollectionDescription1 = interface{}
+
+// CertificateCollectionCertificateCollection_Description defines model for CertificateCollectionCertificateCollection.Description.
+type CertificateCollectionCertificateCollection_Description struct {
+	union json.RawMessage
+}
+
+// CertificateCertificateType defines model for Certificate_CertificateType.
+type CertificateCertificateType string
+
+// CertificateCertificateUsageType defines model for Certificate_CertificateUsageType.
+type CertificateCertificateUsageType string
+
+// CertificateKeyUsage The usages of a key contained within a certificate.
+type CertificateKeyUsage string
+
+// CertificateV1110Actions The available actions for this resource.
+type CertificateV1110Actions struct {
+	// HashCertificateForceAutomaticRenew This action forces an automatic renewal of the certificate, if this certificate is configured for automatic certificate enrollment.
+	HashCertificateForceAutomaticRenew *CertificateV1110ForceAutomaticRenew `json:"#Certificate.ForceAutomaticRenew,omitempty"`
+
+	// HashCertificateRekey This action generates a new key-pair for a certificate and produces a certificate signing request.
+	HashCertificateRekey *CertificateV1110Rekey `json:"#Certificate.Rekey,omitempty"`
+
+	// HashCertificateRenew This action generates a certificate signing request by using the existing information and key-pair of the certificate.
+	HashCertificateRenew *CertificateV1110Renew `json:"#Certificate.Renew,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *CertificateV1110OemActions `json:"Oem,omitempty"`
+}
+
+// CertificateV1110Certificate The `Certificate` schema describes a certificate that proves the identity of a component, account, or service.
+type CertificateV1110Certificate struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *CertificateV1110Actions `json:"Actions,omitempty"`
+
+	// CertificateString The string for the certificate.
+	CertificateString *string `json:"CertificateString,omitempty"`
+
+	// CertificateType The format of the certificate.
+	CertificateType *CertificateV1110Certificate_CertificateType `json:"CertificateType,omitempty"`
+
+	// CertificateUsageTypes The types or purposes for this certificate.
+	CertificateUsageTypes *[]CertificateV1110Certificate_CertificateUsageTypes_Item `json:"CertificateUsageTypes,omitempty"`
+	Description           *CertificateV1110Certificate_Description                  `json:"Description,omitempty"`
+
+	// Fingerprint The fingerprint of the certificate.
+	Fingerprint *string `json:"Fingerprint,omitempty"`
+
+	// FingerprintHashAlgorithm The hash algorithm for the fingerprint of the certificate.
+	FingerprintHashAlgorithm *string `json:"FingerprintHashAlgorithm,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// Issuer The identifier information about a certificate.
+	Issuer *CertificateV1110Identifier `json:"Issuer,omitempty"`
+
+	// KeyUsage The key usage extension, which defines the purpose of the public keys in this certificate.
+	KeyUsage *[]CertificateV1110Certificate_KeyUsage_Item `json:"KeyUsage,omitempty"`
+
+	// Links The links to other resources that are related to this resource.
+	Links *CertificateV1110Links `json:"Links,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// Password The password for the certificate.
+	Password *string `json:"Password,omitempty"`
+
+	// SPDM SPDM-related information for a certificate.
+	SPDM *CertificateV1110SPDM `json:"SPDM,omitempty"`
+
+	// SerialNumber The serial number of the certificate.
+	SerialNumber *string `json:"SerialNumber,omitempty"`
+
+	// SignatureAlgorithm The algorithm used for creating the signature of the certificate.
+	SignatureAlgorithm *string `json:"SignatureAlgorithm,omitempty"`
+
+	// Status The status and health of a resource and its children.
+	Status *ResourceStatus `json:"Status,omitempty"`
+
+	// Subject The identifier information about a certificate.
+	Subject *CertificateV1110Identifier `json:"Subject,omitempty"`
+
+	// UefiSignatureOwner The UEFI signature owner for this certificate.
+	UefiSignatureOwner *string `json:"UefiSignatureOwner,omitempty"`
+
+	// ValidNotAfter The date when the certificate is no longer valid.
+	ValidNotAfter *time.Time `json:"ValidNotAfter,omitempty"`
+
+	// ValidNotBefore The date when the certificate becomes valid.
+	ValidNotBefore *time.Time `json:"ValidNotBefore,omitempty"`
+}
+
+// CertificateV1110CertificateCertificateType1 defines model for .
+type CertificateV1110CertificateCertificateType1 = interface{}
+
+// CertificateV1110Certificate_CertificateType The format of the certificate.
+type CertificateV1110Certificate_CertificateType struct {
+	union json.RawMessage
+}
+
+// CertificateV1110CertificateCertificateUsageTypes1 defines model for .
+type CertificateV1110CertificateCertificateUsageTypes1 = interface{}
+
+// CertificateV1110Certificate_CertificateUsageTypes_Item defines model for Certificate_v1_11_0_Certificate.CertificateUsageTypes.Item.
+type CertificateV1110Certificate_CertificateUsageTypes_Item struct {
+	union json.RawMessage
+}
+
+// CertificateV1110CertificateDescription1 defines model for .
+type CertificateV1110CertificateDescription1 = interface{}
+
+// CertificateV1110Certificate_Description defines model for CertificateV1110Certificate.Description.
+type CertificateV1110Certificate_Description struct {
+	union json.RawMessage
+}
+
+// CertificateV1110CertificateKeyUsage1 defines model for .
+type CertificateV1110CertificateKeyUsage1 = interface{}
+
+// CertificateV1110Certificate_KeyUsage_Item defines model for Certificate_v1_11_0_Certificate.KeyUsage.Item.
+type CertificateV1110Certificate_KeyUsage_Item struct {
+	union json.RawMessage
+}
+
+// CertificateV1110ForceAutomaticRenew This action forces an automatic renewal of the certificate, if this certificate is configured for automatic certificate enrollment.
+type CertificateV1110ForceAutomaticRenew struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// CertificateV1110Identifier The identifier information about a certificate.
+type CertificateV1110Identifier struct {
+	// AdditionalCommonNames Additional common names of the entity.
+	AdditionalCommonNames *[]*string `json:"AdditionalCommonNames,omitempty"`
+
+	// AdditionalOrganizationalUnits Additional organizational units of the entity.
+	AdditionalOrganizationalUnits *[]*string `json:"AdditionalOrganizationalUnits,omitempty"`
+
+	// AlternativeNames The additional host names of the entity.
+	AlternativeNames *[]*string `json:"AlternativeNames,omitempty"`
+
+	// City The city or locality of the organization of the entity.
+	City *string `json:"City,omitempty"`
+
+	// CommonName The common name of the entity.
+	CommonName *string `json:"CommonName,omitempty"`
+
+	// Country The country of the organization of the entity.
+	Country *string `json:"Country,omitempty"`
+
+	// DisplayString A human-readable string for this identifier.
+	DisplayString *string `json:"DisplayString,omitempty"`
+
+	// DomainComponents The domain components of the entity.
+	DomainComponents *[]*string `json:"DomainComponents,omitempty"`
+
+	// Email The email address of the contact within the organization of the entity.
+	Email *string `json:"Email,omitempty"`
+
+	// Organization The name of the organization of the entity.
+	Organization *string `json:"Organization,omitempty"`
+
+	// OrganizationalUnit The name of the unit or division of the organization of the entity.
+	OrganizationalUnit *string `json:"OrganizationalUnit,omitempty"`
+
+	// State The state, province, or region of the organization of the entity.
+	State *string `json:"State,omitempty"`
+}
+
+// CertificateV1110Links The links to other resources that are related to this resource.
+type CertificateV1110Links struct {
+	// Issuer A link to the certificate of the CA that issued this certificate.
+	Issuer *CertificateV1110Links_Issuer `json:"Issuer,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// Subjects An array of links to certificates that were issued by the CA that is represented by this certificate.
+	Subjects *[]OdataV4IdRef `json:"Subjects,omitempty"`
+
+	// SubjectsOdataCount The number of items in a collection.
+	SubjectsOdataCount *OdataV4Count `json:"Subjects@odata.count,omitempty"`
+}
+
+// CertificateV1110LinksIssuer1 defines model for .
+type CertificateV1110LinksIssuer1 = interface{}
+
+// CertificateV1110Links_Issuer A link to the certificate of the CA that issued this certificate.
+type CertificateV1110Links_Issuer struct {
+	union json.RawMessage
+}
+
+// CertificateV1110OemActions The available OEM-specific actions for this resource.
+type CertificateV1110OemActions map[string]interface{}
+
+// CertificateV1110Rekey This action generates a new key-pair for a certificate and produces a certificate signing request.
+type CertificateV1110Rekey struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// CertificateV1110Renew This action generates a certificate signing request by using the existing information and key-pair of the certificate.
+type CertificateV1110Renew struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// CertificateV1110SPDM SPDM-related information for a certificate.
+type CertificateV1110SPDM struct {
+	// SlotID Slot identifier of the certificate.
+	SlotID *int64 `json:"SlotId,omitempty"`
 }
 
 // ComputerSystemCollectionComputerSystemCollection The collection of `ComputerSystem` resource instances.
@@ -3591,6 +4031,213 @@ type ResourceV1240RackUnits string
 // ResourceV1240Reference The reference areas for the location of the part within an enclosure.
 type ResourceV1240Reference string
 
+// SecureBootDatabaseCollectionSecureBootDatabaseCollection The collection of `SecureBootDatabase` resource instances.
+type SecureBootDatabaseCollectionSecureBootDatabaseCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                                          `json:"@odata.type,omitempty"`
+	Description *SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1 defines model for .
+type SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1 = interface{}
+
+// SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description defines model for SecureBootDatabaseCollectionSecureBootDatabaseCollection.Description.
+type SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description struct {
+	union json.RawMessage
+}
+
+// SecureBootDatabaseV103Actions The available actions for this resource.
+type SecureBootDatabaseV103Actions struct {
+	// HashSecureBootDatabaseResetKeys This action is used to reset the UEFI Secure Boot keys of this database.
+	HashSecureBootDatabaseResetKeys *SecureBootDatabaseV103ResetKeys `json:"#SecureBootDatabase.ResetKeys,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *SecureBootDatabaseV103OemActions `json:"Oem,omitempty"`
+}
+
+// SecureBootDatabaseV103OemActions The available OEM-specific actions for this resource.
+type SecureBootDatabaseV103OemActions map[string]interface{}
+
+// SecureBootDatabaseV103ResetKeys This action is used to reset the UEFI Secure Boot keys of this database.
+type SecureBootDatabaseV103ResetKeys struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// SecureBootDatabaseV103SecureBootDatabase The `SecureBootDatabase` schema describes a UEFI Secure Boot database used to store certificates or hashes.
+type SecureBootDatabaseV103SecureBootDatabase struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *SecureBootDatabaseV103Actions `json:"Actions,omitempty"`
+
+	// Certificates A reference to a resource.
+	Certificates *OdataV4IdRef `json:"Certificates,omitempty"`
+
+	// DatabaseID This property contains the name of the UEFI Secure Boot database.
+	DatabaseID  *string                                               `json:"DatabaseId,omitempty"`
+	Description *SecureBootDatabaseV103SecureBootDatabase_Description `json:"Description,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// Signatures A reference to a resource.
+	Signatures *OdataV4IdRef `json:"Signatures,omitempty"`
+}
+
+// SecureBootDatabaseV103SecureBootDatabaseDescription1 defines model for .
+type SecureBootDatabaseV103SecureBootDatabaseDescription1 = interface{}
+
+// SecureBootDatabaseV103SecureBootDatabase_Description defines model for SecureBootDatabaseV103SecureBootDatabase.Description.
+type SecureBootDatabaseV103SecureBootDatabase_Description struct {
+	union json.RawMessage
+}
+
+// SecureBootV120Actions The available actions for this resource.
+type SecureBootV120Actions struct {
+	// HashSecureBootResetKeys This action resets the UEFI Secure Boot keys.
+	HashSecureBootResetKeys *SecureBootV120ResetKeys `json:"#SecureBoot.ResetKeys,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *SecureBootV120OemActions `json:"Oem,omitempty"`
+}
+
+// SecureBootV120OemActions The available OEM-specific actions for this resource.
+type SecureBootV120OemActions map[string]interface{}
+
+// SecureBootV120ResetKeys This action resets the UEFI Secure Boot keys.
+type SecureBootV120ResetKeys struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// SecureBootV120SecureBoot The `SecureBoot` schema contains UEFI Secure Boot information and represents properties for managing the UEFI Secure Boot functionality of a system.
+type SecureBootV120SecureBoot struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions     *SecureBootV120Actions                `json:"Actions,omitempty"`
+	Description *SecureBootV120SecureBoot_Description `json:"Description,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// SecureBootCurrentBoot The UEFI Secure Boot state during the current boot cycle.
+	SecureBootCurrentBoot *SecureBootV120SecureBoot_SecureBootCurrentBoot `json:"SecureBootCurrentBoot,omitempty"`
+
+	// SecureBootDatabases A reference to a resource.
+	SecureBootDatabases *OdataV4IdRef `json:"SecureBootDatabases,omitempty"`
+
+	// SecureBootDesiredMode The desired UEFI Secure Boot Mode for the next boot.
+	SecureBootDesiredMode *SecureBootV120SecureBoot_SecureBootDesiredMode `json:"SecureBootDesiredMode,omitempty"`
+
+	// SecureBootEnable An indication of whether UEFI Secure Boot is enabled.
+	SecureBootEnable *bool `json:"SecureBootEnable,omitempty"`
+
+	// SecureBootMode The current UEFI Secure Boot Mode.
+	SecureBootMode *SecureBootV120SecureBoot_SecureBootMode `json:"SecureBootMode,omitempty"`
+}
+
+// SecureBootV120SecureBootDescription1 defines model for .
+type SecureBootV120SecureBootDescription1 = interface{}
+
+// SecureBootV120SecureBoot_Description defines model for SecureBootV120SecureBoot.Description.
+type SecureBootV120SecureBoot_Description struct {
+	union json.RawMessage
+}
+
+// SecureBootV120SecureBootSecureBootCurrentBoot1 defines model for .
+type SecureBootV120SecureBootSecureBootCurrentBoot1 = interface{}
+
+// SecureBootV120SecureBoot_SecureBootCurrentBoot The UEFI Secure Boot state during the current boot cycle.
+type SecureBootV120SecureBoot_SecureBootCurrentBoot struct {
+	union json.RawMessage
+}
+
+// SecureBootV120SecureBootSecureBootDesiredMode1 defines model for .
+type SecureBootV120SecureBootSecureBootDesiredMode1 = interface{}
+
+// SecureBootV120SecureBoot_SecureBootDesiredMode The desired UEFI Secure Boot Mode for the next boot.
+type SecureBootV120SecureBoot_SecureBootDesiredMode struct {
+	union json.RawMessage
+}
+
+// SecureBootV120SecureBootSecureBootMode1 defines model for .
+type SecureBootV120SecureBootSecureBootMode1 = interface{}
+
+// SecureBootV120SecureBoot_SecureBootMode The current UEFI Secure Boot Mode.
+type SecureBootV120SecureBoot_SecureBootMode struct {
+	union json.RawMessage
+}
+
+// SecureBootV120SecureBootCurrentBootType defines model for SecureBoot_v1_2_0_SecureBootCurrentBootType.
+type SecureBootV120SecureBootCurrentBootType string
+
+// SecureBootV120SecureBootModeType defines model for SecureBoot_v1_2_0_SecureBootModeType.
+type SecureBootV120SecureBootModeType string
+
 // ServiceRootV1210DeepOperations The information about deep operations that the service supports.
 type ServiceRootV1210DeepOperations struct {
 	// DeepPATCH An indication of whether the service supports the deep `PATCH` operation.
@@ -4365,6 +5012,21 @@ type PatchRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130
 // PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDBiosSettings for application/json ContentType.
 type PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130Bios
 
+// PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDSecureBoot for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV120SecureBoot
+
+// PutRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDSecureBoot for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV120SecureBoot
+
+// PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesJSONRequestBody defines body for PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates for application/json ContentType.
+type PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesJSONRequestBody = CertificateV1110Certificate
+
+// PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateIDJSONRequestBody = CertificateV1110Certificate
+
+// PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateIDJSONRequestBody = CertificateV1110Certificate
+
 // AsActionInfoV160ParameterTypes returns the union data inside the ActionInfoV160Parameters_DataType as a ActionInfoV160ParameterTypes
 func (t ActionInfoV160Parameters_DataType) AsActionInfoV160ParameterTypes() (ActionInfoV160ParameterTypes, error) {
 	var body ActionInfoV160ParameterTypes
@@ -4485,6 +5147,378 @@ func (t BiosV130Bios_Description) MarshalJSON() ([]byte, error) {
 }
 
 func (t *BiosV130Bios_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the CertificateCollectionCertificateCollection_Description as a ResourceDescription
+func (t CertificateCollectionCertificateCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the CertificateCollectionCertificateCollection_Description as the provided ResourceDescription
+func (t *CertificateCollectionCertificateCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the CertificateCollectionCertificateCollection_Description, using the provided ResourceDescription
+func (t *CertificateCollectionCertificateCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCertificateCollectionCertificateCollectionDescription1 returns the union data inside the CertificateCollectionCertificateCollection_Description as a CertificateCollectionCertificateCollectionDescription1
+func (t CertificateCollectionCertificateCollection_Description) AsCertificateCollectionCertificateCollectionDescription1() (CertificateCollectionCertificateCollectionDescription1, error) {
+	var body CertificateCollectionCertificateCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateCollectionCertificateCollectionDescription1 overwrites any union data inside the CertificateCollectionCertificateCollection_Description as the provided CertificateCollectionCertificateCollectionDescription1
+func (t *CertificateCollectionCertificateCollection_Description) FromCertificateCollectionCertificateCollectionDescription1(v CertificateCollectionCertificateCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateCollectionCertificateCollectionDescription1 performs a merge with any union data inside the CertificateCollectionCertificateCollection_Description, using the provided CertificateCollectionCertificateCollectionDescription1
+func (t *CertificateCollectionCertificateCollection_Description) MergeCertificateCollectionCertificateCollectionDescription1(v CertificateCollectionCertificateCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CertificateCollectionCertificateCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CertificateCollectionCertificateCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCertificateCertificateType returns the union data inside the CertificateV1110Certificate_CertificateType as a CertificateCertificateType
+func (t CertificateV1110Certificate_CertificateType) AsCertificateCertificateType() (CertificateCertificateType, error) {
+	var body CertificateCertificateType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateCertificateType overwrites any union data inside the CertificateV1110Certificate_CertificateType as the provided CertificateCertificateType
+func (t *CertificateV1110Certificate_CertificateType) FromCertificateCertificateType(v CertificateCertificateType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateCertificateType performs a merge with any union data inside the CertificateV1110Certificate_CertificateType, using the provided CertificateCertificateType
+func (t *CertificateV1110Certificate_CertificateType) MergeCertificateCertificateType(v CertificateCertificateType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCertificateV1110CertificateCertificateType1 returns the union data inside the CertificateV1110Certificate_CertificateType as a CertificateV1110CertificateCertificateType1
+func (t CertificateV1110Certificate_CertificateType) AsCertificateV1110CertificateCertificateType1() (CertificateV1110CertificateCertificateType1, error) {
+	var body CertificateV1110CertificateCertificateType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateV1110CertificateCertificateType1 overwrites any union data inside the CertificateV1110Certificate_CertificateType as the provided CertificateV1110CertificateCertificateType1
+func (t *CertificateV1110Certificate_CertificateType) FromCertificateV1110CertificateCertificateType1(v CertificateV1110CertificateCertificateType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateV1110CertificateCertificateType1 performs a merge with any union data inside the CertificateV1110Certificate_CertificateType, using the provided CertificateV1110CertificateCertificateType1
+func (t *CertificateV1110Certificate_CertificateType) MergeCertificateV1110CertificateCertificateType1(v CertificateV1110CertificateCertificateType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CertificateV1110Certificate_CertificateType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CertificateV1110Certificate_CertificateType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCertificateCertificateUsageType returns the union data inside the CertificateV1110Certificate_CertificateUsageTypes_Item as a CertificateCertificateUsageType
+func (t CertificateV1110Certificate_CertificateUsageTypes_Item) AsCertificateCertificateUsageType() (CertificateCertificateUsageType, error) {
+	var body CertificateCertificateUsageType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateCertificateUsageType overwrites any union data inside the CertificateV1110Certificate_CertificateUsageTypes_Item as the provided CertificateCertificateUsageType
+func (t *CertificateV1110Certificate_CertificateUsageTypes_Item) FromCertificateCertificateUsageType(v CertificateCertificateUsageType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateCertificateUsageType performs a merge with any union data inside the CertificateV1110Certificate_CertificateUsageTypes_Item, using the provided CertificateCertificateUsageType
+func (t *CertificateV1110Certificate_CertificateUsageTypes_Item) MergeCertificateCertificateUsageType(v CertificateCertificateUsageType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCertificateV1110CertificateCertificateUsageTypes1 returns the union data inside the CertificateV1110Certificate_CertificateUsageTypes_Item as a CertificateV1110CertificateCertificateUsageTypes1
+func (t CertificateV1110Certificate_CertificateUsageTypes_Item) AsCertificateV1110CertificateCertificateUsageTypes1() (CertificateV1110CertificateCertificateUsageTypes1, error) {
+	var body CertificateV1110CertificateCertificateUsageTypes1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateV1110CertificateCertificateUsageTypes1 overwrites any union data inside the CertificateV1110Certificate_CertificateUsageTypes_Item as the provided CertificateV1110CertificateCertificateUsageTypes1
+func (t *CertificateV1110Certificate_CertificateUsageTypes_Item) FromCertificateV1110CertificateCertificateUsageTypes1(v CertificateV1110CertificateCertificateUsageTypes1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateV1110CertificateCertificateUsageTypes1 performs a merge with any union data inside the CertificateV1110Certificate_CertificateUsageTypes_Item, using the provided CertificateV1110CertificateCertificateUsageTypes1
+func (t *CertificateV1110Certificate_CertificateUsageTypes_Item) MergeCertificateV1110CertificateCertificateUsageTypes1(v CertificateV1110CertificateCertificateUsageTypes1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CertificateV1110Certificate_CertificateUsageTypes_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CertificateV1110Certificate_CertificateUsageTypes_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the CertificateV1110Certificate_Description as a ResourceDescription
+func (t CertificateV1110Certificate_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the CertificateV1110Certificate_Description as the provided ResourceDescription
+func (t *CertificateV1110Certificate_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the CertificateV1110Certificate_Description, using the provided ResourceDescription
+func (t *CertificateV1110Certificate_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCertificateV1110CertificateDescription1 returns the union data inside the CertificateV1110Certificate_Description as a CertificateV1110CertificateDescription1
+func (t CertificateV1110Certificate_Description) AsCertificateV1110CertificateDescription1() (CertificateV1110CertificateDescription1, error) {
+	var body CertificateV1110CertificateDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateV1110CertificateDescription1 overwrites any union data inside the CertificateV1110Certificate_Description as the provided CertificateV1110CertificateDescription1
+func (t *CertificateV1110Certificate_Description) FromCertificateV1110CertificateDescription1(v CertificateV1110CertificateDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateV1110CertificateDescription1 performs a merge with any union data inside the CertificateV1110Certificate_Description, using the provided CertificateV1110CertificateDescription1
+func (t *CertificateV1110Certificate_Description) MergeCertificateV1110CertificateDescription1(v CertificateV1110CertificateDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CertificateV1110Certificate_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CertificateV1110Certificate_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsCertificateKeyUsage returns the union data inside the CertificateV1110Certificate_KeyUsage_Item as a CertificateKeyUsage
+func (t CertificateV1110Certificate_KeyUsage_Item) AsCertificateKeyUsage() (CertificateKeyUsage, error) {
+	var body CertificateKeyUsage
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateKeyUsage overwrites any union data inside the CertificateV1110Certificate_KeyUsage_Item as the provided CertificateKeyUsage
+func (t *CertificateV1110Certificate_KeyUsage_Item) FromCertificateKeyUsage(v CertificateKeyUsage) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateKeyUsage performs a merge with any union data inside the CertificateV1110Certificate_KeyUsage_Item, using the provided CertificateKeyUsage
+func (t *CertificateV1110Certificate_KeyUsage_Item) MergeCertificateKeyUsage(v CertificateKeyUsage) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCertificateV1110CertificateKeyUsage1 returns the union data inside the CertificateV1110Certificate_KeyUsage_Item as a CertificateV1110CertificateKeyUsage1
+func (t CertificateV1110Certificate_KeyUsage_Item) AsCertificateV1110CertificateKeyUsage1() (CertificateV1110CertificateKeyUsage1, error) {
+	var body CertificateV1110CertificateKeyUsage1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateV1110CertificateKeyUsage1 overwrites any union data inside the CertificateV1110Certificate_KeyUsage_Item as the provided CertificateV1110CertificateKeyUsage1
+func (t *CertificateV1110Certificate_KeyUsage_Item) FromCertificateV1110CertificateKeyUsage1(v CertificateV1110CertificateKeyUsage1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateV1110CertificateKeyUsage1 performs a merge with any union data inside the CertificateV1110Certificate_KeyUsage_Item, using the provided CertificateV1110CertificateKeyUsage1
+func (t *CertificateV1110Certificate_KeyUsage_Item) MergeCertificateV1110CertificateKeyUsage1(v CertificateV1110CertificateKeyUsage1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CertificateV1110Certificate_KeyUsage_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CertificateV1110Certificate_KeyUsage_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOdataV4IdRef returns the union data inside the CertificateV1110Links_Issuer as a OdataV4IdRef
+func (t CertificateV1110Links_Issuer) AsOdataV4IdRef() (OdataV4IdRef, error) {
+	var body OdataV4IdRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOdataV4IdRef overwrites any union data inside the CertificateV1110Links_Issuer as the provided OdataV4IdRef
+func (t *CertificateV1110Links_Issuer) FromOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOdataV4IdRef performs a merge with any union data inside the CertificateV1110Links_Issuer, using the provided OdataV4IdRef
+func (t *CertificateV1110Links_Issuer) MergeOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsCertificateV1110LinksIssuer1 returns the union data inside the CertificateV1110Links_Issuer as a CertificateV1110LinksIssuer1
+func (t CertificateV1110Links_Issuer) AsCertificateV1110LinksIssuer1() (CertificateV1110LinksIssuer1, error) {
+	var body CertificateV1110LinksIssuer1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromCertificateV1110LinksIssuer1 overwrites any union data inside the CertificateV1110Links_Issuer as the provided CertificateV1110LinksIssuer1
+func (t *CertificateV1110Links_Issuer) FromCertificateV1110LinksIssuer1(v CertificateV1110LinksIssuer1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeCertificateV1110LinksIssuer1 performs a merge with any union data inside the CertificateV1110Links_Issuer, using the provided CertificateV1110LinksIssuer1
+func (t *CertificateV1110Links_Issuer) MergeCertificateV1110LinksIssuer1(v CertificateV1110LinksIssuer1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t CertificateV1110Links_Issuer) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *CertificateV1110Links_Issuer) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -7589,6 +8623,378 @@ func (t *ResourceV1240Placement_RackOffsetUnits) UnmarshalJSON(b []byte) error {
 	return err
 }
 
+// AsResourceDescription returns the union data inside the SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description as a ResourceDescription
+func (t SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description as the provided ResourceDescription
+func (t *SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description, using the provided ResourceDescription
+func (t *SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1 returns the union data inside the SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description as a SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1
+func (t SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) AsSecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1() (SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1, error) {
+	var body SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1 overwrites any union data inside the SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description as the provided SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1
+func (t *SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) FromSecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1(v SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1 performs a merge with any union data inside the SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description, using the provided SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1
+func (t *SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) MergeSecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1(v SecureBootDatabaseCollectionSecureBootDatabaseCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SecureBootDatabaseCollectionSecureBootDatabaseCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the SecureBootDatabaseV103SecureBootDatabase_Description as a ResourceDescription
+func (t SecureBootDatabaseV103SecureBootDatabase_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the SecureBootDatabaseV103SecureBootDatabase_Description as the provided ResourceDescription
+func (t *SecureBootDatabaseV103SecureBootDatabase_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the SecureBootDatabaseV103SecureBootDatabase_Description, using the provided ResourceDescription
+func (t *SecureBootDatabaseV103SecureBootDatabase_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSecureBootDatabaseV103SecureBootDatabaseDescription1 returns the union data inside the SecureBootDatabaseV103SecureBootDatabase_Description as a SecureBootDatabaseV103SecureBootDatabaseDescription1
+func (t SecureBootDatabaseV103SecureBootDatabase_Description) AsSecureBootDatabaseV103SecureBootDatabaseDescription1() (SecureBootDatabaseV103SecureBootDatabaseDescription1, error) {
+	var body SecureBootDatabaseV103SecureBootDatabaseDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootDatabaseV103SecureBootDatabaseDescription1 overwrites any union data inside the SecureBootDatabaseV103SecureBootDatabase_Description as the provided SecureBootDatabaseV103SecureBootDatabaseDescription1
+func (t *SecureBootDatabaseV103SecureBootDatabase_Description) FromSecureBootDatabaseV103SecureBootDatabaseDescription1(v SecureBootDatabaseV103SecureBootDatabaseDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootDatabaseV103SecureBootDatabaseDescription1 performs a merge with any union data inside the SecureBootDatabaseV103SecureBootDatabase_Description, using the provided SecureBootDatabaseV103SecureBootDatabaseDescription1
+func (t *SecureBootDatabaseV103SecureBootDatabase_Description) MergeSecureBootDatabaseV103SecureBootDatabaseDescription1(v SecureBootDatabaseV103SecureBootDatabaseDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SecureBootDatabaseV103SecureBootDatabase_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SecureBootDatabaseV103SecureBootDatabase_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the SecureBootV120SecureBoot_Description as a ResourceDescription
+func (t SecureBootV120SecureBoot_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the SecureBootV120SecureBoot_Description as the provided ResourceDescription
+func (t *SecureBootV120SecureBoot_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the SecureBootV120SecureBoot_Description, using the provided ResourceDescription
+func (t *SecureBootV120SecureBoot_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSecureBootV120SecureBootDescription1 returns the union data inside the SecureBootV120SecureBoot_Description as a SecureBootV120SecureBootDescription1
+func (t SecureBootV120SecureBoot_Description) AsSecureBootV120SecureBootDescription1() (SecureBootV120SecureBootDescription1, error) {
+	var body SecureBootV120SecureBootDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootDescription1 overwrites any union data inside the SecureBootV120SecureBoot_Description as the provided SecureBootV120SecureBootDescription1
+func (t *SecureBootV120SecureBoot_Description) FromSecureBootV120SecureBootDescription1(v SecureBootV120SecureBootDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootDescription1 performs a merge with any union data inside the SecureBootV120SecureBoot_Description, using the provided SecureBootV120SecureBootDescription1
+func (t *SecureBootV120SecureBoot_Description) MergeSecureBootV120SecureBootDescription1(v SecureBootV120SecureBootDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SecureBootV120SecureBoot_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SecureBootV120SecureBoot_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSecureBootV120SecureBootCurrentBootType returns the union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as a SecureBootV120SecureBootCurrentBootType
+func (t SecureBootV120SecureBoot_SecureBootCurrentBoot) AsSecureBootV120SecureBootCurrentBootType() (SecureBootV120SecureBootCurrentBootType, error) {
+	var body SecureBootV120SecureBootCurrentBootType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootCurrentBootType overwrites any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as the provided SecureBootV120SecureBootCurrentBootType
+func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) FromSecureBootV120SecureBootCurrentBootType(v SecureBootV120SecureBootCurrentBootType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootCurrentBootType performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot, using the provided SecureBootV120SecureBootCurrentBootType
+func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) MergeSecureBootV120SecureBootCurrentBootType(v SecureBootV120SecureBootCurrentBootType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSecureBootV120SecureBootSecureBootCurrentBoot1 returns the union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as a SecureBootV120SecureBootSecureBootCurrentBoot1
+func (t SecureBootV120SecureBoot_SecureBootCurrentBoot) AsSecureBootV120SecureBootSecureBootCurrentBoot1() (SecureBootV120SecureBootSecureBootCurrentBoot1, error) {
+	var body SecureBootV120SecureBootSecureBootCurrentBoot1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootSecureBootCurrentBoot1 overwrites any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as the provided SecureBootV120SecureBootSecureBootCurrentBoot1
+func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) FromSecureBootV120SecureBootSecureBootCurrentBoot1(v SecureBootV120SecureBootSecureBootCurrentBoot1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootSecureBootCurrentBoot1 performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot, using the provided SecureBootV120SecureBootSecureBootCurrentBoot1
+func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) MergeSecureBootV120SecureBootSecureBootCurrentBoot1(v SecureBootV120SecureBootSecureBootCurrentBoot1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SecureBootV120SecureBoot_SecureBootCurrentBoot) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSecureBootV120SecureBootModeType returns the union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as a SecureBootV120SecureBootModeType
+func (t SecureBootV120SecureBoot_SecureBootDesiredMode) AsSecureBootV120SecureBootModeType() (SecureBootV120SecureBootModeType, error) {
+	var body SecureBootV120SecureBootModeType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootModeType overwrites any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as the provided SecureBootV120SecureBootModeType
+func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) FromSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootModeType performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode, using the provided SecureBootV120SecureBootModeType
+func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) MergeSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSecureBootV120SecureBootSecureBootDesiredMode1 returns the union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as a SecureBootV120SecureBootSecureBootDesiredMode1
+func (t SecureBootV120SecureBoot_SecureBootDesiredMode) AsSecureBootV120SecureBootSecureBootDesiredMode1() (SecureBootV120SecureBootSecureBootDesiredMode1, error) {
+	var body SecureBootV120SecureBootSecureBootDesiredMode1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootSecureBootDesiredMode1 overwrites any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as the provided SecureBootV120SecureBootSecureBootDesiredMode1
+func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) FromSecureBootV120SecureBootSecureBootDesiredMode1(v SecureBootV120SecureBootSecureBootDesiredMode1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootSecureBootDesiredMode1 performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode, using the provided SecureBootV120SecureBootSecureBootDesiredMode1
+func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) MergeSecureBootV120SecureBootSecureBootDesiredMode1(v SecureBootV120SecureBootSecureBootDesiredMode1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SecureBootV120SecureBoot_SecureBootDesiredMode) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSecureBootV120SecureBootModeType returns the union data inside the SecureBootV120SecureBoot_SecureBootMode as a SecureBootV120SecureBootModeType
+func (t SecureBootV120SecureBoot_SecureBootMode) AsSecureBootV120SecureBootModeType() (SecureBootV120SecureBootModeType, error) {
+	var body SecureBootV120SecureBootModeType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootModeType overwrites any union data inside the SecureBootV120SecureBoot_SecureBootMode as the provided SecureBootV120SecureBootModeType
+func (t *SecureBootV120SecureBoot_SecureBootMode) FromSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootModeType performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootMode, using the provided SecureBootV120SecureBootModeType
+func (t *SecureBootV120SecureBoot_SecureBootMode) MergeSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSecureBootV120SecureBootSecureBootMode1 returns the union data inside the SecureBootV120SecureBoot_SecureBootMode as a SecureBootV120SecureBootSecureBootMode1
+func (t SecureBootV120SecureBoot_SecureBootMode) AsSecureBootV120SecureBootSecureBootMode1() (SecureBootV120SecureBootSecureBootMode1, error) {
+	var body SecureBootV120SecureBootSecureBootMode1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSecureBootV120SecureBootSecureBootMode1 overwrites any union data inside the SecureBootV120SecureBoot_SecureBootMode as the provided SecureBootV120SecureBootSecureBootMode1
+func (t *SecureBootV120SecureBoot_SecureBootMode) FromSecureBootV120SecureBootSecureBootMode1(v SecureBootV120SecureBootSecureBootMode1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSecureBootV120SecureBootSecureBootMode1 performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootMode, using the provided SecureBootV120SecureBootSecureBootMode1
+func (t *SecureBootV120SecureBoot_SecureBootMode) MergeSecureBootV120SecureBootSecureBootMode1(v SecureBootV120SecureBootSecureBootMode1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SecureBootV120SecureBoot_SecureBootMode) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SecureBootV120SecureBoot_SecureBootMode) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsResourceDescription returns the union data inside the ServiceRootV1210ServiceRoot_Description as a ResourceDescription
 func (t ServiceRootV1210ServiceRoot_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
@@ -8283,6 +9689,39 @@ type ServerInterface interface {
 
 	// (PUT /redfish/v1/Systems/{ComputerSystemId}/Bios/Settings)
 	PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot)
+	GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/SecureBoot)
+	PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/SecureBoot)
+	PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases)
+	GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId})
+	GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates)
+	GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string)
+
+	// (POST /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates)
+	PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string)
+
+	// (DELETE /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId})
+	DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId})
+	GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId})
+	PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId})
+	PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -8915,6 +10354,391 @@ func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDBiosSettin
 	handler.ServeHTTP(w, r)
 }
 
+// GetRedfishV1SystemsComputerSystemIDSecureBoot operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBoot(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDSecureBoot operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDSecureBoot(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDSecureBoot operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDSecureBoot(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID(w, r, computerSystemID, databaseID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w, r, computerSystemID, databaseID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates operation middleware
+func (siw *ServerInterfaceWrapper) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w, r, computerSystemID, databaseID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "CertificateId" -------------
+	var certificateID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "CertificateId", r.PathValue("CertificateId"), &certificateID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "CertificateId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w, r, computerSystemID, databaseID, certificateID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "CertificateId" -------------
+	var certificateID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "CertificateId", r.PathValue("CertificateId"), &certificateID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "CertificateId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w, r, computerSystemID, databaseID, certificateID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "CertificateId" -------------
+	var certificateID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "CertificateId", r.PathValue("CertificateId"), &certificateID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "CertificateId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w, r, computerSystemID, databaseID, certificateID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "CertificateId" -------------
+	var certificateID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "CertificateId", r.PathValue("CertificateId"), &certificateID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "CertificateId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w, r, computerSystemID, databaseID, certificateID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -9059,6 +10883,17 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.GetRedfishV1SystemsComputerSystemIDBiosSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PatchRedfishV1SystemsComputerSystemIDBiosSettings)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PutRedfishV1SystemsComputerSystemIDBiosSettings)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBoot)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot", wrapper.PatchRedfishV1SystemsComputerSystemIDSecureBoot)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot", wrapper.PutRedfishV1SystemsComputerSystemIDSecureBoot)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates", wrapper.PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
 
 	return m
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 
 	incusclient "github.com/lxc/incus/v6/client"
 	incusapi "github.com/lxc/incus/v6/shared/api"
@@ -38,7 +39,10 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 	response(w, ServiceRootV1210ServiceRoot{
 		OdataID:   ref("/redfish/v1/"),
 		OdataType: ref("#ServiceRoot.v1_21_0.ServiceRoot"),
-		ID:        "RootService",
+		// EventService: &OdataV4IdRef{
+		// 	OdataID: ref("/redfish/v1/EventService"),
+		// },
+		ID: "RootService",
 		// Links: ServiceRootV1210Links{
 		// 	Sessions: OdataV4IdRef{
 		// 		OdataID: ref("/redfish/v1/SessionService/Sessions"),
@@ -55,6 +59,9 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 		Systems: &OdataV4IdRef{
 			OdataID: ref("/redfish/v1/Systems"),
 		},
+		// Tasks: &OdataV4IdRef{
+		// 	OdataID: ref("/redfish/v1/TaskService"),
+		// },
 	})
 }
 
@@ -129,7 +136,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 	_, inserted := instance.Devices["boot-media"]
 
 	connectedViaURI := VirtualMediaV165VirtualMedia_ConnectedVia{}
-	_ = connectedViaURI.FromVirtualMediaV165ConnectedVia(VirtualMediaV165ConnectedViaURI)
+	_ = connectedViaURI.FromVirtualMediaV165ConnectedVia(URI)
 
 	response(w, VirtualMediaV165VirtualMedia{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)),
@@ -314,12 +321,26 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		Bios: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
 		},
+
 		ID:           s.instanceName,
 		Manufacturer: ref("linuxcontainers.org"),
-		Model:        ref("Incus"),
-		Name:         s.instanceName,
-		PowerState:   &powerState,
+		// TODO: add memory summary
+		// MemorySummary: &ComputerSystemV1280MemorySummary{},
+		Model:      ref("Incus"),
+		Name:       s.instanceName,
+		PowerState: &powerState,
+		// TODO: add processor summary
+		ProcessorSummary: &ComputerSystemV1280ProcessorSummary{},
+		SecureBoot: &OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
+		},
 		SerialNumber: ref(s.instanceName),
+		// TODO: add trusted modules info if vtpm is present
+		// TrustedModules: &[]ComputerSystemV1280TrustedModules{},
+		// TODO: add virtual media for system
+		// VirtualMedia: &OdataV4IdRef{
+		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
+		// },
 	})
 }
 
@@ -489,5 +510,190 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBiosSettings(w http.
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	secureBootCurrentBootType := SecureBootV120SecureBoot_SecureBootCurrentBoot{}
+	_ = secureBootCurrentBootType.FromSecureBootV120SecureBootCurrentBootType(Disabled)
+
+	secureBootMode := SecureBootV120SecureBoot_SecureBootMode{}
+	_ = secureBootMode.FromSecureBootV120SecureBootModeType(UserMode)
+
+	response(w, SecureBootV120SecureBoot{
+		OdataID:               ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
+		OdataType:             ref("#SecureBoot.v1_2_0.SecureBoot"),
+		ID:                    "SecureBoot",
+		Name:                  "UEFI Secure Boot",
+		SecureBootCurrentBoot: &secureBootCurrentBootType,
+		SecureBootDatabases: &OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases", s.instanceName)),
+		},
+		SecureBootEnable: ref(false),
+		SecureBootMode:   &secureBootMode,
+	})
+}
+
+func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	responseNotImplemented(w)
+}
+
+var secureBootDatabases = []string{
+	"DB",
+	"DBX",
+	"KEK",
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	members := []OdataV4IdRef{}
+	for _, cert := range secureBootDatabases {
+		members = append(members, OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s", s.instanceName, cert)),
+		})
+	}
+
+	response(w, SecureBootDatabaseCollectionSecureBootDatabaseCollection{
+		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases", s.instanceName)),
+		OdataType:         ref("#SecureBootDatabaseCollection.SecureBootDatabaseCollection"),
+		Members:           &members,
+		MembersOdataCount: ref(OdataV4Count(len(secureBootDatabases))),
+		Name:              "UEFI SecureBoot Database Collection",
+	})
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	if !slices.Contains(secureBootDatabases, databaseID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	response(w, SecureBootDatabaseV103SecureBootDatabase{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s", s.instanceName, databaseID)),
+		OdataType: ref("#SecureBootDatabase.v1_0_3.SecureBootDatabase"),
+		Certificates: &OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates", s.instanceName, databaseID)),
+		},
+		ID:   databaseID,
+		Name: fmt.Sprintf("%s - database", databaseID),
+	})
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	if !slices.Contains(secureBootDatabases, databaseID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	response(w, CertificateCollectionCertificateCollection{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates", s.instanceName, databaseID)),
+		OdataType: ref("#CertificateCollection.CertificateCollection"),
+		Members: &[]OdataV4IdRef{
+			// TODO: this is only a dummy entry
+			{
+				OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/1", s.instanceName, databaseID)),
+			},
+		},
+		MembersOdataCount: ref(OdataV4Count(0)),
+		Name:              "Certificate Collection",
+	})
+}
+
+func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	if !slices.Contains(secureBootDatabases, databaseID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	// TODO: process provided request payload containing the certificate
+
+	responseNoContent(w)
+}
+
+func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	if !slices.Contains(secureBootDatabases, databaseID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	// TODO: this is only a dummy entry
+
+	if certificateID != "1" {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	responseNoContent(w)
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	if !slices.Contains(secureBootDatabases, databaseID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	// TODO: this is only a dummy entry
+
+	if certificateID != "1" {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	certificateType := CertificateV1110Certificate_CertificateType{}
+	_ = certificateType.FromCertificateCertificateType(PEM)
+
+	response(w, CertificateV1110Certificate{
+		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/%s", s.instanceName, databaseID, certificateID)),
+		OdataType:         ref("#Certificate.v1_11_0.Certificate"),
+		CertificateString: ref(""),
+		CertificateType:   ref(certificateType),
+		ID:                certificateID,
+		Name:              certificateID,
+	})
+}
+
+func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
 	responseNotImplemented(w)
 }
