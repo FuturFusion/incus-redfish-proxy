@@ -13,20 +13,24 @@ Options:
   --user USER       basic-auth username
   --password PASS   basic-auth password
   --insecure        skip TLS certificate verification
-  --exact FILE      file of exact endpoint paths to scrape (one per line)
-  --prefix FILE     file of prefix paths to scrape recursively (one per line)
+  --input FILE      paths/patterns to scrape, one per line (repeatable)
   --clear           remove OUTPUT_DIR before scraping (default: resume)
   --debug           verbose progress to stderr
   -h, --help        show this help and exit
 
-At least one of --exact or --prefix is required.
-Lines starting with '#' and blank lines in endpoint files are ignored.
+--input is required and may be given more than once.
+Lines starting with '#' and blank lines in input files are ignored.
+
+Pattern syntax:
+  /exact/path         fetch this resource once, no link following
+  /path/*/resource    fetch for each * discovered under /path
+  /path/**            recursively scrape everything under /path
 EOF
 }
 
 log()   { printf '%s\n' "$*" >&2; }
 err()   { printf '[ERROR] %s\n' "$*" >&2; }
-stop()   { err "$*"; exit 1; }
+stop()  { err "$*"; exit 1; }
 debug() { [ "${opt_debug}" -eq 1 ] && printf '[DEBUG] %s\n' "$*" >&2 || true; }
 
 check_deps() {
@@ -107,12 +111,12 @@ same_endpoint() {
     printf '%s' "$path"
 }
 
-# Return 0 if path matches (equals or starts with /) one of the prefix endpoints.
+# Return 0 if path matches (equals or starts with /) one of the recursive prefixes.
 matches_prefix() {
     local path="$1"
     local prefix
-    [ "${#prefix_endpoints[@]}" -gt 0 ] || return 1
-    for prefix in "${prefix_endpoints[@]}"; do
+    [ "${#recursive_prefixes[@]}" -gt 0 ] || return 1
+    for prefix in "${recursive_prefixes[@]}"; do
         [ "$path" = "$prefix" ] && return 0
         case "$path" in
             "${prefix}/"*) return 0 ;;
@@ -153,14 +157,62 @@ extract_header_links() {
         || true
 }
 
+# Expand wildcard patterns registered for cur_path using links from index_file.
+# For each direct child discovered:
+#   - More wildcards remain: register a new wildcard parent and enqueue its stem.
+#   - Literal suffix remains: enqueue the derived exact target.
+#   - Pattern ends at the wildcard: enqueue the child itself.
+expand_wildcards() {
+    local cur_path="$1" index_file="$2"
+    [ "${wildcard_parents[$cur_path]+x}" ] || return 0
+
+    local -a links
+    mapfile -t links < <(extract_body_links "$index_file")
+
+    local pattern stem after_pos rest link child_part
+    local next_lit next_pos new_stem new_rest new_pat derived
+
+    while IFS= read -r pattern; do
+        [ -z "$pattern" ] && continue
+        stem="${pattern%%/\**}"
+        after_pos=$(( ${#stem} + 2 ))   # skip past "/*" in the pattern
+        rest="${pattern:$after_pos}"
+
+        for link in "${links[@]}"; do
+            case "$link" in "${cur_path}/"*) ;; *) continue ;; esac
+            child_part="${link#${cur_path}/}"
+            case "$child_part" in */*) continue ;; esac  # not a direct child
+
+            case "$rest" in
+                *"/*"*)
+                    # More wildcards: advance to the next wildcard level.
+                    next_lit="${rest%%/\**}"
+                    next_pos=$(( ${#next_lit} + 2 ))
+                    new_rest="${rest:$next_pos}"
+                    new_stem="${link}${next_lit}"
+                    new_pat="${new_stem}/*${new_rest}"
+                    wildcard_parents["$new_stem"]+="${new_pat}"$'\n'
+                    enqueue 0 "$new_stem"
+                    ;;
+                ?*)
+                    derived="${link}${rest}"
+                    enqueue 0 "$derived"
+                    ;;
+                *)
+                    enqueue 0 "$link"
+                    ;;
+            esac
+        done
+    done <<< "${wildcard_parents[$cur_path]}"
+}
+
 # ── defaults ────────────────────────────────────────────────────────────────
 
 opt_endpoint="http://localhost:8080"
 opt_user=""
 opt_password=""
 opt_insecure=0
-opt_exact_file=""
-opt_prefix_file=""
+declare -a opt_input_files=()
 opt_clear=0
 opt_debug=0
 opt_output=""
@@ -173,8 +225,7 @@ while [ $# -gt 0 ]; do
         --user)      shift; opt_user="$1" ;;
         --password)  shift; opt_password="$1" ;;
         --insecure)  opt_insecure=1 ;;
-        --exact)     shift; opt_exact_file="$1" ;;
-        --prefix)    shift; opt_prefix_file="$1" ;;
+        --input)     shift; opt_input_files+=("$1") ;;
         --clear)     opt_clear=1 ;;
         --debug)     opt_debug=1 ;;
         -h|--help)   usage; exit 0 ;;
@@ -192,12 +243,10 @@ opt_output="$1"
 
 check_deps
 
-[ -n "${opt_exact_file}" ] || [ -n "${opt_prefix_file}" ] \
-    || stop "at least one of --exact or --prefix is required"
-[ -z "${opt_exact_file}"  ] || [ -f "${opt_exact_file}"  ] \
-    || stop "exact endpoints file not found: ${opt_exact_file}"
-[ -z "${opt_prefix_file}" ] || [ -f "${opt_prefix_file}" ] \
-    || stop "prefix endpoints file not found: ${opt_prefix_file}"
+[ "${#opt_input_files[@]}" -gt 0 ] || stop "--input is required"
+for _f in "${opt_input_files[@]}"; do
+    [ -f "$_f" ] || stop "input file not found: ${_f}"
+done
 
 base_host=$(printf '%s' "${opt_endpoint}" \
     | sed 's|^https\?://\([^/?#]*\).*|\1|')
@@ -205,23 +254,27 @@ base_host=$(printf '%s' "${opt_endpoint}" \
 # ── load endpoint lists ─────────────────────────────────────────────────────
 
 declare -a exact_endpoints=()
-declare -a prefix_endpoints=()
+declare -a recursive_prefixes=()
+declare -A wildcard_parents=()
 
-if [ -n "${opt_exact_file}" ]; then
+for _input_file in "${opt_input_files[@]}"; do
     while IFS= read -r line || [ -n "$line" ]; do
         line="${line%$'\r'}"
         case "$line" in ''|'#'*) continue ;; esac
-        exact_endpoints+=("$line")
-    done < "${opt_exact_file}"
-fi
-
-if [ -n "${opt_prefix_file}" ]; then
-    while IFS= read -r line || [ -n "$line" ]; do
-        line="${line%$'\r'}"
-        case "$line" in ''|'#'*) continue ;; esac
-        prefix_endpoints+=("$line")
-    done < "${opt_prefix_file}"
-fi
+        case "$line" in
+            *"/**")
+                recursive_prefixes+=("${line%/**}")
+                ;;
+            *"/*"*)
+                stem="${line%%/\**}"
+                wildcard_parents["$stem"]+="${line}"$'\n'
+                ;;
+            *)
+                exact_endpoints+=("$line")
+                ;;
+        esac
+    done < "$_input_file"
+done
 
 # ── clear output if requested ───────────────────────────────────────────────
 
@@ -251,16 +304,9 @@ enqueue() {
     queue_follow+=("$1")
 }
 
-if [ "${#exact_endpoints[@]}" -gt 0 ]; then
-    for ep in "${exact_endpoints[@]}"; do
-        enqueue 0 "$ep"
-    done
-fi
-if [ "${#prefix_endpoints[@]}" -gt 0 ]; then
-    for ep in "${prefix_endpoints[@]}"; do
-        enqueue 1 "$ep"
-    done
-fi
+for ep in "${exact_endpoints[@]}";    do enqueue 0 "$ep"; done
+for pf in "${recursive_prefixes[@]}"; do enqueue 1 "$pf"; done
+for st in "${!wildcard_parents[@]}";  do enqueue 0 "$st"; done
 
 while [ "${queue_head}" -lt "${#queue_paths[@]}" ]; do
     path="${queue_paths[$queue_head]}"
@@ -275,6 +321,10 @@ while [ "${queue_head}" -lt "${#queue_paths[@]}" ]; do
     fi
     visited["$path"]=1
 
+    # A path under a recursive prefix always gets link-following regardless of
+    # how it was first enqueued (e.g. via wildcard expansion with follow=0).
+    matches_prefix "$path" && follow=1
+
     dir=$(resource_dir "$path") || {
         err "Unsafe path, skipping: ${path}"
         failures=$(( failures + 1 ))
@@ -282,6 +332,12 @@ while [ "${queue_head}" -lt "${#queue_paths[@]}" ]; do
     }
 
     index_file="${dir}/index.json"
+    not_found_file="${dir}/index.404.json"
+
+    if [ -f "${not_found_file}" ]; then
+        debug "Skipping previously 404'd: ${path}"
+        continue
+    fi
 
     if [ -f "${index_file}" ]; then
         debug "Using cached: ${path}"
@@ -294,6 +350,13 @@ while [ "${queue_head}" -lt "${#queue_paths[@]}" ]; do
                 enqueue 1 "$link_path"
             done < <(extract_body_links "${index_file}")
         fi
+        while IFS= read -r raw_uri; do
+            [ -z "$raw_uri" ] && continue
+            uri=$(normalize_path "$raw_uri")
+            uri_path=$(same_endpoint "$uri") || continue
+            enqueue 0 "$uri_path"
+        done < <(extract_location_uris "${index_file}")
+        expand_wildcards "$path" "${index_file}"
         continue
     fi
 
@@ -308,6 +371,12 @@ while [ "${queue_head}" -lt "${#queue_paths[@]}" ]; do
 
     case "${http_code}" in
         2??) ;;
+        404)
+            mkdir -p "${dir}"
+            printf '{}\n' > "${not_found_file}"
+            debug "Resource not found (404), saved marker: ${path}"
+            continue
+            ;;
         *)
             err "HTTP ${http_code}: ${path}"
             failures=$(( failures + 1 ))
@@ -339,6 +408,13 @@ while [ "${queue_head}" -lt "${#queue_paths[@]}" ]; do
             enqueue 1 "$link_path"
         done < <(extract_body_links "${index_file}")
     fi
+    while IFS= read -r raw_uri; do
+        [ -z "$raw_uri" ] && continue
+        uri=$(normalize_path "$raw_uri")
+        uri_path=$(same_endpoint "$uri") || continue
+        enqueue 0 "$uri_path"
+    done < <(extract_location_uris "${index_file}")
+    expand_wildcards "$path" "${index_file}"
 done
 
 # ── summary ─────────────────────────────────────────────────────────────────
