@@ -149,12 +149,16 @@ extract_body_links() {
         "$1" 2>/dev/null || true
 }
 
-# Print all URIs from Link response headers in a curl header dump file.
-extract_header_links() {
-    grep -i '^Link:' "$1" 2>/dev/null \
-        | grep -oE '<[^>]+>' \
-        | sed 's/^<//; s/>$//' \
-        || true
+# Print Uri values from the Location array of a Redfish registry file.
+extract_location_uris() {
+    jq -r '.Location[]? | .Uri | select(type == "string")' \
+        "$1" 2>/dev/null || true
+}
+
+# Print @odata.id values from the Members array of a Redfish collection JSON file.
+extract_member_links() {
+    jq -r '.Members[]? | .["@odata.id"] | select(type == "string")' \
+        "$1" 2>/dev/null || true
 }
 
 # Expand wildcard patterns registered for cur_path using links from index_file.
@@ -167,7 +171,7 @@ expand_wildcards() {
     [ "${wildcard_parents[$cur_path]+x}" ] || return 0
 
     local -a links
-    mapfile -t links < <(extract_body_links "$index_file")
+    mapfile -t links < <(extract_member_links "$index_file")
 
     local pattern stem after_pos rest link child_part
     local next_lit next_pos new_stem new_rest new_pat derived
