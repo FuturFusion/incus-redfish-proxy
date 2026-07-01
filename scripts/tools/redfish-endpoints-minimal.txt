@@ -1,0 +1,33 @@
+/redfish/v1/
+/redfish/v1/Managers
+/redfish/v1/Managers/*
+/redfish/v1/Managers/*/LogServices
+/redfish/v1/Managers/*/LogServices/*
+/redfish/v1/Managers/*/LogServices/*/Entries
+/redfish/v1/Managers/*/VirtualMedia
+/redfish/v1/Managers/*/VirtualMedia/*
+/redfish/v1/SessionService/**
+/redfish/v1/Systems
+/redfish/v1/Systems/*
+/redfish/v1/Systems/*/Bios
+/redfish/v1/Systems/*/Bios/Settings
+/redfish/v1/Systems/*/BootOptions
+/redfish/v1/Systems/*/BootOptions/*
+/redfish/v1/Systems/*/LogServices
+/redfish/v1/Systems/*/LogServices/*/Entries
+/redfish/v1/Systems/*/Memory
+/redfish/v1/Systems/*/Processors
+/redfish/v1/Systems/*/SecureBoot
+/redfish/v1/Systems/*/SecureBoot/SecureBootDatabases
+/redfish/v1/Systems/*/SecureBoot/SecureBootDatabases/*
+/redfish/v1/Systems/*/SecureBoot/SecureBootDatabases/*/Certificates
+/redfish/v1/Systems/*/SecureBoot/SecureBootDatabases/*/Certificates/*
+/redfish/v1/Systems/*/VirtualMedia
+/redfish/v1/Systems/*/VirtualMedia/*
+
+# non standard
+/redfish/v1/odata
+
+# Dell - non standard
+/redfish/v1/Systems/*/SecureBoot/Certificates
+/redfish/v1/Systems/*/SecureBoot/Certificates/*
