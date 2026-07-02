@@ -1,0 +1,19 @@
+---
+
+all: False
+template: matryer
+require-template-schema-exists: false
+force-file-write: true
+formatter: goimports
+formatter-options:
+  goimports:
+    local-prefix: github.com/FuturFusion/incus-redfish-proxy
+    tab-indent: true
+include-auto-generated: true
+include-interface-regex: "(IncusClient|IncusOperation)"
+dir: internal/api/mock
+filename: "{{ .InterfaceName | snakecase }}_mock_gen.go"
+structname: "{{ .InterfaceName }}Mock"
+pkgname: mock
+packages:
+  github.com/FuturFusion/incus-redfish-proxy/internal/api:

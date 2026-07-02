@@ -1,0 +1,16 @@
+---
+
+name: Commits
+on:
+  - pull_request
+
+jobs:
+  dco-check:
+    permissions:
+      # for tim-actions/get-pr-commits to get list of commits from the PR
+      contents: read
+      pull-requests: read
+    name: Signed-off-by (DCO)
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: KineticCafe/actions-dco@v3.1.0
