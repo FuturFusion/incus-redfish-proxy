@@ -10,8 +10,10 @@
 bin/
 /incus-redfish-proxy
 /redfish-openapi-filter
+/redfish-scraper
 /cmd/incus-redfish-proxy/incus-redfish-proxy
 /cmd/redfish-openapi-filter/redfish-openapi-filter
+/cmd/redfish-scraper/redfish-scraper
 __debug_*
 
 # Test binary, built with `go test -c`
