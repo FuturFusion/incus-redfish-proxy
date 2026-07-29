@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
 
 	incusclient "github.com/lxc/incus/v6/client"
@@ -322,6 +323,9 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		Bios: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
 		},
+		Processors: &OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors", s.instanceName)),
+		},
 
 		ID:           s.instanceName,
 		Manufacturer: ref("linuxcontainers.org"),
@@ -541,6 +545,107 @@ func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.Re
 	responseNotImplemented(w)
 }
 
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessors(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	cfgLimitCPU, ok := instance.Config["limits.cpu"]
+	if !ok {
+		cfgLimitCPU = "1"
+	}
+
+	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
+	if err != nil {
+		cpuNo = 1
+	}
+
+	cpuMembers := make([]OdataV4IdRef, 0, cpuNo)
+	for i := range cpuNo {
+		cpuMembers = append(cpuMembers, OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors/%d", s.instanceName, i)),
+		})
+	}
+
+	response(w, ProcessorCollectionProcessorCollection{
+		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors", s.instanceName)),
+		OdataType:         ref("#ProcessorCollection.ProcessorCollection"),
+		Members:           &cpuMembers,
+		MembersOdataCount: ref(cpuNo),
+		Name:              "Processors",
+	})
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorIDStr string) {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	processorID, err := strconv.ParseInt(processorIDStr, 10, 64)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	cfgLimitCPU, ok := instance.Config["limits.cpu"]
+	if !ok {
+		cfgLimitCPU = "1"
+	}
+
+	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
+	if err != nil {
+		cpuNo = 1
+	}
+
+	if processorID < 0 || processorID >= cpuNo {
+		responseErr(w, http.StatusNotFound)
+	}
+
+	processorArchitecture := &ProcessorV1230Processor_ProcessorArchitecture{}
+	instructionSet := &ProcessorV1230Processor_InstructionSet{}
+	switch instance.Architecture {
+	case "x86_64":
+		_ = processorArchitecture.FromProcessorV1230ProcessorArchitecture(ProcessorV1230ProcessorArchitectureX86)
+		_ = instructionSet.FromProcessorV1230InstructionSet(ProcessorV1230InstructionSetX8664)
+
+	case "aarch64":
+		_ = processorArchitecture.FromProcessorV1230ProcessorArchitecture(ProcessorV1230ProcessorArchitectureARM)
+		_ = instructionSet.FromProcessorV1230InstructionSet(ProcessorV1230InstructionSetARMA64)
+	}
+
+	response(w, ProcessorV1230Processor{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors/%s", s.instanceName, processorIDStr)),
+		OdataType: ref("#Processor.v1_23_0.Processor"),
+
+		ID:                    processorIDStr,
+		Name:                  "Processor",
+		ProcessorArchitecture: processorArchitecture,
+		InstructionSet:        instructionSet,
+	})
+}
+
+func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string) {
+	responseNotImplemented(w)
+}
+
+func (s redfishServer) PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string) {
+	responseNotImplemented(w)
+}
+
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
 	if computerSystemID != s.instanceName {
 		responseErr(w, http.StatusNotFound)
@@ -548,7 +653,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 	}
 
 	secureBootCurrentBootType := SecureBootV120SecureBoot_SecureBootCurrentBoot{}
-	_ = secureBootCurrentBootType.FromSecureBootV120SecureBootCurrentBootType(Disabled)
+	_ = secureBootCurrentBootType.FromSecureBootV120SecureBootCurrentBootType(SecureBootV120SecureBootCurrentBootTypeDisabled)
 
 	secureBootMode := SecureBootV120SecureBoot_SecureBootMode{}
 	_ = secureBootMode.FromSecureBootV120SecureBootModeType(UserMode)

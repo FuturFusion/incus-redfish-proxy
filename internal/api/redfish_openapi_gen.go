@@ -761,6 +761,30 @@ func (e ComputerSystemV1280WatchdogWarningActions) Valid() bool {
 	}
 }
 
+// Defines values for ControlV180ControlMode.
+const (
+	ControlV180ControlModeAutomatic ControlV180ControlMode = "Automatic"
+	ControlV180ControlModeDisabled  ControlV180ControlMode = "Disabled"
+	ControlV180ControlModeManual    ControlV180ControlMode = "Manual"
+	ControlV180ControlModeOverride  ControlV180ControlMode = "Override"
+)
+
+// Valid indicates whether the value is a known member of the ControlV180ControlMode enum.
+func (e ControlV180ControlMode) Valid() bool {
+	switch e {
+	case ControlV180ControlModeAutomatic:
+		return true
+	case ControlV180ControlModeDisabled:
+		return true
+	case ControlV180ControlModeManual:
+		return true
+	case ControlV180ControlModeOverride:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ManagerV1250CommandConnectTypesSupported.
 const (
 	ManagerV1250CommandConnectTypesSupportedIPMI   ManagerV1250CommandConnectTypesSupported = "IPMI"
@@ -917,6 +941,381 @@ func (e ManagerV1250SerialConnectTypesSupported) Valid() bool {
 	case ManagerV1250SerialConnectTypesSupportedSSH:
 		return true
 	case ManagerV1250SerialConnectTypesSupportedTelnet:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for PCIeDevicePCIeTypes.
+const (
+	Gen1 PCIeDevicePCIeTypes = "Gen1"
+	Gen2 PCIeDevicePCIeTypes = "Gen2"
+	Gen3 PCIeDevicePCIeTypes = "Gen3"
+	Gen4 PCIeDevicePCIeTypes = "Gen4"
+	Gen5 PCIeDevicePCIeTypes = "Gen5"
+	Gen6 PCIeDevicePCIeTypes = "Gen6"
+)
+
+// Valid indicates whether the value is a known member of the PCIeDevicePCIeTypes enum.
+func (e PCIeDevicePCIeTypes) Valid() bool {
+	switch e {
+	case Gen1:
+		return true
+	case Gen2:
+		return true
+	case Gen3:
+		return true
+	case Gen4:
+		return true
+	case Gen5:
+		return true
+	case Gen6:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230BaseSpeedPriorityState.
+const (
+	ProcessorV1230BaseSpeedPriorityStateDisabled ProcessorV1230BaseSpeedPriorityState = "Disabled"
+	ProcessorV1230BaseSpeedPriorityStateEnabled  ProcessorV1230BaseSpeedPriorityState = "Enabled"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230BaseSpeedPriorityState enum.
+func (e ProcessorV1230BaseSpeedPriorityState) Valid() bool {
+	switch e {
+	case ProcessorV1230BaseSpeedPriorityStateDisabled:
+		return true
+	case ProcessorV1230BaseSpeedPriorityStateEnabled:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230FpgaType.
+const (
+	Discrete   ProcessorV1230FpgaType = "Discrete"
+	Integrated ProcessorV1230FpgaType = "Integrated"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230FpgaType enum.
+func (e ProcessorV1230FpgaType) Valid() bool {
+	switch e {
+	case Discrete:
+		return true
+	case Integrated:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230InstructionSet.
+const (
+	ProcessorV1230InstructionSetARMA32   ProcessorV1230InstructionSet = "ARM-A32"
+	ProcessorV1230InstructionSetARMA64   ProcessorV1230InstructionSet = "ARM-A64"
+	ProcessorV1230InstructionSetIA64     ProcessorV1230InstructionSet = "IA-64"
+	ProcessorV1230InstructionSetMIPS32   ProcessorV1230InstructionSet = "MIPS32"
+	ProcessorV1230InstructionSetMIPS64   ProcessorV1230InstructionSet = "MIPS64"
+	ProcessorV1230InstructionSetOEM      ProcessorV1230InstructionSet = "OEM"
+	ProcessorV1230InstructionSetPowerISA ProcessorV1230InstructionSet = "PowerISA"
+	ProcessorV1230InstructionSetRV32     ProcessorV1230InstructionSet = "RV32"
+	ProcessorV1230InstructionSetRV64     ProcessorV1230InstructionSet = "RV64"
+	ProcessorV1230InstructionSetX86      ProcessorV1230InstructionSet = "x86"
+	ProcessorV1230InstructionSetX8664    ProcessorV1230InstructionSet = "x86-64"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230InstructionSet enum.
+func (e ProcessorV1230InstructionSet) Valid() bool {
+	switch e {
+	case ProcessorV1230InstructionSetARMA32:
+		return true
+	case ProcessorV1230InstructionSetARMA64:
+		return true
+	case ProcessorV1230InstructionSetIA64:
+		return true
+	case ProcessorV1230InstructionSetMIPS32:
+		return true
+	case ProcessorV1230InstructionSetMIPS64:
+		return true
+	case ProcessorV1230InstructionSetOEM:
+		return true
+	case ProcessorV1230InstructionSetPowerISA:
+		return true
+	case ProcessorV1230InstructionSetRV32:
+		return true
+	case ProcessorV1230InstructionSetRV64:
+		return true
+	case ProcessorV1230InstructionSetX86:
+		return true
+	case ProcessorV1230InstructionSetX8664:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230ProcessorArchitecture.
+const (
+	ProcessorV1230ProcessorArchitectureARM   ProcessorV1230ProcessorArchitecture = "ARM"
+	ProcessorV1230ProcessorArchitectureIA64  ProcessorV1230ProcessorArchitecture = "IA-64"
+	ProcessorV1230ProcessorArchitectureMIPS  ProcessorV1230ProcessorArchitecture = "MIPS"
+	ProcessorV1230ProcessorArchitectureOEM   ProcessorV1230ProcessorArchitecture = "OEM"
+	ProcessorV1230ProcessorArchitecturePower ProcessorV1230ProcessorArchitecture = "Power"
+	ProcessorV1230ProcessorArchitectureRISCV ProcessorV1230ProcessorArchitecture = "RISC-V"
+	ProcessorV1230ProcessorArchitectureX86   ProcessorV1230ProcessorArchitecture = "x86"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230ProcessorArchitecture enum.
+func (e ProcessorV1230ProcessorArchitecture) Valid() bool {
+	switch e {
+	case ProcessorV1230ProcessorArchitectureARM:
+		return true
+	case ProcessorV1230ProcessorArchitectureIA64:
+		return true
+	case ProcessorV1230ProcessorArchitectureMIPS:
+		return true
+	case ProcessorV1230ProcessorArchitectureOEM:
+		return true
+	case ProcessorV1230ProcessorArchitecturePower:
+		return true
+	case ProcessorV1230ProcessorArchitectureRISCV:
+		return true
+	case ProcessorV1230ProcessorArchitectureX86:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230ProcessorMemoryType.
+const (
+	ProcessorV1230ProcessorMemoryTypeCache   ProcessorV1230ProcessorMemoryType = "Cache"
+	ProcessorV1230ProcessorMemoryTypeDDR     ProcessorV1230ProcessorMemoryType = "DDR"
+	ProcessorV1230ProcessorMemoryTypeDDR2    ProcessorV1230ProcessorMemoryType = "DDR2"
+	ProcessorV1230ProcessorMemoryTypeDDR3    ProcessorV1230ProcessorMemoryType = "DDR3"
+	ProcessorV1230ProcessorMemoryTypeDDR4    ProcessorV1230ProcessorMemoryType = "DDR4"
+	ProcessorV1230ProcessorMemoryTypeDDR5    ProcessorV1230ProcessorMemoryType = "DDR5"
+	ProcessorV1230ProcessorMemoryTypeFlash   ProcessorV1230ProcessorMemoryType = "Flash"
+	ProcessorV1230ProcessorMemoryTypeGDDR    ProcessorV1230ProcessorMemoryType = "GDDR"
+	ProcessorV1230ProcessorMemoryTypeGDDR2   ProcessorV1230ProcessorMemoryType = "GDDR2"
+	ProcessorV1230ProcessorMemoryTypeGDDR3   ProcessorV1230ProcessorMemoryType = "GDDR3"
+	ProcessorV1230ProcessorMemoryTypeGDDR4   ProcessorV1230ProcessorMemoryType = "GDDR4"
+	ProcessorV1230ProcessorMemoryTypeGDDR5   ProcessorV1230ProcessorMemoryType = "GDDR5"
+	ProcessorV1230ProcessorMemoryTypeGDDR5X  ProcessorV1230ProcessorMemoryType = "GDDR5X"
+	ProcessorV1230ProcessorMemoryTypeGDDR6   ProcessorV1230ProcessorMemoryType = "GDDR6"
+	ProcessorV1230ProcessorMemoryTypeGDDR7   ProcessorV1230ProcessorMemoryType = "GDDR7"
+	ProcessorV1230ProcessorMemoryTypeHBM1    ProcessorV1230ProcessorMemoryType = "HBM1"
+	ProcessorV1230ProcessorMemoryTypeHBM2    ProcessorV1230ProcessorMemoryType = "HBM2"
+	ProcessorV1230ProcessorMemoryTypeHBM2E   ProcessorV1230ProcessorMemoryType = "HBM2E"
+	ProcessorV1230ProcessorMemoryTypeHBM3    ProcessorV1230ProcessorMemoryType = "HBM3"
+	ProcessorV1230ProcessorMemoryTypeHBM3E   ProcessorV1230ProcessorMemoryType = "HBM3E"
+	ProcessorV1230ProcessorMemoryTypeHBM4    ProcessorV1230ProcessorMemoryType = "HBM4"
+	ProcessorV1230ProcessorMemoryTypeL1Cache ProcessorV1230ProcessorMemoryType = "L1Cache"
+	ProcessorV1230ProcessorMemoryTypeL2Cache ProcessorV1230ProcessorMemoryType = "L2Cache"
+	ProcessorV1230ProcessorMemoryTypeL3Cache ProcessorV1230ProcessorMemoryType = "L3Cache"
+	ProcessorV1230ProcessorMemoryTypeL4Cache ProcessorV1230ProcessorMemoryType = "L4Cache"
+	ProcessorV1230ProcessorMemoryTypeL5Cache ProcessorV1230ProcessorMemoryType = "L5Cache"
+	ProcessorV1230ProcessorMemoryTypeL6Cache ProcessorV1230ProcessorMemoryType = "L6Cache"
+	ProcessorV1230ProcessorMemoryTypeL7Cache ProcessorV1230ProcessorMemoryType = "L7Cache"
+	ProcessorV1230ProcessorMemoryTypeOEM     ProcessorV1230ProcessorMemoryType = "OEM"
+	ProcessorV1230ProcessorMemoryTypeSDRAM   ProcessorV1230ProcessorMemoryType = "SDRAM"
+	ProcessorV1230ProcessorMemoryTypeSGRAM   ProcessorV1230ProcessorMemoryType = "SGRAM"
+	ProcessorV1230ProcessorMemoryTypeSRAM    ProcessorV1230ProcessorMemoryType = "SRAM"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230ProcessorMemoryType enum.
+func (e ProcessorV1230ProcessorMemoryType) Valid() bool {
+	switch e {
+	case ProcessorV1230ProcessorMemoryTypeCache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeDDR:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeDDR2:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeDDR3:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeDDR4:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeDDR5:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeFlash:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR2:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR3:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR4:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR5:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR5X:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR6:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeGDDR7:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeHBM1:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeHBM2:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeHBM2E:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeHBM3:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeHBM3E:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeHBM4:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL1Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL2Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL3Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL4Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL5Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL6Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeL7Cache:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeOEM:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeSDRAM:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeSGRAM:
+		return true
+	case ProcessorV1230ProcessorMemoryTypeSRAM:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230ProcessorType.
+const (
+	ProcessorV1230ProcessorTypeAccelerator ProcessorV1230ProcessorType = "Accelerator"
+	ProcessorV1230ProcessorTypeCPU         ProcessorV1230ProcessorType = "CPU"
+	ProcessorV1230ProcessorTypeCore        ProcessorV1230ProcessorType = "Core"
+	ProcessorV1230ProcessorTypeDSP         ProcessorV1230ProcessorType = "DSP"
+	ProcessorV1230ProcessorTypeFPGA        ProcessorV1230ProcessorType = "FPGA"
+	ProcessorV1230ProcessorTypeGPU         ProcessorV1230ProcessorType = "GPU"
+	ProcessorV1230ProcessorTypeOEM         ProcessorV1230ProcessorType = "OEM"
+	ProcessorV1230ProcessorTypePartition   ProcessorV1230ProcessorType = "Partition"
+	ProcessorV1230ProcessorTypeThread      ProcessorV1230ProcessorType = "Thread"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230ProcessorType enum.
+func (e ProcessorV1230ProcessorType) Valid() bool {
+	switch e {
+	case ProcessorV1230ProcessorTypeAccelerator:
+		return true
+	case ProcessorV1230ProcessorTypeCPU:
+		return true
+	case ProcessorV1230ProcessorTypeCore:
+		return true
+	case ProcessorV1230ProcessorTypeDSP:
+		return true
+	case ProcessorV1230ProcessorTypeFPGA:
+		return true
+	case ProcessorV1230ProcessorTypeGPU:
+		return true
+	case ProcessorV1230ProcessorTypeOEM:
+		return true
+	case ProcessorV1230ProcessorTypePartition:
+		return true
+	case ProcessorV1230ProcessorTypeThread:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230SystemInterfaceType.
+const (
+	ProcessorV1230SystemInterfaceTypeAMBA     ProcessorV1230SystemInterfaceType = "AMBA"
+	ProcessorV1230SystemInterfaceTypeCCIX     ProcessorV1230SystemInterfaceType = "CCIX"
+	ProcessorV1230SystemInterfaceTypeCXL      ProcessorV1230SystemInterfaceType = "CXL"
+	ProcessorV1230SystemInterfaceTypeEthernet ProcessorV1230SystemInterfaceType = "Ethernet"
+	ProcessorV1230SystemInterfaceTypeOEM      ProcessorV1230SystemInterfaceType = "OEM"
+	ProcessorV1230SystemInterfaceTypePCIe     ProcessorV1230SystemInterfaceType = "PCIe"
+	ProcessorV1230SystemInterfaceTypeQPI      ProcessorV1230SystemInterfaceType = "QPI"
+	ProcessorV1230SystemInterfaceTypeUPI      ProcessorV1230SystemInterfaceType = "UPI"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230SystemInterfaceType enum.
+func (e ProcessorV1230SystemInterfaceType) Valid() bool {
+	switch e {
+	case ProcessorV1230SystemInterfaceTypeAMBA:
+		return true
+	case ProcessorV1230SystemInterfaceTypeCCIX:
+		return true
+	case ProcessorV1230SystemInterfaceTypeCXL:
+		return true
+	case ProcessorV1230SystemInterfaceTypeEthernet:
+		return true
+	case ProcessorV1230SystemInterfaceTypeOEM:
+		return true
+	case ProcessorV1230SystemInterfaceTypePCIe:
+		return true
+	case ProcessorV1230SystemInterfaceTypeQPI:
+		return true
+	case ProcessorV1230SystemInterfaceTypeUPI:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230ThrottleCause.
+const (
+	ProcessorV1230ThrottleCauseClockLimit              ProcessorV1230ThrottleCause = "ClockLimit"
+	ProcessorV1230ThrottleCauseManagementDetectedFault ProcessorV1230ThrottleCause = "ManagementDetectedFault"
+	ProcessorV1230ThrottleCauseOEM                     ProcessorV1230ThrottleCause = "OEM"
+	ProcessorV1230ThrottleCausePowerLimit              ProcessorV1230ThrottleCause = "PowerLimit"
+	ProcessorV1230ThrottleCauseThermalLimit            ProcessorV1230ThrottleCause = "ThermalLimit"
+	ProcessorV1230ThrottleCauseUnknown                 ProcessorV1230ThrottleCause = "Unknown"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230ThrottleCause enum.
+func (e ProcessorV1230ThrottleCause) Valid() bool {
+	switch e {
+	case ProcessorV1230ThrottleCauseClockLimit:
+		return true
+	case ProcessorV1230ThrottleCauseManagementDetectedFault:
+		return true
+	case ProcessorV1230ThrottleCauseOEM:
+		return true
+	case ProcessorV1230ThrottleCausePowerLimit:
+		return true
+	case ProcessorV1230ThrottleCauseThermalLimit:
+		return true
+	case ProcessorV1230ThrottleCauseUnknown:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ProcessorV1230TurboState.
+const (
+	ProcessorV1230TurboStateDisabled ProcessorV1230TurboState = "Disabled"
+	ProcessorV1230TurboStateEnabled  ProcessorV1230TurboState = "Enabled"
+)
+
+// Valid indicates whether the value is a known member of the ProcessorV1230TurboState enum.
+func (e ProcessorV1230TurboState) Valid() bool {
+	switch e {
+	case ProcessorV1230TurboStateDisabled:
+		return true
+	case ProcessorV1230TurboStateEnabled:
 		return true
 	default:
 		return false
@@ -1285,16 +1684,16 @@ func (e ResourceV1240Reference) Valid() bool {
 
 // Defines values for SecureBootV120SecureBootCurrentBootType.
 const (
-	Disabled SecureBootV120SecureBootCurrentBootType = "Disabled"
-	Enabled  SecureBootV120SecureBootCurrentBootType = "Enabled"
+	SecureBootV120SecureBootCurrentBootTypeDisabled SecureBootV120SecureBootCurrentBootType = "Disabled"
+	SecureBootV120SecureBootCurrentBootTypeEnabled  SecureBootV120SecureBootCurrentBootType = "Enabled"
 )
 
 // Valid indicates whether the value is a known member of the SecureBootV120SecureBootCurrentBootType enum.
 func (e SecureBootV120SecureBootCurrentBootType) Valid() bool {
 	switch e {
-	case Disabled:
+	case SecureBootV120SecureBootCurrentBootTypeDisabled:
 		return true
-	case Enabled:
+	case SecureBootV120SecureBootCurrentBootTypeEnabled:
 		return true
 	default:
 		return false
@@ -2996,6 +3395,44 @@ type ComputerSystemV1280WebSocketConsole struct {
 	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
 }
 
+// ControlV180ControlMode defines model for Control_v1_8_0_ControlMode.
+type ControlV180ControlMode string
+
+// ControlV180ControlRangeExcerpt The `Control` schema describes a control point and its properties.
+type ControlV180ControlRangeExcerpt struct {
+	// AllowableMax The maximum possible setting for this control.
+	AllowableMax *float32 `json:"AllowableMax,omitempty"`
+
+	// AllowableMin The minimum possible setting for this control.
+	AllowableMin *float32 `json:"AllowableMin,omitempty"`
+
+	// AllowableNumericValues The supported values for the set point.
+	AllowableNumericValues *[]*float32 `json:"AllowableNumericValues,omitempty"`
+
+	// ControlMode The current operating mode of the control.
+	ControlMode *ControlV180ControlRangeExcerpt_ControlMode `json:"ControlMode,omitempty"`
+
+	// DataSourceURI The link to the resource that provides the data for this control.
+	DataSourceURI *string `json:"DataSourceUri,omitempty"`
+
+	// Reading The reading of the sensor associated with this control.
+	Reading *float32 `json:"Reading,omitempty"`
+
+	// SettingMax The maximum set point in the allowed range.
+	SettingMax *float32 `json:"SettingMax,omitempty"`
+
+	// SettingMin The minimum set point in the allowed range.
+	SettingMin *float32 `json:"SettingMin,omitempty"`
+}
+
+// ControlV180ControlRangeExcerptControlMode1 defines model for .
+type ControlV180ControlRangeExcerptControlMode1 = interface{}
+
+// ControlV180ControlRangeExcerpt_ControlMode The current operating mode of the control.
+type ControlV180ControlRangeExcerpt_ControlMode struct {
+	union json.RawMessage
+}
+
 // ManagerCollectionManagerCollection The collection of `Manager` resource instances.
 type ManagerCollectionManagerCollection struct {
 	// OdataContext The OData description of a payload.
@@ -3496,6 +3933,639 @@ type MessageV130Message struct {
 
 	// Username The username of the account associated with the message.
 	Username *string `json:"Username,omitempty"`
+}
+
+// PCIeDevicePCIeTypes defines model for PCIeDevice_PCIeTypes.
+type PCIeDevicePCIeTypes string
+
+// PCIeDeviceV1220PCIeInterface Properties that describe a PCIe interface.
+type PCIeDeviceV1220PCIeInterface struct {
+	// LanesInUse The number of PCIe lanes in use by this device.
+	LanesInUse *int64 `json:"LanesInUse,omitempty"`
+
+	// MaxLanes The number of PCIe lanes supported by this device.
+	MaxLanes *int64 `json:"MaxLanes,omitempty"`
+
+	// MaxPCIeType The highest version of the PCIe specification supported by this device.
+	MaxPCIeType *PCIeDeviceV1220PCIeInterface_MaxPCIeType `json:"MaxPCIeType,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// PCIeType The version of the PCIe specification in use by this device.
+	PCIeType *PCIeDeviceV1220PCIeInterface_PCIeType `json:"PCIeType,omitempty"`
+}
+
+// PCIeDeviceV1220PCIeInterfaceMaxPCIeType1 defines model for .
+type PCIeDeviceV1220PCIeInterfaceMaxPCIeType1 = interface{}
+
+// PCIeDeviceV1220PCIeInterface_MaxPCIeType The highest version of the PCIe specification supported by this device.
+type PCIeDeviceV1220PCIeInterface_MaxPCIeType struct {
+	union json.RawMessage
+}
+
+// PCIeDeviceV1220PCIeInterfacePCIeType1 defines model for .
+type PCIeDeviceV1220PCIeInterfacePCIeType1 = interface{}
+
+// PCIeDeviceV1220PCIeInterface_PCIeType The version of the PCIe specification in use by this device.
+type PCIeDeviceV1220PCIeInterface_PCIeType struct {
+	union json.RawMessage
+}
+
+// ProcessorCollectionProcessorCollection The collection of `Processor` resource instances.
+type ProcessorCollectionProcessorCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                        `json:"@odata.type,omitempty"`
+	Description *ProcessorCollectionProcessorCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// ProcessorCollectionProcessorCollectionDescription1 defines model for .
+type ProcessorCollectionProcessorCollectionDescription1 = interface{}
+
+// ProcessorCollectionProcessorCollection_Description defines model for ProcessorCollectionProcessorCollection.Description.
+type ProcessorCollectionProcessorCollection_Description struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230Actions The available actions for this resource.
+type ProcessorV1230Actions struct {
+	// HashProcessorReset This action resets the processor.
+	HashProcessorReset *ProcessorV1230Reset `json:"#Processor.Reset,omitempty"`
+
+	// HashProcessorResetToDefaults The action resets the values of writable properties to factory defaults.
+	HashProcessorResetToDefaults *ProcessorV1230ResetToDefaults `json:"#Processor.ResetToDefaults,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *ProcessorV1230OemActions `json:"Oem,omitempty"`
+}
+
+// ProcessorV1230BaseSpeedPriorityState defines model for Processor_v1_23_0_BaseSpeedPriorityState.
+type ProcessorV1230BaseSpeedPriorityState string
+
+// ProcessorV1230EthernetInterface This type defines an Ethernet interface.
+type ProcessorV1230EthernetInterface struct {
+	// MaxLanes The number of lanes supported by this interface.
+	MaxLanes *int64 `json:"MaxLanes,omitempty"`
+
+	// MaxSpeedMbps The maximum speed supported by this interface.
+	MaxSpeedMbps *int64 `json:"MaxSpeedMbps,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// ProcessorV1230FPGA The properties of the FPGA device.
+type ProcessorV1230FPGA struct {
+	// ExternalInterfaces An array of the FPGA external interfaces.
+	ExternalInterfaces *[]ProcessorV1230ProcessorInterface `json:"ExternalInterfaces,omitempty"`
+
+	// FirmwareID The FPGA firmware identifier.
+	FirmwareID *string `json:"FirmwareId,omitempty"`
+
+	// FirmwareManufacturer The FPGA firmware manufacturer.
+	FirmwareManufacturer *string `json:"FirmwareManufacturer,omitempty"`
+
+	// FirmwareVersion The FPGA firmware version.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	FirmwareVersion *string                 `json:"FirmwareVersion,omitempty"`
+	FpgaType        *ProcessorV1230FpgaType `json:"FpgaType,omitempty"`
+
+	// HostInterface This type describes an interface between the system, or external connection, and the processor.
+	HostInterface *ProcessorV1230ProcessorInterface `json:"HostInterface,omitempty"`
+
+	// Model The FPGA model.
+	Model *string `json:"Model,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// PCIeVirtualFunctions The number of PCIe Virtual Functions.
+	PCIeVirtualFunctions *int64 `json:"PCIeVirtualFunctions,omitempty"`
+
+	// ProgrammableFromHost An indication of whether the FPGA firmware can be reprogrammed from the host by using system software.
+	ProgrammableFromHost *bool `json:"ProgrammableFromHost,omitempty"`
+
+	// ReconfigurationSlots An array of the FPGA reconfiguration slots.  An FPGA uses a reconfiguration slot to contain an acceleration function that can change as the FPGA is provisioned.
+	ReconfigurationSlots *[]ProcessorV1230FpgaReconfigurationSlot `json:"ReconfigurationSlots,omitempty"`
+}
+
+// ProcessorV1230FpgaReconfigurationSlot This type describes the FPGA reconfiguration slot.  An FPGA uses a reconfiguration slot to contain an acceleration function that can change as the FPGA is provisioned.
+type ProcessorV1230FpgaReconfigurationSlot struct {
+	// AccelerationFunction A reference to a resource.
+	AccelerationFunction *OdataV4IdRef `json:"AccelerationFunction,omitempty"`
+
+	// ProgrammableFromHost An indication of whether the reconfiguration slot can be reprogrammed from the host by using system software.
+	ProgrammableFromHost *bool `json:"ProgrammableFromHost,omitempty"`
+
+	// SlotID The FPGA reconfiguration slot identifier.
+	SlotID *string `json:"SlotId,omitempty"`
+
+	// UUID The UUID for this reconfiguration slot.
+	UUID *ProcessorV1230FpgaReconfigurationSlot_UUID `json:"UUID,omitempty"`
+}
+
+// ProcessorV1230FpgaReconfigurationSlotUUID1 defines model for .
+type ProcessorV1230FpgaReconfigurationSlotUUID1 = interface{}
+
+// ProcessorV1230FpgaReconfigurationSlot_UUID The UUID for this reconfiguration slot.
+type ProcessorV1230FpgaReconfigurationSlot_UUID struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230FpgaType defines model for Processor_v1_23_0_FpgaType.
+type ProcessorV1230FpgaType string
+
+// ProcessorV1230InstructionSet defines model for Processor_v1_23_0_InstructionSet.
+type ProcessorV1230InstructionSet string
+
+// ProcessorV1230Links The links to other resources that are related to this resource.
+type ProcessorV1230Links struct {
+	// Chassis A reference to a resource.
+	Chassis *OdataV4IdRef `json:"Chassis,omitempty"`
+
+	// ConnectedProcessors An array of links to the processors directly connected to this processor.
+	ConnectedProcessors *[]OdataV4IdRef `json:"ConnectedProcessors,omitempty"`
+
+	// ConnectedProcessorsOdataCount The number of items in a collection.
+	ConnectedProcessorsOdataCount *OdataV4Count `json:"ConnectedProcessors@odata.count,omitempty"`
+
+	// Endpoints An array of links to the endpoints that connect to this processor.
+	Endpoints *[]OdataV4IdRef `json:"Endpoints,omitempty"`
+
+	// EndpointsOdataCount The number of items in a collection.
+	EndpointsOdataCount *OdataV4Count `json:"Endpoints@odata.count,omitempty"`
+
+	// FabricAdapters An array of links to the fabric adapters that present this processor to a fabric.
+	FabricAdapters *[]OdataV4IdRef `json:"FabricAdapters,omitempty"`
+
+	// FabricAdaptersOdataCount The number of items in a collection.
+	FabricAdaptersOdataCount *OdataV4Count `json:"FabricAdapters@odata.count,omitempty"`
+
+	// GraphicsController A link to the graphics controller associated with this processor.
+	GraphicsController *ProcessorV1230Links_GraphicsController `json:"GraphicsController,omitempty"`
+
+	// Memory An array of links to the memory associated with this processor.
+	Memory *[]OdataV4IdRef `json:"Memory,omitempty"`
+
+	// MemoryOdataCount The number of items in a collection.
+	MemoryOdataCount *OdataV4Count `json:"Memory@odata.count,omitempty"`
+
+	// NetworkDeviceFunctions The network device functions to which this processor performs offload computation, such as with a SmartNIC.
+	NetworkDeviceFunctions *[]OdataV4IdRef `json:"NetworkDeviceFunctions,omitempty"`
+
+	// NetworkDeviceFunctionsOdataCount The number of items in a collection.
+	NetworkDeviceFunctionsOdataCount *OdataV4Count `json:"NetworkDeviceFunctions@odata.count,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// PCIeDevice A reference to a resource.
+	PCIeDevice *OdataV4IdRef `json:"PCIeDevice,omitempty"`
+
+	// PCIeFunctions An array of links to the PCIeFunctions associated with this processor.
+	PCIeFunctions *[]OdataV4IdRef `json:"PCIeFunctions,omitempty"`
+
+	// PCIeFunctionsOdataCount The number of items in a collection.
+	PCIeFunctionsOdataCount *OdataV4Count `json:"PCIeFunctions@odata.count,omitempty"`
+}
+
+// ProcessorV1230LinksGraphicsController1 defines model for .
+type ProcessorV1230LinksGraphicsController1 = interface{}
+
+// ProcessorV1230Links_GraphicsController A link to the graphics controller associated with this processor.
+type ProcessorV1230Links_GraphicsController struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230MemorySummary The summary of all memory associated with a processor.
+type ProcessorV1230MemorySummary struct {
+	// ECCModeEnabled An indication of whether memory ECC mode is enabled for this processor.
+	ECCModeEnabled *bool `json:"ECCModeEnabled,omitempty"`
+
+	// Metrics A reference to a resource.
+	Metrics *OdataV4IdRef `json:"Metrics,omitempty"`
+
+	// TotalCacheSizeMiB Total size of cache memory of this processor.
+	TotalCacheSizeMiB *int64 `json:"TotalCacheSizeMiB,omitempty"`
+
+	// TotalMemorySizeMiB Total size of non-cache volatile or non-volatile memory attached to this processor.  Examples include DRAMs and NV-DIMMs that are not configured as block storage.
+	TotalMemorySizeMiB *int64 `json:"TotalMemorySizeMiB,omitempty"`
+}
+
+// ProcessorV1230OemActions The available OEM-specific actions for this resource.
+type ProcessorV1230OemActions map[string]interface{}
+
+// ProcessorV1230Processor The `Processor` schema describes the information about a single processor that a system contains.  A processor includes both performance characteristics, clock speed, architecture, core count, and so on, and compatibility, such as the CPU ID instruction results.  It also describes the location, such as a slot, socket, or bay, where a unit can be installed, by populating a resource instance with an absent state if a unit is not present.
+type ProcessorV1230Processor struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// AccelerationFunctions A reference to a resource.
+	AccelerationFunctions *OdataV4IdRef `json:"AccelerationFunctions,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *ProcessorV1230Actions `json:"Actions,omitempty"`
+
+	// AdditionalFirmwareVersions Additional versions.
+	AdditionalFirmwareVersions *SoftwareInventoryV1140AdditionalVersions `json:"AdditionalFirmwareVersions,omitempty"`
+
+	// AppliedOperatingConfig A reference to a resource.
+	AppliedOperatingConfig *OdataV4IdRef `json:"AppliedOperatingConfig,omitempty"`
+
+	// Assembly A reference to a resource.
+	Assembly *OdataV4IdRef `json:"Assembly,omitempty"`
+
+	// BaseSpeedMHz The base (nominal) clock speed of the processor in MHz.
+	BaseSpeedMHz *int64 `json:"BaseSpeedMHz,omitempty"`
+
+	// BaseSpeedPriorityState The state of the base frequency settings of the operation configuration applied to this processor.
+	BaseSpeedPriorityState *ProcessorV1230Processor_BaseSpeedPriorityState `json:"BaseSpeedPriorityState,omitempty"`
+
+	// CacheMemory A reference to a resource.
+	CacheMemory *OdataV4IdRef `json:"CacheMemory,omitempty"`
+
+	// Certificates A reference to a resource.
+	Certificates *OdataV4IdRef                        `json:"Certificates,omitempty"`
+	Description  *ProcessorV1230Processor_Description `json:"Description,omitempty"`
+
+	// Enabled An indication of whether this processor is enabled.
+	Enabled *bool `json:"Enabled,omitempty"`
+
+	// EnvironmentMetrics A reference to a resource.
+	EnvironmentMetrics *OdataV4IdRef `json:"EnvironmentMetrics,omitempty"`
+
+	// FPGA The properties of the FPGA device.
+	FPGA *ProcessorV1230FPGA `json:"FPGA,omitempty"`
+
+	// Family The processor family.
+	Family *string `json:"Family,omitempty"`
+
+	// FirmwareVersion The firmware version of the processor.
+	FirmwareVersion *string `json:"FirmwareVersion,omitempty"`
+
+	// HighSpeedCoreIDs The list of core identifiers corresponding to the cores that have been configured with the higher clock speed from the operating configuration applied to this processor.
+	HighSpeedCoreIDs *[]*int64 `json:"HighSpeedCoreIDs,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// InstructionSet The instruction set of the processor.
+	InstructionSet *ProcessorV1230Processor_InstructionSet `json:"InstructionSet,omitempty"`
+
+	// Links The links to other resources that are related to this resource.
+	Links *ProcessorV1230Links `json:"Links,omitempty"`
+
+	// Location The location of a resource.
+	Location *ResourceV1240Location `json:"Location,omitempty"`
+
+	// LocationIndicatorActive An indicator allowing an operator to physically locate this resource.
+	LocationIndicatorActive *bool `json:"LocationIndicatorActive,omitempty"`
+
+	// Manufacturer The processor manufacturer.
+	Manufacturer *string `json:"Manufacturer,omitempty"`
+
+	// MaxSpeedMHz The maximum clock speed of the processor.
+	MaxSpeedMHz *int64 `json:"MaxSpeedMHz,omitempty"`
+
+	// MaxTDPWatts The maximum Thermal Design Power (TDP) in watt units.
+	MaxTDPWatts *int64 `json:"MaxTDPWatts,omitempty"`
+
+	// Measurements An array of DSP0274-defined measurement blocks.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Measurements *[]SoftwareInventoryV1140MeasurementBlock `json:"Measurements,omitempty"`
+
+	// MemorySummary The summary of all memory associated with a processor.
+	MemorySummary *ProcessorV1230MemorySummary `json:"MemorySummary,omitempty"`
+
+	// Metrics A reference to a resource.
+	Metrics *OdataV4IdRef `json:"Metrics,omitempty"`
+
+	// MinSpeedMHz The minimum clock speed of the processor in MHz.
+	MinSpeedMHz *int64 `json:"MinSpeedMHz,omitempty"`
+
+	// Model The product model number of this device.
+	Model *string `json:"Model,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// OperatingConfigs A reference to a resource.
+	OperatingConfigs *OdataV4IdRef `json:"OperatingConfigs,omitempty"`
+
+	// OperatingSpeedMHz Operating speed of the processor in MHz.
+	OperatingSpeedMHz *int64 `json:"OperatingSpeedMHz,omitempty"`
+
+	// OperatingSpeedRangeMHz Range of allowed operating speeds (MHz).
+	OperatingSpeedRangeMHz *ProcessorV1230Processor_OperatingSpeedRangeMHz `json:"OperatingSpeedRangeMHz,omitempty"`
+
+	// PartNumber The part number of the processor.
+	PartNumber *string `json:"PartNumber,omitempty"`
+
+	// Ports A reference to a resource.
+	Ports *OdataV4IdRef `json:"Ports,omitempty"`
+
+	// PowerState The current power state of the processor.
+	PowerState *ProcessorV1230Processor_PowerState `json:"PowerState,omitempty"`
+
+	// ProcessorArchitecture The architecture of the processor.
+	ProcessorArchitecture *ProcessorV1230Processor_ProcessorArchitecture `json:"ProcessorArchitecture,omitempty"`
+
+	// ProcessorID The identification information for a processor.
+	ProcessorID *ProcessorV1230ProcessorID `json:"ProcessorId,omitempty"`
+
+	// ProcessorIndex The logical index of this processor within the system.
+	ProcessorIndex *int64 `json:"ProcessorIndex,omitempty"`
+
+	// ProcessorMemory The memory directly attached or integrated within this processor.  Examples include internal cache, dedicated memory for the processor, and system memory.
+	ProcessorMemory *[]ProcessorV1230ProcessorMemory `json:"ProcessorMemory,omitempty"`
+
+	// ProcessorType The type of processor.
+	ProcessorType *ProcessorV1230Processor_ProcessorType `json:"ProcessorType,omitempty"`
+
+	// Replaceable An indication of whether this component can be independently replaced as allowed by the vendor's replacement policy.
+	Replaceable *bool `json:"Replaceable,omitempty"`
+
+	// SerialNumber The serial number of the processor.
+	SerialNumber *string `json:"SerialNumber,omitempty"`
+
+	// Socket The socket or location of the processor.
+	Socket *string `json:"Socket,omitempty"`
+
+	// SparePartNumber The spare part number of the processor.
+	SparePartNumber *string `json:"SparePartNumber,omitempty"`
+
+	// SpeedLimitMHz The clock limit of the processor in MHz.
+	SpeedLimitMHz *int64 `json:"SpeedLimitMHz,omitempty"`
+
+	// SpeedLocked Indicates whether the clock speed of the processor is fixed at the value specified in the `SpeedLimitMHz` property.
+	SpeedLocked *bool `json:"SpeedLocked,omitempty"`
+
+	// Status The status and health of a resource and its children.
+	Status *ResourceStatus `json:"Status,omitempty"`
+
+	// SubProcessors A reference to a resource.
+	SubProcessors *OdataV4IdRef `json:"SubProcessors,omitempty"`
+
+	// SystemInterface This type describes an interface between the system, or external connection, and the processor.
+	SystemInterface *ProcessorV1230ProcessorInterface `json:"SystemInterface,omitempty"`
+
+	// TDPWatts The nominal Thermal Design Power (TDP) in watt units.
+	TDPWatts *int64 `json:"TDPWatts,omitempty"`
+
+	// ThrottleCauses The causes of the processor being throttled.
+	ThrottleCauses *[]ProcessorV1230Processor_ThrottleCauses_Item `json:"ThrottleCauses,omitempty"`
+
+	// Throttled An indication of whether the processor is throttled.
+	Throttled *bool `json:"Throttled,omitempty"`
+
+	// TotalCores The total number of cores that this processor contains.
+	TotalCores *int64 `json:"TotalCores,omitempty"`
+
+	// TotalEnabledCores The total number of enabled cores that this processor contains.
+	TotalEnabledCores *int64 `json:"TotalEnabledCores,omitempty"`
+
+	// TotalEnabledThreads The total number of enabled execution threads contained in this processor.
+	TotalEnabledThreads *int64 `json:"TotalEnabledThreads,omitempty"`
+
+	// TotalThreads The total number of execution threads that this processor supports.
+	TotalThreads *int64 `json:"TotalThreads,omitempty"`
+
+	// TurboState The state of turbo for this processor.
+	TurboState *ProcessorV1230Processor_TurboState `json:"TurboState,omitempty"`
+
+	// UALink The UALink attributes of a processor.
+	UALink *ProcessorV1230UALink `json:"UALink,omitempty"`
+
+	// UUID The UUID for this processor.
+	UUID *ProcessorV1230Processor_UUID `json:"UUID,omitempty"`
+
+	// Version The hardware version of the processor.
+	Version *string `json:"Version,omitempty"`
+}
+
+// ProcessorV1230ProcessorBaseSpeedPriorityState1 defines model for .
+type ProcessorV1230ProcessorBaseSpeedPriorityState1 = interface{}
+
+// ProcessorV1230Processor_BaseSpeedPriorityState The state of the base frequency settings of the operation configuration applied to this processor.
+type ProcessorV1230Processor_BaseSpeedPriorityState struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorDescription1 defines model for .
+type ProcessorV1230ProcessorDescription1 = interface{}
+
+// ProcessorV1230Processor_Description defines model for ProcessorV1230Processor.Description.
+type ProcessorV1230Processor_Description struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorInstructionSet1 defines model for .
+type ProcessorV1230ProcessorInstructionSet1 = interface{}
+
+// ProcessorV1230Processor_InstructionSet The instruction set of the processor.
+type ProcessorV1230Processor_InstructionSet struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorOperatingSpeedRangeMHz1 defines model for .
+type ProcessorV1230ProcessorOperatingSpeedRangeMHz1 = interface{}
+
+// ProcessorV1230Processor_OperatingSpeedRangeMHz Range of allowed operating speeds (MHz).
+type ProcessorV1230Processor_OperatingSpeedRangeMHz struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorPowerState1 defines model for .
+type ProcessorV1230ProcessorPowerState1 = interface{}
+
+// ProcessorV1230Processor_PowerState The current power state of the processor.
+type ProcessorV1230Processor_PowerState struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorProcessorArchitecture1 defines model for .
+type ProcessorV1230ProcessorProcessorArchitecture1 = interface{}
+
+// ProcessorV1230Processor_ProcessorArchitecture The architecture of the processor.
+type ProcessorV1230Processor_ProcessorArchitecture struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorProcessorType1 defines model for .
+type ProcessorV1230ProcessorProcessorType1 = interface{}
+
+// ProcessorV1230Processor_ProcessorType The type of processor.
+type ProcessorV1230Processor_ProcessorType struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorThrottleCauses1 defines model for .
+type ProcessorV1230ProcessorThrottleCauses1 = interface{}
+
+// ProcessorV1230Processor_ThrottleCauses_Item defines model for Processor_v1_23_0_Processor.ThrottleCauses.Item.
+type ProcessorV1230Processor_ThrottleCauses_Item struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorTurboState1 defines model for .
+type ProcessorV1230ProcessorTurboState1 = interface{}
+
+// ProcessorV1230Processor_TurboState The state of turbo for this processor.
+type ProcessorV1230Processor_TurboState struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorUUID1 defines model for .
+type ProcessorV1230ProcessorUUID1 = interface{}
+
+// ProcessorV1230Processor_UUID The UUID for this processor.
+type ProcessorV1230Processor_UUID struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorArchitecture defines model for Processor_v1_23_0_ProcessorArchitecture.
+type ProcessorV1230ProcessorArchitecture string
+
+// ProcessorV1230ProcessorID The identification information for a processor.
+type ProcessorV1230ProcessorID struct {
+	// EffectiveFamily The effective family for this processor.
+	EffectiveFamily *string `json:"EffectiveFamily,omitempty"`
+
+	// EffectiveModel The effective model for this processor.
+	EffectiveModel *string `json:"EffectiveModel,omitempty"`
+
+	// IdentificationRegisters The raw manufacturer-provided processor identification registers for this processor.
+	IdentificationRegisters *string `json:"IdentificationRegisters,omitempty"`
+
+	// MicrocodeInfo The microcode information for this processor.
+	MicrocodeInfo *string `json:"MicrocodeInfo,omitempty"`
+
+	// ProtectedIdentificationNumber The Protected Processor Identification Number (PPIN) for this processor.
+	ProtectedIdentificationNumber *string `json:"ProtectedIdentificationNumber,omitempty"`
+
+	// Step The step value for this processor.
+	Step *string `json:"Step,omitempty"`
+
+	// VendorID The vendor identification for this processor.
+	VendorID *string `json:"VendorId,omitempty"`
+}
+
+// ProcessorV1230ProcessorInterface This type describes an interface between the system, or external connection, and the processor.
+type ProcessorV1230ProcessorInterface struct {
+	// Ethernet This type defines an Ethernet interface.
+	Ethernet *ProcessorV1230EthernetInterface `json:"Ethernet,omitempty"`
+
+	// InterfaceType The interface type.
+	InterfaceType *ProcessorV1230ProcessorInterface_InterfaceType `json:"InterfaceType,omitempty"`
+
+	// PCIe Properties that describe a PCIe interface.
+	PCIe *PCIeDeviceV1220PCIeInterface `json:"PCIe,omitempty"`
+}
+
+// ProcessorV1230ProcessorInterfaceInterfaceType1 defines model for .
+type ProcessorV1230ProcessorInterfaceInterfaceType1 = interface{}
+
+// ProcessorV1230ProcessorInterface_InterfaceType The interface type.
+type ProcessorV1230ProcessorInterface_InterfaceType struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorMemory This type describes the memory directly attached or integrated within a processor.
+type ProcessorV1230ProcessorMemory struct {
+	// CapacityMiB The memory capacity in MiB.
+	CapacityMiB *int64 `json:"CapacityMiB,omitempty"`
+
+	// IntegratedMemory An indication of whether this memory is integrated within the processor.
+	IntegratedMemory *bool `json:"IntegratedMemory,omitempty"`
+
+	// MemoryType The type of memory used by this processor.
+	MemoryType *ProcessorV1230ProcessorMemory_MemoryType `json:"MemoryType,omitempty"`
+
+	// SpeedMHz The operating speed of the memory in MHz.
+	SpeedMHz *int64 `json:"SpeedMHz,omitempty"`
+}
+
+// ProcessorV1230ProcessorMemoryMemoryType1 defines model for .
+type ProcessorV1230ProcessorMemoryMemoryType1 = interface{}
+
+// ProcessorV1230ProcessorMemory_MemoryType The type of memory used by this processor.
+type ProcessorV1230ProcessorMemory_MemoryType struct {
+	union json.RawMessage
+}
+
+// ProcessorV1230ProcessorMemoryType defines model for Processor_v1_23_0_ProcessorMemoryType.
+type ProcessorV1230ProcessorMemoryType string
+
+// ProcessorV1230ProcessorType defines model for Processor_v1_23_0_ProcessorType.
+type ProcessorV1230ProcessorType string
+
+// ProcessorV1230Reset This action resets the processor.
+type ProcessorV1230Reset struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ProcessorV1230ResetToDefaults The action resets the values of writable properties to factory defaults.
+type ProcessorV1230ResetToDefaults struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ProcessorV1230SystemInterfaceType defines model for Processor_v1_23_0_SystemInterfaceType.
+type ProcessorV1230SystemInterfaceType string
+
+// ProcessorV1230ThrottleCause defines model for Processor_v1_23_0_ThrottleCause.
+type ProcessorV1230ThrottleCause string
+
+// ProcessorV1230TurboState defines model for Processor_v1_23_0_TurboState.
+type ProcessorV1230TurboState string
+
+// ProcessorV1230UALink The UALink attributes of a processor.
+type ProcessorV1230UALink struct {
+	// AcceleratorID The UALink Accelerator ID of the processor.
+	AcceleratorID *int64 `json:"AcceleratorID,omitempty"`
 }
 
 // RedfishError The error payload from a Redfish service.
@@ -5011,6 +6081,12 @@ type PatchRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130
 
 // PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDBiosSettings for application/json ContentType.
 type PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130Bios
+
+// PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1230Processor
+
+// PutRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1230Processor
 
 // PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDSecureBoot for application/json ContentType.
 type PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV120SecureBoot
@@ -7259,6 +8335,68 @@ func (t *ComputerSystemV1280WatchdogTimer_WarningAction) UnmarshalJSON(b []byte)
 	return err
 }
 
+// AsControlV180ControlMode returns the union data inside the ControlV180ControlRangeExcerpt_ControlMode as a ControlV180ControlMode
+func (t ControlV180ControlRangeExcerpt_ControlMode) AsControlV180ControlMode() (ControlV180ControlMode, error) {
+	var body ControlV180ControlMode
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromControlV180ControlMode overwrites any union data inside the ControlV180ControlRangeExcerpt_ControlMode as the provided ControlV180ControlMode
+func (t *ControlV180ControlRangeExcerpt_ControlMode) FromControlV180ControlMode(v ControlV180ControlMode) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeControlV180ControlMode performs a merge with any union data inside the ControlV180ControlRangeExcerpt_ControlMode, using the provided ControlV180ControlMode
+func (t *ControlV180ControlRangeExcerpt_ControlMode) MergeControlV180ControlMode(v ControlV180ControlMode) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsControlV180ControlRangeExcerptControlMode1 returns the union data inside the ControlV180ControlRangeExcerpt_ControlMode as a ControlV180ControlRangeExcerptControlMode1
+func (t ControlV180ControlRangeExcerpt_ControlMode) AsControlV180ControlRangeExcerptControlMode1() (ControlV180ControlRangeExcerptControlMode1, error) {
+	var body ControlV180ControlRangeExcerptControlMode1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromControlV180ControlRangeExcerptControlMode1 overwrites any union data inside the ControlV180ControlRangeExcerpt_ControlMode as the provided ControlV180ControlRangeExcerptControlMode1
+func (t *ControlV180ControlRangeExcerpt_ControlMode) FromControlV180ControlRangeExcerptControlMode1(v ControlV180ControlRangeExcerptControlMode1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeControlV180ControlRangeExcerptControlMode1 performs a merge with any union data inside the ControlV180ControlRangeExcerpt_ControlMode, using the provided ControlV180ControlRangeExcerptControlMode1
+func (t *ControlV180ControlRangeExcerpt_ControlMode) MergeControlV180ControlRangeExcerptControlMode1(v ControlV180ControlRangeExcerptControlMode1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ControlV180ControlRangeExcerpt_ControlMode) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ControlV180ControlRangeExcerpt_ControlMode) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsResourceDescription returns the union data inside the ManagerCollectionManagerCollection_Description as a ResourceDescription
 func (t ManagerCollectionManagerCollection_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
@@ -7813,6 +8951,1060 @@ func (t ManagerV1250Manager_UUID) MarshalJSON() ([]byte, error) {
 }
 
 func (t *ManagerV1250Manager_UUID) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPCIeDevicePCIeTypes returns the union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as a PCIeDevicePCIeTypes
+func (t PCIeDeviceV1220PCIeInterface_MaxPCIeType) AsPCIeDevicePCIeTypes() (PCIeDevicePCIeTypes, error) {
+	var body PCIeDevicePCIeTypes
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPCIeDevicePCIeTypes overwrites any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) FromPCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePCIeDevicePCIeTypes performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType, using the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) MergePCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPCIeDeviceV1220PCIeInterfaceMaxPCIeType1 returns the union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as a PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
+func (t PCIeDeviceV1220PCIeInterface_MaxPCIeType) AsPCIeDeviceV1220PCIeInterfaceMaxPCIeType1() (PCIeDeviceV1220PCIeInterfaceMaxPCIeType1, error) {
+	var body PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPCIeDeviceV1220PCIeInterfaceMaxPCIeType1 overwrites any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as the provided PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
+func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) FromPCIeDeviceV1220PCIeInterfaceMaxPCIeType1(v PCIeDeviceV1220PCIeInterfaceMaxPCIeType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePCIeDeviceV1220PCIeInterfaceMaxPCIeType1 performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType, using the provided PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
+func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) MergePCIeDeviceV1220PCIeInterfaceMaxPCIeType1(v PCIeDeviceV1220PCIeInterfaceMaxPCIeType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PCIeDeviceV1220PCIeInterface_MaxPCIeType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsPCIeDevicePCIeTypes returns the union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as a PCIeDevicePCIeTypes
+func (t PCIeDeviceV1220PCIeInterface_PCIeType) AsPCIeDevicePCIeTypes() (PCIeDevicePCIeTypes, error) {
+	var body PCIeDevicePCIeTypes
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPCIeDevicePCIeTypes overwrites any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1220PCIeInterface_PCIeType) FromPCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePCIeDevicePCIeTypes performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType, using the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1220PCIeInterface_PCIeType) MergePCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsPCIeDeviceV1220PCIeInterfacePCIeType1 returns the union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as a PCIeDeviceV1220PCIeInterfacePCIeType1
+func (t PCIeDeviceV1220PCIeInterface_PCIeType) AsPCIeDeviceV1220PCIeInterfacePCIeType1() (PCIeDeviceV1220PCIeInterfacePCIeType1, error) {
+	var body PCIeDeviceV1220PCIeInterfacePCIeType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromPCIeDeviceV1220PCIeInterfacePCIeType1 overwrites any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as the provided PCIeDeviceV1220PCIeInterfacePCIeType1
+func (t *PCIeDeviceV1220PCIeInterface_PCIeType) FromPCIeDeviceV1220PCIeInterfacePCIeType1(v PCIeDeviceV1220PCIeInterfacePCIeType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergePCIeDeviceV1220PCIeInterfacePCIeType1 performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType, using the provided PCIeDeviceV1220PCIeInterfacePCIeType1
+func (t *PCIeDeviceV1220PCIeInterface_PCIeType) MergePCIeDeviceV1220PCIeInterfacePCIeType1(v PCIeDeviceV1220PCIeInterfacePCIeType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t PCIeDeviceV1220PCIeInterface_PCIeType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *PCIeDeviceV1220PCIeInterface_PCIeType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the ProcessorCollectionProcessorCollection_Description as a ResourceDescription
+func (t ProcessorCollectionProcessorCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the ProcessorCollectionProcessorCollection_Description as the provided ResourceDescription
+func (t *ProcessorCollectionProcessorCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the ProcessorCollectionProcessorCollection_Description, using the provided ResourceDescription
+func (t *ProcessorCollectionProcessorCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorCollectionProcessorCollectionDescription1 returns the union data inside the ProcessorCollectionProcessorCollection_Description as a ProcessorCollectionProcessorCollectionDescription1
+func (t ProcessorCollectionProcessorCollection_Description) AsProcessorCollectionProcessorCollectionDescription1() (ProcessorCollectionProcessorCollectionDescription1, error) {
+	var body ProcessorCollectionProcessorCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorCollectionProcessorCollectionDescription1 overwrites any union data inside the ProcessorCollectionProcessorCollection_Description as the provided ProcessorCollectionProcessorCollectionDescription1
+func (t *ProcessorCollectionProcessorCollection_Description) FromProcessorCollectionProcessorCollectionDescription1(v ProcessorCollectionProcessorCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorCollectionProcessorCollectionDescription1 performs a merge with any union data inside the ProcessorCollectionProcessorCollection_Description, using the provided ProcessorCollectionProcessorCollectionDescription1
+func (t *ProcessorCollectionProcessorCollection_Description) MergeProcessorCollectionProcessorCollectionDescription1(v ProcessorCollectionProcessorCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorCollectionProcessorCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorCollectionProcessorCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceUUID returns the union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as a ResourceUUID
+func (t ProcessorV1230FpgaReconfigurationSlot_UUID) AsResourceUUID() (ResourceUUID, error) {
+	var body ResourceUUID
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceUUID overwrites any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as the provided ResourceUUID
+func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) FromResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceUUID performs a merge with any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID, using the provided ResourceUUID
+func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) MergeResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230FpgaReconfigurationSlotUUID1 returns the union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as a ProcessorV1230FpgaReconfigurationSlotUUID1
+func (t ProcessorV1230FpgaReconfigurationSlot_UUID) AsProcessorV1230FpgaReconfigurationSlotUUID1() (ProcessorV1230FpgaReconfigurationSlotUUID1, error) {
+	var body ProcessorV1230FpgaReconfigurationSlotUUID1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230FpgaReconfigurationSlotUUID1 overwrites any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as the provided ProcessorV1230FpgaReconfigurationSlotUUID1
+func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) FromProcessorV1230FpgaReconfigurationSlotUUID1(v ProcessorV1230FpgaReconfigurationSlotUUID1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230FpgaReconfigurationSlotUUID1 performs a merge with any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID, using the provided ProcessorV1230FpgaReconfigurationSlotUUID1
+func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) MergeProcessorV1230FpgaReconfigurationSlotUUID1(v ProcessorV1230FpgaReconfigurationSlotUUID1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230FpgaReconfigurationSlot_UUID) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOdataV4IdRef returns the union data inside the ProcessorV1230Links_GraphicsController as a OdataV4IdRef
+func (t ProcessorV1230Links_GraphicsController) AsOdataV4IdRef() (OdataV4IdRef, error) {
+	var body OdataV4IdRef
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromOdataV4IdRef overwrites any union data inside the ProcessorV1230Links_GraphicsController as the provided OdataV4IdRef
+func (t *ProcessorV1230Links_GraphicsController) FromOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeOdataV4IdRef performs a merge with any union data inside the ProcessorV1230Links_GraphicsController, using the provided OdataV4IdRef
+func (t *ProcessorV1230Links_GraphicsController) MergeOdataV4IdRef(v OdataV4IdRef) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230LinksGraphicsController1 returns the union data inside the ProcessorV1230Links_GraphicsController as a ProcessorV1230LinksGraphicsController1
+func (t ProcessorV1230Links_GraphicsController) AsProcessorV1230LinksGraphicsController1() (ProcessorV1230LinksGraphicsController1, error) {
+	var body ProcessorV1230LinksGraphicsController1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230LinksGraphicsController1 overwrites any union data inside the ProcessorV1230Links_GraphicsController as the provided ProcessorV1230LinksGraphicsController1
+func (t *ProcessorV1230Links_GraphicsController) FromProcessorV1230LinksGraphicsController1(v ProcessorV1230LinksGraphicsController1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230LinksGraphicsController1 performs a merge with any union data inside the ProcessorV1230Links_GraphicsController, using the provided ProcessorV1230LinksGraphicsController1
+func (t *ProcessorV1230Links_GraphicsController) MergeProcessorV1230LinksGraphicsController1(v ProcessorV1230LinksGraphicsController1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Links_GraphicsController) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Links_GraphicsController) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230BaseSpeedPriorityState returns the union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as a ProcessorV1230BaseSpeedPriorityState
+func (t ProcessorV1230Processor_BaseSpeedPriorityState) AsProcessorV1230BaseSpeedPriorityState() (ProcessorV1230BaseSpeedPriorityState, error) {
+	var body ProcessorV1230BaseSpeedPriorityState
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230BaseSpeedPriorityState overwrites any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as the provided ProcessorV1230BaseSpeedPriorityState
+func (t *ProcessorV1230Processor_BaseSpeedPriorityState) FromProcessorV1230BaseSpeedPriorityState(v ProcessorV1230BaseSpeedPriorityState) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230BaseSpeedPriorityState performs a merge with any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState, using the provided ProcessorV1230BaseSpeedPriorityState
+func (t *ProcessorV1230Processor_BaseSpeedPriorityState) MergeProcessorV1230BaseSpeedPriorityState(v ProcessorV1230BaseSpeedPriorityState) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorBaseSpeedPriorityState1 returns the union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as a ProcessorV1230ProcessorBaseSpeedPriorityState1
+func (t ProcessorV1230Processor_BaseSpeedPriorityState) AsProcessorV1230ProcessorBaseSpeedPriorityState1() (ProcessorV1230ProcessorBaseSpeedPriorityState1, error) {
+	var body ProcessorV1230ProcessorBaseSpeedPriorityState1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorBaseSpeedPriorityState1 overwrites any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as the provided ProcessorV1230ProcessorBaseSpeedPriorityState1
+func (t *ProcessorV1230Processor_BaseSpeedPriorityState) FromProcessorV1230ProcessorBaseSpeedPriorityState1(v ProcessorV1230ProcessorBaseSpeedPriorityState1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorBaseSpeedPriorityState1 performs a merge with any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState, using the provided ProcessorV1230ProcessorBaseSpeedPriorityState1
+func (t *ProcessorV1230Processor_BaseSpeedPriorityState) MergeProcessorV1230ProcessorBaseSpeedPriorityState1(v ProcessorV1230ProcessorBaseSpeedPriorityState1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_BaseSpeedPriorityState) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_BaseSpeedPriorityState) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the ProcessorV1230Processor_Description as a ResourceDescription
+func (t ProcessorV1230Processor_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the ProcessorV1230Processor_Description as the provided ResourceDescription
+func (t *ProcessorV1230Processor_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the ProcessorV1230Processor_Description, using the provided ResourceDescription
+func (t *ProcessorV1230Processor_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorDescription1 returns the union data inside the ProcessorV1230Processor_Description as a ProcessorV1230ProcessorDescription1
+func (t ProcessorV1230Processor_Description) AsProcessorV1230ProcessorDescription1() (ProcessorV1230ProcessorDescription1, error) {
+	var body ProcessorV1230ProcessorDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorDescription1 overwrites any union data inside the ProcessorV1230Processor_Description as the provided ProcessorV1230ProcessorDescription1
+func (t *ProcessorV1230Processor_Description) FromProcessorV1230ProcessorDescription1(v ProcessorV1230ProcessorDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorDescription1 performs a merge with any union data inside the ProcessorV1230Processor_Description, using the provided ProcessorV1230ProcessorDescription1
+func (t *ProcessorV1230Processor_Description) MergeProcessorV1230ProcessorDescription1(v ProcessorV1230ProcessorDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230InstructionSet returns the union data inside the ProcessorV1230Processor_InstructionSet as a ProcessorV1230InstructionSet
+func (t ProcessorV1230Processor_InstructionSet) AsProcessorV1230InstructionSet() (ProcessorV1230InstructionSet, error) {
+	var body ProcessorV1230InstructionSet
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230InstructionSet overwrites any union data inside the ProcessorV1230Processor_InstructionSet as the provided ProcessorV1230InstructionSet
+func (t *ProcessorV1230Processor_InstructionSet) FromProcessorV1230InstructionSet(v ProcessorV1230InstructionSet) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230InstructionSet performs a merge with any union data inside the ProcessorV1230Processor_InstructionSet, using the provided ProcessorV1230InstructionSet
+func (t *ProcessorV1230Processor_InstructionSet) MergeProcessorV1230InstructionSet(v ProcessorV1230InstructionSet) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorInstructionSet1 returns the union data inside the ProcessorV1230Processor_InstructionSet as a ProcessorV1230ProcessorInstructionSet1
+func (t ProcessorV1230Processor_InstructionSet) AsProcessorV1230ProcessorInstructionSet1() (ProcessorV1230ProcessorInstructionSet1, error) {
+	var body ProcessorV1230ProcessorInstructionSet1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorInstructionSet1 overwrites any union data inside the ProcessorV1230Processor_InstructionSet as the provided ProcessorV1230ProcessorInstructionSet1
+func (t *ProcessorV1230Processor_InstructionSet) FromProcessorV1230ProcessorInstructionSet1(v ProcessorV1230ProcessorInstructionSet1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorInstructionSet1 performs a merge with any union data inside the ProcessorV1230Processor_InstructionSet, using the provided ProcessorV1230ProcessorInstructionSet1
+func (t *ProcessorV1230Processor_InstructionSet) MergeProcessorV1230ProcessorInstructionSet1(v ProcessorV1230ProcessorInstructionSet1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_InstructionSet) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_InstructionSet) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsControlV180ControlRangeExcerpt returns the union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as a ControlV180ControlRangeExcerpt
+func (t ProcessorV1230Processor_OperatingSpeedRangeMHz) AsControlV180ControlRangeExcerpt() (ControlV180ControlRangeExcerpt, error) {
+	var body ControlV180ControlRangeExcerpt
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromControlV180ControlRangeExcerpt overwrites any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as the provided ControlV180ControlRangeExcerpt
+func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) FromControlV180ControlRangeExcerpt(v ControlV180ControlRangeExcerpt) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeControlV180ControlRangeExcerpt performs a merge with any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz, using the provided ControlV180ControlRangeExcerpt
+func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) MergeControlV180ControlRangeExcerpt(v ControlV180ControlRangeExcerpt) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorOperatingSpeedRangeMHz1 returns the union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as a ProcessorV1230ProcessorOperatingSpeedRangeMHz1
+func (t ProcessorV1230Processor_OperatingSpeedRangeMHz) AsProcessorV1230ProcessorOperatingSpeedRangeMHz1() (ProcessorV1230ProcessorOperatingSpeedRangeMHz1, error) {
+	var body ProcessorV1230ProcessorOperatingSpeedRangeMHz1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorOperatingSpeedRangeMHz1 overwrites any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as the provided ProcessorV1230ProcessorOperatingSpeedRangeMHz1
+func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) FromProcessorV1230ProcessorOperatingSpeedRangeMHz1(v ProcessorV1230ProcessorOperatingSpeedRangeMHz1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorOperatingSpeedRangeMHz1 performs a merge with any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz, using the provided ProcessorV1230ProcessorOperatingSpeedRangeMHz1
+func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) MergeProcessorV1230ProcessorOperatingSpeedRangeMHz1(v ProcessorV1230ProcessorOperatingSpeedRangeMHz1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_OperatingSpeedRangeMHz) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourcePowerState returns the union data inside the ProcessorV1230Processor_PowerState as a ResourcePowerState
+func (t ProcessorV1230Processor_PowerState) AsResourcePowerState() (ResourcePowerState, error) {
+	var body ResourcePowerState
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourcePowerState overwrites any union data inside the ProcessorV1230Processor_PowerState as the provided ResourcePowerState
+func (t *ProcessorV1230Processor_PowerState) FromResourcePowerState(v ResourcePowerState) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourcePowerState performs a merge with any union data inside the ProcessorV1230Processor_PowerState, using the provided ResourcePowerState
+func (t *ProcessorV1230Processor_PowerState) MergeResourcePowerState(v ResourcePowerState) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorPowerState1 returns the union data inside the ProcessorV1230Processor_PowerState as a ProcessorV1230ProcessorPowerState1
+func (t ProcessorV1230Processor_PowerState) AsProcessorV1230ProcessorPowerState1() (ProcessorV1230ProcessorPowerState1, error) {
+	var body ProcessorV1230ProcessorPowerState1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorPowerState1 overwrites any union data inside the ProcessorV1230Processor_PowerState as the provided ProcessorV1230ProcessorPowerState1
+func (t *ProcessorV1230Processor_PowerState) FromProcessorV1230ProcessorPowerState1(v ProcessorV1230ProcessorPowerState1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorPowerState1 performs a merge with any union data inside the ProcessorV1230Processor_PowerState, using the provided ProcessorV1230ProcessorPowerState1
+func (t *ProcessorV1230Processor_PowerState) MergeProcessorV1230ProcessorPowerState1(v ProcessorV1230ProcessorPowerState1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_PowerState) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_PowerState) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230ProcessorArchitecture returns the union data inside the ProcessorV1230Processor_ProcessorArchitecture as a ProcessorV1230ProcessorArchitecture
+func (t ProcessorV1230Processor_ProcessorArchitecture) AsProcessorV1230ProcessorArchitecture() (ProcessorV1230ProcessorArchitecture, error) {
+	var body ProcessorV1230ProcessorArchitecture
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorArchitecture overwrites any union data inside the ProcessorV1230Processor_ProcessorArchitecture as the provided ProcessorV1230ProcessorArchitecture
+func (t *ProcessorV1230Processor_ProcessorArchitecture) FromProcessorV1230ProcessorArchitecture(v ProcessorV1230ProcessorArchitecture) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorArchitecture performs a merge with any union data inside the ProcessorV1230Processor_ProcessorArchitecture, using the provided ProcessorV1230ProcessorArchitecture
+func (t *ProcessorV1230Processor_ProcessorArchitecture) MergeProcessorV1230ProcessorArchitecture(v ProcessorV1230ProcessorArchitecture) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorProcessorArchitecture1 returns the union data inside the ProcessorV1230Processor_ProcessorArchitecture as a ProcessorV1230ProcessorProcessorArchitecture1
+func (t ProcessorV1230Processor_ProcessorArchitecture) AsProcessorV1230ProcessorProcessorArchitecture1() (ProcessorV1230ProcessorProcessorArchitecture1, error) {
+	var body ProcessorV1230ProcessorProcessorArchitecture1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorProcessorArchitecture1 overwrites any union data inside the ProcessorV1230Processor_ProcessorArchitecture as the provided ProcessorV1230ProcessorProcessorArchitecture1
+func (t *ProcessorV1230Processor_ProcessorArchitecture) FromProcessorV1230ProcessorProcessorArchitecture1(v ProcessorV1230ProcessorProcessorArchitecture1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorProcessorArchitecture1 performs a merge with any union data inside the ProcessorV1230Processor_ProcessorArchitecture, using the provided ProcessorV1230ProcessorProcessorArchitecture1
+func (t *ProcessorV1230Processor_ProcessorArchitecture) MergeProcessorV1230ProcessorProcessorArchitecture1(v ProcessorV1230ProcessorProcessorArchitecture1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_ProcessorArchitecture) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_ProcessorArchitecture) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230ProcessorType returns the union data inside the ProcessorV1230Processor_ProcessorType as a ProcessorV1230ProcessorType
+func (t ProcessorV1230Processor_ProcessorType) AsProcessorV1230ProcessorType() (ProcessorV1230ProcessorType, error) {
+	var body ProcessorV1230ProcessorType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorType overwrites any union data inside the ProcessorV1230Processor_ProcessorType as the provided ProcessorV1230ProcessorType
+func (t *ProcessorV1230Processor_ProcessorType) FromProcessorV1230ProcessorType(v ProcessorV1230ProcessorType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorType performs a merge with any union data inside the ProcessorV1230Processor_ProcessorType, using the provided ProcessorV1230ProcessorType
+func (t *ProcessorV1230Processor_ProcessorType) MergeProcessorV1230ProcessorType(v ProcessorV1230ProcessorType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorProcessorType1 returns the union data inside the ProcessorV1230Processor_ProcessorType as a ProcessorV1230ProcessorProcessorType1
+func (t ProcessorV1230Processor_ProcessorType) AsProcessorV1230ProcessorProcessorType1() (ProcessorV1230ProcessorProcessorType1, error) {
+	var body ProcessorV1230ProcessorProcessorType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorProcessorType1 overwrites any union data inside the ProcessorV1230Processor_ProcessorType as the provided ProcessorV1230ProcessorProcessorType1
+func (t *ProcessorV1230Processor_ProcessorType) FromProcessorV1230ProcessorProcessorType1(v ProcessorV1230ProcessorProcessorType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorProcessorType1 performs a merge with any union data inside the ProcessorV1230Processor_ProcessorType, using the provided ProcessorV1230ProcessorProcessorType1
+func (t *ProcessorV1230Processor_ProcessorType) MergeProcessorV1230ProcessorProcessorType1(v ProcessorV1230ProcessorProcessorType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_ProcessorType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_ProcessorType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230ThrottleCause returns the union data inside the ProcessorV1230Processor_ThrottleCauses_Item as a ProcessorV1230ThrottleCause
+func (t ProcessorV1230Processor_ThrottleCauses_Item) AsProcessorV1230ThrottleCause() (ProcessorV1230ThrottleCause, error) {
+	var body ProcessorV1230ThrottleCause
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ThrottleCause overwrites any union data inside the ProcessorV1230Processor_ThrottleCauses_Item as the provided ProcessorV1230ThrottleCause
+func (t *ProcessorV1230Processor_ThrottleCauses_Item) FromProcessorV1230ThrottleCause(v ProcessorV1230ThrottleCause) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ThrottleCause performs a merge with any union data inside the ProcessorV1230Processor_ThrottleCauses_Item, using the provided ProcessorV1230ThrottleCause
+func (t *ProcessorV1230Processor_ThrottleCauses_Item) MergeProcessorV1230ThrottleCause(v ProcessorV1230ThrottleCause) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorThrottleCauses1 returns the union data inside the ProcessorV1230Processor_ThrottleCauses_Item as a ProcessorV1230ProcessorThrottleCauses1
+func (t ProcessorV1230Processor_ThrottleCauses_Item) AsProcessorV1230ProcessorThrottleCauses1() (ProcessorV1230ProcessorThrottleCauses1, error) {
+	var body ProcessorV1230ProcessorThrottleCauses1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorThrottleCauses1 overwrites any union data inside the ProcessorV1230Processor_ThrottleCauses_Item as the provided ProcessorV1230ProcessorThrottleCauses1
+func (t *ProcessorV1230Processor_ThrottleCauses_Item) FromProcessorV1230ProcessorThrottleCauses1(v ProcessorV1230ProcessorThrottleCauses1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorThrottleCauses1 performs a merge with any union data inside the ProcessorV1230Processor_ThrottleCauses_Item, using the provided ProcessorV1230ProcessorThrottleCauses1
+func (t *ProcessorV1230Processor_ThrottleCauses_Item) MergeProcessorV1230ProcessorThrottleCauses1(v ProcessorV1230ProcessorThrottleCauses1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_ThrottleCauses_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_ThrottleCauses_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230TurboState returns the union data inside the ProcessorV1230Processor_TurboState as a ProcessorV1230TurboState
+func (t ProcessorV1230Processor_TurboState) AsProcessorV1230TurboState() (ProcessorV1230TurboState, error) {
+	var body ProcessorV1230TurboState
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230TurboState overwrites any union data inside the ProcessorV1230Processor_TurboState as the provided ProcessorV1230TurboState
+func (t *ProcessorV1230Processor_TurboState) FromProcessorV1230TurboState(v ProcessorV1230TurboState) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230TurboState performs a merge with any union data inside the ProcessorV1230Processor_TurboState, using the provided ProcessorV1230TurboState
+func (t *ProcessorV1230Processor_TurboState) MergeProcessorV1230TurboState(v ProcessorV1230TurboState) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorTurboState1 returns the union data inside the ProcessorV1230Processor_TurboState as a ProcessorV1230ProcessorTurboState1
+func (t ProcessorV1230Processor_TurboState) AsProcessorV1230ProcessorTurboState1() (ProcessorV1230ProcessorTurboState1, error) {
+	var body ProcessorV1230ProcessorTurboState1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorTurboState1 overwrites any union data inside the ProcessorV1230Processor_TurboState as the provided ProcessorV1230ProcessorTurboState1
+func (t *ProcessorV1230Processor_TurboState) FromProcessorV1230ProcessorTurboState1(v ProcessorV1230ProcessorTurboState1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorTurboState1 performs a merge with any union data inside the ProcessorV1230Processor_TurboState, using the provided ProcessorV1230ProcessorTurboState1
+func (t *ProcessorV1230Processor_TurboState) MergeProcessorV1230ProcessorTurboState1(v ProcessorV1230ProcessorTurboState1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_TurboState) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_TurboState) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceUUID returns the union data inside the ProcessorV1230Processor_UUID as a ResourceUUID
+func (t ProcessorV1230Processor_UUID) AsResourceUUID() (ResourceUUID, error) {
+	var body ResourceUUID
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceUUID overwrites any union data inside the ProcessorV1230Processor_UUID as the provided ResourceUUID
+func (t *ProcessorV1230Processor_UUID) FromResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceUUID performs a merge with any union data inside the ProcessorV1230Processor_UUID, using the provided ResourceUUID
+func (t *ProcessorV1230Processor_UUID) MergeResourceUUID(v ResourceUUID) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorUUID1 returns the union data inside the ProcessorV1230Processor_UUID as a ProcessorV1230ProcessorUUID1
+func (t ProcessorV1230Processor_UUID) AsProcessorV1230ProcessorUUID1() (ProcessorV1230ProcessorUUID1, error) {
+	var body ProcessorV1230ProcessorUUID1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorUUID1 overwrites any union data inside the ProcessorV1230Processor_UUID as the provided ProcessorV1230ProcessorUUID1
+func (t *ProcessorV1230Processor_UUID) FromProcessorV1230ProcessorUUID1(v ProcessorV1230ProcessorUUID1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorUUID1 performs a merge with any union data inside the ProcessorV1230Processor_UUID, using the provided ProcessorV1230ProcessorUUID1
+func (t *ProcessorV1230Processor_UUID) MergeProcessorV1230ProcessorUUID1(v ProcessorV1230ProcessorUUID1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230Processor_UUID) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230Processor_UUID) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230SystemInterfaceType returns the union data inside the ProcessorV1230ProcessorInterface_InterfaceType as a ProcessorV1230SystemInterfaceType
+func (t ProcessorV1230ProcessorInterface_InterfaceType) AsProcessorV1230SystemInterfaceType() (ProcessorV1230SystemInterfaceType, error) {
+	var body ProcessorV1230SystemInterfaceType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230SystemInterfaceType overwrites any union data inside the ProcessorV1230ProcessorInterface_InterfaceType as the provided ProcessorV1230SystemInterfaceType
+func (t *ProcessorV1230ProcessorInterface_InterfaceType) FromProcessorV1230SystemInterfaceType(v ProcessorV1230SystemInterfaceType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230SystemInterfaceType performs a merge with any union data inside the ProcessorV1230ProcessorInterface_InterfaceType, using the provided ProcessorV1230SystemInterfaceType
+func (t *ProcessorV1230ProcessorInterface_InterfaceType) MergeProcessorV1230SystemInterfaceType(v ProcessorV1230SystemInterfaceType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorInterfaceInterfaceType1 returns the union data inside the ProcessorV1230ProcessorInterface_InterfaceType as a ProcessorV1230ProcessorInterfaceInterfaceType1
+func (t ProcessorV1230ProcessorInterface_InterfaceType) AsProcessorV1230ProcessorInterfaceInterfaceType1() (ProcessorV1230ProcessorInterfaceInterfaceType1, error) {
+	var body ProcessorV1230ProcessorInterfaceInterfaceType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorInterfaceInterfaceType1 overwrites any union data inside the ProcessorV1230ProcessorInterface_InterfaceType as the provided ProcessorV1230ProcessorInterfaceInterfaceType1
+func (t *ProcessorV1230ProcessorInterface_InterfaceType) FromProcessorV1230ProcessorInterfaceInterfaceType1(v ProcessorV1230ProcessorInterfaceInterfaceType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorInterfaceInterfaceType1 performs a merge with any union data inside the ProcessorV1230ProcessorInterface_InterfaceType, using the provided ProcessorV1230ProcessorInterfaceInterfaceType1
+func (t *ProcessorV1230ProcessorInterface_InterfaceType) MergeProcessorV1230ProcessorInterfaceInterfaceType1(v ProcessorV1230ProcessorInterfaceInterfaceType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230ProcessorInterface_InterfaceType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230ProcessorInterface_InterfaceType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsProcessorV1230ProcessorMemoryType returns the union data inside the ProcessorV1230ProcessorMemory_MemoryType as a ProcessorV1230ProcessorMemoryType
+func (t ProcessorV1230ProcessorMemory_MemoryType) AsProcessorV1230ProcessorMemoryType() (ProcessorV1230ProcessorMemoryType, error) {
+	var body ProcessorV1230ProcessorMemoryType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorMemoryType overwrites any union data inside the ProcessorV1230ProcessorMemory_MemoryType as the provided ProcessorV1230ProcessorMemoryType
+func (t *ProcessorV1230ProcessorMemory_MemoryType) FromProcessorV1230ProcessorMemoryType(v ProcessorV1230ProcessorMemoryType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorMemoryType performs a merge with any union data inside the ProcessorV1230ProcessorMemory_MemoryType, using the provided ProcessorV1230ProcessorMemoryType
+func (t *ProcessorV1230ProcessorMemory_MemoryType) MergeProcessorV1230ProcessorMemoryType(v ProcessorV1230ProcessorMemoryType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsProcessorV1230ProcessorMemoryMemoryType1 returns the union data inside the ProcessorV1230ProcessorMemory_MemoryType as a ProcessorV1230ProcessorMemoryMemoryType1
+func (t ProcessorV1230ProcessorMemory_MemoryType) AsProcessorV1230ProcessorMemoryMemoryType1() (ProcessorV1230ProcessorMemoryMemoryType1, error) {
+	var body ProcessorV1230ProcessorMemoryMemoryType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromProcessorV1230ProcessorMemoryMemoryType1 overwrites any union data inside the ProcessorV1230ProcessorMemory_MemoryType as the provided ProcessorV1230ProcessorMemoryMemoryType1
+func (t *ProcessorV1230ProcessorMemory_MemoryType) FromProcessorV1230ProcessorMemoryMemoryType1(v ProcessorV1230ProcessorMemoryMemoryType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeProcessorV1230ProcessorMemoryMemoryType1 performs a merge with any union data inside the ProcessorV1230ProcessorMemory_MemoryType, using the provided ProcessorV1230ProcessorMemoryMemoryType1
+func (t *ProcessorV1230ProcessorMemory_MemoryType) MergeProcessorV1230ProcessorMemoryMemoryType1(v ProcessorV1230ProcessorMemoryMemoryType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ProcessorV1230ProcessorMemory_MemoryType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ProcessorV1230ProcessorMemory_MemoryType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -9690,6 +11882,18 @@ type ServerInterface interface {
 	// (PUT /redfish/v1/Systems/{ComputerSystemId}/Bios/Settings)
 	PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string)
 
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/Processors)
+	GetRedfishV1SystemsComputerSystemIDProcessors(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId})
+	GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId})
+	PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId})
+	PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string)
+
 	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot)
 	GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string)
 
@@ -10354,6 +12558,137 @@ func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDBiosSettin
 	handler.ServeHTTP(w, r)
 }
 
+// GetRedfishV1SystemsComputerSystemIDProcessors operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDProcessors(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDProcessors(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "ProcessorId" -------------
+	var processorID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ProcessorId", r.PathValue("ProcessorId"), &processorID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ProcessorId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w, r, computerSystemID, processorID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "ProcessorId" -------------
+	var processorID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ProcessorId", r.PathValue("ProcessorId"), &processorID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ProcessorId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w, r, computerSystemID, processorID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "ProcessorId" -------------
+	var processorID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ProcessorId", r.PathValue("ProcessorId"), &processorID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ProcessorId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w, r, computerSystemID, processorID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 // GetRedfishV1SystemsComputerSystemIDSecureBoot operation middleware
 func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request) {
 
@@ -10883,6 +13218,10 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.GetRedfishV1SystemsComputerSystemIDBiosSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PatchRedfishV1SystemsComputerSystemIDBiosSettings)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PutRedfishV1SystemsComputerSystemIDBiosSettings)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors", wrapper.GetRedfishV1SystemsComputerSystemIDProcessors)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId}", wrapper.GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId}", wrapper.PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId}", wrapper.PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBoot)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot", wrapper.PatchRedfishV1SystemsComputerSystemIDSecureBoot)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot", wrapper.PutRedfishV1SystemsComputerSystemIDSecureBoot)
