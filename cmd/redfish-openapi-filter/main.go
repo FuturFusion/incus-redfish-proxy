@@ -22,6 +22,8 @@ var includedPaths = map[string]bool{
 	"/redfish/v1/Systems/{ComputerSystemId}":                                                                          true,
 	"/redfish/v1/Systems/{ComputerSystemId}/Actions/ComputerSystem.Reset":                                             true,
 	"/redfish/v1/Systems/{ComputerSystemId}/Bios":                                                                     true,
+	"/redfish/v1/Systems/{ComputerSystemId}/Processors":                                                               true,
+	"/redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId}":                                                 true,
 	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot":                                                               true,
 	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases":                                           true,
 	"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}":                              true,
