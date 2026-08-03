@@ -1,0 +1,20 @@
+[container]
+image = "coi-incus-redfish-proxy"
+
+[container.build]
+base = "images:debian/13"
+script = "build.sh"
+
+[incus]
+project = "default"
+
+[security]
+host_immutable = false
+
+[network]
+mode = "restricted"
+
+[tool]
+name = "claude"
+permission_mode = "bypass"
+auto_context = true
