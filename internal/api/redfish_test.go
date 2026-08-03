@@ -511,6 +511,292 @@ func TestRedfishServer_GetAndPatchBiosSettings(t *testing.T) {
 	}
 }
 
+func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessors(t *testing.T) {
+	tests := []struct {
+		name                 string
+		clientGetInstance    *incusapi.Instance
+		clientGetInstanceErr error
+
+		assertErr require.ErrorAssertionFunc
+		wantCount int
+	}{
+		{
+			name:              "success - defaults to a single processor",
+			clientGetInstance: &incusapi.Instance{},
+
+			assertErr: require.NoError,
+			wantCount: 1,
+		},
+		{
+			name: "success - configured cpu count",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"limits.cpu": "4",
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			wantCount: 4,
+		},
+		{
+			name: "success - invalid cpu count falls back to a single processor",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"limits.cpu": "not-a-number",
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			wantCount: 1,
+		},
+		{
+			name:                 "error - client.GetInstance",
+			clientGetInstanceErr: boom.Error,
+
+			assertErr: boom.ErrorContains,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			// The first call to fetch the ComputerSystem must always succeed.
+			callCount := 0
+
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					callCount++
+					if callCount == 1 {
+						return &incusapi.Instance{}, "", nil
+					}
+
+					return tc.clientGetInstance, "", tc.clientGetInstanceErr
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			systems, err := client.Service.Systems()
+			require.NoError(t, err)
+			require.Len(t, systems, 1)
+
+			processors, err := systems[0].Processors()
+			tc.assertErr(t, err)
+			require.Len(t, processors, tc.wantCount)
+		})
+	}
+}
+
+func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(t *testing.T) {
+	tests := []struct {
+		name         string
+		architecture string
+
+		wantArchitecture   schemas.ProcessorArchitecture
+		wantInstructionSet schemas.InstructionSet
+	}{
+		{
+			name:               "x86_64",
+			architecture:       "x86_64",
+			wantArchitecture:   schemas.X86ProcessorArchitecture,
+			wantInstructionSet: schemas.X8664InstructionSet,
+		},
+		{
+			name:               "aarch64",
+			architecture:       "aarch64",
+			wantArchitecture:   schemas.ARMProcessorArchitecture,
+			wantInstructionSet: schemas.ARMA64InstructionSet,
+		},
+		{
+			name:         "unknown architecture",
+			architecture: "riscv64",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{
+						InstancePut: incusapi.InstancePut{
+							Architecture: tc.architecture,
+						},
+					}, "", nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			systems, err := client.Service.Systems()
+			require.NoError(t, err)
+			require.Len(t, systems, 1)
+
+			processors, err := systems[0].Processors()
+			require.NoError(t, err)
+			require.Len(t, processors, 1)
+
+			processor := processors[0]
+			require.Equal(t, "0", processor.ID)
+			require.Equal(t, tc.wantArchitecture, processor.ProcessorArchitecture)
+			require.Equal(t, tc.wantInstructionSet, processor.InstructionSet)
+		})
+	}
+}
+
+func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID_Errors(t *testing.T) {
+	tests := []struct {
+		name       string
+		url        string
+		wantErrMsg string
+	}{
+		{
+			name:       "error - non-numeric processor id",
+			url:        "/redfish/v1/Systems/test-instance/Processors/not-a-number",
+			wantErrMsg: "invalid syntax",
+		},
+		{
+			name:       "error - processor id out of range",
+			url:        "/redfish/v1/Systems/test-instance/Processors/1",
+			wantErrMsg: "Not Found",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{}, "", nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodGet, tc.url, nil, "", nil)
+			require.ErrorContains(t, err, tc.wantErrMsg)
+
+			if resp != nil {
+				resp.Body.Close()
+			}
+		})
+	}
+}
+
+func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDSecureBoot(t *testing.T) {
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	systems, err := client.Service.Systems()
+	require.NoError(t, err)
+	require.Len(t, systems, 1)
+
+	secureBoot, err := systems[0].SecureBoot()
+	require.NoError(t, err)
+	require.NotNil(t, secureBoot)
+
+	require.False(t, secureBoot.SecureBootEnable)
+	require.Equal(t, schemas.DisabledSecureBootCurrentBootType, secureBoot.SecureBootCurrentBoot)
+	require.Equal(t, schemas.UserModeSecureBootModeType, secureBoot.SecureBootMode)
+}
+
+func TestRedfishServer_SecureBootDatabases(t *testing.T) {
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	systems, err := client.Service.Systems()
+	require.NoError(t, err)
+	require.Len(t, systems, 1)
+
+	secureBoot, err := systems[0].SecureBoot()
+	require.NoError(t, err)
+
+	databases, err := secureBoot.SecureBootDatabases()
+	require.NoError(t, err)
+	require.Len(t, databases, 3)
+
+	ids := make([]string, 0, len(databases))
+	for _, db := range databases {
+		ids = append(ids, db.ID)
+	}
+
+	require.ElementsMatch(t, []string{"DB", "DBX", "KEK"}, ids)
+}
+
+func TestRedfishServer_SecureBootDatabaseByID(t *testing.T) {
+	for _, databaseID := range []string{"DB", "DBX", "KEK"} {
+		t.Run(databaseID, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{}, "", nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			systems, err := client.Service.Systems()
+			require.NoError(t, err)
+			require.Len(t, systems, 1)
+
+			secureBoot, err := systems[0].SecureBoot()
+			require.NoError(t, err)
+
+			databases, err := secureBoot.SecureBootDatabases()
+			require.NoError(t, err)
+
+			var found *schemas.SecureBootDatabase
+			for _, db := range databases {
+				if db.ID == databaseID {
+					found = db
+				}
+			}
+
+			require.NotNil(t, found)
+			require.Equal(t, fmt.Sprintf("%s - database", databaseID), found.Name)
+		})
+	}
+}
+
+func TestRedfishServer_SecureBootCertificates(t *testing.T) {
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	systems, err := client.Service.Systems()
+	require.NoError(t, err)
+	require.Len(t, systems, 1)
+
+	secureBoot, err := systems[0].SecureBoot()
+	require.NoError(t, err)
+
+	databases, err := secureBoot.SecureBootDatabases()
+	require.NoError(t, err)
+	require.NotEmpty(t, databases)
+
+	certificates, err := databases[0].Certificates()
+	require.NoError(t, err)
+	require.Len(t, certificates, 1)
+
+	cert := certificates[0]
+	require.Equal(t, "1", cert.ID)
+	require.Equal(t, schemas.PEMCertificateType, cert.CertificateType)
+}
+
 func TestRedfishServer_NotFound_Error(t *testing.T) {
 	tests := []struct {
 		method string
@@ -535,6 +821,70 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		{
 			method: http.MethodPatch,
 			url:    "/redfish/v1/Managers/bmc1/VirtualMedia/invalid",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/Processors",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/Processors/0",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Certificates",
+		},
+		{
+			method: http.MethodPost,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates",
+		},
+		{
+			method: http.MethodPost,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Certificates",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates/1",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Certificates/1",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+		},
+		{
+			method: http.MethodDelete,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates/1",
+		},
+		{
+			method: http.MethodDelete,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Certificates/1",
+		},
+		{
+			method: http.MethodDelete,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
 		},
 	}
 
