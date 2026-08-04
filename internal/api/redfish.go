@@ -613,6 +613,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 
 	if processorID < 0 || processorID >= cpuNo {
 		responseErr(w, http.StatusNotFound)
+		return
 	}
 
 	processorArchitecture := &ProcessorV1230Processor_ProcessorArchitecture{}
