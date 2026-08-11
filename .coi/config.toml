@@ -8,9 +8,6 @@ script = "build.sh"
 [incus]
 project = "default"
 
-[security]
-host_immutable = false
-
 [network]
 mode = "restricted"
 
