@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"slices"
@@ -35,6 +36,59 @@ func NewRedfishServer(instanceName string, client IncusClient) *redfishServer {
 		instanceName: instanceName,
 		client:       client,
 	}
+}
+
+func validateManagerID(w http.ResponseWriter, managerID string) bool {
+	if managerID != managerName {
+		responseErr(w, http.StatusNotFound)
+		return false
+	}
+
+	return true
+}
+
+func validateVirtualMediaID(w http.ResponseWriter, managerID string, virtualMediaID string) bool {
+	if !validateManagerID(w, managerID) {
+		return false
+	}
+
+	if virtualMediaID != virtualMediaName {
+		responseErr(w, http.StatusNotFound)
+		return false
+	}
+
+	return true
+}
+
+func (s redfishServer) validateComputerSystemID(w http.ResponseWriter, computerSystemID string) bool {
+	if computerSystemID != s.instanceName {
+		responseErr(w, http.StatusNotFound)
+		return false
+	}
+
+	return true
+}
+
+func validateDatabaseID(w http.ResponseWriter, databaseID string) bool {
+	if !slices.Contains(secureBootDatabases, databaseID) {
+		responseErr(w, http.StatusNotFound)
+		return false
+	}
+
+	return true
+}
+
+func validateCertificateID(w http.ResponseWriter, databaseID string, certificateID string) bool {
+	if !validateDatabaseID(w, databaseID) {
+		return false
+	}
+
+	if certificateID != "1" {
+		responseErr(w, http.StatusNotFound)
+		return false
+	}
+
+	return true
 }
 
 func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
@@ -84,8 +138,7 @@ func (s redfishServer) GetRedfishV1Managers(w http.ResponseWriter, r *http.Reque
 }
 
 func (s redfishServer) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string) {
-	if managerID != managerName {
-		responseErr(w, http.StatusNotFound)
+	if !validateManagerID(w, managerID) {
 		return
 	}
 
@@ -100,16 +153,28 @@ func (s redfishServer) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 }
 
 func (s redfishServer) PatchRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string) {
+	if !validateManagerID(w, managerID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *http.Request, managerID string) {
+	if !validateManagerID(w, managerID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 const virtualMediaName = "CD"
 
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request, managerID string) {
+	if !validateManagerID(w, managerID) {
+		return
+	}
+
 	response(w, VirtualMediaCollectionVirtualMediaCollection{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
 		OdataType: ref("#VirtualMediaCollection.VirtualMediaCollection"),
@@ -124,8 +189,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.Response
 }
 
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if virtualMediaID != virtualMediaName {
-		responseErr(w, http.StatusNotFound)
+	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
 		return
 	}
 
@@ -157,8 +221,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 }
 
 func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if virtualMediaID != virtualMediaName {
-		responseErr(w, http.StatusNotFound)
+	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
 		return
 	}
 
@@ -166,6 +229,16 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.Inserted == nil {
+		responseErrWithMessage(w, http.StatusBadRequest, "virtual media inserted state is required")
+		return
+	}
+
+	if *request.Inserted && request.Image == nil {
+		responseErrWithMessage(w, http.StatusBadRequest, "virtual media image is required")
 		return
 	}
 
@@ -178,12 +251,13 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 	_, inserted := instance.Devices["boot-media"]
 
 	// eject
-	if !deref(request.Inserted) {
+	if !*request.Inserted {
 		if !inserted {
 			responseNoContent(w)
 			return
 		}
 
+		originalDevice := cloneStringMap(instance.Devices["boot-media"])
 		delete(instance.Devices, "boot-media")
 
 		op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
@@ -200,7 +274,8 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 
 		err = s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
 		if err != nil {
-			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+			rollbackErr := s.restoreBootMediaDevice(originalDevice)
+			responseOperationError(w, err, rollbackErr)
 			return
 		}
 
@@ -209,6 +284,11 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 	}
 
 	// insert
+	if inserted {
+		responseNoContent(w)
+		return
+	}
+
 	resp, err := http.Get(deref(request.Image))
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
@@ -230,7 +310,8 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 
 	err = op.Wait()
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		rollbackErr := s.deleteBootMediaVolume()
+		responseOperationError(w, err, rollbackErr)
 		return
 	}
 
@@ -243,27 +324,84 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 
 	op, err = s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		rollbackErr := s.deleteBootMediaVolume()
+		responseOperationError(w, err, rollbackErr)
 		return
 	}
 
 	err = op.Wait()
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		rollbackErr := s.deleteBootMediaVolume()
+		responseOperationError(w, err, rollbackErr)
 		return
 	}
+
+	responseNoContent(w)
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+		return
+	}
+
 	responseNotImplemented(w)
+}
+
+func cloneStringMap(source map[string]string) map[string]string {
+	clone := make(map[string]string, len(source))
+	for key, value := range source {
+		clone[key] = value
+	}
+
+	return clone
+}
+
+func (s redfishServer) deleteBootMediaVolume() error {
+	return s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
+}
+
+func (s redfishServer) restoreBootMediaDevice(device map[string]string) error {
+	instance, etag, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	if instance.Devices == nil {
+		instance.Devices = incusapi.DevicesMap{}
+	}
+
+	instance.Devices["boot-media"] = cloneStringMap(device)
+
+	op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait()
+}
+
+func responseOperationError(w http.ResponseWriter, operationErr error, rollbackErr error) {
+	if rollbackErr != nil {
+		operationErr = errors.Join(operationErr, fmt.Errorf("rollback failed: %w", rollbackErr))
+	}
+
+	responseErrWithMessage(w, http.StatusInternalServerError, operationErr.Error())
 }
 
 func (s redfishServer) GetRedfishV1Systems(w http.ResponseWriter, r *http.Request) {
@@ -285,12 +423,15 @@ func (s redfishServer) PostRedfishV1Systems(w http.ResponseWriter, r *http.Reque
 }
 
 func (s redfishServer) DeleteRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -350,16 +491,23 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -367,6 +515,11 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.ResetType == nil {
+		responseErrWithMessage(w, http.StatusBadRequest, "reset type is required")
 		return
 	}
 
@@ -411,8 +564,7 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -448,8 +600,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -457,6 +608,11 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.Attributes == nil || len(*request.Attributes) == 0 {
+		responseNoContent(w)
 		return
 	}
 
@@ -471,8 +627,12 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		return
 	}
 
-	if request.Attributes == nil {
-		responseNoContent(w)
+	if instance.Config == nil {
+		instance.Config = map[string]string{}
+	}
+
+	if instance.Devices == nil {
+		instance.Devices = incusapi.DevicesMap{}
 	}
 
 	for name, value := range *request.Attributes {
@@ -484,7 +644,12 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 
 		switch {
 		case strings.HasPrefix(name, "incus.config."):
-			configKey := name[:len("incus.config.")]
+			configKey := strings.TrimPrefix(name, "incus.config.")
+			if configKey == "" {
+				responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q has an empty config key", name))
+				return
+			}
+
 			if valueStr == "" {
 				delete(instance.Config, configKey)
 				continue
@@ -493,7 +658,12 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 			instance.Config[configKey] = valueStr
 
 		case strings.HasPrefix(name, "incus.devices."):
-			deviceName := name[:len("incus.devices.")]
+			deviceName := strings.TrimPrefix(name, "incus.devices.")
+			if deviceName == "" {
+				responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q has an empty device name", name))
+				return
+			}
+
 			if valueStr == "" {
 				delete(instance.Devices, deviceName)
 				continue
@@ -510,7 +680,8 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 			instance.Devices[deviceName] = deviceConfig
 
 		default:
-			continue
+			responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q is not supported", name))
+			return
 		}
 	}
 
@@ -530,6 +701,10 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
@@ -542,12 +717,15 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBiosSettings(w http.
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessors(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -584,35 +762,8 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessors(w http.Resp
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorIDStr string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
-		return
-	}
-
-	processorID, err := strconv.ParseInt(processorIDStr, 10, 64)
-	if err != nil {
-		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	instance, _, err := s.client.GetInstance(s.instanceName)
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	cfgLimitCPU, ok := instance.Config["limits.cpu"]
+	instance, ok := s.validateProcessorID(w, computerSystemID, processorIDStr)
 	if !ok {
-		cfgLimitCPU = "1"
-	}
-
-	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
-	if err != nil {
-		cpuNo = 1
-	}
-
-	if processorID < 0 || processorID >= cpuNo {
-		responseErr(w, http.StatusNotFound)
 		return
 	}
 
@@ -640,16 +791,60 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string) {
+	_, ok := s.validateProcessorID(w, computerSystemID, processorID)
+	if !ok {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string) {
+	_, ok := s.validateProcessorID(w, computerSystemID, processorID)
+	if !ok {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
-func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
+func (s redfishServer) validateProcessorID(w http.ResponseWriter, computerSystemID string, processorIDStr string) (*incusapi.Instance, bool) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return nil, false
+	}
+
+	processorID, err := strconv.ParseInt(processorIDStr, 10, 64)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return nil, false
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return nil, false
+	}
+
+	cfgLimitCPU, ok := instance.Config["limits.cpu"]
+	if !ok {
+		cfgLimitCPU = "1"
+	}
+
+	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
+	if err != nil {
+		cpuNo = 1
+	}
+
+	if processorID < 0 || processorID >= cpuNo {
 		responseErr(w, http.StatusNotFound)
+		return nil, false
+	}
+
+	return instance, true
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -674,10 +869,18 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
@@ -688,8 +891,7 @@ var secureBootDatabases = []string{
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
@@ -710,13 +912,11 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
-	if !slices.Contains(secureBootDatabases, databaseID) {
-		responseErr(w, http.StatusNotFound)
+	if !validateDatabaseID(w, databaseID) {
 		return
 	}
 
@@ -732,13 +932,11 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
-	if !slices.Contains(secureBootDatabases, databaseID) {
-		responseErr(w, http.StatusNotFound)
+	if !validateDatabaseID(w, databaseID) {
 		return
 	}
 
@@ -757,13 +955,11 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 }
 
 func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
-	if !slices.Contains(secureBootDatabases, databaseID) {
-		responseErr(w, http.StatusNotFound)
+	if !validateDatabaseID(w, databaseID) {
 		return
 	}
 
@@ -773,43 +969,29 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootD
 }
 
 func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
-	if !slices.Contains(secureBootDatabases, databaseID) {
-		responseErr(w, http.StatusNotFound)
+	if !validateCertificateID(w, databaseID, certificateID) {
 		return
 	}
 
 	// TODO: this is only a dummy entry
-
-	if certificateID != "1" {
-		responseErr(w, http.StatusNotFound)
-		return
-	}
 
 	responseNoContent(w)
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
-	if computerSystemID != s.instanceName {
-		responseErr(w, http.StatusNotFound)
+	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
-	if !slices.Contains(secureBootDatabases, databaseID) {
-		responseErr(w, http.StatusNotFound)
+	if !validateCertificateID(w, databaseID, certificateID) {
 		return
 	}
 
 	// TODO: this is only a dummy entry
-
-	if certificateID != "1" {
-		responseErr(w, http.StatusNotFound)
-		return
-	}
 
 	certificateType := CertificateV1110Certificate_CertificateType{}
 	_ = certificateType.FromCertificateCertificateType(PEM)
@@ -825,9 +1007,25 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
+	if !validateCertificateID(w, databaseID, certificateID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
+	if !validateCertificateID(w, databaseID, certificateID) {
+		return
+	}
+
 	responseNotImplemented(w)
 }

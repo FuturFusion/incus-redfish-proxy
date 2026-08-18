@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -499,10 +500,15 @@ func TestRedfishServer_GetAndPatchBiosSettings(t *testing.T) {
 			bios, err := system.Bios()
 			require.NoError(t, err)
 
+			attributes := schemas.SettingsAttributes{}
+			if tc.vTPMValue == "On" {
+				attributes["incus.devices.vtpm"] = `{"type":"tpm"}`
+			} else {
+				attributes["incus.devices.vtpm"] = ""
+			}
+
 			// Run test
-			err = bios.UpdateBiosAttributesApplyAt(schemas.SettingsAttributes{
-				"vTPM": tc.vTPMValue,
-			}, schemas.OnResetSettingsApplyTime)
+			err = bios.UpdateBiosAttributesApplyAt(attributes, schemas.OnResetSettingsApplyTime)
 
 			// Assert
 			tc.assertErr(t, err)
@@ -807,12 +813,68 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 			url:    "/redfish/v1/Systems/invalid",
 		},
 		{
+			method: http.MethodDelete,
+			url:    "/redfish/v1/Systems/invalid",
+		},
+		{
+			method: http.MethodPatch,
+			url:    "/redfish/v1/Systems/invalid",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Systems/invalid",
+		},
+		{
 			method: http.MethodPost,
 			url:    "/redfish/v1/Systems/invalid/Actions/ComputerSystem.Reset",
 		},
 		{
 			method: http.MethodPatch,
 			url:    "/redfish/v1/Systems/invalid/Bios/Settings",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Systems/invalid/Bios",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Systems/invalid/Bios/Settings",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Managers/invalid",
+		},
+		{
+			method: http.MethodPatch,
+			url:    "/redfish/v1/Managers/invalid",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Managers/invalid",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia/CD",
+		},
+		{
+			method: http.MethodPatch,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia/CD",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia/CD",
+		},
+		{
+			method: http.MethodPost,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia",
+		},
+		{
+			method: http.MethodPost,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia",
 		},
 		{
 			method: http.MethodGet,
@@ -831,7 +893,23 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 			url:    "/redfish/v1/Systems/invalid/Processors/0",
 		},
 		{
+			method: http.MethodPatch,
+			url:    "/redfish/v1/Systems/invalid/Processors/0",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Systems/invalid/Processors/0",
+		},
+		{
 			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot",
+		},
+		{
+			method: http.MethodPatch,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot",
+		},
+		{
+			method: http.MethodPut,
 			url:    "/redfish/v1/Systems/invalid/SecureBoot",
 		},
 		{
@@ -886,6 +964,14 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 			method: http.MethodDelete,
 			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
 		},
+		{
+			method: http.MethodPatch,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+		},
+		{
+			method: http.MethodPut,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+		},
 	}
 
 	for _, tc := range tests {
@@ -937,6 +1023,126 @@ func TestRedfishServer_InvalidRequest_Error(t *testing.T) {
 				nil,
 			)
 			require.ErrorContains(t, err, "unexpected EOF")
+
+			if resp != nil {
+				resp.Body.Close()
+			}
+		})
+	}
+}
+
+func TestRedfishServer_RequiredRequestFields(t *testing.T) {
+	tests := []struct {
+		name    string
+		method  string
+		url     string
+		body    string
+		wantErr string
+	}{
+		{
+			name:    "reset type",
+			method:  http.MethodPost,
+			url:     "/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset",
+			body:    `{}`,
+			wantErr: "reset type is required",
+		},
+		{
+			name:    "virtual media inserted state",
+			method:  http.MethodPatch,
+			url:     "/redfish/v1/Managers/bmc1/VirtualMedia/CD",
+			body:    `{}`,
+			wantErr: "virtual media inserted state is required",
+		},
+		{
+			name:    "virtual media image",
+			method:  http.MethodPatch,
+			url:     "/redfish/v1/Managers/bmc1/VirtualMedia/CD",
+			body:    `{"Inserted":true}`,
+			wantErr: "virtual media image is required",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			client := setup(t, &mock.IncusClientMock{})
+
+			resp, err := client.RunRawRequestWithHeaders(tc.method, tc.url, strings.NewReader(tc.body), "", nil)
+			require.ErrorContains(t, err, tc.wantErr)
+
+			if resp != nil {
+				resp.Body.Close()
+			}
+		})
+	}
+}
+
+func TestRedfishServer_PatchBiosAttributes(t *testing.T) {
+	instance := &incusapi.Instance{
+		Status: "Stopped",
+	}
+
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return instance, "test-etag", nil
+		},
+		UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+			return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+		},
+	}
+
+	client := setup(t, incusClient)
+	body := `{"Attributes":{"incus.config.foo":"bar","incus.devices.vtpm":"{\"type\":\"tpm\"}"}}`
+	resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/Bios/Settings", strings.NewReader(body), "", nil)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusNoContent, resp.StatusCode)
+	resp.Body.Close()
+
+	updateCalls := incusClient.UpdateInstanceCalls()
+	require.Len(t, updateCalls, 1)
+	require.Equal(t, "test-instance", updateCalls[0].Name)
+	require.Equal(t, "test-etag", updateCalls[0].ETag)
+	require.Equal(t, incusapi.ConfigMap{"foo": "bar"}, updateCalls[0].Instance.Config)
+	require.Equal(t, incusapi.DevicesMap{
+		"vtpm": map[string]string{"type": "tpm"},
+	}, updateCalls[0].Instance.Devices)
+	require.NotContains(t, updateCalls[0].Instance.Config, "incus.config.")
+	require.NotContains(t, updateCalls[0].Instance.Devices, "incus.devices.")
+}
+
+func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
+	client := setup(t, &mock.IncusClientMock{})
+
+	resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/Bios/Settings", strings.NewReader(`{}`), "", nil)
+	require.NoError(t, err)
+	require.Equal(t, http.StatusNoContent, resp.StatusCode)
+	resp.Body.Close()
+}
+
+func TestRedfishServer_PatchBiosAttributes_Invalid(t *testing.T) {
+	tests := []struct {
+		name    string
+		body    string
+		wantErr string
+	}{
+		{name: "unsupported", body: `{"Attributes":{"vTPM":"On"}}`, wantErr: "is not supported"},
+		{name: "empty config key", body: `{"Attributes":{"incus.config.":"value"}}`, wantErr: "empty config key"},
+		{name: "empty device name", body: `{"Attributes":{"incus.devices.":"value"}}`, wantErr: "empty device name"},
+		{name: "invalid device JSON", body: `{"Attributes":{"incus.devices.vtpm":"{"}}`, wantErr: "JSON string expected"},
+		{name: "non-string value", body: `{"Attributes":{"incus.config.foo":1}}`, wantErr: "string expected"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+			}
+			client := setup(t, incusClient)
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/Bios/Settings", strings.NewReader(tc.body), "", nil)
+			require.ErrorContains(t, err, tc.wantErr)
+			require.Empty(t, incusClient.UpdateInstanceCalls())
 
 			if resp != nil {
 				resp.Body.Close()
@@ -1076,7 +1282,8 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		clientDeleteStoragePoolVolumeErr error
 
 		// Placeholder {{IMAGE_URL}} is substituted before sending.
-		body string
+		body       string
+		wantStatus int
 
 		assertErr require.ErrorAssertionFunc
 		assert    func(t *testing.T, incusClient *mock.IncusClientMock)
@@ -1088,7 +1295,8 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 					Devices: incusapi.DevicesMap{},
 				},
 			},
-			body: `{"Inserted":false}`,
+			body:       `{"Inserted":false}`,
+			wantStatus: http.StatusNoContent,
 
 			assertErr: require.NoError,
 			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
@@ -1117,7 +1325,8 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 					return nil
 				},
 			},
-			body: `{"Inserted":false}`,
+			body:       `{"Inserted":false}`,
+			wantStatus: http.StatusNoContent,
 
 			assertErr: require.NoError,
 			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
@@ -1185,6 +1394,12 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 			body:                             `{"Inserted":false}`,
 
 			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.UpdateInstanceCalls(), 2)
+				require.Contains(t, incusClient.UpdateInstanceCalls()[1].Instance.Devices, "boot-media")
+			},
 		},
 		{
 			name: "insert - success",
@@ -1203,7 +1418,8 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 					return nil
 				},
 			},
-			body: `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
+			body:       `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
+			wantStatus: http.StatusNoContent,
 
 			assertErr: require.NoError,
 			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
@@ -1221,6 +1437,26 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 					"source":        "test-instance-boot-media.iso",
 					"type":          "disk",
 				}, updateCalls[0].Instance.Devices["boot-media"])
+			},
+		},
+		{
+			name: "insert - already inserted - no-op",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"boot-media": map[string]string{"type": "disk"},
+					},
+				},
+			},
+			body:       `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
+			wantStatus: http.StatusNoContent,
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Empty(t, incusClient.CreateStoragePoolVolumeFromISOCalls())
+				require.Empty(t, incusClient.UpdateInstanceCalls())
 			},
 		},
 		{
@@ -1269,6 +1505,11 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 			body: `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
 
 			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.DeleteStoragePoolVolumeCalls(), 1)
+			},
 		},
 		{
 			name: "insert - client.UpdateInstance error",
@@ -1286,6 +1527,11 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 			body:                    `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
 
 			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.DeleteStoragePoolVolumeCalls(), 1)
+			},
 		},
 		{
 			name: "insert - client.UpdateInstance Operation.Wait error",
@@ -1307,6 +1553,32 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 			body: `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
 
 			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.DeleteStoragePoolVolumeCalls(), 1)
+			},
+		},
+		{
+			name: "insert - update and rollback errors",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			clientCreateStoragePoolVolumeFromISO: &mock.IncusOperationMock{
+				WaitFunc: func() error {
+					return nil
+				},
+			},
+			clientUpdateInstanceErr:          boom.Error,
+			clientDeleteStoragePoolVolumeErr: errors.New("cleanup failed"),
+			body:                             `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				require.ErrorContains(tt, err, "boom!")
+				require.ErrorContains(tt, err, "rollback failed: cleanup failed")
+			},
 		},
 		{
 			name:                 "error - client.GetInstance",
@@ -1360,6 +1632,10 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 			tc.assertErr(t, err)
 
 			if resp != nil {
+				if tc.wantStatus != 0 {
+					require.Equal(t, tc.wantStatus, resp.StatusCode)
+				}
+
 				resp.Body.Close()
 			}
 
