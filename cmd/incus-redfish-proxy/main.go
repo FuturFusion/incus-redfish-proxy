@@ -6,10 +6,9 @@ import (
 	"net/http"
 	"os"
 
-	config "github.com/lxc/incus/v6/shared/cliconfig"
 	"github.com/spf13/pflag"
 
-	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
+	"github.com/FuturFusion/incus-redfish-proxy/redfishproxy"
 )
 
 var listenAddr = "0.0.0.0:8080"
@@ -32,20 +31,12 @@ func main() {
 
 	instanceName := pflag.Arg(0)
 
-	cfg, err := config.LoadConfig("")
-	if err != nil {
-		die(fmt.Errorf("load incus config: %w", err))
-	}
-
-	if remote == "" {
-		remote = cfg.DefaultRemote
-	}
-
-	client, err := cfg.GetInstanceServer(remote)
+	h, err := redfishproxy.NewHandler(redfishproxy.Config{
+		InstanceName: instanceName,
+		Remote:       remote,
+		Project:      project,
+	})
 	die(err)
-	client = client.UseProject(project)
-
-	h := api.NewHandler(instanceName, client)
 
 	s := &http.Server{
 		Handler: h,
