@@ -45,11 +45,7 @@ func main() {
 	die(err)
 	client = client.UseProject(project)
 
-	server := api.NewRedfishServer(instanceName, client)
-
-	r := http.NewServeMux()
-
-	h := api.HandlerFromMux(server, r)
+	h := api.NewHandler(instanceName, client)
 
 	s := &http.Server{
 		Handler: h,

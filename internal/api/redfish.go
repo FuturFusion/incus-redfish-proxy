@@ -204,20 +204,50 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 	connectedViaURI := VirtualMediaV165VirtualMedia_ConnectedVia{}
 	_ = connectedViaURI.FromVirtualMediaV165ConnectedVia(URI)
 
-	response(w, VirtualMediaV165VirtualMedia{
-		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)),
-		OdataType: ref("#VirtualMedia.v1_6_5.VirtualMedia"),
-		Name:      ResourceName(virtualMediaName),
-		MediaTypes: &[]VirtualMediaV165MediaType{
-			CD,
-			DVD,
+	base := fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)
+
+	response(w, virtualMediaGetResponse{
+		VirtualMediaV165VirtualMedia: VirtualMediaV165VirtualMedia{
+			OdataID:   ref(base),
+			OdataType: ref("#VirtualMedia.v1_6_5.VirtualMedia"),
+			Name:      ResourceName(virtualMediaName),
+			MediaTypes: &[]VirtualMediaV165MediaType{
+				CD,
+				DVD,
+			},
+			Image:             ref(fmt.Sprintf("%s-boot-media.iso", s.instanceName)),
+			ConnectedVia:      ref(connectedViaURI),
+			Inserted:          ref(inserted),
+			WriteProtected:    ref(true),
+			VerifyCertificate: ref(false),
 		},
-		Image:             ref(fmt.Sprintf("%s-boot-media.iso", s.instanceName)),
-		ConnectedVia:      ref(connectedViaURI),
-		Inserted:          ref(inserted),
-		WriteProtected:    ref(true),
-		VerifyCertificate: ref(false),
+		Actions: &virtualMediaActions{
+			HashVirtualMediaEjectMedia: virtualMediaActionTarget{
+				Target: base + "/Actions/VirtualMedia.EjectMedia",
+			},
+			HashVirtualMediaInsertMedia: virtualMediaActionTarget{
+				Target:     base + "/Actions/VirtualMedia.InsertMedia",
+				ActionInfo: base + "/InsertMediaActionInfo",
+			},
+		},
 	})
+}
+
+// virtualMediaGetResponse overrides the Actions field of the generated
+// VirtualMediaV165VirtualMedia type.
+type virtualMediaGetResponse struct {
+	VirtualMediaV165VirtualMedia
+	Actions *virtualMediaActions `json:"Actions,omitempty"`
+}
+
+type virtualMediaActionTarget struct {
+	Target     string `json:"target"`
+	ActionInfo string `json:"@Redfish.ActionInfo,omitempty"`
+}
+
+type virtualMediaActions struct {
+	HashVirtualMediaEjectMedia  virtualMediaActionTarget `json:"#VirtualMedia.EjectMedia"`
+	HashVirtualMediaInsertMedia virtualMediaActionTarget `json:"#VirtualMedia.InsertMedia"`
 }
 
 func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -242,57 +272,104 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		return
 	}
 
+	if !*request.Inserted {
+		err = s.ejectVirtualMedia()
+		if err != nil {
+			respondStatusError(w, err)
+			return
+		}
+
+		responseNoContent(w)
+		return
+	}
+
+	err = s.insertVirtualMedia(deref(request.Image))
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseNoContent(w)
+}
+
+// statusError pairs an error with the HTTP status code the
+// response to the client should use.
+type statusError struct {
+	status int
+	err    error
+}
+
+func (e *statusError) Error() string {
+	return e.err.Error()
+}
+
+func (e *statusError) Unwrap() error {
+	return e.err
+}
+
+func statusErrorf(status int, format string, args ...any) error {
+	return &statusError{status: status, err: fmt.Errorf(format, args...)}
+}
+
+// respondStatusError writes the response for a status error:
+// the status code it carries, or 500 for any other error.
+func respondStatusError(w http.ResponseWriter, err error) {
+	var statusErr *statusError
+	if errors.As(err, &statusErr) {
+		responseErrWithMessage(w, statusErr.status, statusErr.Error())
+		return
+	}
+
+	responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+}
+
+func (s redfishServer) ejectVirtualMedia() error {
 	instance, etag, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
+		return err
 	}
 
 	_, inserted := instance.Devices["boot-media"]
-
-	// eject
-	if !*request.Inserted {
-		if !inserted {
-			responseNoContent(w)
-			return
-		}
-
-		originalDevice := cloneStringMap(instance.Devices["boot-media"])
-		delete(instance.Devices, "boot-media")
-
-		op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
-		if err != nil {
-			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		err = op.Wait()
-		if err != nil {
-			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-			return
-		}
-
-		err = s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
-		if err != nil {
-			rollbackErr := s.restoreBootMediaDevice(originalDevice)
-			responseOperationError(w, err, rollbackErr)
-			return
-		}
-
-		responseNoContent(w)
-		return
+	if !inserted {
+		return statusErrorf(http.StatusConflict, "no virtual media is inserted")
 	}
 
-	// insert
-	if inserted {
-		responseNoContent(w)
-		return
-	}
+	originalDevice := cloneStringMap(instance.Devices["boot-media"])
+	delete(instance.Devices, "boot-media")
 
-	resp, err := http.Get(deref(request.Image))
+	op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
-		return
+		return err
+	}
+
+	err = op.Wait()
+	if err != nil {
+		return err
+	}
+
+	err = s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
+	if err != nil {
+		rollbackErr := s.restoreBootMediaDevice(originalDevice)
+		return combineRollbackError(err, rollbackErr)
+	}
+
+	return nil
+}
+
+func (s redfishServer) insertVirtualMedia(image string) error {
+	instance, etag, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	_, inserted := instance.Devices["boot-media"]
+	if inserted {
+		return statusErrorf(http.StatusConflict, "virtual media is already inserted")
+	}
+
+	resp, err := http.Get(image)
+	if err != nil {
+		return statusErrorf(http.StatusBadRequest, "%s", err.Error())
 	}
 
 	defer func() {
@@ -304,15 +381,13 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		BackupFile: resp.Body,
 	})
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
+		return err
 	}
 
 	err = op.Wait()
 	if err != nil {
 		rollbackErr := s.deleteBootMediaVolume()
-		responseOperationError(w, err, rollbackErr)
-		return
+		return combineRollbackError(err, rollbackErr)
 	}
 
 	instance.Devices["boot-media"] = map[string]string{
@@ -325,18 +400,16 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 	op, err = s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
 	if err != nil {
 		rollbackErr := s.deleteBootMediaVolume()
-		responseOperationError(w, err, rollbackErr)
-		return
+		return combineRollbackError(err, rollbackErr)
 	}
 
 	err = op.Wait()
 	if err != nil {
 		rollbackErr := s.deleteBootMediaVolume()
-		responseOperationError(w, err, rollbackErr)
-		return
+		return combineRollbackError(err, rollbackErr)
 	}
 
-	responseNoContent(w)
+	return nil
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -352,7 +425,13 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 		return
 	}
 
-	responseNotImplemented(w)
+	err := s.ejectVirtualMedia()
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseNoContent(w)
 }
 
 func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -360,7 +439,74 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 		return
 	}
 
-	responseNotImplemented(w)
+	request := VirtualMediaV165InsertMediaRequestBody{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.Image == "" {
+		responseErrWithMessage(w, http.StatusBadRequest, "virtual media image is required")
+		return
+	}
+
+	if request.TransferProtocolType != nil && *request.TransferProtocolType != HTTP && *request.TransferProtocolType != HTTPS {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("transfer protocol %s is not supported, only HTTP and HTTPS are supported", *request.TransferProtocolType))
+		return
+	}
+
+	err = s.insertVirtualMedia(request.Image)
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseNoContent(w)
+}
+
+// actionInfo and actionInfoParameter mirror the Redfish ActionInfo schema
+// (http://redfish.dmtf.org/schemas/v1/ActionInfo.v1_5_0.json). They are
+// hand-written rather than generated because ActionInfo resources have
+// service-defined URIs that the DMTF Redfish OpenAPI schema does not
+// enumerate, so oapi-codegen never sees a path to generate types or a route
+// for.
+type actionInfo struct {
+	OdataID    string                `json:"@odata.id"`
+	OdataType  string                `json:"@odata.type"`
+	ID         string                `json:"Id"`
+	Name       string                `json:"Name"`
+	Parameters []actionInfoParameter `json:"Parameters"`
+}
+
+type actionInfoParameter struct {
+	Name            string   `json:"Name"`
+	Required        bool     `json:"Required"`
+	DataType        string   `json:"DataType,omitempty"`
+	AllowableValues []string `json:"AllowableValues,omitempty"`
+}
+
+// GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDInsertMediaActionInfo
+// serves the ActionInfo resource referenced by the InsertMedia action's
+// "@Redfish.ActionInfo" annotation. It is not part of the generated
+// ServerInterface, NewHandler registers it directly.
+func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDInsertMediaActionInfo(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
+	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+		return
+	}
+
+	response(w, actionInfo{
+		OdataID:   fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s/InsertMediaActionInfo", managerName, virtualMediaName),
+		OdataType: "#ActionInfo.v1_5_0.ActionInfo",
+		ID:        "InsertMediaActionInfo",
+		Name:      "Insert Media Action Info",
+		Parameters: []actionInfoParameter{
+			{Name: "Image", Required: true, DataType: "String"},
+			{Name: "TransferProtocolType", Required: false, DataType: "String", AllowableValues: []string{string(HTTP), string(HTTPS)}},
+			{Name: "Inserted", Required: false, DataType: "Boolean"},
+			{Name: "WriteProtected", Required: false, DataType: "Boolean"},
+		},
+	})
 }
 
 func cloneStringMap(source map[string]string) map[string]string {
@@ -396,12 +542,14 @@ func (s redfishServer) restoreBootMediaDevice(device map[string]string) error {
 	return op.Wait()
 }
 
-func responseOperationError(w http.ResponseWriter, operationErr error, rollbackErr error) {
+// combineRollbackError joins operationErr with rollbackErr, if the rollback
+// itself also failed, so the caller's error response reports both.
+func combineRollbackError(operationErr error, rollbackErr error) error {
 	if rollbackErr != nil {
-		operationErr = errors.Join(operationErr, fmt.Errorf("rollback failed: %w", rollbackErr))
+		return errors.Join(operationErr, fmt.Errorf("rollback failed: %w", rollbackErr))
 	}
 
-	responseErrWithMessage(w, http.StatusInternalServerError, operationErr.Error())
+	return operationErr
 }
 
 func (s redfishServer) GetRedfishV1Systems(w http.ResponseWriter, r *http.Request) {
