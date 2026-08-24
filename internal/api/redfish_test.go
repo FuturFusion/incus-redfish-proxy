@@ -878,6 +878,14 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
+			url:    "/redfish/v1/Managers/invalid/VirtualMedia/CD/InsertMediaActionInfo",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Managers/bmc1/VirtualMedia/invalid/InsertMediaActionInfo",
+		},
+		{
+			method: http.MethodGet,
 			url:    "/redfish/v1/Managers/bmc1/VirtualMedia/invalid",
 		},
 		{
@@ -1006,6 +1014,10 @@ func TestRedfishServer_InvalidRequest_Error(t *testing.T) {
 		{
 			method: http.MethodPatch,
 			url:    "/redfish/v1/Managers/bmc1/VirtualMedia/CD",
+		},
+		{
+			method: http.MethodPost,
+			url:    "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia",
 		},
 	}
 
@@ -1289,16 +1301,17 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		assert    func(t *testing.T, incusClient *mock.IncusClientMock)
 	}{
 		{
-			name: "eject - not inserted - no-op",
+			name: "eject - not inserted - rejected",
 			clientGetInstance: &incusapi.Instance{
 				InstancePut: incusapi.InstancePut{
 					Devices: incusapi.DevicesMap{},
 				},
 			},
-			body:       `{"Inserted":false}`,
-			wantStatus: http.StatusNoContent,
+			body: `{"Inserted":false}`,
 
-			assertErr: require.NoError,
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				require.ErrorContains(tt, err, "no virtual media is inserted")
+			},
 			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
 				t.Helper()
 
@@ -1440,7 +1453,7 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 			},
 		},
 		{
-			name: "insert - already inserted - no-op",
+			name: "insert - already inserted - rejected",
 			clientGetInstance: &incusapi.Instance{
 				InstancePut: incusapi.InstancePut{
 					Devices: incusapi.DevicesMap{
@@ -1448,10 +1461,11 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 					},
 				},
 			},
-			body:       `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
-			wantStatus: http.StatusNoContent,
+			body: `{"Inserted":true,"Image":"{{IMAGE_URL}}"}`,
 
-			assertErr: require.NoError,
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				require.ErrorContains(tt, err, "virtual media is already inserted")
+			},
 			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
 				t.Helper()
 
@@ -1646,14 +1660,238 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 	}
 }
 
+func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID_Actions(t *testing.T) {
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	managers, err := client.Service.Managers()
+	require.NoError(t, err)
+	require.Len(t, managers, 1)
+
+	vms, err := managers[0].VirtualMedia()
+	require.NoError(t, err)
+	require.Len(t, vms, 1)
+	vm := vms[0]
+
+	require.True(t, vm.SupportsMediaInsert)
+	require.True(t, vm.SupportsMediaEject)
+
+	actionInfo, err := vm.InsertMediaActionInfo()
+	require.NoError(t, err)
+	require.NotNil(t, actionInfo)
+
+	values, err := actionInfo.GetParamValues("TransferProtocolType", schemas.StringParameterTypes)
+	require.NoError(t, err)
+	require.ElementsMatch(t, []string{"HTTP", "HTTPS"}, values)
+}
+
+func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(t *testing.T) {
+	tests := []struct {
+		name string
+
+		clientGetInstance *incusapi.Instance
+
+		wantStatus int
+		wantErr    string
+		assert     func(t *testing.T, incusClient *mock.IncusClientMock)
+	}{
+		{
+			name: "not inserted - rejected",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			wantErr: "no virtual media is inserted",
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+				require.Empty(t, incusClient.DeleteStoragePoolVolumeCalls())
+			},
+		},
+		{
+			name: "inserted - success",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"boot-media": map[string]string{"type": "disk"},
+					},
+				},
+			},
+			wantStatus: http.StatusNoContent,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+				require.Len(t, incusClient.DeleteStoragePoolVolumeCalls(), 1)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return tc.clientGetInstance, "test-etag", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+				DeleteStoragePoolVolumeFunc: func(pool string, volType string, name string) error {
+					return nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			resp, err := client.RunRawRequestWithHeaders(
+				http.MethodPost,
+				"/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia",
+				strings.NewReader(`{}`),
+				"",
+				nil,
+			)
+
+			if tc.wantErr != "" {
+				require.ErrorContains(t, err, tc.wantErr)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.wantStatus, resp.StatusCode)
+			}
+
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if tc.assert != nil {
+				tc.assert(t, incusClient)
+			}
+		})
+	}
+}
+
+func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(t *testing.T) {
+	tests := []struct {
+		name string
+
+		clientGetInstance *incusapi.Instance
+
+		// Placeholder {{IMAGE_URL}} is substituted before sending.
+		body string
+
+		wantStatus int
+		wantErr    string
+		assert     func(t *testing.T, incusClient *mock.IncusClientMock)
+	}{
+		{
+			name: "success",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			body:       `{"Image":"{{IMAGE_URL}}","TransferProtocolType":"HTTP"}`,
+			wantStatus: http.StatusNoContent,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), 1)
+				require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			},
+		},
+		{
+			name: "already inserted - rejected",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"boot-media": map[string]string{"type": "disk"},
+					},
+				},
+			},
+			body:    `{"Image":"{{IMAGE_URL}}"}`,
+			wantErr: "virtual media is already inserted",
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Empty(t, incusClient.CreateStoragePoolVolumeFromISOCalls())
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+			},
+		},
+		{
+			name:    "missing image",
+			body:    `{}`,
+			wantErr: "virtual media image is required",
+		},
+		{
+			name:    "unsupported transfer protocol",
+			body:    `{"Image":"{{IMAGE_URL}}","TransferProtocolType":"FTP"}`,
+			wantErr: "transfer protocol FTP is not supported",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("fake-iso-data"))
+			}))
+			t.Cleanup(imageServer.Close)
+
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return tc.clientGetInstance, "test-etag", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+				CreateStoragePoolVolumeFromISOFunc: func(pool string, args incusclient.StorageVolumeBackupArgs) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			body := strings.ReplaceAll(tc.body, "{{IMAGE_URL}}", imageServer.URL)
+
+			resp, err := client.RunRawRequestWithHeaders(
+				http.MethodPost,
+				"/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia",
+				strings.NewReader(body),
+				"",
+				nil,
+			)
+
+			if tc.wantErr != "" {
+				require.ErrorContains(t, err, tc.wantErr)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.wantStatus, resp.StatusCode)
+			}
+
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if tc.assert != nil {
+				tc.assert(t, incusClient)
+			}
+		})
+	}
+}
+
 func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
 	t.Helper()
 
-	server := api.NewRedfishServer("test-instance", client)
-
-	r := http.NewServeMux()
-
-	h := api.HandlerFromMux(server, r)
+	h := api.NewHandler("test-instance", client)
 
 	httpserver := httptest.NewServer(h)
 	t.Cleanup(func() {
