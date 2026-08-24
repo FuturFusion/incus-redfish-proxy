@@ -19,8 +19,7 @@ set -euo pipefail
 CODE_USER="code"
 CODE_UID=1000
 
-GO_VERSION=1.25.11
-INCUS_TERRAFORM_PROVIDER_VERSION=1.1.0
+GO_VERSION=1.26.7
 
 log() {
     echo "[coi] $*"
