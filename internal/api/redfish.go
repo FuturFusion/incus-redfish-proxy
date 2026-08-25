@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	incusclient "github.com/lxc/incus/v6/client"
-	incusapi "github.com/lxc/incus/v6/shared/api"
+	incusclient "github.com/lxc/incus/v7/client"
+	incusapi "github.com/lxc/incus/v7/shared/api"
 )
 
 type IncusClient interface {
