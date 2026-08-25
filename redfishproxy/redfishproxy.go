@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	config "github.com/lxc/incus/v6/shared/cliconfig"
+	config "github.com/lxc/incus/v7/shared/cliconfig"
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
 )
