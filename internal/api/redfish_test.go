@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	incusclient "github.com/lxc/incus/v6/client"
-	incusapi "github.com/lxc/incus/v6/shared/api"
+	incusclient "github.com/lxc/incus/v7/client"
+	incusapi "github.com/lxc/incus/v7/shared/api"
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/schemas"
 	"github.com/stretchr/testify/require"

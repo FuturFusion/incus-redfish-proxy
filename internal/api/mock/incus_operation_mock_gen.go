@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"github.com/lxc/incus/v6/client"
-	"github.com/lxc/incus/v6/shared/api"
+	"github.com/lxc/incus/v7/client"
+	"github.com/lxc/incus/v7/shared/api"
 
 	api0 "github.com/FuturFusion/incus-redfish-proxy/internal/api"
 )
