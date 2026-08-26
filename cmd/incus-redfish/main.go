@@ -20,6 +20,7 @@ var commands = []string{
 	"info",
 	"start",
 	"stop",
+	"restart",
 	"get-bios-settings",
 	"add-tpm",
 	"remove-tpm",
@@ -87,6 +88,10 @@ func main() {
 
 	case "stop":
 		_, err := getSystem(c).Reset(schemas.ForceOffResetType)
+		die(err)
+
+	case "restart":
+		_, err := getSystem(c).Reset(schemas.ForceRestartResetType)
 		die(err)
 
 	case "get-bios-settings":

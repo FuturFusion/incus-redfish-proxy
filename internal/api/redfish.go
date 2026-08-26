@@ -688,6 +688,13 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		action = "stop"
 		force = true
 
+	case ResourceResetTypeGracefulRestart:
+		action = "restart"
+
+	case ResourceResetTypeForceRestart:
+		action = "restart"
+		force = true
+
 	default:
 		responseErrWithMessage(w, http.StatusBadRequest, "reset type not supported")
 		return

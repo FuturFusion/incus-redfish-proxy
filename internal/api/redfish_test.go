@@ -100,7 +100,9 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		clientUpdateInstanceState    incusclient.Operation
 		clientUpdateInstanceStateErr error
 
-		assertErr require.ErrorAssertionFunc
+		wantAction string
+		wantForce  bool
+		assertErr  require.ErrorAssertionFunc
 	}{
 		{
 			name:      "success - on",
@@ -114,7 +116,9 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			assertErr: require.NoError,
+			wantAction: "start",
+			wantForce:  false,
+			assertErr:  require.NoError,
 		},
 		{
 			name:      "success - force on",
@@ -128,7 +132,9 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			assertErr: require.NoError,
+			wantAction: "start",
+			wantForce:  true,
+			assertErr:  require.NoError,
 		},
 		{
 			name:      "success - shutdown",
@@ -142,7 +148,9 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			assertErr: require.NoError,
+			wantAction: "stop",
+			wantForce:  false,
+			assertErr:  require.NoError,
 		},
 		{
 			name:      "success - force off",
@@ -156,7 +164,41 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			assertErr: require.NoError,
+			wantAction: "stop",
+			wantForce:  true,
+			assertErr:  require.NoError,
+		},
+		{
+			name:      "success - graceful restart",
+			resetType: schemas.GracefulRestartResetType,
+			clientGetInstance: &incusapi.Instance{
+				Status: "Running",
+			},
+			clientUpdateInstanceState: &mock.IncusOperationMock{
+				WaitFunc: func() error {
+					return nil
+				},
+			},
+
+			wantAction: "restart",
+			wantForce:  false,
+			assertErr:  require.NoError,
+		},
+		{
+			name:      "success - force restart",
+			resetType: schemas.ForceRestartResetType,
+			clientGetInstance: &incusapi.Instance{
+				Status: "Running",
+			},
+			clientUpdateInstanceState: &mock.IncusOperationMock{
+				WaitFunc: func() error {
+					return nil
+				},
+			},
+
+			wantAction: "restart",
+			wantForce:  true,
+			assertErr:  require.NoError,
 		},
 
 		{
@@ -206,6 +248,11 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 					return tc.clientGetInstance, "", nil
 				},
 				UpdateInstanceStateFunc: func(name string, state incusapi.InstanceStatePut, ETag string) (incusclient.Operation, error) {
+					if tc.wantAction != "" {
+						require.Equal(t, tc.wantAction, state.Action)
+						require.Equal(t, tc.wantForce, state.Force)
+					}
+
 					return tc.clientUpdateInstanceState, tc.clientUpdateInstanceStateErr
 				},
 			}
