@@ -9,6 +9,8 @@ import (
 	"os"
 	"slices"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/pflag"
 	"github.com/stmcginnis/gofish"
@@ -27,8 +29,14 @@ var commands = []string{
 	"get-virtual-media",
 	"insert-virtual-media",
 	"eject-virtual-media",
+	"get-secureboot",
+	"set-secureboot",
+	"get-secureboot-databases",
 	"get-secureboot-certificates",
 	"get-secureboot-certificate",
+	"add-secureboot-certificate",
+	"delete-secureboot-certificate",
+	"get-secureboot-signatures",
 }
 
 func main() {
@@ -156,9 +164,41 @@ func main() {
 
 		_ = taskMonitor
 
+	case "get-secureboot":
+		secureBoot, err := getSystem(c).SecureBoot()
+		die(err)
+
+		secureBoot.RawData = nil
+
+		err = enc.Encode(secureBoot)
+		die(err)
+
+	case "set-secureboot":
+		if len(pflag.Args()) < 2 {
+			fmt.Println("error: enabled state missing")
+			usage()
+			os.Exit(1)
+		}
+
+		enabled, err := strconv.ParseBool(pflag.Arg(1))
+		die(err)
+
+		secureBoot, err := getSystem(c).SecureBoot()
+		die(err)
+
+		secureBoot.SecureBootEnable = enabled
+
+		err = secureBoot.Update()
+		die(err)
+
+	case "get-secureboot-databases":
+		for _, database := range getSecureBootDatabases(c) {
+			fmt.Printf("%s, %s\n", database.ID, database.Name)
+		}
+
 	case "get-secureboot-certificates":
-		for _, certificate := range getSecureBootCertificates(c) {
-			fmt.Printf("%s, %s\n", certificate.ID, certificate.Name)
+		for _, certificate := range getSecureBootCertificates(c, pflag.Arg(1)) {
+			fmt.Printf("%s, %s\n", certificate.ID, certificate.Subject.CommonName)
 		}
 
 	case "get-secureboot-certificate":
@@ -172,7 +212,7 @@ func main() {
 		var certificate *schemas.Certificate
 
 		found := false
-		for _, certificate = range getSecureBootCertificates(c) {
+		for _, certificate = range getSecureBootCertificates(c, pflag.Arg(2)) {
 			if certificate.ID == certificateID {
 				found = true
 				break
@@ -184,8 +224,65 @@ func main() {
 			os.Exit(1)
 		}
 
-		err = enc.Encode(certificate.Entity)
+		certificate.RawData = nil
+
+		err = enc.Encode(certificate)
 		die(err)
+
+	case "add-secureboot-certificate":
+		if len(pflag.Args()) < 2 {
+			fmt.Println("error: certificate file missing")
+			usage()
+			os.Exit(1)
+		}
+
+		certificate, err := os.ReadFile(pflag.Arg(1))
+		die(err)
+
+		database := getSecureBootDatabase(c, pflag.Arg(2))
+
+		payload := map[string]string{
+			"CertificateString": string(certificate),
+			"CertificateType":   string(schemas.PEMCertificateType),
+		}
+
+		if pflag.Arg(3) != "" {
+			payload["UefiSignatureOwner"] = pflag.Arg(3)
+		}
+
+		resp, err := c.Post(database.ODataID+"/Certificates", payload)
+		die(err)
+		defer resp.Body.Close()
+
+		fmt.Println(resp.Header.Get("Location"))
+
+	case "delete-secureboot-certificate":
+		if len(pflag.Args()) < 2 {
+			fmt.Println("error: certificate name missing")
+			usage()
+			os.Exit(1)
+		}
+
+		database := getSecureBootDatabase(c, pflag.Arg(2))
+
+		resp, err := c.Delete(fmt.Sprintf("%s/Certificates/%s", database.ODataID, pflag.Arg(1)))
+		die(err)
+		defer resp.Body.Close()
+
+	case "get-secureboot-signatures":
+		database := pflag.Arg(1)
+		if database == "" {
+			database = "dbx"
+		}
+
+		signatures, err := getSecureBootDatabase(c, database).Signatures()
+		die(err)
+
+		sort.Slice(signatures, func(i, j int) bool { return signatures[i].ID < signatures[j].ID })
+
+		for _, signature := range signatures {
+			fmt.Printf("%s, %s, %s\n", signature.ID, signature.SignatureType, signature.SignatureString)
+		}
 	}
 }
 
@@ -226,24 +323,40 @@ func getManagerVirtualMedia(c *gofish.APIClient) *schemas.VirtualMedia {
 	return virtualMedias[0]
 }
 
-func getSecureBootCertificates(c *gofish.APIClient) []*schemas.Certificate {
-	system := getSystem(c)
-
-	secureboot, err := system.SecureBoot()
+func getSecureBootDatabases(c *gofish.APIClient) []*schemas.SecureBootDatabase {
+	secureboot, err := getSystem(c).SecureBoot()
 	die(err)
 
-	sercureBootDBs, err := secureboot.SecureBootDatabases()
+	secureBootDBs, err := secureboot.SecureBootDatabases()
 	die(err)
 
-	if len(sercureBootDBs) < 1 {
+	if len(secureBootDBs) < 1 {
 		die(fmt.Errorf("no secure boot database found"))
 	}
 
-	sort.Slice(sercureBootDBs, func(i, j int) bool { return sercureBootDBs[i].ID < sercureBootDBs[j].ID })
+	sort.Slice(secureBootDBs, func(i, j int) bool { return secureBootDBs[i].ID < secureBootDBs[j].ID })
 
-	secureBootDB := sercureBootDBs[0]
+	return secureBootDBs
+}
 
-	certificates, err := secureBootDB.Certificates()
+func getSecureBootDatabase(c *gofish.APIClient, databaseID string) *schemas.SecureBootDatabase {
+	if databaseID == "" {
+		databaseID = "db"
+	}
+
+	for _, database := range getSecureBootDatabases(c) {
+		if strings.EqualFold(database.ID, databaseID) {
+			return database
+		}
+	}
+
+	die(fmt.Errorf("secure boot database %q not found", databaseID))
+
+	return nil
+}
+
+func getSecureBootCertificates(c *gofish.APIClient, databaseID string) []*schemas.Certificate {
+	certificates, err := getSecureBootDatabase(c, databaseID).Certificates()
 	die(err)
 
 	sort.Slice(certificates, func(i, j int) bool { return certificates[i].ID < certificates[j].ID })
