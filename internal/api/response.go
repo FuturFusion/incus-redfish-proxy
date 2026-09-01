@@ -12,6 +12,14 @@ func response(w http.ResponseWriter, resp any) {
 	_ = enc.Encode(resp)
 }
 
+func responseCreated(w http.ResponseWriter, location string, resp any) {
+	w.Header().Set("Location", location)
+	w.WriteHeader(http.StatusCreated)
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(resp)
+}
+
 func responseNoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }

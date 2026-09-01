@@ -1,23 +1,36 @@
 package api
 
 import (
+	"bytes"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
-	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	incusclient "github.com/lxc/incus/v7/client"
 	incusapi "github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/uefi"
+	incusutil "github.com/lxc/incus/v7/shared/util"
 )
 
 type IncusClient interface {
 	GetServer() (server *incusapi.Server, ETag string, err error)
+	HasExtension(extension string) (exists bool)
+
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
+
+	GetInstanceNVRAMGUID(name string, guid string) (vars map[string]*incusapi.InstanceNVRAMVariable, err error)
+	GetInstanceNVRAMGUIDVar(name string, guid string, varName string) (resp *incusapi.InstanceNVRAMVariable, ETag string, err error)
+	UpdateInstanceNVRAMGUIDVar(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error
+	DeleteInstanceNVRAMGUIDVar(name string, guid string, varName string) error
 
 	CreateStoragePoolVolumeFromISO(pool string, args incusclient.StorageVolumeBackupArgs) (op incusclient.Operation, err error)
 	DeleteStoragePoolVolume(pool string, volType string, name string) (err error)
@@ -70,22 +83,23 @@ func (s redfishServer) validateComputerSystemID(w http.ResponseWriter, computerS
 	return true
 }
 
-func validateDatabaseID(w http.ResponseWriter, databaseID string) bool {
-	if !slices.Contains(secureBootDatabases, databaseID) {
-		responseErr(w, http.StatusNotFound)
-		return false
+func (s redfishServer) validateDatabaseID(w http.ResponseWriter, computerSystemID string, databaseID string) (secureBootDatabase, bool) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return secureBootDatabase{}, false
 	}
 
-	return true
+	db, ok := lookupSecureBootDatabase(databaseID)
+	if !ok {
+		responseErr(w, http.StatusNotFound)
+		return secureBootDatabase{}, false
+	}
+
+	return db, true
 }
 
-func validateCertificateID(w http.ResponseWriter, databaseID string, certificateID string) bool {
-	if !validateDatabaseID(w, databaseID) {
-		return false
-	}
-
-	if certificateID != "1" {
-		responseErr(w, http.StatusNotFound)
+func (s redfishServer) hasNVRAMSupport(w http.ResponseWriter) bool {
+	if !s.client.HasExtension(nvramExtension) {
+		responseErrWithMessage(w, http.StatusNotImplemented, fmt.Sprintf("the Incus server is missing the %q API extension", nvramExtension))
 		return false
 	}
 
@@ -1076,11 +1090,38 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 		return
 	}
 
+	instance, _, err := s.client.GetInstance(computerSystemID)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	enabled := incusutil.IsTrueOrEmpty(instance.ExpandedConfig["security.secureboot"])
+
+	mode := SetupMode
+
+	if s.client.HasExtension(nvramExtension) {
+		enrolled, err := s.isPlatformKeyEnrolled()
+		if err != nil {
+			respondNVRAMError(w, err)
+			return
+		}
+
+		if enrolled {
+			mode = UserMode
+		}
+	}
+
+	currentBootType := SecureBootV121SecureBootCurrentBootTypeDisabled
+	if enabled && instance.Status == "Running" {
+		currentBootType = SecureBootV121SecureBootCurrentBootTypeEnabled
+	}
+
 	secureBootCurrentBootType := SecureBootV121SecureBoot_SecureBootCurrentBoot{}
-	_ = secureBootCurrentBootType.FromSecureBootV121SecureBootCurrentBootType(SecureBootV121SecureBootCurrentBootTypeDisabled)
+	_ = secureBootCurrentBootType.FromSecureBootV121SecureBootCurrentBootType(currentBootType)
 
 	secureBootMode := SecureBootV121SecureBoot_SecureBootMode{}
-	_ = secureBootMode.FromSecureBootV121SecureBootModeType(UserMode)
+	_ = secureBootMode.FromSecureBootV121SecureBootModeType(mode)
 
 	response(w, SecureBootV121SecureBoot{
 		OdataID:               ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
@@ -1091,9 +1132,27 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 		SecureBootDatabases: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases", s.instanceName)),
 		},
-		SecureBootEnable: ref(false),
+		SecureBootEnable: ref(enabled),
 		SecureBootMode:   &secureBootMode,
 	})
+}
+
+func (s redfishServer) isPlatformKeyEnrolled() (bool, error) {
+	vars, err := s.client.GetInstanceNVRAMGUID(s.instanceName, uefi.EfiGlobalVariableGuid)
+	if incusapi.StatusErrorCheck(err, http.StatusNotFound) {
+		return false, nil
+	}
+
+	if err != nil {
+		return false, err
+	}
+
+	platformKey, ok := vars["PK"]
+	if !ok || platformKey == nil {
+		return false, nil
+	}
+
+	return len(platformKey.Binary) > 0, nil
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -1101,7 +1160,50 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.Re
 		return
 	}
 
-	responseNotImplemented(w)
+	request := SecureBootV121SecureBoot{}
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// The remaining properties of the resource are read only.
+	if request.SecureBootEnable == nil {
+		responseNoContent(w)
+		return
+	}
+
+	instance, etag, err := s.client.GetInstance(computerSystemID)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if instance.Status != "Stopped" {
+		responseErrWithMessage(w, http.StatusPreconditionFailed, fmt.Sprintf("instance %q is not stopped", computerSystemID))
+		return
+	}
+
+	if instance.Config == nil {
+		instance.Config = map[string]string{}
+	}
+
+	instance.Config["security.secureboot"] = strconv.FormatBool(*request.SecureBootEnable)
+
+	op, err := s.client.UpdateInstance(computerSystemID, instance.Writable(), etag)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = op.Wait()
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	responseNoContent(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -1112,21 +1214,15 @@ func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 	responseNotImplemented(w)
 }
 
-var secureBootDatabases = []string{
-	"DB",
-	"DBX",
-	"KEK",
-}
-
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabases(w http.ResponseWriter, r *http.Request, computerSystemID string) {
 	if !s.validateComputerSystemID(w, computerSystemID) {
 		return
 	}
 
-	members := []OdataV4IdRef{}
-	for _, cert := range secureBootDatabases {
+	members := make([]OdataV4IdRef, 0, len(secureBootDatabases))
+	for _, db := range secureBootDatabases {
 		members = append(members, OdataV4IdRef{
-			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s", s.instanceName, cert)),
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s", s.instanceName, db.id)),
 		})
 	}
 
@@ -1134,112 +1230,245 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases", s.instanceName)),
 		OdataType:         ref("#SecureBootDatabaseCollection.SecureBootDatabaseCollection"),
 		Members:           &members,
-		MembersOdataCount: ref(OdataV4Count(len(secureBootDatabases))),
+		MembersOdataCount: ref(OdataV4Count(len(members))),
 		Name:              "UEFI SecureBoot Database Collection",
 	})
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
-		return
-	}
-
-	if !validateDatabaseID(w, databaseID) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
 	response(w, SecureBootDatabaseV103SecureBootDatabase{
-		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s", s.instanceName, databaseID)),
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s", s.instanceName, db.id)),
 		OdataType: ref("#SecureBootDatabase.v1_0_3.SecureBootDatabase"),
 		Certificates: &OdataV4IdRef{
-			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates", s.instanceName, databaseID)),
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates", s.instanceName, db.id)),
 		},
-		ID:   databaseID,
-		Name: fmt.Sprintf("%s - database", databaseID),
+		Signatures: &OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Signatures", s.instanceName, db.id)),
+		},
+		DatabaseID: ref(db.id),
+		ID:         db.id,
+		Name:       fmt.Sprintf("%s - database", db.id),
 	})
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
-	if !validateDatabaseID(w, databaseID) {
+	if !s.hasNVRAMSupport(w) {
 		return
+	}
+
+	lists, _, _, err := s.getSignatureDatabase(db)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	certificates := collectSignatures(lists, true)
+
+	members := make([]OdataV4IdRef, 0, len(certificates))
+	for _, certificate := range certificates {
+		members = append(members, OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/%s", s.instanceName, db.id, certificate.id)),
+		})
 	}
 
 	response(w, CertificateCollectionCertificateCollection{
-		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates", s.instanceName, databaseID)),
-		OdataType: ref("#CertificateCollection.CertificateCollection"),
-		Members: &[]OdataV4IdRef{
-			// TODO: this is only a dummy entry
-			{
-				OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/1", s.instanceName, databaseID)),
-			},
-		},
-		MembersOdataCount: ref(OdataV4Count(0)),
+		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates", s.instanceName, db.id)),
+		OdataType:         ref("#CertificateCollection.CertificateCollection"),
+		Members:           &members,
+		MembersOdataCount: ref(OdataV4Count(len(members))),
 		Name:              "Certificate Collection",
 	})
 }
 
 func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
-	if !validateDatabaseID(w, databaseID) {
+	if !s.hasNVRAMSupport(w) {
 		return
 	}
 
-	// TODO: process provided request payload containing the certificate
+	request := CertificateV1110Certificate{}
 
-	responseNoContent(w)
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.CertificateType != nil {
+		certificateType, err := request.CertificateType.AsCertificateCertificateType()
+		if err != nil || certificateType != PEM {
+			responseErrWithMessage(w, http.StatusBadRequest, "only PEM encoded certificates are supported")
+			return
+		}
+	}
+
+	if request.CertificateString == nil || *request.CertificateString == "" {
+		responseErrWithMessage(w, http.StatusBadRequest, "CertificateString is required")
+		return
+	}
+
+	der, err := pemToDER(*request.CertificateString)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	owner := deref(request.UefiSignatureOwner)
+	if owner == "" {
+		owner = uuid.Nil.String()
+	}
+
+	owner, err = uefi.ParseGUID(owner)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("invalid UefiSignatureOwner: %v", err))
+		return
+	}
+
+	certificateID, err := s.addSignature(db, signatureList{
+		Type:    "x509",
+		Entries: []signatureEntry{{Owner: owner, Data: der}},
+	}, true)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	location := fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/%s", s.instanceName, db.id, certificateID)
+
+	responseCreated(w, location, s.certificateResource(db, signatureRef{id: certificateID, entry: signatureEntry{Owner: owner, Data: der}}))
 }
 
 func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
-	if !validateCertificateID(w, databaseID, certificateID) {
+	if !s.hasNVRAMSupport(w) {
 		return
 	}
 
-	// TODO: this is only a dummy entry
+	err := s.deleteSignature(db, certificateID, true)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
 
 	responseNoContent(w)
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
-	if !validateCertificateID(w, databaseID, certificateID) {
+	if !s.hasNVRAMSupport(w) {
 		return
 	}
 
-	// TODO: this is only a dummy entry
+	lists, _, _, err := s.getSignatureDatabase(db)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
 
+	certificate, ok := lookupSignature(collectSignatures(lists, true), certificateID)
+	if !ok {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	response(w, s.certificateResource(db, certificate))
+}
+
+// certificateResource builds the Redfish representation of an X.509 signature entry.
+func (s redfishServer) certificateResource(db secureBootDatabase, certificate signatureRef) CertificateV1110Certificate {
 	certificateType := CertificateV1110Certificate_CertificateType{}
 	_ = certificateType.FromCertificateCertificateType(PEM)
 
-	response(w, CertificateV1110Certificate{
-		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/%s", s.instanceName, databaseID, certificateID)),
-		OdataType:         ref("#Certificate.v1_11_0.Certificate"),
-		CertificateString: ref(""),
-		CertificateType:   ref(certificateType),
-		ID:                certificateID,
-		Name:              certificateID,
-	})
+	certificateUsageType := CertificateV1110Certificate_CertificateUsageTypes_Item{}
+	_ = certificateUsageType.FromCertificateCertificateUsageType(CertificateCertificateUsageTypeBIOS)
+
+	resource := CertificateV1110Certificate{
+		OdataID:                  ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/%s", s.instanceName, db.id, certificate.id)),
+		OdataType:                ref("#Certificate.v1_11_0.Certificate"),
+		CertificateString:        ref(derToPEM(certificate.entry.Data)),
+		CertificateType:          ref(certificateType),
+		CertificateUsageTypes:    &[]CertificateV1110Certificate_CertificateUsageTypes_Item{certificateUsageType},
+		Fingerprint:              ref(fingerprint(certificate.entry.Data)),
+		FingerprintHashAlgorithm: ref("SHA256"),
+		UefiSignatureOwner:       ref(certificate.entry.Owner),
+		ID:                       certificate.id,
+		Name:                     "SecureBoot Certificate",
+	}
+
+	// A signature database may contain entries we cannot parse, report those as is.
+	parsed, err := x509.ParseCertificate(certificate.entry.Data)
+	if err != nil {
+		return resource
+	}
+
+	resource.ValidNotBefore = ref(parsed.NotBefore)
+	resource.ValidNotAfter = ref(parsed.NotAfter)
+	resource.SerialNumber = ref(parsed.SerialNumber.String())
+	resource.SignatureAlgorithm = ref(parsed.SignatureAlgorithm.String())
+	resource.Subject = certificateIdentifier(parsed.Subject)
+	resource.Issuer = certificateIdentifier(parsed.Issuer)
+
+	return resource
+}
+
+// certificateIdentifier converts an X.509 name into its Redfish representation.
+func certificateIdentifier(name pkix.Name) *CertificateV1110Identifier {
+	identifier := CertificateV1110Identifier{
+		DisplayString: ref(name.String()),
+	}
+
+	if name.CommonName != "" {
+		identifier.CommonName = ref(name.CommonName)
+	}
+
+	if len(name.Organization) > 0 {
+		identifier.Organization = ref(name.Organization[0])
+	}
+
+	if len(name.OrganizationalUnit) > 0 {
+		identifier.OrganizationalUnit = ref(name.OrganizationalUnit[0])
+	}
+
+	if len(name.Locality) > 0 {
+		identifier.City = ref(name.Locality[0])
+	}
+
+	if len(name.Province) > 0 {
+		identifier.State = ref(name.Province[0])
+	}
+
+	if len(name.Country) > 0 {
+		identifier.Country = ref(name.Country[0])
+	}
+
+	return &identifier
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
-		return
-	}
-
-	if !validateCertificateID(w, databaseID, certificateID) {
+	_, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
@@ -1247,13 +1476,237 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBoot
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
-	if !s.validateComputerSystemID(w, computerSystemID) {
-		return
-	}
-
-	if !validateCertificateID(w, databaseID, certificateID) {
+	_, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
 		return
 	}
 
 	responseNotImplemented(w)
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
+		return
+	}
+
+	if !s.hasNVRAMSupport(w) {
+		return
+	}
+
+	lists, _, _, err := s.getSignatureDatabase(db)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	signatures := collectSignatures(lists, false)
+
+	members := make([]OdataV4IdRef, 0, len(signatures))
+	for _, signature := range signatures {
+		members = append(members, OdataV4IdRef{
+			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Signatures/%s", s.instanceName, db.id, signature.id)),
+		})
+	}
+
+	response(w, SignatureCollectionSignatureCollection{
+		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Signatures", s.instanceName, db.id)),
+		OdataType:         ref("#SignatureCollection.SignatureCollection"),
+		Members:           &members,
+		MembersOdataCount: ref(OdataV4Count(len(members))),
+		Name:              "Signature Collection",
+	})
+}
+
+// The DMTF schema marks the signature collection as not insertable. We accept the
+// insertion anyway, as it is the only way to add a hash to a signature database.
+func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
+		return
+	}
+
+	if !s.hasNVRAMSupport(w) {
+		return
+	}
+
+	request := SignatureV103Signature{}
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.SignatureTypeRegistry != nil {
+		registry, err := request.SignatureTypeRegistry.AsSignatureSignatureTypeRegistry()
+		if err != nil || registry != SignatureSignatureTypeRegistryUEFI {
+			responseErrWithMessage(w, http.StatusBadRequest, "only the UEFI signature type registry is supported")
+			return
+		}
+	}
+
+	signatureType, ok := signatureTypeFromName(deref(request.SignatureType))
+	if !ok {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("unsupported signature type %q", deref(request.SignatureType)))
+		return
+	}
+
+	data, err := hex.DecodeString(strings.TrimPrefix(deref(request.SignatureString), "0x"))
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("SignatureString must be hex encoded: %v", err))
+		return
+	}
+
+	if len(data) == 0 {
+		responseErrWithMessage(w, http.StatusBadRequest, "SignatureString is required")
+		return
+	}
+
+	owner := deref(request.UefiSignatureOwner)
+	if owner == "" {
+		owner = uuid.Nil.String()
+	}
+
+	owner, err = uefi.ParseGUID(owner)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("invalid UefiSignatureOwner: %v", err))
+		return
+	}
+
+	signatureID, err := s.addSignature(db, signatureList{
+		Type:    signatureType,
+		Entries: []signatureEntry{{Owner: owner, Data: data}},
+	}, false)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	location := fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Signatures/%s", s.instanceName, db.id, signatureID)
+
+	responseCreated(w, location, s.signatureResource(db, signatureRef{
+		id:        signatureID,
+		entry:     signatureEntry{Owner: owner, Data: data},
+		entryType: signatureType,
+	}))
+}
+
+func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, signatureID string) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
+		return
+	}
+
+	if !s.hasNVRAMSupport(w) {
+		return
+	}
+
+	lists, _, _, err := s.getSignatureDatabase(db)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	signature, ok := lookupSignature(collectSignatures(lists, false), signatureID)
+	if !ok {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	response(w, s.signatureResource(db, signature))
+}
+
+func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, signatureID string) {
+	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
+	if !ok {
+		return
+	}
+
+	if !s.hasNVRAMSupport(w) {
+		return
+	}
+
+	err := s.deleteSignature(db, signatureID, false)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	responseNoContent(w)
+}
+
+// signatureResource builds the Redfish representation of a non certificate signature entry.
+func (s redfishServer) signatureResource(db secureBootDatabase, signature signatureRef) SignatureV103Signature {
+	registry := SignatureV103Signature_SignatureTypeRegistry{}
+	_ = registry.FromSignatureSignatureTypeRegistry(SignatureSignatureTypeRegistryUEFI)
+
+	return SignatureV103Signature{
+		OdataID:               ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Signatures/%s", s.instanceName, db.id, signature.id)),
+		OdataType:             ref("#Signature.v1_0_3.Signature"),
+		SignatureString:       ref(strings.ToUpper(hex.EncodeToString(signature.entry.Data))),
+		SignatureType:         ref(signatureTypeName(signature.entryType)),
+		SignatureTypeRegistry: &registry,
+		UefiSignatureOwner:    ref(signature.entry.Owner),
+		ID:                    signature.id,
+		Name:                  "SecureBoot Signature",
+	}
+}
+
+// addSignature appends an entry to a signature database and returns its Redfish ID.
+// The entry always gets its own signature list, because the Incus encoder requires all
+// entries of a list to have the same size.
+func (s redfishServer) addSignature(db secureBootDatabase, list signatureList, certificate bool) (string, error) {
+	lists, variable, etag, err := s.getSignatureDatabaseForUpdate(db)
+	if err != nil {
+		return "", err
+	}
+
+	for _, existing := range collectSignatures(lists, certificate) {
+		if bytes.Equal(existing.entry.Data, list.Entries[0].Data) {
+			return "", statusErrorf(http.StatusConflict, "the signature database %q already contains this entry", db.id)
+		}
+	}
+
+	lists = append(lists, list)
+
+	err = s.putSignatureDatabase(db, lists, variable, etag)
+	if err != nil {
+		return "", err
+	}
+
+	added := collectSignatures(lists, certificate)
+
+	return added[len(added)-1].id, nil
+}
+
+// deleteSignature removes an entry from a signature database. Removing the last entry of
+// the platform key returns the firmware to setup mode, which is the expected UEFI behaviour.
+func (s redfishServer) deleteSignature(db secureBootDatabase, id string, certificate bool) error {
+	lists, variable, etag, err := s.getSignatureDatabaseForUpdate(db)
+	if err != nil {
+		return err
+	}
+
+	entry, ok := lookupSignature(collectSignatures(lists, certificate), id)
+	if !ok {
+		return statusErrorf(http.StatusNotFound, "%s", http.StatusText(http.StatusNotFound))
+	}
+
+	return s.putSignatureDatabase(db, removeSignature(lists, entry), variable, etag)
+}
+
+// getSignatureDatabaseForUpdate fetches a signature database for modification. Incus only
+// allows the UEFI variables of a stopped instance to be changed.
+func (s redfishServer) getSignatureDatabaseForUpdate(db secureBootDatabase) ([]signatureList, *incusapi.InstanceNVRAMVariable, string, error) {
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return nil, nil, "", err
+	}
+
+	if instance.Status != "Stopped" {
+		return nil, nil, "", statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+	}
+
+	return s.getSignatureDatabase(db)
 }

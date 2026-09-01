@@ -2,15 +2,29 @@ package api_test
 
 import (
 	"bytes"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/sha256"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/base64"
+	"encoding/hex"
+	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
+	"math/big"
 	"net/http"
 	"net/http/httptest"
+	"sort"
 	"strings"
 	"testing"
+	"time"
 
 	incusclient "github.com/lxc/incus/v7/client"
 	incusapi "github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/uefi"
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/schemas"
 	"github.com/stretchr/testify/require"
@@ -963,32 +977,222 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID_
 	}
 }
 
+// nvramSignatureDatabase builds an UEFI signature database the way the Incus client
+// delivers it, with every entry in its own signature list.
+func nvramSignatureDatabase(t *testing.T, entryType string, datas ...[]byte) *incusapi.InstanceNVRAMVariable {
+	t.Helper()
+
+	lists := make([]map[string]any, 0, len(datas))
+	for _, data := range datas {
+		lists = append(lists, map[string]any{
+			"type": entryType,
+			"entries": []map[string]any{
+				{
+					"owner": "77fa9abd-0359-4d32-bd60-28f4e78f784b",
+					"data":  base64.StdEncoding.EncodeToString(data),
+				},
+			},
+		})
+	}
+
+	raw, err := json.Marshal(lists)
+	require.NoError(t, err)
+
+	var data any
+
+	err = json.Unmarshal(raw, &data)
+	require.NoError(t, err)
+
+	return &incusapi.InstanceNVRAMVariable{
+		Binary: []byte("non-empty"),
+		InstanceNVRAMVariablePut: incusapi.InstanceNVRAMVariablePut{
+			Data:       data,
+			Attributes: []string{"NON_VOLATILE", "BOOTSERVICE_ACCESS", "RUNTIME_ACCESS"},
+		},
+	}
+}
+
+// testCertificate returns a throwaway self signed certificate.
+func testCertificate(t *testing.T, commonName string) ([]byte, string) {
+	t.Helper()
+
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject:      pkix.Name{CommonName: commonName, Organization: []string{"Incus"}},
+		NotBefore:    time.Now().Add(-time.Hour),
+		NotAfter:     time.Now().Add(time.Hour),
+	}
+
+	der, err := x509.CreateCertificate(rand.Reader, &template, &template, &key.PublicKey, key)
+	require.NoError(t, err)
+
+	return der, string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}))
+}
+
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDSecureBoot(t *testing.T) {
-	incusClient := &mock.IncusClientMock{
-		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
-			return &incusapi.Instance{}, "", nil
+	tests := []struct {
+		name           string
+		instance       *incusapi.Instance
+		hasExtension   bool
+		platformKey    *incusapi.InstanceNVRAMVariable
+		wantEnabled    bool
+		wantCurrent    schemas.SecureBootCurrentBootType
+		wantSecureMode schemas.SecureBootModeType
+	}{
+		{
+			name:           "secure boot enabled by default, no platform key",
+			instance:       &incusapi.Instance{Status: "Stopped"},
+			hasExtension:   true,
+			wantEnabled:    true,
+			wantCurrent:    schemas.DisabledSecureBootCurrentBootType,
+			wantSecureMode: schemas.SetupModeSecureBootModeType,
+		},
+		{
+			name: "secure boot disabled",
+			instance: &incusapi.Instance{
+				Status:         "Stopped",
+				ExpandedConfig: map[string]string{"security.secureboot": "false"},
+			},
+			hasExtension:   true,
+			wantEnabled:    false,
+			wantCurrent:    schemas.DisabledSecureBootCurrentBootType,
+			wantSecureMode: schemas.SetupModeSecureBootModeType,
+		},
+		{
+			name:           "platform key enrolled while running",
+			instance:       &incusapi.Instance{Status: "Running"},
+			hasExtension:   true,
+			platformKey:    &incusapi.InstanceNVRAMVariable{Binary: []byte("pk")},
+			wantEnabled:    true,
+			wantCurrent:    schemas.EnabledSecureBootCurrentBootType,
+			wantSecureMode: schemas.UserModeSecureBootModeType,
+		},
+		{
+			name:           "without the NVRAM extension",
+			instance:       &incusapi.Instance{Status: "Stopped"},
+			hasExtension:   false,
+			wantEnabled:    true,
+			wantCurrent:    schemas.DisabledSecureBootCurrentBootType,
+			wantSecureMode: schemas.SetupModeSecureBootModeType,
 		},
 	}
 
-	client := setup(t, incusClient)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return tc.instance, "", nil
+				},
+				HasExtensionFunc: func(extension string) bool {
+					return tc.hasExtension
+				},
+				GetInstanceNVRAMGUIDFunc: func(name string, guid string) (map[string]*incusapi.InstanceNVRAMVariable, error) {
+					if tc.platformKey == nil {
+						return nil, incusapi.StatusErrorf(http.StatusNotFound, "GUID not found")
+					}
 
-	systems, err := client.Service.Systems()
-	require.NoError(t, err)
-	require.Len(t, systems, 1)
+					return map[string]*incusapi.InstanceNVRAMVariable{"PK": tc.platformKey}, nil
+				},
+			}
 
-	secureBoot, err := systems[0].SecureBoot()
-	require.NoError(t, err)
-	require.NotNil(t, secureBoot)
+			client := setup(t, incusClient)
 
-	require.False(t, secureBoot.SecureBootEnable)
-	require.Equal(t, schemas.DisabledSecureBootCurrentBootType, secureBoot.SecureBootCurrentBoot)
-	require.Equal(t, schemas.UserModeSecureBootModeType, secureBoot.SecureBootMode)
+			systems, err := client.Service.Systems()
+			require.NoError(t, err)
+			require.Len(t, systems, 1)
+
+			secureBoot, err := systems[0].SecureBoot()
+			require.NoError(t, err)
+			require.NotNil(t, secureBoot)
+
+			require.Equal(t, tc.wantEnabled, secureBoot.SecureBootEnable)
+			require.Equal(t, tc.wantCurrent, secureBoot.SecureBootCurrentBoot)
+			require.Equal(t, tc.wantSecureMode, secureBoot.SecureBootMode)
+		})
+	}
+}
+
+func TestRedfishServer_PatchSecureBoot(t *testing.T) {
+	tests := []struct {
+		name           string
+		instanceStatus string
+		body           string
+
+		wantErr    bool
+		wantConfig string
+	}{
+		{
+			name:           "success",
+			instanceStatus: "Stopped",
+			body:           `{"SecureBootEnable": false}`,
+			wantConfig:     "false",
+		},
+		{
+			name:           "no op without SecureBootEnable",
+			instanceStatus: "Stopped",
+			body:           `{}`,
+		},
+		{
+			name:           "error - instance is running",
+			instanceStatus: "Running",
+			body:           `{"SecureBootEnable": true}`,
+			wantErr:        true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: tc.instanceStatus}, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{
+						WaitFunc: func() error {
+							return nil
+						},
+					}, nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/SecureBoot", strings.NewReader(tc.body), "", nil)
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if tc.wantErr {
+				require.Error(t, err)
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+
+				return
+			}
+
+			require.NoError(t, err)
+
+			if tc.wantConfig == "" {
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+
+				return
+			}
+
+			require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			require.Equal(t, tc.wantConfig, incusClient.UpdateInstanceCalls()[0].Instance.Config["security.secureboot"])
+		})
+	}
 }
 
 func TestRedfishServer_SecureBootDatabases(t *testing.T) {
 	incusClient := &mock.IncusClientMock{
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 			return &incusapi.Instance{}, "", nil
+		},
+		HasExtensionFunc: func(extension string) bool {
+			return false
 		},
 	}
 
@@ -1003,22 +1207,25 @@ func TestRedfishServer_SecureBootDatabases(t *testing.T) {
 
 	databases, err := secureBoot.SecureBootDatabases()
 	require.NoError(t, err)
-	require.Len(t, databases, 3)
+	require.Len(t, databases, 4)
 
 	ids := make([]string, 0, len(databases))
 	for _, db := range databases {
 		ids = append(ids, db.ID)
 	}
 
-	require.ElementsMatch(t, []string{"DB", "DBX", "KEK"}, ids)
+	require.ElementsMatch(t, []string{"PK", "KEK", "db", "dbx"}, ids)
 }
 
 func TestRedfishServer_SecureBootDatabaseByID(t *testing.T) {
-	for _, databaseID := range []string{"DB", "DBX", "KEK"} {
+	for _, databaseID := range []string{"PK", "KEK", "db", "dbx"} {
 		t.Run(databaseID, func(t *testing.T) {
 			incusClient := &mock.IncusClientMock{
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return &incusapi.Instance{}, "", nil
+				},
+				HasExtensionFunc: func(extension string) bool {
+					return false
 				},
 			}
 
@@ -1043,14 +1250,27 @@ func TestRedfishServer_SecureBootDatabaseByID(t *testing.T) {
 
 			require.NotNil(t, found)
 			require.Equal(t, fmt.Sprintf("%s - database", databaseID), found.Name)
+			require.Equal(t, databaseID, found.DatabaseID)
 		})
 	}
 }
 
 func TestRedfishServer_SecureBootCertificates(t *testing.T) {
+	firstDER, _ := testCertificate(t, "first")
+	secondDER, _ := testCertificate(t, "second")
+
 	incusClient := &mock.IncusClientMock{
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 			return &incusapi.Instance{}, "", nil
+		},
+		HasExtensionFunc: func(extension string) bool {
+			return true
+		},
+		GetInstanceNVRAMGUIDFunc: func(name string, guid string) (map[string]*incusapi.InstanceNVRAMVariable, error) {
+			return nil, incusapi.StatusErrorf(http.StatusNotFound, "GUID not found")
+		},
+		GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+			return nvramSignatureDatabase(t, "x509", firstDER, secondDER), "etag", nil
 		},
 	}
 
@@ -1069,11 +1289,340 @@ func TestRedfishServer_SecureBootCertificates(t *testing.T) {
 
 	certificates, err := databases[0].Certificates()
 	require.NoError(t, err)
-	require.Len(t, certificates, 1)
+	require.Len(t, certificates, 2)
+
+	// The Redfish client does not preserve the order of the collection members.
+	sort.Slice(certificates, func(i, j int) bool { return certificates[i].ID < certificates[j].ID })
 
 	cert := certificates[0]
 	require.Equal(t, "1", cert.ID)
 	require.Equal(t, schemas.PEMCertificateType, cert.CertificateType)
+	require.Equal(t, "first", cert.Subject.CommonName)
+	require.Equal(t, "Incus", cert.Subject.Organization)
+	require.Equal(t, "77fa9abd-0359-4d32-bd60-28f4e78f784b", cert.UefiSignatureOwner)
+	require.Contains(t, cert.CertificateString, "-----BEGIN CERTIFICATE-----")
+
+	require.Equal(t, "second", certificates[1].Subject.CommonName)
+}
+
+func TestRedfishServer_SecureBootCertificates_Errors(t *testing.T) {
+	tests := []struct {
+		name         string
+		hasExtension bool
+		variable     *incusapi.InstanceNVRAMVariable
+		variableErr  error
+
+		wantErrMsg string
+	}{
+		{
+			name:         "database not enrolled yet",
+			hasExtension: true,
+			variableErr:  incusapi.StatusErrorf(http.StatusNotFound, "Variable not found"),
+		},
+		{
+			name:         "error - missing API extension",
+			hasExtension: false,
+			wantErrMsg:   "501",
+		},
+		{
+			name:         "error - undissectable variable",
+			hasExtension: true,
+			variable:     &incusapi.InstanceNVRAMVariable{Binary: []byte("garbage")},
+			wantErrMsg:   "500",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				HasExtensionFunc: func(extension string) bool {
+					return tc.hasExtension
+				},
+				GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+					return tc.variable, "", tc.variableErr
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodGet, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates", nil, "", nil)
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if tc.wantErrMsg != "" {
+				require.ErrorContains(t, err, tc.wantErrMsg)
+
+				return
+			}
+
+			require.NoError(t, err)
+		})
+	}
+}
+
+func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
+	existingDER, existingPEM := testCertificate(t, "existing")
+	_, addedPEM := testCertificate(t, "added")
+
+	tests := []struct {
+		name           string
+		hasExtension   bool
+		instanceStatus string
+		body           string
+
+		wantErrMsg   string
+		wantListLen  int
+		wantEntryLen int
+	}{
+		{
+			name:           "success",
+			hasExtension:   true,
+			instanceStatus: "Stopped",
+			body:           fmt.Sprintf(`{"CertificateString": %q, "CertificateType": "PEM"}`, addedPEM),
+			wantListLen:    2,
+			wantEntryLen:   1,
+		},
+		{
+			name:           "error - not a certificate",
+			hasExtension:   true,
+			instanceStatus: "Stopped",
+			body:           `{"CertificateString": "not a certificate"}`,
+			wantErrMsg:     "400",
+		},
+		{
+			name:           "error - unsupported certificate type",
+			hasExtension:   true,
+			instanceStatus: "Stopped",
+			body:           fmt.Sprintf(`{"CertificateString": %q, "CertificateType": "PKCS7"}`, addedPEM),
+			wantErrMsg:     "400",
+		},
+		{
+			name:           "error - certificate already present",
+			hasExtension:   true,
+			instanceStatus: "Stopped",
+			body:           fmt.Sprintf(`{"CertificateString": %q}`, existingPEM),
+			wantErrMsg:     "409",
+		},
+		{
+			name:           "error - instance is running",
+			hasExtension:   true,
+			instanceStatus: "Running",
+			body:           fmt.Sprintf(`{"CertificateString": %q}`, addedPEM),
+			wantErrMsg:     "412",
+		},
+		{
+			name:           "error - missing API extension",
+			hasExtension:   false,
+			instanceStatus: "Stopped",
+			body:           fmt.Sprintf(`{"CertificateString": %q}`, addedPEM),
+			wantErrMsg:     "501",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: tc.instanceStatus}, "", nil
+				},
+				HasExtensionFunc: func(extension string) bool {
+					return tc.hasExtension
+				},
+				GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+					return nvramSignatureDatabase(t, "x509", existingDER), "etag", nil
+				},
+				UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
+					return nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPost, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates", strings.NewReader(tc.body), "", nil)
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if tc.wantErrMsg != "" {
+				require.ErrorContains(t, err, tc.wantErrMsg)
+				require.Empty(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls())
+
+				return
+			}
+
+			require.NoError(t, err)
+			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), 1)
+
+			call := incusClient.UpdateInstanceNVRAMGUIDVarCalls()[0]
+			require.Equal(t, "test-instance", call.Name)
+			require.Equal(t, uefi.EfiImageSecurityDatabaseGuid, call.GUID)
+			require.Equal(t, "db", call.VarName)
+			require.Equal(t, "etag", call.ETag)
+
+			// The Incus encoder requires all entries of a signature list to have the
+			// same size, so every certificate must get a list of its own.
+			raw, err := json.Marshal(call.Data.Data)
+			require.NoError(t, err)
+
+			lists := []struct {
+				Type    string `json:"type"`
+				Entries []struct {
+					Owner string `json:"owner"`
+					Data  []byte `json:"data"`
+				} `json:"entries"`
+			}{}
+
+			err = json.Unmarshal(raw, &lists)
+			require.NoError(t, err)
+			require.Len(t, lists, tc.wantListLen)
+
+			for _, list := range lists {
+				require.Equal(t, "x509", list.Type)
+				require.Len(t, list.Entries, tc.wantEntryLen)
+			}
+		})
+	}
+}
+
+func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
+	firstDER, _ := testCertificate(t, "first")
+	secondDER, _ := testCertificate(t, "second")
+
+	tests := []struct {
+		name          string
+		certificates  [][]byte
+		certificateID string
+
+		wantErrMsg string
+		wantDelete bool
+		wantUpdate int
+	}{
+		{
+			name:          "remove one of two certificates",
+			certificates:  [][]byte{firstDER, secondDER},
+			certificateID: "1",
+			wantUpdate:    1,
+		},
+		{
+			name:          "removing the last certificate deletes the variable",
+			certificates:  [][]byte{firstDER},
+			certificateID: "1",
+			wantDelete:    true,
+		},
+		{
+			name:          "error - unknown certificate",
+			certificates:  [][]byte{firstDER},
+			certificateID: "2",
+			wantErrMsg:    "404",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+				HasExtensionFunc: func(extension string) bool {
+					return true
+				},
+				GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+					return nvramSignatureDatabase(t, "x509", tc.certificates...), "etag", nil
+				},
+				UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
+					return nil
+				},
+				DeleteInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) error {
+					return nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			url := fmt.Sprintf("/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates/%s", tc.certificateID)
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodDelete, url, nil, "", nil)
+			if resp != nil {
+				resp.Body.Close()
+			}
+
+			if tc.wantErrMsg != "" {
+				require.ErrorContains(t, err, tc.wantErrMsg)
+
+				return
+			}
+
+			require.NoError(t, err)
+			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), tc.wantUpdate)
+			require.Equal(t, tc.wantDelete, len(incusClient.DeleteInstanceNVRAMGUIDVarCalls()) == 1)
+		})
+	}
+}
+
+func TestRedfishServer_SecureBootSignatures(t *testing.T) {
+	hash := sha256.Sum256([]byte("forbidden binary"))
+
+	variable := nvramSignatureDatabase(t, "sha256", hash[:])
+
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{Status: "Stopped"}, "", nil
+		},
+		HasExtensionFunc: func(extension string) bool {
+			return true
+		},
+		GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+			return variable, "etag", nil
+		},
+		DeleteInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) error {
+			return nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	// The hash is reported as a signature and not as a certificate.
+	resp, err := client.RunRawRequestWithHeaders(http.MethodGet, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/1", nil, "", nil)
+	require.NoError(t, err)
+
+	signature := struct {
+		ID                    string `json:"Id"`
+		SignatureString       string `json:"SignatureString"`
+		SignatureType         string `json:"SignatureType"`
+		SignatureTypeRegistry string `json:"SignatureTypeRegistry"`
+	}{}
+
+	err = json.NewDecoder(resp.Body).Decode(&signature)
+	resp.Body.Close()
+	require.NoError(t, err)
+
+	require.Equal(t, "1", signature.ID)
+	require.Equal(t, strings.ToUpper(hex.EncodeToString(hash[:])), signature.SignatureString)
+	require.Equal(t, "EFI_CERT_SHA256_GUID", signature.SignatureType)
+	require.Equal(t, "UEFI", signature.SignatureTypeRegistry)
+
+	// The certificate collection of the same database is empty.
+	resp, err = client.RunRawRequestWithHeaders(http.MethodGet, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Certificates", nil, "", nil)
+	require.NoError(t, err)
+
+	collection := struct {
+		Count int `json:"Members@odata.count"`
+	}{}
+
+	err = json.NewDecoder(resp.Body).Decode(&collection)
+	resp.Body.Close()
+	require.NoError(t, err)
+	require.Equal(t, 0, collection.Count)
+
+	// Deleting the only signature removes the whole variable.
+	resp, err = client.RunRawRequestWithHeaders(http.MethodDelete, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/1", nil, "", nil)
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	require.NoError(t, err)
+	require.Len(t, incusClient.DeleteInstanceNVRAMGUIDVarCalls(), 1)
 }
 
 func TestRedfishServer_NotFound_Error(t *testing.T) {
@@ -1199,7 +1748,7 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
-			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB",
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/db",
 		},
 		{
 			method: http.MethodGet,
@@ -1207,7 +1756,7 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
-			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates",
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/db/Certificates",
 		},
 		{
 			method: http.MethodGet,
@@ -1215,7 +1764,7 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodPost,
-			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates",
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/db/Certificates",
 		},
 		{
 			method: http.MethodPost,
@@ -1223,7 +1772,7 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
-			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates/1",
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/db/Certificates/1",
 		},
 		{
 			method: http.MethodGet,
@@ -1231,11 +1780,11 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
-			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates/2",
 		},
 		{
 			method: http.MethodDelete,
-			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/DB/Certificates/1",
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/db/Certificates/1",
 		},
 		{
 			method: http.MethodDelete,
@@ -1243,21 +1792,51 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodDelete,
-			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates/2",
 		},
 		{
 			method: http.MethodPatch,
-			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Certificates/1",
 		},
 		{
 			method: http.MethodPut,
-			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/DB/Certificates/2",
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Certificates/1",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/invalid/SecureBoot/SecureBootDatabases/db/Signatures",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Signatures",
+		},
+		{
+			method: http.MethodPost,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/INVALID/Signatures",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Signatures/2",
+		},
+		{
+			method: http.MethodDelete,
+			url:    "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Signatures/2",
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(fmt.Sprintf("%s %s", tc.method, tc.url), func(t *testing.T) {
-			incusClient := &mock.IncusClientMock{}
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+				HasExtensionFunc: func(extension string) bool {
+					return true
+				},
+				GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+					return nil, "", incusapi.StatusErrorf(http.StatusNotFound, "Variable not found")
+				},
+			}
 
 			client := setup(t, incusClient)
 
