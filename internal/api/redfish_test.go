@@ -26,6 +26,8 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 		name                 string
 		clientGetInstance    *incusapi.Instance
 		clientGetInstanceErr error
+		clientGetServer      *incusapi.Server
+		clientGetServerErr   error
 
 		assertErr require.ErrorAssertionFunc
 		assert    func(t *testing.T, cs []*schemas.ComputerSystem)
@@ -44,6 +46,154 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				c := cs[0]
 
 				require.Equal(t, schemas.OnPowerState, c.PowerState)
+			},
+		},
+		{
+			name: "success - bios version is the incus server version",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+			},
+			clientGetServer: &incusapi.Server{
+				Environment: incusapi.ServerEnvironment{
+					ServerVersion: "7.3.0",
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				require.Equal(t, "7.3.0", cs[0].BiosVersion)
+			},
+		},
+		{
+			name: "success - processor summary from limits.cpu",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"limits.cpu": "4",
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				c := cs[0]
+
+				require.Equal(t, uint(4), *c.ProcessorSummary.Count)
+				require.Equal(t, uint(4), *c.ProcessorSummary.CoreCount)
+				require.Equal(t, uint(4), *c.ProcessorSummary.LogicalProcessorCount)
+			},
+		},
+		{
+			name: "success - processor summary from expanded config",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+				ExpandedConfig: map[string]string{
+					"limits.cpu": "8",
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				require.Equal(t, uint(8), *cs[0].ProcessorSummary.Count)
+			},
+		},
+		{
+			name: "success - processor summary defaults to one",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"limits.cpu": "not-a-number",
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				require.Equal(t, uint(1), *cs[0].ProcessorSummary.Count)
+			},
+		},
+		{
+			name: "success - trusted module present for a tpm device",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"vtpm": map[string]string{"type": "tpm"},
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				require.Len(t, cs[0].TrustedModules, 1)                                      // nolint: staticcheck // ignore deprecated property warning.
+				require.Equal(t, schemas.EnabledState, cs[0].TrustedModules[0].Status.State) // nolint: staticcheck // ignore deprecated property warning.
+			},
+		},
+		{
+			name: "success - trusted module present for a tpm in the expanded devices",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+				ExpandedDevices: incusapi.DevicesMap{
+					"vtpm": map[string]string{"type": "tpm"},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				require.Len(t, cs[0].TrustedModules, 1) // nolint: staticcheck // ignore deprecated property warning.
+			},
+		},
+		{
+			name: "success - no trusted module without a tpm device",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"root": map[string]string{"type": "disk"},
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				require.Empty(t, cs[0].TrustedModules) // nolint: staticcheck // ignore deprecated property warning.
+			},
+		},
+		{
+			name: "error - client.GetServer",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+			},
+			clientGetServerErr: boom.Error,
+
+			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Nil(t, cs)
 			},
 		},
 		{
@@ -80,6 +230,13 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 			incusClient := &mock.IncusClientMock{
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return tc.clientGetInstance, "", tc.clientGetInstanceErr
+				},
+				GetServerFunc: func() (*incusapi.Server, string, error) {
+					if tc.clientGetServer == nil {
+						return &incusapi.Server{}, "", tc.clientGetServerErr
+					}
+
+					return tc.clientGetServer, "", tc.clientGetServerErr
 				},
 			}
 
@@ -695,8 +852,77 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 			require.Equal(t, "0", processor.ID)
 			require.Equal(t, tc.wantArchitecture, processor.ProcessorArchitecture)
 			require.Equal(t, tc.wantInstructionSet, processor.InstructionSet)
+			require.Equal(t, "qemu", processor.Manufacturer)
+			require.Equal(t, "qemu64", processor.Model)
+			require.Equal(t, schemas.CPUProcessorType, processor.ProcessorType)
 		})
 	}
+}
+
+// TestRedfishServer_BIOSProfileProperties collects the same properties
+// OperationsCenter reads in GetData
+// (internal/provisioning/adapter/bmc/redfish/redfish.go) to select a BIOS
+// profile for a server. A property left empty here makes the instance
+// unmatchable by a BIOS profile keyed on it.
+func TestRedfishServer_BIOSProfileProperties(t *testing.T) {
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Architecture: "x86_64",
+					Config: map[string]string{
+						"limits.cpu": "2",
+					},
+					Devices: incusapi.DevicesMap{
+						"vtpm": map[string]string{"type": "tpm"},
+					},
+				},
+			}, "", nil
+		},
+		GetServerFunc: func() (*incusapi.Server, string, error) {
+			return &incusapi.Server{
+				Environment: incusapi.ServerEnvironment{
+					ServerVersion: "7.3.0",
+				},
+			}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	systems, err := client.Service.Systems()
+	require.NoError(t, err)
+	require.Len(t, systems, 1)
+
+	system := systems[0]
+
+	processors, err := system.Processors()
+	require.NoError(t, err)
+	require.NotEmpty(t, processors)
+
+	processor := processors[0]
+
+	// BIOSProfileMatch.Manufacturer / .Model
+	require.Equal(t, "linuxcontainers.org", system.Manufacturer)
+	require.Equal(t, "Incus", system.Model)
+
+	// BIOSProfileMatch.BIOSVersion, a semver constraint.
+	require.Equal(t, "7.3.0", system.BiosVersion)
+
+	// BIOSProfileMatch.ProcessorManufacturer / .ProcessorArchitecture /
+	// .ProcessorInstructionSet
+	require.Equal(t, "qemu", processor.Manufacturer)
+	require.Equal(t, schemas.X86ProcessorArchitecture, processor.ProcessorArchitecture)
+	require.Equal(t, schemas.X8664InstructionSet, processor.InstructionSet)
+
+	// BIOSProfileMatch.CPUSockets
+	require.NotNil(t, system.ProcessorSummary.Count)
+	require.Equal(t, uint(2), *system.ProcessorSummary.Count)
+
+	// BIOSProfileMatch.HasTPM
+	require.Len(t, system.TrustedModules, 1)                                        // nolint: staticcheck // ignore deprecated property warning.
+	require.NotEqual(t, schemas.AbsentState, system.TrustedModules[0].Status.State) // nolint: staticcheck // ignore deprecated property warning.
 }
 
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID_Errors(t *testing.T) {
@@ -1937,6 +2163,15 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 
 func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
 	t.Helper()
+
+	// Fetching the computer system reads the Incus server version for the BIOS
+	// version, which most test cases do not care about.
+	incusClient, ok := client.(*mock.IncusClientMock)
+	if ok && incusClient.GetServerFunc == nil {
+		incusClient.GetServerFunc = func() (*incusapi.Server, string, error) {
+			return &incusapi.Server{}, "", nil
+		}
+	}
 
 	h := api.NewHandler("test-instance", client)
 

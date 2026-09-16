@@ -14,6 +14,7 @@ import (
 )
 
 type IncusClient interface {
+	GetServer() (server *incusapi.Server, ETag string, err error)
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
@@ -509,6 +510,55 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDIn
 	})
 }
 
+// instanceConfig returns the effective configuration of the instance,
+// preferring the expanded configuration so that keys coming from a profile are
+// taken into account.
+func instanceConfig(instance *incusapi.Instance) map[string]string {
+	if len(instance.ExpandedConfig) > 0 {
+		return instance.ExpandedConfig
+	}
+
+	return instance.Config
+}
+
+// instanceDevices returns the effective devices of the instance, preferring
+// the expanded devices so that devices coming from a profile are taken into
+// account.
+func instanceDevices(instance *incusapi.Instance) incusapi.DevicesMap {
+	if len(instance.ExpandedDevices) > 0 {
+		return instance.ExpandedDevices
+	}
+
+	return instance.Devices
+}
+
+// instanceCPUCount returns the number of vCPUs configured for the instance,
+// defaulting to one if limits.cpu is absent or is not a plain count.
+func instanceCPUCount(instance *incusapi.Instance) int64 {
+	cfgLimitCPU, ok := instanceConfig(instance)["limits.cpu"]
+	if !ok {
+		return 1
+	}
+
+	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
+	if err != nil {
+		return 1
+	}
+
+	return cpuNo
+}
+
+// instanceHasTPM reports whether the instance has a TPM device attached.
+func instanceHasTPM(instance *incusapi.Instance) bool {
+	for _, deviceConfig := range instanceDevices(instance) {
+		if deviceConfig["type"] == "tpm" {
+			return true
+		}
+	}
+
+	return false
+}
+
 func cloneStringMap(source map[string]string) map[string]string {
 	clone := make(map[string]string, len(source))
 	for key, value := range source {
@@ -601,6 +651,31 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		_ = powerState.FromResourcePowerState(Off)
 	}
 
+	server, _, err := s.client.GetServer()
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	cpuNo := instanceCPUCount(instance)
+
+	var trustedModules *[]ComputerSystemV1280TrustedModules
+
+	if instanceHasTPM(instance) {
+		interfaceType := ComputerSystemV1280TrustedModules_InterfaceType{}
+		_ = interfaceType.FromComputerSystemV1280InterfaceType(TPM20)
+
+		state := ResourceStatus_State{}
+		_ = state.FromResourceState(ResourceStateEnabled)
+
+		trustedModules = &[]ComputerSystemV1280TrustedModules{
+			{
+				InterfaceType: &interfaceType,
+				Status:        &ResourceStatus{State: &state},
+			},
+		}
+	}
+
 	response(w, ComputerSystemV1280ComputerSystem{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName)),
 		OdataType: ref("#ComputerSystem.v1_28_0.ComputerSystem"),
@@ -612,6 +687,9 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		Bios: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
 		},
+		// The Incus version is what determines the firmware the instance boots
+		// with, so it stands in for the BIOS version.
+		BiosVersion: ref(server.Environment.ServerVersion),
 		Processors: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors", s.instanceName)),
 		},
@@ -623,14 +701,18 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		Model:      ref("Incus"),
 		Name:       s.instanceName,
 		PowerState: &powerState,
-		// TODO: add processor summary
-		ProcessorSummary: &ComputerSystemV1280ProcessorSummary{},
+		// Every vCPU is exposed as its own processor, so the number of vCPUs is
+		// both the socket and the logical processor count.
+		ProcessorSummary: &ComputerSystemV1280ProcessorSummary{
+			Count:                 ref(cpuNo),
+			CoreCount:             ref(cpuNo),
+			LogicalProcessorCount: ref(cpuNo),
+		},
 		SecureBoot: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
 		},
-		SerialNumber: ref(s.instanceName),
-		// TODO: add trusted modules info if vtpm is present
-		// TrustedModules: &[]ComputerSystemV1280TrustedModules{},
+		SerialNumber:   ref(s.instanceName),
+		TrustedModules: trustedModules,
 		// TODO: add virtual media for system
 		// VirtualMedia: &OdataV4IdRef{
 		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
@@ -890,15 +972,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessors(w http.Resp
 		return
 	}
 
-	cfgLimitCPU, ok := instance.Config["limits.cpu"]
-	if !ok {
-		cfgLimitCPU = "1"
-	}
-
-	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
-	if err != nil {
-		cpuNo = 1
-	}
+	cpuNo := instanceCPUCount(instance)
 
 	cpuMembers := make([]OdataV4IdRef, 0, cpuNo)
 	for i := range cpuNo {
@@ -934,12 +1008,19 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 		_ = instructionSet.FromProcessorV1230InstructionSet(ProcessorV1230InstructionSetARMA64)
 	}
 
+	processorType := ProcessorV1230Processor_ProcessorType{}
+	_ = processorType.FromProcessorV1230ProcessorType(ProcessorV1230ProcessorTypeCPU)
+
 	response(w, ProcessorV1230Processor{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors/%s", s.instanceName, processorIDStr)),
 		OdataType: ref("#Processor.v1_23_0.Processor"),
 
-		ID:                    processorIDStr,
-		Name:                  "Processor",
+		ID:   processorIDStr,
+		Name: "Processor",
+		// Incus does not report the vCPU vendor.
+		Manufacturer:          ref("qemu"),
+		Model:                 ref("qemu64"),
+		ProcessorType:         &processorType,
 		ProcessorArchitecture: processorArchitecture,
 		InstructionSet:        instructionSet,
 	})
@@ -980,15 +1061,7 @@ func (s redfishServer) validateProcessorID(w http.ResponseWriter, computerSystem
 		return nil, false
 	}
 
-	cfgLimitCPU, ok := instance.Config["limits.cpu"]
-	if !ok {
-		cfgLimitCPU = "1"
-	}
-
-	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
-	if err != nil {
-		cpuNo = 1
-	}
+	cpuNo := instanceCPUCount(instance)
 
 	if processorID < 0 || processorID >= cpuNo {
 		responseErr(w, http.StatusNotFound)
