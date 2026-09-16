@@ -233,35 +233,35 @@ func (e ComputerSystemBootSource) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280AutomaticRetryConfig.
+// Defines values for ComputerSystemV1290AutomaticRetryConfig.
 const (
-	ComputerSystemV1280AutomaticRetryConfigDisabled      ComputerSystemV1280AutomaticRetryConfig = "Disabled"
-	ComputerSystemV1280AutomaticRetryConfigRetryAlways   ComputerSystemV1280AutomaticRetryConfig = "RetryAlways"
-	ComputerSystemV1280AutomaticRetryConfigRetryAttempts ComputerSystemV1280AutomaticRetryConfig = "RetryAttempts"
+	ComputerSystemV1290AutomaticRetryConfigDisabled      ComputerSystemV1290AutomaticRetryConfig = "Disabled"
+	ComputerSystemV1290AutomaticRetryConfigRetryAlways   ComputerSystemV1290AutomaticRetryConfig = "RetryAlways"
+	ComputerSystemV1290AutomaticRetryConfigRetryAttempts ComputerSystemV1290AutomaticRetryConfig = "RetryAttempts"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280AutomaticRetryConfig enum.
-func (e ComputerSystemV1280AutomaticRetryConfig) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290AutomaticRetryConfig enum.
+func (e ComputerSystemV1290AutomaticRetryConfig) Valid() bool {
 	switch e {
-	case ComputerSystemV1280AutomaticRetryConfigDisabled:
+	case ComputerSystemV1290AutomaticRetryConfigDisabled:
 		return true
-	case ComputerSystemV1280AutomaticRetryConfigRetryAlways:
+	case ComputerSystemV1290AutomaticRetryConfigRetryAlways:
 		return true
-	case ComputerSystemV1280AutomaticRetryConfigRetryAttempts:
+	case ComputerSystemV1290AutomaticRetryConfigRetryAttempts:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280BootOrderTypes.
+// Defines values for ComputerSystemV1290BootOrderTypes.
 const (
-	AliasBootOrder ComputerSystemV1280BootOrderTypes = "AliasBootOrder"
-	BootOrder      ComputerSystemV1280BootOrderTypes = "BootOrder"
+	AliasBootOrder ComputerSystemV1290BootOrderTypes = "AliasBootOrder"
+	BootOrder      ComputerSystemV1290BootOrderTypes = "BootOrder"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280BootOrderTypes enum.
-func (e ComputerSystemV1280BootOrderTypes) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290BootOrderTypes enum.
+func (e ComputerSystemV1290BootOrderTypes) Valid() bool {
 	switch e {
 	case AliasBootOrder:
 		return true
@@ -272,80 +272,80 @@ func (e ComputerSystemV1280BootOrderTypes) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280BootProgressTypes.
+// Defines values for ComputerSystemV1290BootProgressTypes.
 const (
-	ComputerSystemV1280BootProgressTypesBusInitializationStarted                ComputerSystemV1280BootProgressTypes = "BusInitializationStarted"
-	ComputerSystemV1280BootProgressTypesMemoryInitializationStarted             ComputerSystemV1280BootProgressTypes = "MemoryInitializationStarted"
-	ComputerSystemV1280BootProgressTypesNone                                    ComputerSystemV1280BootProgressTypes = "None"
-	ComputerSystemV1280BootProgressTypesOEM                                     ComputerSystemV1280BootProgressTypes = "OEM"
-	ComputerSystemV1280BootProgressTypesOSBootStarted                           ComputerSystemV1280BootProgressTypes = "OSBootStarted"
-	ComputerSystemV1280BootProgressTypesOSRunning                               ComputerSystemV1280BootProgressTypes = "OSRunning"
-	ComputerSystemV1280BootProgressTypesPCIResourceConfigStarted                ComputerSystemV1280BootProgressTypes = "PCIResourceConfigStarted"
-	ComputerSystemV1280BootProgressTypesPrimaryProcessorInitializationStarted   ComputerSystemV1280BootProgressTypes = "PrimaryProcessorInitializationStarted"
-	ComputerSystemV1280BootProgressTypesSecondaryProcessorInitializationStarted ComputerSystemV1280BootProgressTypes = "SecondaryProcessorInitializationStarted"
-	ComputerSystemV1280BootProgressTypesSetupEntered                            ComputerSystemV1280BootProgressTypes = "SetupEntered"
-	ComputerSystemV1280BootProgressTypesSystemHardwareInitializationComplete    ComputerSystemV1280BootProgressTypes = "SystemHardwareInitializationComplete"
+	ComputerSystemV1290BootProgressTypesBusInitializationStarted                ComputerSystemV1290BootProgressTypes = "BusInitializationStarted"
+	ComputerSystemV1290BootProgressTypesMemoryInitializationStarted             ComputerSystemV1290BootProgressTypes = "MemoryInitializationStarted"
+	ComputerSystemV1290BootProgressTypesNone                                    ComputerSystemV1290BootProgressTypes = "None"
+	ComputerSystemV1290BootProgressTypesOEM                                     ComputerSystemV1290BootProgressTypes = "OEM"
+	ComputerSystemV1290BootProgressTypesOSBootStarted                           ComputerSystemV1290BootProgressTypes = "OSBootStarted"
+	ComputerSystemV1290BootProgressTypesOSRunning                               ComputerSystemV1290BootProgressTypes = "OSRunning"
+	ComputerSystemV1290BootProgressTypesPCIResourceConfigStarted                ComputerSystemV1290BootProgressTypes = "PCIResourceConfigStarted"
+	ComputerSystemV1290BootProgressTypesPrimaryProcessorInitializationStarted   ComputerSystemV1290BootProgressTypes = "PrimaryProcessorInitializationStarted"
+	ComputerSystemV1290BootProgressTypesSecondaryProcessorInitializationStarted ComputerSystemV1290BootProgressTypes = "SecondaryProcessorInitializationStarted"
+	ComputerSystemV1290BootProgressTypesSetupEntered                            ComputerSystemV1290BootProgressTypes = "SetupEntered"
+	ComputerSystemV1290BootProgressTypesSystemHardwareInitializationComplete    ComputerSystemV1290BootProgressTypes = "SystemHardwareInitializationComplete"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280BootProgressTypes enum.
-func (e ComputerSystemV1280BootProgressTypes) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290BootProgressTypes enum.
+func (e ComputerSystemV1290BootProgressTypes) Valid() bool {
 	switch e {
-	case ComputerSystemV1280BootProgressTypesBusInitializationStarted:
+	case ComputerSystemV1290BootProgressTypesBusInitializationStarted:
 		return true
-	case ComputerSystemV1280BootProgressTypesMemoryInitializationStarted:
+	case ComputerSystemV1290BootProgressTypesMemoryInitializationStarted:
 		return true
-	case ComputerSystemV1280BootProgressTypesNone:
+	case ComputerSystemV1290BootProgressTypesNone:
 		return true
-	case ComputerSystemV1280BootProgressTypesOEM:
+	case ComputerSystemV1290BootProgressTypesOEM:
 		return true
-	case ComputerSystemV1280BootProgressTypesOSBootStarted:
+	case ComputerSystemV1290BootProgressTypesOSBootStarted:
 		return true
-	case ComputerSystemV1280BootProgressTypesOSRunning:
+	case ComputerSystemV1290BootProgressTypesOSRunning:
 		return true
-	case ComputerSystemV1280BootProgressTypesPCIResourceConfigStarted:
+	case ComputerSystemV1290BootProgressTypesPCIResourceConfigStarted:
 		return true
-	case ComputerSystemV1280BootProgressTypesPrimaryProcessorInitializationStarted:
+	case ComputerSystemV1290BootProgressTypesPrimaryProcessorInitializationStarted:
 		return true
-	case ComputerSystemV1280BootProgressTypesSecondaryProcessorInitializationStarted:
+	case ComputerSystemV1290BootProgressTypesSecondaryProcessorInitializationStarted:
 		return true
-	case ComputerSystemV1280BootProgressTypesSetupEntered:
+	case ComputerSystemV1290BootProgressTypesSetupEntered:
 		return true
-	case ComputerSystemV1280BootProgressTypesSystemHardwareInitializationComplete:
+	case ComputerSystemV1290BootProgressTypesSystemHardwareInitializationComplete:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280BootSourceOverrideEnabled.
+// Defines values for ComputerSystemV1290BootSourceOverrideEnabled.
 const (
-	ComputerSystemV1280BootSourceOverrideEnabledContinuous ComputerSystemV1280BootSourceOverrideEnabled = "Continuous"
-	ComputerSystemV1280BootSourceOverrideEnabledDisabled   ComputerSystemV1280BootSourceOverrideEnabled = "Disabled"
-	ComputerSystemV1280BootSourceOverrideEnabledOnce       ComputerSystemV1280BootSourceOverrideEnabled = "Once"
+	ComputerSystemV1290BootSourceOverrideEnabledContinuous ComputerSystemV1290BootSourceOverrideEnabled = "Continuous"
+	ComputerSystemV1290BootSourceOverrideEnabledDisabled   ComputerSystemV1290BootSourceOverrideEnabled = "Disabled"
+	ComputerSystemV1290BootSourceOverrideEnabledOnce       ComputerSystemV1290BootSourceOverrideEnabled = "Once"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280BootSourceOverrideEnabled enum.
-func (e ComputerSystemV1280BootSourceOverrideEnabled) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290BootSourceOverrideEnabled enum.
+func (e ComputerSystemV1290BootSourceOverrideEnabled) Valid() bool {
 	switch e {
-	case ComputerSystemV1280BootSourceOverrideEnabledContinuous:
+	case ComputerSystemV1290BootSourceOverrideEnabledContinuous:
 		return true
-	case ComputerSystemV1280BootSourceOverrideEnabledDisabled:
+	case ComputerSystemV1290BootSourceOverrideEnabledDisabled:
 		return true
-	case ComputerSystemV1280BootSourceOverrideEnabledOnce:
+	case ComputerSystemV1290BootSourceOverrideEnabledOnce:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280BootSourceOverrideMode.
+// Defines values for ComputerSystemV1290BootSourceOverrideMode.
 const (
-	Legacy ComputerSystemV1280BootSourceOverrideMode = "Legacy"
-	UEFI   ComputerSystemV1280BootSourceOverrideMode = "UEFI"
+	Legacy ComputerSystemV1290BootSourceOverrideMode = "Legacy"
+	UEFI   ComputerSystemV1290BootSourceOverrideMode = "UEFI"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280BootSourceOverrideMode enum.
-func (e ComputerSystemV1280BootSourceOverrideMode) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290BootSourceOverrideMode enum.
+func (e ComputerSystemV1290BootSourceOverrideMode) Valid() bool {
 	switch e {
 	case Legacy:
 		return true
@@ -356,14 +356,14 @@ func (e ComputerSystemV1280BootSourceOverrideMode) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280CompositionUseCase.
+// Defines values for ComputerSystemV1290CompositionUseCase.
 const (
-	ExpandableSystem     ComputerSystemV1280CompositionUseCase = "ExpandableSystem"
-	ResourceBlockCapable ComputerSystemV1280CompositionUseCase = "ResourceBlockCapable"
+	ExpandableSystem     ComputerSystemV1290CompositionUseCase = "ExpandableSystem"
+	ResourceBlockCapable ComputerSystemV1290CompositionUseCase = "ResourceBlockCapable"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280CompositionUseCase enum.
-func (e ComputerSystemV1280CompositionUseCase) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290CompositionUseCase enum.
+func (e ComputerSystemV1290CompositionUseCase) Valid() bool {
 	switch e {
 	case ExpandableSystem:
 		return true
@@ -374,37 +374,76 @@ func (e ComputerSystemV1280CompositionUseCase) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280GraphicalConnectTypesSupported.
+// Defines values for ComputerSystemV1290ConsoleAccessMode.
 const (
-	ComputerSystemV1280GraphicalConnectTypesSupportedKVMIP ComputerSystemV1280GraphicalConnectTypesSupported = "KVMIP"
-	ComputerSystemV1280GraphicalConnectTypesSupportedOEM   ComputerSystemV1280GraphicalConnectTypesSupported = "OEM"
+	ReadOnly  ComputerSystemV1290ConsoleAccessMode = "ReadOnly"
+	ReadWrite ComputerSystemV1290ConsoleAccessMode = "ReadWrite"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280GraphicalConnectTypesSupported enum.
-func (e ComputerSystemV1280GraphicalConnectTypesSupported) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290ConsoleAccessMode enum.
+func (e ComputerSystemV1290ConsoleAccessMode) Valid() bool {
 	switch e {
-	case ComputerSystemV1280GraphicalConnectTypesSupportedKVMIP:
+	case ReadOnly:
 		return true
-	case ComputerSystemV1280GraphicalConnectTypesSupportedOEM:
+	case ReadWrite:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280HostingRole.
+// Defines values for ComputerSystemV1290ConsoleAuthenticationMethod.
 const (
-	Appliance            ComputerSystemV1280HostingRole = "Appliance"
-	ApplicationServer    ComputerSystemV1280HostingRole = "ApplicationServer"
-	BareMetalServer      ComputerSystemV1280HostingRole = "BareMetalServer"
-	ContainerServer      ComputerSystemV1280HostingRole = "ContainerServer"
-	StorageServer        ComputerSystemV1280HostingRole = "StorageServer"
-	Switch               ComputerSystemV1280HostingRole = "Switch"
-	VirtualMachineServer ComputerSystemV1280HostingRole = "VirtualMachineServer"
+	ExplicitLogin   ComputerSystemV1290ConsoleAuthenticationMethod = "ExplicitLogin"
+	OneTimePassword ComputerSystemV1290ConsoleAuthenticationMethod = "OneTimePassword"
+	OneTimeURL      ComputerSystemV1290ConsoleAuthenticationMethod = "OneTimeURL"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280HostingRole enum.
-func (e ComputerSystemV1280HostingRole) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290ConsoleAuthenticationMethod enum.
+func (e ComputerSystemV1290ConsoleAuthenticationMethod) Valid() bool {
+	switch e {
+	case ExplicitLogin:
+		return true
+	case OneTimePassword:
+		return true
+	case OneTimeURL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ComputerSystemV1290GraphicalConnectTypesSupported.
+const (
+	ComputerSystemV1290GraphicalConnectTypesSupportedKVMIP ComputerSystemV1290GraphicalConnectTypesSupported = "KVMIP"
+	ComputerSystemV1290GraphicalConnectTypesSupportedOEM   ComputerSystemV1290GraphicalConnectTypesSupported = "OEM"
+)
+
+// Valid indicates whether the value is a known member of the ComputerSystemV1290GraphicalConnectTypesSupported enum.
+func (e ComputerSystemV1290GraphicalConnectTypesSupported) Valid() bool {
+	switch e {
+	case ComputerSystemV1290GraphicalConnectTypesSupportedKVMIP:
+		return true
+	case ComputerSystemV1290GraphicalConnectTypesSupportedOEM:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for ComputerSystemV1290HostingRole.
+const (
+	Appliance            ComputerSystemV1290HostingRole = "Appliance"
+	ApplicationServer    ComputerSystemV1290HostingRole = "ApplicationServer"
+	BareMetalServer      ComputerSystemV1290HostingRole = "BareMetalServer"
+	ContainerServer      ComputerSystemV1290HostingRole = "ContainerServer"
+	StorageServer        ComputerSystemV1290HostingRole = "StorageServer"
+	Switch               ComputerSystemV1290HostingRole = "Switch"
+	VirtualMachineServer ComputerSystemV1290HostingRole = "VirtualMachineServer"
+)
+
+// Valid indicates whether the value is a known member of the ComputerSystemV1290HostingRole enum.
+func (e ComputerSystemV1290HostingRole) Valid() bool {
 	switch e {
 	case Appliance:
 		return true
@@ -425,39 +464,39 @@ func (e ComputerSystemV1280HostingRole) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280IndicatorLED.
+// Defines values for ComputerSystemV1290IndicatorLED.
 const (
-	ComputerSystemV1280IndicatorLEDBlinking ComputerSystemV1280IndicatorLED = "Blinking"
-	ComputerSystemV1280IndicatorLEDLit      ComputerSystemV1280IndicatorLED = "Lit"
-	ComputerSystemV1280IndicatorLEDOff      ComputerSystemV1280IndicatorLED = "Off"
-	ComputerSystemV1280IndicatorLEDUnknown  ComputerSystemV1280IndicatorLED = "Unknown"
+	ComputerSystemV1290IndicatorLEDBlinking ComputerSystemV1290IndicatorLED = "Blinking"
+	ComputerSystemV1290IndicatorLEDLit      ComputerSystemV1290IndicatorLED = "Lit"
+	ComputerSystemV1290IndicatorLEDOff      ComputerSystemV1290IndicatorLED = "Off"
+	ComputerSystemV1290IndicatorLEDUnknown  ComputerSystemV1290IndicatorLED = "Unknown"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280IndicatorLED enum.
-func (e ComputerSystemV1280IndicatorLED) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290IndicatorLED enum.
+func (e ComputerSystemV1290IndicatorLED) Valid() bool {
 	switch e {
-	case ComputerSystemV1280IndicatorLEDBlinking:
+	case ComputerSystemV1290IndicatorLEDBlinking:
 		return true
-	case ComputerSystemV1280IndicatorLEDLit:
+	case ComputerSystemV1290IndicatorLEDLit:
 		return true
-	case ComputerSystemV1280IndicatorLEDOff:
+	case ComputerSystemV1290IndicatorLEDOff:
 		return true
-	case ComputerSystemV1280IndicatorLEDUnknown:
+	case ComputerSystemV1290IndicatorLEDUnknown:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280InterfaceType.
+// Defines values for ComputerSystemV1290InterfaceType.
 const (
-	TCM10 ComputerSystemV1280InterfaceType = "TCM1_0"
-	TPM12 ComputerSystemV1280InterfaceType = "TPM1_2"
-	TPM20 ComputerSystemV1280InterfaceType = "TPM2_0"
+	TCM10 ComputerSystemV1290InterfaceType = "TCM1_0"
+	TPM12 ComputerSystemV1290InterfaceType = "TPM1_2"
+	TPM20 ComputerSystemV1290InterfaceType = "TPM2_0"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280InterfaceType enum.
-func (e ComputerSystemV1280InterfaceType) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290InterfaceType enum.
+func (e ComputerSystemV1290InterfaceType) Valid() bool {
 	switch e {
 	case TCM10:
 		return true
@@ -470,159 +509,159 @@ func (e ComputerSystemV1280InterfaceType) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280InterfaceTypeSelection.
+// Defines values for ComputerSystemV1290InterfaceTypeSelection.
 const (
-	ComputerSystemV1280InterfaceTypeSelectionBiosSetting    ComputerSystemV1280InterfaceTypeSelection = "BiosSetting"
-	ComputerSystemV1280InterfaceTypeSelectionFirmwareUpdate ComputerSystemV1280InterfaceTypeSelection = "FirmwareUpdate"
-	ComputerSystemV1280InterfaceTypeSelectionNone           ComputerSystemV1280InterfaceTypeSelection = "None"
-	ComputerSystemV1280InterfaceTypeSelectionOemMethod      ComputerSystemV1280InterfaceTypeSelection = "OemMethod"
+	ComputerSystemV1290InterfaceTypeSelectionBiosSetting    ComputerSystemV1290InterfaceTypeSelection = "BiosSetting"
+	ComputerSystemV1290InterfaceTypeSelectionFirmwareUpdate ComputerSystemV1290InterfaceTypeSelection = "FirmwareUpdate"
+	ComputerSystemV1290InterfaceTypeSelectionNone           ComputerSystemV1290InterfaceTypeSelection = "None"
+	ComputerSystemV1290InterfaceTypeSelectionOemMethod      ComputerSystemV1290InterfaceTypeSelection = "OemMethod"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280InterfaceTypeSelection enum.
-func (e ComputerSystemV1280InterfaceTypeSelection) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290InterfaceTypeSelection enum.
+func (e ComputerSystemV1290InterfaceTypeSelection) Valid() bool {
 	switch e {
-	case ComputerSystemV1280InterfaceTypeSelectionBiosSetting:
+	case ComputerSystemV1290InterfaceTypeSelectionBiosSetting:
 		return true
-	case ComputerSystemV1280InterfaceTypeSelectionFirmwareUpdate:
+	case ComputerSystemV1290InterfaceTypeSelectionFirmwareUpdate:
 		return true
-	case ComputerSystemV1280InterfaceTypeSelectionNone:
+	case ComputerSystemV1290InterfaceTypeSelectionNone:
 		return true
-	case ComputerSystemV1280InterfaceTypeSelectionOemMethod:
+	case ComputerSystemV1290InterfaceTypeSelectionOemMethod:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280KMIPCachePolicy.
+// Defines values for ComputerSystemV1290KMIPCachePolicy.
 const (
-	ComputerSystemV1280KMIPCachePolicyAfterFirstUse ComputerSystemV1280KMIPCachePolicy = "AfterFirstUse"
-	ComputerSystemV1280KMIPCachePolicyNone          ComputerSystemV1280KMIPCachePolicy = "None"
+	ComputerSystemV1290KMIPCachePolicyAfterFirstUse ComputerSystemV1290KMIPCachePolicy = "AfterFirstUse"
+	ComputerSystemV1290KMIPCachePolicyNone          ComputerSystemV1290KMIPCachePolicy = "None"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280KMIPCachePolicy enum.
-func (e ComputerSystemV1280KMIPCachePolicy) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290KMIPCachePolicy enum.
+func (e ComputerSystemV1290KMIPCachePolicy) Valid() bool {
 	switch e {
-	case ComputerSystemV1280KMIPCachePolicyAfterFirstUse:
+	case ComputerSystemV1290KMIPCachePolicyAfterFirstUse:
 		return true
-	case ComputerSystemV1280KMIPCachePolicyNone:
+	case ComputerSystemV1290KMIPCachePolicyNone:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280LastResetCauses.
+// Defines values for ComputerSystemV1290LastResetCauses.
 const (
-	ComputerSystemV1280LastResetCausesManagementCommand  ComputerSystemV1280LastResetCauses = "ManagementCommand"
-	ComputerSystemV1280LastResetCausesOSSoftRestart      ComputerSystemV1280LastResetCauses = "OSSoftRestart"
-	ComputerSystemV1280LastResetCausesPowerButtonPress   ComputerSystemV1280LastResetCauses = "PowerButtonPress"
-	ComputerSystemV1280LastResetCausesPowerEvent         ComputerSystemV1280LastResetCauses = "PowerEvent"
-	ComputerSystemV1280LastResetCausesPowerRestorePolicy ComputerSystemV1280LastResetCauses = "PowerRestorePolicy"
-	ComputerSystemV1280LastResetCausesRTCWakeup          ComputerSystemV1280LastResetCauses = "RTCWakeup"
-	ComputerSystemV1280LastResetCausesSystemCrash        ComputerSystemV1280LastResetCauses = "SystemCrash"
-	ComputerSystemV1280LastResetCausesThermalEvent       ComputerSystemV1280LastResetCauses = "ThermalEvent"
-	ComputerSystemV1280LastResetCausesUnknown            ComputerSystemV1280LastResetCauses = "Unknown"
-	ComputerSystemV1280LastResetCausesWatchdogExpiration ComputerSystemV1280LastResetCauses = "WatchdogExpiration"
+	ComputerSystemV1290LastResetCausesManagementCommand  ComputerSystemV1290LastResetCauses = "ManagementCommand"
+	ComputerSystemV1290LastResetCausesOSSoftRestart      ComputerSystemV1290LastResetCauses = "OSSoftRestart"
+	ComputerSystemV1290LastResetCausesPowerButtonPress   ComputerSystemV1290LastResetCauses = "PowerButtonPress"
+	ComputerSystemV1290LastResetCausesPowerEvent         ComputerSystemV1290LastResetCauses = "PowerEvent"
+	ComputerSystemV1290LastResetCausesPowerRestorePolicy ComputerSystemV1290LastResetCauses = "PowerRestorePolicy"
+	ComputerSystemV1290LastResetCausesRTCWakeup          ComputerSystemV1290LastResetCauses = "RTCWakeup"
+	ComputerSystemV1290LastResetCausesSystemCrash        ComputerSystemV1290LastResetCauses = "SystemCrash"
+	ComputerSystemV1290LastResetCausesThermalEvent       ComputerSystemV1290LastResetCauses = "ThermalEvent"
+	ComputerSystemV1290LastResetCausesUnknown            ComputerSystemV1290LastResetCauses = "Unknown"
+	ComputerSystemV1290LastResetCausesWatchdogExpiration ComputerSystemV1290LastResetCauses = "WatchdogExpiration"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280LastResetCauses enum.
-func (e ComputerSystemV1280LastResetCauses) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290LastResetCauses enum.
+func (e ComputerSystemV1290LastResetCauses) Valid() bool {
 	switch e {
-	case ComputerSystemV1280LastResetCausesManagementCommand:
+	case ComputerSystemV1290LastResetCausesManagementCommand:
 		return true
-	case ComputerSystemV1280LastResetCausesOSSoftRestart:
+	case ComputerSystemV1290LastResetCausesOSSoftRestart:
 		return true
-	case ComputerSystemV1280LastResetCausesPowerButtonPress:
+	case ComputerSystemV1290LastResetCausesPowerButtonPress:
 		return true
-	case ComputerSystemV1280LastResetCausesPowerEvent:
+	case ComputerSystemV1290LastResetCausesPowerEvent:
 		return true
-	case ComputerSystemV1280LastResetCausesPowerRestorePolicy:
+	case ComputerSystemV1290LastResetCausesPowerRestorePolicy:
 		return true
-	case ComputerSystemV1280LastResetCausesRTCWakeup:
+	case ComputerSystemV1290LastResetCausesRTCWakeup:
 		return true
-	case ComputerSystemV1280LastResetCausesSystemCrash:
+	case ComputerSystemV1290LastResetCausesSystemCrash:
 		return true
-	case ComputerSystemV1280LastResetCausesThermalEvent:
+	case ComputerSystemV1290LastResetCausesThermalEvent:
 		return true
-	case ComputerSystemV1280LastResetCausesUnknown:
+	case ComputerSystemV1290LastResetCausesUnknown:
 		return true
-	case ComputerSystemV1280LastResetCausesWatchdogExpiration:
+	case ComputerSystemV1290LastResetCausesWatchdogExpiration:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280MemoryMirroring.
+// Defines values for ComputerSystemV1290MemoryMirroring.
 const (
-	ComputerSystemV1280MemoryMirroringDIMM   ComputerSystemV1280MemoryMirroring = "DIMM"
-	ComputerSystemV1280MemoryMirroringHybrid ComputerSystemV1280MemoryMirroring = "Hybrid"
-	ComputerSystemV1280MemoryMirroringNone   ComputerSystemV1280MemoryMirroring = "None"
-	ComputerSystemV1280MemoryMirroringSystem ComputerSystemV1280MemoryMirroring = "System"
+	ComputerSystemV1290MemoryMirroringDIMM   ComputerSystemV1290MemoryMirroring = "DIMM"
+	ComputerSystemV1290MemoryMirroringHybrid ComputerSystemV1290MemoryMirroring = "Hybrid"
+	ComputerSystemV1290MemoryMirroringNone   ComputerSystemV1290MemoryMirroring = "None"
+	ComputerSystemV1290MemoryMirroringSystem ComputerSystemV1290MemoryMirroring = "System"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280MemoryMirroring enum.
-func (e ComputerSystemV1280MemoryMirroring) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290MemoryMirroring enum.
+func (e ComputerSystemV1290MemoryMirroring) Valid() bool {
 	switch e {
-	case ComputerSystemV1280MemoryMirroringDIMM:
+	case ComputerSystemV1290MemoryMirroringDIMM:
 		return true
-	case ComputerSystemV1280MemoryMirroringHybrid:
+	case ComputerSystemV1290MemoryMirroringHybrid:
 		return true
-	case ComputerSystemV1280MemoryMirroringNone:
+	case ComputerSystemV1290MemoryMirroringNone:
 		return true
-	case ComputerSystemV1280MemoryMirroringSystem:
+	case ComputerSystemV1290MemoryMirroringSystem:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280PowerMode.
+// Defines values for ComputerSystemV1290PowerMode.
 const (
-	ComputerSystemV1280PowerModeBalancedPerformance        ComputerSystemV1280PowerMode = "BalancedPerformance"
-	ComputerSystemV1280PowerModeEfficiencyFavorPerformance ComputerSystemV1280PowerMode = "EfficiencyFavorPerformance"
-	ComputerSystemV1280PowerModeEfficiencyFavorPower       ComputerSystemV1280PowerMode = "EfficiencyFavorPower"
-	ComputerSystemV1280PowerModeMaximumPerformance         ComputerSystemV1280PowerMode = "MaximumPerformance"
-	ComputerSystemV1280PowerModeOEM                        ComputerSystemV1280PowerMode = "OEM"
-	ComputerSystemV1280PowerModeOSControlled               ComputerSystemV1280PowerMode = "OSControlled"
-	ComputerSystemV1280PowerModePowerSaving                ComputerSystemV1280PowerMode = "PowerSaving"
-	ComputerSystemV1280PowerModeStatic                     ComputerSystemV1280PowerMode = "Static"
+	ComputerSystemV1290PowerModeBalancedPerformance        ComputerSystemV1290PowerMode = "BalancedPerformance"
+	ComputerSystemV1290PowerModeEfficiencyFavorPerformance ComputerSystemV1290PowerMode = "EfficiencyFavorPerformance"
+	ComputerSystemV1290PowerModeEfficiencyFavorPower       ComputerSystemV1290PowerMode = "EfficiencyFavorPower"
+	ComputerSystemV1290PowerModeMaximumPerformance         ComputerSystemV1290PowerMode = "MaximumPerformance"
+	ComputerSystemV1290PowerModeOEM                        ComputerSystemV1290PowerMode = "OEM"
+	ComputerSystemV1290PowerModeOSControlled               ComputerSystemV1290PowerMode = "OSControlled"
+	ComputerSystemV1290PowerModePowerSaving                ComputerSystemV1290PowerMode = "PowerSaving"
+	ComputerSystemV1290PowerModeStatic                     ComputerSystemV1290PowerMode = "Static"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280PowerMode enum.
-func (e ComputerSystemV1280PowerMode) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290PowerMode enum.
+func (e ComputerSystemV1290PowerMode) Valid() bool {
 	switch e {
-	case ComputerSystemV1280PowerModeBalancedPerformance:
+	case ComputerSystemV1290PowerModeBalancedPerformance:
 		return true
-	case ComputerSystemV1280PowerModeEfficiencyFavorPerformance:
+	case ComputerSystemV1290PowerModeEfficiencyFavorPerformance:
 		return true
-	case ComputerSystemV1280PowerModeEfficiencyFavorPower:
+	case ComputerSystemV1290PowerModeEfficiencyFavorPower:
 		return true
-	case ComputerSystemV1280PowerModeMaximumPerformance:
+	case ComputerSystemV1290PowerModeMaximumPerformance:
 		return true
-	case ComputerSystemV1280PowerModeOEM:
+	case ComputerSystemV1290PowerModeOEM:
 		return true
-	case ComputerSystemV1280PowerModeOSControlled:
+	case ComputerSystemV1290PowerModeOSControlled:
 		return true
-	case ComputerSystemV1280PowerModePowerSaving:
+	case ComputerSystemV1290PowerModePowerSaving:
 		return true
-	case ComputerSystemV1280PowerModeStatic:
+	case ComputerSystemV1290PowerModeStatic:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280PowerRestorePolicyTypes.
+// Defines values for ComputerSystemV1290PowerRestorePolicyTypes.
 const (
-	AlwaysOff ComputerSystemV1280PowerRestorePolicyTypes = "AlwaysOff"
-	AlwaysOn  ComputerSystemV1280PowerRestorePolicyTypes = "AlwaysOn"
-	LastState ComputerSystemV1280PowerRestorePolicyTypes = "LastState"
+	AlwaysOff ComputerSystemV1290PowerRestorePolicyTypes = "AlwaysOff"
+	AlwaysOn  ComputerSystemV1290PowerRestorePolicyTypes = "AlwaysOn"
+	LastState ComputerSystemV1290PowerRestorePolicyTypes = "LastState"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280PowerRestorePolicyTypes enum.
-func (e ComputerSystemV1280PowerRestorePolicyTypes) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290PowerRestorePolicyTypes enum.
+func (e ComputerSystemV1290PowerRestorePolicyTypes) Valid() bool {
 	switch e {
 	case AlwaysOff:
 		return true
@@ -635,14 +674,14 @@ func (e ComputerSystemV1280PowerRestorePolicyTypes) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280StopBootOnFault.
+// Defines values for ComputerSystemV1290StopBootOnFault.
 const (
-	AnyFault ComputerSystemV1280StopBootOnFault = "AnyFault"
-	Never    ComputerSystemV1280StopBootOnFault = "Never"
+	AnyFault ComputerSystemV1290StopBootOnFault = "AnyFault"
+	Never    ComputerSystemV1290StopBootOnFault = "Never"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280StopBootOnFault enum.
-func (e ComputerSystemV1280StopBootOnFault) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290StopBootOnFault enum.
+func (e ComputerSystemV1290StopBootOnFault) Valid() bool {
 	switch e {
 	case AnyFault:
 		return true
@@ -653,19 +692,19 @@ func (e ComputerSystemV1280StopBootOnFault) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280SystemType.
+// Defines values for ComputerSystemV1290SystemType.
 const (
-	Composed              ComputerSystemV1280SystemType = "Composed"
-	DPU                   ComputerSystemV1280SystemType = "DPU"
-	OS                    ComputerSystemV1280SystemType = "OS"
-	Physical              ComputerSystemV1280SystemType = "Physical"
-	PhysicallyPartitioned ComputerSystemV1280SystemType = "PhysicallyPartitioned"
-	Virtual               ComputerSystemV1280SystemType = "Virtual"
-	VirtuallyPartitioned  ComputerSystemV1280SystemType = "VirtuallyPartitioned"
+	Composed              ComputerSystemV1290SystemType = "Composed"
+	DPU                   ComputerSystemV1290SystemType = "DPU"
+	OS                    ComputerSystemV1290SystemType = "OS"
+	Physical              ComputerSystemV1290SystemType = "Physical"
+	PhysicallyPartitioned ComputerSystemV1290SystemType = "PhysicallyPartitioned"
+	Virtual               ComputerSystemV1290SystemType = "Virtual"
+	VirtuallyPartitioned  ComputerSystemV1290SystemType = "VirtuallyPartitioned"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280SystemType enum.
-func (e ComputerSystemV1280SystemType) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290SystemType enum.
+func (e ComputerSystemV1290SystemType) Valid() bool {
 	switch e {
 	case Composed:
 		return true
@@ -686,99 +725,99 @@ func (e ComputerSystemV1280SystemType) Valid() bool {
 	}
 }
 
-// Defines values for ComputerSystemV1280TrustedModuleRequiredToBoot.
+// Defines values for ComputerSystemV1290TrustedModuleRequiredToBoot.
 const (
-	ComputerSystemV1280TrustedModuleRequiredToBootDisabled ComputerSystemV1280TrustedModuleRequiredToBoot = "Disabled"
-	ComputerSystemV1280TrustedModuleRequiredToBootRequired ComputerSystemV1280TrustedModuleRequiredToBoot = "Required"
+	ComputerSystemV1290TrustedModuleRequiredToBootDisabled ComputerSystemV1290TrustedModuleRequiredToBoot = "Disabled"
+	ComputerSystemV1290TrustedModuleRequiredToBootRequired ComputerSystemV1290TrustedModuleRequiredToBoot = "Required"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280TrustedModuleRequiredToBoot enum.
-func (e ComputerSystemV1280TrustedModuleRequiredToBoot) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290TrustedModuleRequiredToBoot enum.
+func (e ComputerSystemV1290TrustedModuleRequiredToBoot) Valid() bool {
 	switch e {
-	case ComputerSystemV1280TrustedModuleRequiredToBootDisabled:
+	case ComputerSystemV1290TrustedModuleRequiredToBootDisabled:
 		return true
-	case ComputerSystemV1280TrustedModuleRequiredToBootRequired:
+	case ComputerSystemV1290TrustedModuleRequiredToBootRequired:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280WatchdogTimeoutActions.
+// Defines values for ComputerSystemV1290WatchdogTimeoutActions.
 const (
-	ComputerSystemV1280WatchdogTimeoutActionsNone        ComputerSystemV1280WatchdogTimeoutActions = "None"
-	ComputerSystemV1280WatchdogTimeoutActionsOEM         ComputerSystemV1280WatchdogTimeoutActions = "OEM"
-	ComputerSystemV1280WatchdogTimeoutActionsPowerCycle  ComputerSystemV1280WatchdogTimeoutActions = "PowerCycle"
-	ComputerSystemV1280WatchdogTimeoutActionsPowerDown   ComputerSystemV1280WatchdogTimeoutActions = "PowerDown"
-	ComputerSystemV1280WatchdogTimeoutActionsResetSystem ComputerSystemV1280WatchdogTimeoutActions = "ResetSystem"
+	ComputerSystemV1290WatchdogTimeoutActionsNone        ComputerSystemV1290WatchdogTimeoutActions = "None"
+	ComputerSystemV1290WatchdogTimeoutActionsOEM         ComputerSystemV1290WatchdogTimeoutActions = "OEM"
+	ComputerSystemV1290WatchdogTimeoutActionsPowerCycle  ComputerSystemV1290WatchdogTimeoutActions = "PowerCycle"
+	ComputerSystemV1290WatchdogTimeoutActionsPowerDown   ComputerSystemV1290WatchdogTimeoutActions = "PowerDown"
+	ComputerSystemV1290WatchdogTimeoutActionsResetSystem ComputerSystemV1290WatchdogTimeoutActions = "ResetSystem"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280WatchdogTimeoutActions enum.
-func (e ComputerSystemV1280WatchdogTimeoutActions) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290WatchdogTimeoutActions enum.
+func (e ComputerSystemV1290WatchdogTimeoutActions) Valid() bool {
 	switch e {
-	case ComputerSystemV1280WatchdogTimeoutActionsNone:
+	case ComputerSystemV1290WatchdogTimeoutActionsNone:
 		return true
-	case ComputerSystemV1280WatchdogTimeoutActionsOEM:
+	case ComputerSystemV1290WatchdogTimeoutActionsOEM:
 		return true
-	case ComputerSystemV1280WatchdogTimeoutActionsPowerCycle:
+	case ComputerSystemV1290WatchdogTimeoutActionsPowerCycle:
 		return true
-	case ComputerSystemV1280WatchdogTimeoutActionsPowerDown:
+	case ComputerSystemV1290WatchdogTimeoutActionsPowerDown:
 		return true
-	case ComputerSystemV1280WatchdogTimeoutActionsResetSystem:
+	case ComputerSystemV1290WatchdogTimeoutActionsResetSystem:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ComputerSystemV1280WatchdogWarningActions.
+// Defines values for ComputerSystemV1290WatchdogWarningActions.
 const (
-	ComputerSystemV1280WatchdogWarningActionsDiagnosticInterrupt ComputerSystemV1280WatchdogWarningActions = "DiagnosticInterrupt"
-	ComputerSystemV1280WatchdogWarningActionsMessagingInterrupt  ComputerSystemV1280WatchdogWarningActions = "MessagingInterrupt"
-	ComputerSystemV1280WatchdogWarningActionsNone                ComputerSystemV1280WatchdogWarningActions = "None"
-	ComputerSystemV1280WatchdogWarningActionsOEM                 ComputerSystemV1280WatchdogWarningActions = "OEM"
-	ComputerSystemV1280WatchdogWarningActionsSCI                 ComputerSystemV1280WatchdogWarningActions = "SCI"
-	ComputerSystemV1280WatchdogWarningActionsSMI                 ComputerSystemV1280WatchdogWarningActions = "SMI"
+	ComputerSystemV1290WatchdogWarningActionsDiagnosticInterrupt ComputerSystemV1290WatchdogWarningActions = "DiagnosticInterrupt"
+	ComputerSystemV1290WatchdogWarningActionsMessagingInterrupt  ComputerSystemV1290WatchdogWarningActions = "MessagingInterrupt"
+	ComputerSystemV1290WatchdogWarningActionsNone                ComputerSystemV1290WatchdogWarningActions = "None"
+	ComputerSystemV1290WatchdogWarningActionsOEM                 ComputerSystemV1290WatchdogWarningActions = "OEM"
+	ComputerSystemV1290WatchdogWarningActionsSCI                 ComputerSystemV1290WatchdogWarningActions = "SCI"
+	ComputerSystemV1290WatchdogWarningActionsSMI                 ComputerSystemV1290WatchdogWarningActions = "SMI"
 )
 
-// Valid indicates whether the value is a known member of the ComputerSystemV1280WatchdogWarningActions enum.
-func (e ComputerSystemV1280WatchdogWarningActions) Valid() bool {
+// Valid indicates whether the value is a known member of the ComputerSystemV1290WatchdogWarningActions enum.
+func (e ComputerSystemV1290WatchdogWarningActions) Valid() bool {
 	switch e {
-	case ComputerSystemV1280WatchdogWarningActionsDiagnosticInterrupt:
+	case ComputerSystemV1290WatchdogWarningActionsDiagnosticInterrupt:
 		return true
-	case ComputerSystemV1280WatchdogWarningActionsMessagingInterrupt:
+	case ComputerSystemV1290WatchdogWarningActionsMessagingInterrupt:
 		return true
-	case ComputerSystemV1280WatchdogWarningActionsNone:
+	case ComputerSystemV1290WatchdogWarningActionsNone:
 		return true
-	case ComputerSystemV1280WatchdogWarningActionsOEM:
+	case ComputerSystemV1290WatchdogWarningActionsOEM:
 		return true
-	case ComputerSystemV1280WatchdogWarningActionsSCI:
+	case ComputerSystemV1290WatchdogWarningActionsSCI:
 		return true
-	case ComputerSystemV1280WatchdogWarningActionsSMI:
+	case ComputerSystemV1290WatchdogWarningActionsSMI:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ControlV180ControlMode.
+// Defines values for ControlV181ControlMode.
 const (
-	ControlV180ControlModeAutomatic ControlV180ControlMode = "Automatic"
-	ControlV180ControlModeDisabled  ControlV180ControlMode = "Disabled"
-	ControlV180ControlModeManual    ControlV180ControlMode = "Manual"
-	ControlV180ControlModeOverride  ControlV180ControlMode = "Override"
+	ControlV181ControlModeAutomatic ControlV181ControlMode = "Automatic"
+	ControlV181ControlModeDisabled  ControlV181ControlMode = "Disabled"
+	ControlV181ControlModeManual    ControlV181ControlMode = "Manual"
+	ControlV181ControlModeOverride  ControlV181ControlMode = "Override"
 )
 
-// Valid indicates whether the value is a known member of the ControlV180ControlMode enum.
-func (e ControlV180ControlMode) Valid() bool {
+// Valid indicates whether the value is a known member of the ControlV181ControlMode enum.
+func (e ControlV181ControlMode) Valid() bool {
 	switch e {
-	case ControlV180ControlModeAutomatic:
+	case ControlV181ControlModeAutomatic:
 		return true
-	case ControlV180ControlModeDisabled:
+	case ControlV181ControlModeDisabled:
 		return true
-	case ControlV180ControlModeManual:
+	case ControlV181ControlModeManual:
 		return true
-	case ControlV180ControlModeOverride:
+	case ControlV181ControlModeOverride:
 		return true
 	default:
 		return false
@@ -977,32 +1016,32 @@ func (e PCIeDevicePCIeTypes) Valid() bool {
 	}
 }
 
-// Defines values for ProcessorV1230BaseSpeedPriorityState.
+// Defines values for ProcessorV1240BaseSpeedPriorityState.
 const (
-	ProcessorV1230BaseSpeedPriorityStateDisabled ProcessorV1230BaseSpeedPriorityState = "Disabled"
-	ProcessorV1230BaseSpeedPriorityStateEnabled  ProcessorV1230BaseSpeedPriorityState = "Enabled"
+	ProcessorV1240BaseSpeedPriorityStateDisabled ProcessorV1240BaseSpeedPriorityState = "Disabled"
+	ProcessorV1240BaseSpeedPriorityStateEnabled  ProcessorV1240BaseSpeedPriorityState = "Enabled"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230BaseSpeedPriorityState enum.
-func (e ProcessorV1230BaseSpeedPriorityState) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240BaseSpeedPriorityState enum.
+func (e ProcessorV1240BaseSpeedPriorityState) Valid() bool {
 	switch e {
-	case ProcessorV1230BaseSpeedPriorityStateDisabled:
+	case ProcessorV1240BaseSpeedPriorityStateDisabled:
 		return true
-	case ProcessorV1230BaseSpeedPriorityStateEnabled:
+	case ProcessorV1240BaseSpeedPriorityStateEnabled:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230FpgaType.
+// Defines values for ProcessorV1240FpgaType.
 const (
-	Discrete   ProcessorV1230FpgaType = "Discrete"
-	Integrated ProcessorV1230FpgaType = "Integrated"
+	Discrete   ProcessorV1240FpgaType = "Discrete"
+	Integrated ProcessorV1240FpgaType = "Integrated"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230FpgaType enum.
-func (e ProcessorV1230FpgaType) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240FpgaType enum.
+func (e ProcessorV1240FpgaType) Valid() bool {
 	switch e {
 	case Discrete:
 		return true
@@ -1013,326 +1052,326 @@ func (e ProcessorV1230FpgaType) Valid() bool {
 	}
 }
 
-// Defines values for ProcessorV1230InstructionSet.
+// Defines values for ProcessorV1240InstructionSet.
 const (
-	ProcessorV1230InstructionSetARMA32   ProcessorV1230InstructionSet = "ARM-A32"
-	ProcessorV1230InstructionSetARMA64   ProcessorV1230InstructionSet = "ARM-A64"
-	ProcessorV1230InstructionSetIA64     ProcessorV1230InstructionSet = "IA-64"
-	ProcessorV1230InstructionSetMIPS32   ProcessorV1230InstructionSet = "MIPS32"
-	ProcessorV1230InstructionSetMIPS64   ProcessorV1230InstructionSet = "MIPS64"
-	ProcessorV1230InstructionSetOEM      ProcessorV1230InstructionSet = "OEM"
-	ProcessorV1230InstructionSetPowerISA ProcessorV1230InstructionSet = "PowerISA"
-	ProcessorV1230InstructionSetRV32     ProcessorV1230InstructionSet = "RV32"
-	ProcessorV1230InstructionSetRV64     ProcessorV1230InstructionSet = "RV64"
-	ProcessorV1230InstructionSetX86      ProcessorV1230InstructionSet = "x86"
-	ProcessorV1230InstructionSetX8664    ProcessorV1230InstructionSet = "x86-64"
+	ProcessorV1240InstructionSetARMA32   ProcessorV1240InstructionSet = "ARM-A32"
+	ProcessorV1240InstructionSetARMA64   ProcessorV1240InstructionSet = "ARM-A64"
+	ProcessorV1240InstructionSetIA64     ProcessorV1240InstructionSet = "IA-64"
+	ProcessorV1240InstructionSetMIPS32   ProcessorV1240InstructionSet = "MIPS32"
+	ProcessorV1240InstructionSetMIPS64   ProcessorV1240InstructionSet = "MIPS64"
+	ProcessorV1240InstructionSetOEM      ProcessorV1240InstructionSet = "OEM"
+	ProcessorV1240InstructionSetPowerISA ProcessorV1240InstructionSet = "PowerISA"
+	ProcessorV1240InstructionSetRV32     ProcessorV1240InstructionSet = "RV32"
+	ProcessorV1240InstructionSetRV64     ProcessorV1240InstructionSet = "RV64"
+	ProcessorV1240InstructionSetX86      ProcessorV1240InstructionSet = "x86"
+	ProcessorV1240InstructionSetX8664    ProcessorV1240InstructionSet = "x86-64"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230InstructionSet enum.
-func (e ProcessorV1230InstructionSet) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240InstructionSet enum.
+func (e ProcessorV1240InstructionSet) Valid() bool {
 	switch e {
-	case ProcessorV1230InstructionSetARMA32:
+	case ProcessorV1240InstructionSetARMA32:
 		return true
-	case ProcessorV1230InstructionSetARMA64:
+	case ProcessorV1240InstructionSetARMA64:
 		return true
-	case ProcessorV1230InstructionSetIA64:
+	case ProcessorV1240InstructionSetIA64:
 		return true
-	case ProcessorV1230InstructionSetMIPS32:
+	case ProcessorV1240InstructionSetMIPS32:
 		return true
-	case ProcessorV1230InstructionSetMIPS64:
+	case ProcessorV1240InstructionSetMIPS64:
 		return true
-	case ProcessorV1230InstructionSetOEM:
+	case ProcessorV1240InstructionSetOEM:
 		return true
-	case ProcessorV1230InstructionSetPowerISA:
+	case ProcessorV1240InstructionSetPowerISA:
 		return true
-	case ProcessorV1230InstructionSetRV32:
+	case ProcessorV1240InstructionSetRV32:
 		return true
-	case ProcessorV1230InstructionSetRV64:
+	case ProcessorV1240InstructionSetRV64:
 		return true
-	case ProcessorV1230InstructionSetX86:
+	case ProcessorV1240InstructionSetX86:
 		return true
-	case ProcessorV1230InstructionSetX8664:
+	case ProcessorV1240InstructionSetX8664:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230ProcessorArchitecture.
+// Defines values for ProcessorV1240ProcessorArchitecture.
 const (
-	ProcessorV1230ProcessorArchitectureARM   ProcessorV1230ProcessorArchitecture = "ARM"
-	ProcessorV1230ProcessorArchitectureIA64  ProcessorV1230ProcessorArchitecture = "IA-64"
-	ProcessorV1230ProcessorArchitectureMIPS  ProcessorV1230ProcessorArchitecture = "MIPS"
-	ProcessorV1230ProcessorArchitectureOEM   ProcessorV1230ProcessorArchitecture = "OEM"
-	ProcessorV1230ProcessorArchitecturePower ProcessorV1230ProcessorArchitecture = "Power"
-	ProcessorV1230ProcessorArchitectureRISCV ProcessorV1230ProcessorArchitecture = "RISC-V"
-	ProcessorV1230ProcessorArchitectureX86   ProcessorV1230ProcessorArchitecture = "x86"
+	ProcessorV1240ProcessorArchitectureARM   ProcessorV1240ProcessorArchitecture = "ARM"
+	ProcessorV1240ProcessorArchitectureIA64  ProcessorV1240ProcessorArchitecture = "IA-64"
+	ProcessorV1240ProcessorArchitectureMIPS  ProcessorV1240ProcessorArchitecture = "MIPS"
+	ProcessorV1240ProcessorArchitectureOEM   ProcessorV1240ProcessorArchitecture = "OEM"
+	ProcessorV1240ProcessorArchitecturePower ProcessorV1240ProcessorArchitecture = "Power"
+	ProcessorV1240ProcessorArchitectureRISCV ProcessorV1240ProcessorArchitecture = "RISC-V"
+	ProcessorV1240ProcessorArchitectureX86   ProcessorV1240ProcessorArchitecture = "x86"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230ProcessorArchitecture enum.
-func (e ProcessorV1230ProcessorArchitecture) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240ProcessorArchitecture enum.
+func (e ProcessorV1240ProcessorArchitecture) Valid() bool {
 	switch e {
-	case ProcessorV1230ProcessorArchitectureARM:
+	case ProcessorV1240ProcessorArchitectureARM:
 		return true
-	case ProcessorV1230ProcessorArchitectureIA64:
+	case ProcessorV1240ProcessorArchitectureIA64:
 		return true
-	case ProcessorV1230ProcessorArchitectureMIPS:
+	case ProcessorV1240ProcessorArchitectureMIPS:
 		return true
-	case ProcessorV1230ProcessorArchitectureOEM:
+	case ProcessorV1240ProcessorArchitectureOEM:
 		return true
-	case ProcessorV1230ProcessorArchitecturePower:
+	case ProcessorV1240ProcessorArchitecturePower:
 		return true
-	case ProcessorV1230ProcessorArchitectureRISCV:
+	case ProcessorV1240ProcessorArchitectureRISCV:
 		return true
-	case ProcessorV1230ProcessorArchitectureX86:
+	case ProcessorV1240ProcessorArchitectureX86:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230ProcessorMemoryType.
+// Defines values for ProcessorV1240ProcessorMemoryType.
 const (
-	ProcessorV1230ProcessorMemoryTypeCache   ProcessorV1230ProcessorMemoryType = "Cache"
-	ProcessorV1230ProcessorMemoryTypeDDR     ProcessorV1230ProcessorMemoryType = "DDR"
-	ProcessorV1230ProcessorMemoryTypeDDR2    ProcessorV1230ProcessorMemoryType = "DDR2"
-	ProcessorV1230ProcessorMemoryTypeDDR3    ProcessorV1230ProcessorMemoryType = "DDR3"
-	ProcessorV1230ProcessorMemoryTypeDDR4    ProcessorV1230ProcessorMemoryType = "DDR4"
-	ProcessorV1230ProcessorMemoryTypeDDR5    ProcessorV1230ProcessorMemoryType = "DDR5"
-	ProcessorV1230ProcessorMemoryTypeFlash   ProcessorV1230ProcessorMemoryType = "Flash"
-	ProcessorV1230ProcessorMemoryTypeGDDR    ProcessorV1230ProcessorMemoryType = "GDDR"
-	ProcessorV1230ProcessorMemoryTypeGDDR2   ProcessorV1230ProcessorMemoryType = "GDDR2"
-	ProcessorV1230ProcessorMemoryTypeGDDR3   ProcessorV1230ProcessorMemoryType = "GDDR3"
-	ProcessorV1230ProcessorMemoryTypeGDDR4   ProcessorV1230ProcessorMemoryType = "GDDR4"
-	ProcessorV1230ProcessorMemoryTypeGDDR5   ProcessorV1230ProcessorMemoryType = "GDDR5"
-	ProcessorV1230ProcessorMemoryTypeGDDR5X  ProcessorV1230ProcessorMemoryType = "GDDR5X"
-	ProcessorV1230ProcessorMemoryTypeGDDR6   ProcessorV1230ProcessorMemoryType = "GDDR6"
-	ProcessorV1230ProcessorMemoryTypeGDDR7   ProcessorV1230ProcessorMemoryType = "GDDR7"
-	ProcessorV1230ProcessorMemoryTypeHBM1    ProcessorV1230ProcessorMemoryType = "HBM1"
-	ProcessorV1230ProcessorMemoryTypeHBM2    ProcessorV1230ProcessorMemoryType = "HBM2"
-	ProcessorV1230ProcessorMemoryTypeHBM2E   ProcessorV1230ProcessorMemoryType = "HBM2E"
-	ProcessorV1230ProcessorMemoryTypeHBM3    ProcessorV1230ProcessorMemoryType = "HBM3"
-	ProcessorV1230ProcessorMemoryTypeHBM3E   ProcessorV1230ProcessorMemoryType = "HBM3E"
-	ProcessorV1230ProcessorMemoryTypeHBM4    ProcessorV1230ProcessorMemoryType = "HBM4"
-	ProcessorV1230ProcessorMemoryTypeL1Cache ProcessorV1230ProcessorMemoryType = "L1Cache"
-	ProcessorV1230ProcessorMemoryTypeL2Cache ProcessorV1230ProcessorMemoryType = "L2Cache"
-	ProcessorV1230ProcessorMemoryTypeL3Cache ProcessorV1230ProcessorMemoryType = "L3Cache"
-	ProcessorV1230ProcessorMemoryTypeL4Cache ProcessorV1230ProcessorMemoryType = "L4Cache"
-	ProcessorV1230ProcessorMemoryTypeL5Cache ProcessorV1230ProcessorMemoryType = "L5Cache"
-	ProcessorV1230ProcessorMemoryTypeL6Cache ProcessorV1230ProcessorMemoryType = "L6Cache"
-	ProcessorV1230ProcessorMemoryTypeL7Cache ProcessorV1230ProcessorMemoryType = "L7Cache"
-	ProcessorV1230ProcessorMemoryTypeOEM     ProcessorV1230ProcessorMemoryType = "OEM"
-	ProcessorV1230ProcessorMemoryTypeSDRAM   ProcessorV1230ProcessorMemoryType = "SDRAM"
-	ProcessorV1230ProcessorMemoryTypeSGRAM   ProcessorV1230ProcessorMemoryType = "SGRAM"
-	ProcessorV1230ProcessorMemoryTypeSRAM    ProcessorV1230ProcessorMemoryType = "SRAM"
+	ProcessorV1240ProcessorMemoryTypeCache   ProcessorV1240ProcessorMemoryType = "Cache"
+	ProcessorV1240ProcessorMemoryTypeDDR     ProcessorV1240ProcessorMemoryType = "DDR"
+	ProcessorV1240ProcessorMemoryTypeDDR2    ProcessorV1240ProcessorMemoryType = "DDR2"
+	ProcessorV1240ProcessorMemoryTypeDDR3    ProcessorV1240ProcessorMemoryType = "DDR3"
+	ProcessorV1240ProcessorMemoryTypeDDR4    ProcessorV1240ProcessorMemoryType = "DDR4"
+	ProcessorV1240ProcessorMemoryTypeDDR5    ProcessorV1240ProcessorMemoryType = "DDR5"
+	ProcessorV1240ProcessorMemoryTypeFlash   ProcessorV1240ProcessorMemoryType = "Flash"
+	ProcessorV1240ProcessorMemoryTypeGDDR    ProcessorV1240ProcessorMemoryType = "GDDR"
+	ProcessorV1240ProcessorMemoryTypeGDDR2   ProcessorV1240ProcessorMemoryType = "GDDR2"
+	ProcessorV1240ProcessorMemoryTypeGDDR3   ProcessorV1240ProcessorMemoryType = "GDDR3"
+	ProcessorV1240ProcessorMemoryTypeGDDR4   ProcessorV1240ProcessorMemoryType = "GDDR4"
+	ProcessorV1240ProcessorMemoryTypeGDDR5   ProcessorV1240ProcessorMemoryType = "GDDR5"
+	ProcessorV1240ProcessorMemoryTypeGDDR5X  ProcessorV1240ProcessorMemoryType = "GDDR5X"
+	ProcessorV1240ProcessorMemoryTypeGDDR6   ProcessorV1240ProcessorMemoryType = "GDDR6"
+	ProcessorV1240ProcessorMemoryTypeGDDR7   ProcessorV1240ProcessorMemoryType = "GDDR7"
+	ProcessorV1240ProcessorMemoryTypeHBM1    ProcessorV1240ProcessorMemoryType = "HBM1"
+	ProcessorV1240ProcessorMemoryTypeHBM2    ProcessorV1240ProcessorMemoryType = "HBM2"
+	ProcessorV1240ProcessorMemoryTypeHBM2E   ProcessorV1240ProcessorMemoryType = "HBM2E"
+	ProcessorV1240ProcessorMemoryTypeHBM3    ProcessorV1240ProcessorMemoryType = "HBM3"
+	ProcessorV1240ProcessorMemoryTypeHBM3E   ProcessorV1240ProcessorMemoryType = "HBM3E"
+	ProcessorV1240ProcessorMemoryTypeHBM4    ProcessorV1240ProcessorMemoryType = "HBM4"
+	ProcessorV1240ProcessorMemoryTypeL1Cache ProcessorV1240ProcessorMemoryType = "L1Cache"
+	ProcessorV1240ProcessorMemoryTypeL2Cache ProcessorV1240ProcessorMemoryType = "L2Cache"
+	ProcessorV1240ProcessorMemoryTypeL3Cache ProcessorV1240ProcessorMemoryType = "L3Cache"
+	ProcessorV1240ProcessorMemoryTypeL4Cache ProcessorV1240ProcessorMemoryType = "L4Cache"
+	ProcessorV1240ProcessorMemoryTypeL5Cache ProcessorV1240ProcessorMemoryType = "L5Cache"
+	ProcessorV1240ProcessorMemoryTypeL6Cache ProcessorV1240ProcessorMemoryType = "L6Cache"
+	ProcessorV1240ProcessorMemoryTypeL7Cache ProcessorV1240ProcessorMemoryType = "L7Cache"
+	ProcessorV1240ProcessorMemoryTypeOEM     ProcessorV1240ProcessorMemoryType = "OEM"
+	ProcessorV1240ProcessorMemoryTypeSDRAM   ProcessorV1240ProcessorMemoryType = "SDRAM"
+	ProcessorV1240ProcessorMemoryTypeSGRAM   ProcessorV1240ProcessorMemoryType = "SGRAM"
+	ProcessorV1240ProcessorMemoryTypeSRAM    ProcessorV1240ProcessorMemoryType = "SRAM"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230ProcessorMemoryType enum.
-func (e ProcessorV1230ProcessorMemoryType) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240ProcessorMemoryType enum.
+func (e ProcessorV1240ProcessorMemoryType) Valid() bool {
 	switch e {
-	case ProcessorV1230ProcessorMemoryTypeCache:
+	case ProcessorV1240ProcessorMemoryTypeCache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeDDR:
+	case ProcessorV1240ProcessorMemoryTypeDDR:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeDDR2:
+	case ProcessorV1240ProcessorMemoryTypeDDR2:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeDDR3:
+	case ProcessorV1240ProcessorMemoryTypeDDR3:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeDDR4:
+	case ProcessorV1240ProcessorMemoryTypeDDR4:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeDDR5:
+	case ProcessorV1240ProcessorMemoryTypeDDR5:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeFlash:
+	case ProcessorV1240ProcessorMemoryTypeFlash:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR:
+	case ProcessorV1240ProcessorMemoryTypeGDDR:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR2:
+	case ProcessorV1240ProcessorMemoryTypeGDDR2:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR3:
+	case ProcessorV1240ProcessorMemoryTypeGDDR3:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR4:
+	case ProcessorV1240ProcessorMemoryTypeGDDR4:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR5:
+	case ProcessorV1240ProcessorMemoryTypeGDDR5:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR5X:
+	case ProcessorV1240ProcessorMemoryTypeGDDR5X:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR6:
+	case ProcessorV1240ProcessorMemoryTypeGDDR6:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeGDDR7:
+	case ProcessorV1240ProcessorMemoryTypeGDDR7:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeHBM1:
+	case ProcessorV1240ProcessorMemoryTypeHBM1:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeHBM2:
+	case ProcessorV1240ProcessorMemoryTypeHBM2:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeHBM2E:
+	case ProcessorV1240ProcessorMemoryTypeHBM2E:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeHBM3:
+	case ProcessorV1240ProcessorMemoryTypeHBM3:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeHBM3E:
+	case ProcessorV1240ProcessorMemoryTypeHBM3E:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeHBM4:
+	case ProcessorV1240ProcessorMemoryTypeHBM4:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL1Cache:
+	case ProcessorV1240ProcessorMemoryTypeL1Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL2Cache:
+	case ProcessorV1240ProcessorMemoryTypeL2Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL3Cache:
+	case ProcessorV1240ProcessorMemoryTypeL3Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL4Cache:
+	case ProcessorV1240ProcessorMemoryTypeL4Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL5Cache:
+	case ProcessorV1240ProcessorMemoryTypeL5Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL6Cache:
+	case ProcessorV1240ProcessorMemoryTypeL6Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeL7Cache:
+	case ProcessorV1240ProcessorMemoryTypeL7Cache:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeOEM:
+	case ProcessorV1240ProcessorMemoryTypeOEM:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeSDRAM:
+	case ProcessorV1240ProcessorMemoryTypeSDRAM:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeSGRAM:
+	case ProcessorV1240ProcessorMemoryTypeSGRAM:
 		return true
-	case ProcessorV1230ProcessorMemoryTypeSRAM:
+	case ProcessorV1240ProcessorMemoryTypeSRAM:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230ProcessorType.
+// Defines values for ProcessorV1240ProcessorType.
 const (
-	ProcessorV1230ProcessorTypeAccelerator ProcessorV1230ProcessorType = "Accelerator"
-	ProcessorV1230ProcessorTypeCPU         ProcessorV1230ProcessorType = "CPU"
-	ProcessorV1230ProcessorTypeCore        ProcessorV1230ProcessorType = "Core"
-	ProcessorV1230ProcessorTypeDSP         ProcessorV1230ProcessorType = "DSP"
-	ProcessorV1230ProcessorTypeFPGA        ProcessorV1230ProcessorType = "FPGA"
-	ProcessorV1230ProcessorTypeGPU         ProcessorV1230ProcessorType = "GPU"
-	ProcessorV1230ProcessorTypeOEM         ProcessorV1230ProcessorType = "OEM"
-	ProcessorV1230ProcessorTypePartition   ProcessorV1230ProcessorType = "Partition"
-	ProcessorV1230ProcessorTypeThread      ProcessorV1230ProcessorType = "Thread"
+	ProcessorV1240ProcessorTypeAccelerator ProcessorV1240ProcessorType = "Accelerator"
+	ProcessorV1240ProcessorTypeCPU         ProcessorV1240ProcessorType = "CPU"
+	ProcessorV1240ProcessorTypeCore        ProcessorV1240ProcessorType = "Core"
+	ProcessorV1240ProcessorTypeDSP         ProcessorV1240ProcessorType = "DSP"
+	ProcessorV1240ProcessorTypeFPGA        ProcessorV1240ProcessorType = "FPGA"
+	ProcessorV1240ProcessorTypeGPU         ProcessorV1240ProcessorType = "GPU"
+	ProcessorV1240ProcessorTypeOEM         ProcessorV1240ProcessorType = "OEM"
+	ProcessorV1240ProcessorTypePartition   ProcessorV1240ProcessorType = "Partition"
+	ProcessorV1240ProcessorTypeThread      ProcessorV1240ProcessorType = "Thread"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230ProcessorType enum.
-func (e ProcessorV1230ProcessorType) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240ProcessorType enum.
+func (e ProcessorV1240ProcessorType) Valid() bool {
 	switch e {
-	case ProcessorV1230ProcessorTypeAccelerator:
+	case ProcessorV1240ProcessorTypeAccelerator:
 		return true
-	case ProcessorV1230ProcessorTypeCPU:
+	case ProcessorV1240ProcessorTypeCPU:
 		return true
-	case ProcessorV1230ProcessorTypeCore:
+	case ProcessorV1240ProcessorTypeCore:
 		return true
-	case ProcessorV1230ProcessorTypeDSP:
+	case ProcessorV1240ProcessorTypeDSP:
 		return true
-	case ProcessorV1230ProcessorTypeFPGA:
+	case ProcessorV1240ProcessorTypeFPGA:
 		return true
-	case ProcessorV1230ProcessorTypeGPU:
+	case ProcessorV1240ProcessorTypeGPU:
 		return true
-	case ProcessorV1230ProcessorTypeOEM:
+	case ProcessorV1240ProcessorTypeOEM:
 		return true
-	case ProcessorV1230ProcessorTypePartition:
+	case ProcessorV1240ProcessorTypePartition:
 		return true
-	case ProcessorV1230ProcessorTypeThread:
+	case ProcessorV1240ProcessorTypeThread:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230SystemInterfaceType.
+// Defines values for ProcessorV1240SystemInterfaceType.
 const (
-	ProcessorV1230SystemInterfaceTypeAMBA     ProcessorV1230SystemInterfaceType = "AMBA"
-	ProcessorV1230SystemInterfaceTypeCCIX     ProcessorV1230SystemInterfaceType = "CCIX"
-	ProcessorV1230SystemInterfaceTypeCXL      ProcessorV1230SystemInterfaceType = "CXL"
-	ProcessorV1230SystemInterfaceTypeEthernet ProcessorV1230SystemInterfaceType = "Ethernet"
-	ProcessorV1230SystemInterfaceTypeOEM      ProcessorV1230SystemInterfaceType = "OEM"
-	ProcessorV1230SystemInterfaceTypePCIe     ProcessorV1230SystemInterfaceType = "PCIe"
-	ProcessorV1230SystemInterfaceTypeQPI      ProcessorV1230SystemInterfaceType = "QPI"
-	ProcessorV1230SystemInterfaceTypeUPI      ProcessorV1230SystemInterfaceType = "UPI"
+	ProcessorV1240SystemInterfaceTypeAMBA     ProcessorV1240SystemInterfaceType = "AMBA"
+	ProcessorV1240SystemInterfaceTypeCCIX     ProcessorV1240SystemInterfaceType = "CCIX"
+	ProcessorV1240SystemInterfaceTypeCXL      ProcessorV1240SystemInterfaceType = "CXL"
+	ProcessorV1240SystemInterfaceTypeEthernet ProcessorV1240SystemInterfaceType = "Ethernet"
+	ProcessorV1240SystemInterfaceTypeOEM      ProcessorV1240SystemInterfaceType = "OEM"
+	ProcessorV1240SystemInterfaceTypePCIe     ProcessorV1240SystemInterfaceType = "PCIe"
+	ProcessorV1240SystemInterfaceTypeQPI      ProcessorV1240SystemInterfaceType = "QPI"
+	ProcessorV1240SystemInterfaceTypeUPI      ProcessorV1240SystemInterfaceType = "UPI"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230SystemInterfaceType enum.
-func (e ProcessorV1230SystemInterfaceType) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240SystemInterfaceType enum.
+func (e ProcessorV1240SystemInterfaceType) Valid() bool {
 	switch e {
-	case ProcessorV1230SystemInterfaceTypeAMBA:
+	case ProcessorV1240SystemInterfaceTypeAMBA:
 		return true
-	case ProcessorV1230SystemInterfaceTypeCCIX:
+	case ProcessorV1240SystemInterfaceTypeCCIX:
 		return true
-	case ProcessorV1230SystemInterfaceTypeCXL:
+	case ProcessorV1240SystemInterfaceTypeCXL:
 		return true
-	case ProcessorV1230SystemInterfaceTypeEthernet:
+	case ProcessorV1240SystemInterfaceTypeEthernet:
 		return true
-	case ProcessorV1230SystemInterfaceTypeOEM:
+	case ProcessorV1240SystemInterfaceTypeOEM:
 		return true
-	case ProcessorV1230SystemInterfaceTypePCIe:
+	case ProcessorV1240SystemInterfaceTypePCIe:
 		return true
-	case ProcessorV1230SystemInterfaceTypeQPI:
+	case ProcessorV1240SystemInterfaceTypeQPI:
 		return true
-	case ProcessorV1230SystemInterfaceTypeUPI:
+	case ProcessorV1240SystemInterfaceTypeUPI:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230ThrottleCause.
+// Defines values for ProcessorV1240ThrottleCause.
 const (
-	ProcessorV1230ThrottleCauseClockLimit              ProcessorV1230ThrottleCause = "ClockLimit"
-	ProcessorV1230ThrottleCauseManagementDetectedFault ProcessorV1230ThrottleCause = "ManagementDetectedFault"
-	ProcessorV1230ThrottleCauseOEM                     ProcessorV1230ThrottleCause = "OEM"
-	ProcessorV1230ThrottleCausePowerLimit              ProcessorV1230ThrottleCause = "PowerLimit"
-	ProcessorV1230ThrottleCauseThermalLimit            ProcessorV1230ThrottleCause = "ThermalLimit"
-	ProcessorV1230ThrottleCauseUnknown                 ProcessorV1230ThrottleCause = "Unknown"
+	ProcessorV1240ThrottleCauseClockLimit              ProcessorV1240ThrottleCause = "ClockLimit"
+	ProcessorV1240ThrottleCauseManagementDetectedFault ProcessorV1240ThrottleCause = "ManagementDetectedFault"
+	ProcessorV1240ThrottleCauseOEM                     ProcessorV1240ThrottleCause = "OEM"
+	ProcessorV1240ThrottleCausePowerLimit              ProcessorV1240ThrottleCause = "PowerLimit"
+	ProcessorV1240ThrottleCauseThermalLimit            ProcessorV1240ThrottleCause = "ThermalLimit"
+	ProcessorV1240ThrottleCauseUnknown                 ProcessorV1240ThrottleCause = "Unknown"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230ThrottleCause enum.
-func (e ProcessorV1230ThrottleCause) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240ThrottleCause enum.
+func (e ProcessorV1240ThrottleCause) Valid() bool {
 	switch e {
-	case ProcessorV1230ThrottleCauseClockLimit:
+	case ProcessorV1240ThrottleCauseClockLimit:
 		return true
-	case ProcessorV1230ThrottleCauseManagementDetectedFault:
+	case ProcessorV1240ThrottleCauseManagementDetectedFault:
 		return true
-	case ProcessorV1230ThrottleCauseOEM:
+	case ProcessorV1240ThrottleCauseOEM:
 		return true
-	case ProcessorV1230ThrottleCausePowerLimit:
+	case ProcessorV1240ThrottleCausePowerLimit:
 		return true
-	case ProcessorV1230ThrottleCauseThermalLimit:
+	case ProcessorV1240ThrottleCauseThermalLimit:
 		return true
-	case ProcessorV1230ThrottleCauseUnknown:
+	case ProcessorV1240ThrottleCauseUnknown:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for ProcessorV1230TurboState.
+// Defines values for ProcessorV1240TurboState.
 const (
-	ProcessorV1230TurboStateDisabled ProcessorV1230TurboState = "Disabled"
-	ProcessorV1230TurboStateEnabled  ProcessorV1230TurboState = "Enabled"
+	ProcessorV1240TurboStateDisabled ProcessorV1240TurboState = "Disabled"
+	ProcessorV1240TurboStateEnabled  ProcessorV1240TurboState = "Enabled"
 )
 
-// Valid indicates whether the value is a known member of the ProcessorV1230TurboState enum.
-func (e ProcessorV1230TurboState) Valid() bool {
+// Valid indicates whether the value is a known member of the ProcessorV1240TurboState enum.
+func (e ProcessorV1240TurboState) Valid() bool {
 	switch e {
-	case ProcessorV1230TurboStateDisabled:
+	case ProcessorV1240TurboStateDisabled:
 		return true
-	case ProcessorV1230TurboStateEnabled:
+	case ProcessorV1240TurboStateEnabled:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for RedundancyV170RedundancyMode.
+// Defines values for RedundancyV171RedundancyMode.
 const (
-	Failover     RedundancyV170RedundancyMode = "Failover"
-	NM           RedundancyV170RedundancyMode = "N+m"
-	NotRedundant RedundancyV170RedundancyMode = "NotRedundant"
-	Sharing      RedundancyV170RedundancyMode = "Sharing"
-	Sparing      RedundancyV170RedundancyMode = "Sparing"
+	Failover     RedundancyV171RedundancyMode = "Failover"
+	NM           RedundancyV171RedundancyMode = "N+m"
+	NotRedundant RedundancyV171RedundancyMode = "NotRedundant"
+	Sharing      RedundancyV171RedundancyMode = "Sharing"
+	Sparing      RedundancyV171RedundancyMode = "Sparing"
 )
 
-// Valid indicates whether the value is a known member of the RedundancyV170RedundancyMode enum.
-func (e RedundancyV170RedundancyMode) Valid() bool {
+// Valid indicates whether the value is a known member of the RedundancyV171RedundancyMode enum.
+func (e RedundancyV171RedundancyMode) Valid() bool {
 	switch e {
 	case Failover:
 		return true
@@ -1571,18 +1610,18 @@ func (e ResourceV1220ConditionType) Valid() bool {
 	}
 }
 
-// Defines values for ResourceV1240LocationType.
+// Defines values for ResourceV1250LocationType.
 const (
-	Backplane ResourceV1240LocationType = "Backplane"
-	Bay       ResourceV1240LocationType = "Bay"
-	Connector ResourceV1240LocationType = "Connector"
-	Embedded  ResourceV1240LocationType = "Embedded"
-	Slot      ResourceV1240LocationType = "Slot"
-	Socket    ResourceV1240LocationType = "Socket"
+	Backplane ResourceV1250LocationType = "Backplane"
+	Bay       ResourceV1250LocationType = "Bay"
+	Connector ResourceV1250LocationType = "Connector"
+	Embedded  ResourceV1250LocationType = "Embedded"
+	Slot      ResourceV1250LocationType = "Slot"
+	Socket    ResourceV1250LocationType = "Socket"
 )
 
-// Valid indicates whether the value is a known member of the ResourceV1240LocationType enum.
-func (e ResourceV1240LocationType) Valid() bool {
+// Valid indicates whether the value is a known member of the ResourceV1250LocationType enum.
+func (e ResourceV1250LocationType) Valid() bool {
 	switch e {
 	case Backplane:
 		return true
@@ -1601,18 +1640,18 @@ func (e ResourceV1240LocationType) Valid() bool {
 	}
 }
 
-// Defines values for ResourceV1240Orientation.
+// Defines values for ResourceV1250Orientation.
 const (
-	BackToFront ResourceV1240Orientation = "BackToFront"
-	BottomToTop ResourceV1240Orientation = "BottomToTop"
-	FrontToBack ResourceV1240Orientation = "FrontToBack"
-	LeftToRight ResourceV1240Orientation = "LeftToRight"
-	RightToLeft ResourceV1240Orientation = "RightToLeft"
-	TopToBottom ResourceV1240Orientation = "TopToBottom"
+	BackToFront ResourceV1250Orientation = "BackToFront"
+	BottomToTop ResourceV1250Orientation = "BottomToTop"
+	FrontToBack ResourceV1250Orientation = "FrontToBack"
+	LeftToRight ResourceV1250Orientation = "LeftToRight"
+	RightToLeft ResourceV1250Orientation = "RightToLeft"
+	TopToBottom ResourceV1250Orientation = "TopToBottom"
 )
 
-// Valid indicates whether the value is a known member of the ResourceV1240Orientation enum.
-func (e ResourceV1240Orientation) Valid() bool {
+// Valid indicates whether the value is a known member of the ResourceV1250Orientation enum.
+func (e ResourceV1250Orientation) Valid() bool {
 	switch e {
 	case BackToFront:
 		return true
@@ -1631,14 +1670,14 @@ func (e ResourceV1240Orientation) Valid() bool {
 	}
 }
 
-// Defines values for ResourceV1240RackUnits.
+// Defines values for ResourceV1250RackUnits.
 const (
-	EIA310 ResourceV1240RackUnits = "EIA_310"
-	OpenU  ResourceV1240RackUnits = "OpenU"
+	EIA310 ResourceV1250RackUnits = "EIA_310"
+	OpenU  ResourceV1250RackUnits = "OpenU"
 )
 
-// Valid indicates whether the value is a known member of the ResourceV1240RackUnits enum.
-func (e ResourceV1240RackUnits) Valid() bool {
+// Valid indicates whether the value is a known member of the ResourceV1250RackUnits enum.
+func (e ResourceV1250RackUnits) Valid() bool {
 	switch e {
 	case EIA310:
 		return true
@@ -1649,19 +1688,19 @@ func (e ResourceV1240RackUnits) Valid() bool {
 	}
 }
 
-// Defines values for ResourceV1240Reference.
+// Defines values for ResourceV1250Reference.
 const (
-	Bottom ResourceV1240Reference = "Bottom"
-	Front  ResourceV1240Reference = "Front"
-	Left   ResourceV1240Reference = "Left"
-	Middle ResourceV1240Reference = "Middle"
-	Rear   ResourceV1240Reference = "Rear"
-	Right  ResourceV1240Reference = "Right"
-	Top    ResourceV1240Reference = "Top"
+	Bottom ResourceV1250Reference = "Bottom"
+	Front  ResourceV1250Reference = "Front"
+	Left   ResourceV1250Reference = "Left"
+	Middle ResourceV1250Reference = "Middle"
+	Rear   ResourceV1250Reference = "Rear"
+	Right  ResourceV1250Reference = "Right"
+	Top    ResourceV1250Reference = "Top"
 )
 
-// Valid indicates whether the value is a known member of the ResourceV1240Reference enum.
-func (e ResourceV1240Reference) Valid() bool {
+// Valid indicates whether the value is a known member of the ResourceV1250Reference enum.
+func (e ResourceV1250Reference) Valid() bool {
 	switch e {
 	case Bottom:
 		return true
@@ -1682,34 +1721,34 @@ func (e ResourceV1240Reference) Valid() bool {
 	}
 }
 
-// Defines values for SecureBootV120SecureBootCurrentBootType.
+// Defines values for SecureBootV121SecureBootCurrentBootType.
 const (
-	SecureBootV120SecureBootCurrentBootTypeDisabled SecureBootV120SecureBootCurrentBootType = "Disabled"
-	SecureBootV120SecureBootCurrentBootTypeEnabled  SecureBootV120SecureBootCurrentBootType = "Enabled"
+	SecureBootV121SecureBootCurrentBootTypeDisabled SecureBootV121SecureBootCurrentBootType = "Disabled"
+	SecureBootV121SecureBootCurrentBootTypeEnabled  SecureBootV121SecureBootCurrentBootType = "Enabled"
 )
 
-// Valid indicates whether the value is a known member of the SecureBootV120SecureBootCurrentBootType enum.
-func (e SecureBootV120SecureBootCurrentBootType) Valid() bool {
+// Valid indicates whether the value is a known member of the SecureBootV121SecureBootCurrentBootType enum.
+func (e SecureBootV121SecureBootCurrentBootType) Valid() bool {
 	switch e {
-	case SecureBootV120SecureBootCurrentBootTypeDisabled:
+	case SecureBootV121SecureBootCurrentBootTypeDisabled:
 		return true
-	case SecureBootV120SecureBootCurrentBootTypeEnabled:
+	case SecureBootV121SecureBootCurrentBootTypeEnabled:
 		return true
 	default:
 		return false
 	}
 }
 
-// Defines values for SecureBootV120SecureBootModeType.
+// Defines values for SecureBootV121SecureBootModeType.
 const (
-	AuditMode    SecureBootV120SecureBootModeType = "AuditMode"
-	DeployedMode SecureBootV120SecureBootModeType = "DeployedMode"
-	SetupMode    SecureBootV120SecureBootModeType = "SetupMode"
-	UserMode     SecureBootV120SecureBootModeType = "UserMode"
+	AuditMode    SecureBootV121SecureBootModeType = "AuditMode"
+	DeployedMode SecureBootV121SecureBootModeType = "DeployedMode"
+	SetupMode    SecureBootV121SecureBootModeType = "SetupMode"
+	UserMode     SecureBootV121SecureBootModeType = "UserMode"
 )
 
-// Valid indicates whether the value is a known member of the SecureBootV120SecureBootModeType enum.
-func (e SecureBootV120SecureBootModeType) Valid() bool {
+// Valid indicates whether the value is a known member of the SecureBootV121SecureBootModeType enum.
+func (e SecureBootV121SecureBootModeType) Valid() bool {
 	switch e {
 	case AuditMode:
 		return true
@@ -1802,16 +1841,16 @@ func (e TaskV174TaskState) Valid() bool {
 	}
 }
 
-// Defines values for VirtualMediaV165ConnectedVia.
+// Defines values for VirtualMediaV170ConnectedVia.
 const (
-	Applet       VirtualMediaV165ConnectedVia = "Applet"
-	NotConnected VirtualMediaV165ConnectedVia = "NotConnected"
-	Oem          VirtualMediaV165ConnectedVia = "Oem"
-	URI          VirtualMediaV165ConnectedVia = "URI"
+	Applet       VirtualMediaV170ConnectedVia = "Applet"
+	NotConnected VirtualMediaV170ConnectedVia = "NotConnected"
+	Oem          VirtualMediaV170ConnectedVia = "Oem"
+	URI          VirtualMediaV170ConnectedVia = "URI"
 )
 
-// Valid indicates whether the value is a known member of the VirtualMediaV165ConnectedVia enum.
-func (e VirtualMediaV165ConnectedVia) Valid() bool {
+// Valid indicates whether the value is a known member of the VirtualMediaV170ConnectedVia enum.
+func (e VirtualMediaV170ConnectedVia) Valid() bool {
 	switch e {
 	case Applet:
 		return true
@@ -1826,17 +1865,17 @@ func (e VirtualMediaV165ConnectedVia) Valid() bool {
 	}
 }
 
-// Defines values for VirtualMediaV165EjectPolicy.
+// Defines values for VirtualMediaV170EjectPolicy.
 const (
-	AfterUse   VirtualMediaV165EjectPolicy = "AfterUse"
-	OnPowerOff VirtualMediaV165EjectPolicy = "OnPowerOff"
-	Persistent VirtualMediaV165EjectPolicy = "Persistent"
-	Session    VirtualMediaV165EjectPolicy = "Session"
-	Timed      VirtualMediaV165EjectPolicy = "Timed"
+	AfterUse   VirtualMediaV170EjectPolicy = "AfterUse"
+	OnPowerOff VirtualMediaV170EjectPolicy = "OnPowerOff"
+	Persistent VirtualMediaV170EjectPolicy = "Persistent"
+	Session    VirtualMediaV170EjectPolicy = "Session"
+	Timed      VirtualMediaV170EjectPolicy = "Timed"
 )
 
-// Valid indicates whether the value is a known member of the VirtualMediaV165EjectPolicy enum.
-func (e VirtualMediaV165EjectPolicy) Valid() bool {
+// Valid indicates whether the value is a known member of the VirtualMediaV170EjectPolicy enum.
+func (e VirtualMediaV170EjectPolicy) Valid() bool {
 	switch e {
 	case AfterUse:
 		return true
@@ -1853,16 +1892,16 @@ func (e VirtualMediaV165EjectPolicy) Valid() bool {
 	}
 }
 
-// Defines values for VirtualMediaV165MediaType.
+// Defines values for VirtualMediaV170MediaType.
 const (
-	CD       VirtualMediaV165MediaType = "CD"
-	DVD      VirtualMediaV165MediaType = "DVD"
-	Floppy   VirtualMediaV165MediaType = "Floppy"
-	USBStick VirtualMediaV165MediaType = "USBStick"
+	CD       VirtualMediaV170MediaType = "CD"
+	DVD      VirtualMediaV170MediaType = "DVD"
+	Floppy   VirtualMediaV170MediaType = "Floppy"
+	USBStick VirtualMediaV170MediaType = "USBStick"
 )
 
-// Valid indicates whether the value is a known member of the VirtualMediaV165MediaType enum.
-func (e VirtualMediaV165MediaType) Valid() bool {
+// Valid indicates whether the value is a known member of the VirtualMediaV170MediaType enum.
+func (e VirtualMediaV170MediaType) Valid() bool {
 	switch e {
 	case CD:
 		return true
@@ -1877,14 +1916,14 @@ func (e VirtualMediaV165MediaType) Valid() bool {
 	}
 }
 
-// Defines values for VirtualMediaV165TransferMethod.
+// Defines values for VirtualMediaV170TransferMethod.
 const (
-	Stream VirtualMediaV165TransferMethod = "Stream"
-	Upload VirtualMediaV165TransferMethod = "Upload"
+	Stream VirtualMediaV170TransferMethod = "Stream"
+	Upload VirtualMediaV170TransferMethod = "Upload"
 )
 
-// Valid indicates whether the value is a known member of the VirtualMediaV165TransferMethod enum.
-func (e VirtualMediaV165TransferMethod) Valid() bool {
+// Valid indicates whether the value is a known member of the VirtualMediaV170TransferMethod enum.
+func (e VirtualMediaV170TransferMethod) Valid() bool {
 	switch e {
 	case Stream:
 		return true
@@ -1895,21 +1934,21 @@ func (e VirtualMediaV165TransferMethod) Valid() bool {
 	}
 }
 
-// Defines values for VirtualMediaV165TransferProtocolType.
+// Defines values for VirtualMediaV170TransferProtocolType.
 const (
-	CIFS  VirtualMediaV165TransferProtocolType = "CIFS"
-	FTP   VirtualMediaV165TransferProtocolType = "FTP"
-	HTTP  VirtualMediaV165TransferProtocolType = "HTTP"
-	HTTPS VirtualMediaV165TransferProtocolType = "HTTPS"
-	NFS   VirtualMediaV165TransferProtocolType = "NFS"
-	OEM   VirtualMediaV165TransferProtocolType = "OEM"
-	SCP   VirtualMediaV165TransferProtocolType = "SCP"
-	SFTP  VirtualMediaV165TransferProtocolType = "SFTP"
-	TFTP  VirtualMediaV165TransferProtocolType = "TFTP"
+	CIFS  VirtualMediaV170TransferProtocolType = "CIFS"
+	FTP   VirtualMediaV170TransferProtocolType = "FTP"
+	HTTP  VirtualMediaV170TransferProtocolType = "HTTP"
+	HTTPS VirtualMediaV170TransferProtocolType = "HTTPS"
+	NFS   VirtualMediaV170TransferProtocolType = "NFS"
+	OEM   VirtualMediaV170TransferProtocolType = "OEM"
+	SCP   VirtualMediaV170TransferProtocolType = "SCP"
+	SFTP  VirtualMediaV170TransferProtocolType = "SFTP"
+	TFTP  VirtualMediaV170TransferProtocolType = "TFTP"
 )
 
-// Valid indicates whether the value is a known member of the VirtualMediaV165TransferProtocolType enum.
-func (e VirtualMediaV165TransferProtocolType) Valid() bool {
+// Valid indicates whether the value is a known member of the VirtualMediaV170TransferProtocolType enum.
+func (e VirtualMediaV170TransferProtocolType) Valid() bool {
 	switch e {
 	case CIFS:
 		return true
@@ -2430,32 +2469,41 @@ type ComputerSystemCollectionComputerSystemCollection_Description struct {
 // ComputerSystemBootSource defines model for ComputerSystem_BootSource.
 type ComputerSystemBootSource string
 
-// ComputerSystemV1280Actions The available actions for this resource.
-type ComputerSystemV1280Actions struct {
+// ComputerSystemV1290Actions The available actions for this resource.
+type ComputerSystemV1290Actions struct {
 	// HashComputerSystemAddResourceBlock This action adds a resource block to a system.
-	HashComputerSystemAddResourceBlock *ComputerSystemV1280AddResourceBlock `json:"#ComputerSystem.AddResourceBlock,omitempty"`
+	HashComputerSystemAddResourceBlock *ComputerSystemV1290AddResourceBlock `json:"#ComputerSystem.AddResourceBlock,omitempty"`
 
 	// HashComputerSystemDecommission This action decommissions a system.
-	HashComputerSystemDecommission *ComputerSystemV1280Decommission `json:"#ComputerSystem.Decommission,omitempty"`
+	HashComputerSystemDecommission *ComputerSystemV1290Decommission `json:"#ComputerSystem.Decommission,omitempty"`
 
 	// HashComputerSystemExportConfiguration This action exports the configuration of a system in a vendor-specific format.
-	HashComputerSystemExportConfiguration *ComputerSystemV1280ExportConfiguration `json:"#ComputerSystem.ExportConfiguration,omitempty"`
+	HashComputerSystemExportConfiguration *ComputerSystemV1290ExportConfiguration `json:"#ComputerSystem.ExportConfiguration,omitempty"`
+
+	// HashComputerSystemGraphicalConsoleGetOneTimeURL This action generates a single-use URL for accessing the graphical console.
+	HashComputerSystemGraphicalConsoleGetOneTimeURL *ComputerSystemV1290GraphicalConsoleGetOneTimeURL `json:"#ComputerSystem.GraphicalConsoleGetOneTimeURL,omitempty"`
+
+	// HashComputerSystemGraphicalConsoleSetOneTimePassword This action sets a one-time or single-use password for accessing the graphical console.
+	HashComputerSystemGraphicalConsoleSetOneTimePassword *ComputerSystemV1290GraphicalConsoleSetOneTimePassword `json:"#ComputerSystem.GraphicalConsoleSetOneTimePassword,omitempty"`
+
+	// HashComputerSystemGraphicalConsoleSetPassword This action sets a persistent password for accessing the graphical console.
+	HashComputerSystemGraphicalConsoleSetPassword *ComputerSystemV1290GraphicalConsoleSetPassword `json:"#ComputerSystem.GraphicalConsoleSetPassword,omitempty"`
 
 	// HashComputerSystemRemoveResourceBlock This action removes a resource block from a system.
-	HashComputerSystemRemoveResourceBlock *ComputerSystemV1280RemoveResourceBlock `json:"#ComputerSystem.RemoveResourceBlock,omitempty"`
+	HashComputerSystemRemoveResourceBlock *ComputerSystemV1290RemoveResourceBlock `json:"#ComputerSystem.RemoveResourceBlock,omitempty"`
 
 	// HashComputerSystemReset This action resets the system.
-	HashComputerSystemReset *ComputerSystemV1280Reset `json:"#ComputerSystem.Reset,omitempty"`
+	HashComputerSystemReset *ComputerSystemV1290Reset `json:"#ComputerSystem.Reset,omitempty"`
 
 	// HashComputerSystemSetDefaultBootOrder This action sets the `BootOrder` property to the default settings.
-	HashComputerSystemSetDefaultBootOrder *ComputerSystemV1280SetDefaultBootOrder `json:"#ComputerSystem.SetDefaultBootOrder,omitempty"`
+	HashComputerSystemSetDefaultBootOrder *ComputerSystemV1290SetDefaultBootOrder `json:"#ComputerSystem.SetDefaultBootOrder,omitempty"`
 
 	// Oem The available OEM-specific actions for this resource.
-	Oem *ComputerSystemV1280OemActions `json:"Oem,omitempty"`
+	Oem *ComputerSystemV1290OemActions `json:"Oem,omitempty"`
 }
 
-// ComputerSystemV1280AddResourceBlock This action adds a resource block to a system.
-type ComputerSystemV1280AddResourceBlock struct {
+// ComputerSystemV1290AddResourceBlock This action adds a resource block to a system.
+type ComputerSystemV1290AddResourceBlock struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -2463,19 +2511,19 @@ type ComputerSystemV1280AddResourceBlock struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ComputerSystemV1280AutomaticRetryConfig defines model for ComputerSystem_v1_28_0_AutomaticRetryConfig.
-type ComputerSystemV1280AutomaticRetryConfig string
+// ComputerSystemV1290AutomaticRetryConfig defines model for ComputerSystem_v1_29_0_AutomaticRetryConfig.
+type ComputerSystemV1290AutomaticRetryConfig string
 
-// ComputerSystemV1280Boot The boot information for this resource.
-type ComputerSystemV1280Boot struct {
+// ComputerSystemV1290Boot The boot information for this resource.
+type ComputerSystemV1290Boot struct {
 	// AliasBootOrder Ordered array of boot source aliases representing the persistent boot order associated with this computer system.
-	AliasBootOrder *[]ComputerSystemV1280Boot_AliasBootOrder_Item `json:"AliasBootOrder,omitempty"`
+	AliasBootOrder *[]ComputerSystemV1290Boot_AliasBootOrder_Item `json:"AliasBootOrder,omitempty"`
 
 	// AutomaticRetryAttempts The number of attempts the system will automatically retry booting.
 	AutomaticRetryAttempts *int64 `json:"AutomaticRetryAttempts,omitempty"`
 
 	// AutomaticRetryConfig The configuration of how the system retries booting automatically.
-	AutomaticRetryConfig *ComputerSystemV1280Boot_AutomaticRetryConfig `json:"AutomaticRetryConfig,omitempty"`
+	AutomaticRetryConfig *ComputerSystemV1290Boot_AutomaticRetryConfig `json:"AutomaticRetryConfig,omitempty"`
 
 	// BootNext The `BootOptionReference` of the Boot Option to perform a one-time boot from when `BootSourceOverrideTarget` is `UefiBootNext`.
 	BootNext *string `json:"BootNext,omitempty"`
@@ -2487,16 +2535,16 @@ type ComputerSystemV1280Boot struct {
 	BootOrder *[]*string `json:"BootOrder,omitempty"`
 
 	// BootOrderPropertySelection The name of the boot order property that the system uses for the persistent boot order.
-	BootOrderPropertySelection *ComputerSystemV1280Boot_BootOrderPropertySelection `json:"BootOrderPropertySelection,omitempty"`
+	BootOrderPropertySelection *ComputerSystemV1290Boot_BootOrderPropertySelection `json:"BootOrderPropertySelection,omitempty"`
 
 	// BootSourceOverrideEnabled The state of the boot source override feature.
-	BootSourceOverrideEnabled *ComputerSystemV1280Boot_BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled,omitempty"`
+	BootSourceOverrideEnabled *ComputerSystemV1290Boot_BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled,omitempty"`
 
 	// BootSourceOverrideMode The BIOS boot mode to use when the system boots from the `BootSourceOverrideTarget` boot source.
-	BootSourceOverrideMode *ComputerSystemV1280Boot_BootSourceOverrideMode `json:"BootSourceOverrideMode,omitempty"`
+	BootSourceOverrideMode *ComputerSystemV1290Boot_BootSourceOverrideMode `json:"BootSourceOverrideMode,omitempty"`
 
 	// BootSourceOverrideTarget The current boot source to use at the next boot instead of the normal boot device, if `BootSourceOverrideEnabled` does not contain `Disabled`.
-	BootSourceOverrideTarget *ComputerSystemV1280Boot_BootSourceOverrideTarget `json:"BootSourceOverrideTarget,omitempty"`
+	BootSourceOverrideTarget *ComputerSystemV1290Boot_BootSourceOverrideTarget `json:"BootSourceOverrideTarget,omitempty"`
 
 	// Certificates A reference to a resource.
 	Certificates *OdataV4IdRef `json:"Certificates,omitempty"`
@@ -2508,89 +2556,89 @@ type ComputerSystemV1280Boot struct {
 	RemainingAutomaticRetryAttempts *int64 `json:"RemainingAutomaticRetryAttempts,omitempty"`
 
 	// StopBootOnFault If the boot should stop on a fault.
-	StopBootOnFault *ComputerSystemV1280Boot_StopBootOnFault `json:"StopBootOnFault,omitempty"`
+	StopBootOnFault *ComputerSystemV1290Boot_StopBootOnFault `json:"StopBootOnFault,omitempty"`
 
 	// TrustedModuleRequiredToBoot The Trusted Module boot requirement.
-	TrustedModuleRequiredToBoot *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot `json:"TrustedModuleRequiredToBoot,omitempty"`
+	TrustedModuleRequiredToBoot *ComputerSystemV1290Boot_TrustedModuleRequiredToBoot `json:"TrustedModuleRequiredToBoot,omitempty"`
 
 	// UefiTargetBootSourceOverride The UEFI device path of the device from which to boot when `BootSourceOverrideTarget` is `UefiTarget`.
 	UefiTargetBootSourceOverride *string `json:"UefiTargetBootSourceOverride,omitempty"`
 }
 
-// ComputerSystemV1280BootAliasBootOrder1 defines model for .
-type ComputerSystemV1280BootAliasBootOrder1 = interface{}
+// ComputerSystemV1290BootAliasBootOrder1 defines model for .
+type ComputerSystemV1290BootAliasBootOrder1 = interface{}
 
-// ComputerSystemV1280Boot_AliasBootOrder_Item defines model for ComputerSystem_v1_28_0_Boot.AliasBootOrder.Item.
-type ComputerSystemV1280Boot_AliasBootOrder_Item struct {
+// ComputerSystemV1290Boot_AliasBootOrder_Item defines model for ComputerSystem_v1_29_0_Boot.AliasBootOrder.Item.
+type ComputerSystemV1290Boot_AliasBootOrder_Item struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootAutomaticRetryConfig1 defines model for .
-type ComputerSystemV1280BootAutomaticRetryConfig1 = interface{}
+// ComputerSystemV1290BootAutomaticRetryConfig1 defines model for .
+type ComputerSystemV1290BootAutomaticRetryConfig1 = interface{}
 
-// ComputerSystemV1280Boot_AutomaticRetryConfig The configuration of how the system retries booting automatically.
-type ComputerSystemV1280Boot_AutomaticRetryConfig struct {
+// ComputerSystemV1290Boot_AutomaticRetryConfig The configuration of how the system retries booting automatically.
+type ComputerSystemV1290Boot_AutomaticRetryConfig struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootBootOrderPropertySelection1 defines model for .
-type ComputerSystemV1280BootBootOrderPropertySelection1 = interface{}
+// ComputerSystemV1290BootBootOrderPropertySelection1 defines model for .
+type ComputerSystemV1290BootBootOrderPropertySelection1 = interface{}
 
-// ComputerSystemV1280Boot_BootOrderPropertySelection The name of the boot order property that the system uses for the persistent boot order.
-type ComputerSystemV1280Boot_BootOrderPropertySelection struct {
+// ComputerSystemV1290Boot_BootOrderPropertySelection The name of the boot order property that the system uses for the persistent boot order.
+type ComputerSystemV1290Boot_BootOrderPropertySelection struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootBootSourceOverrideEnabled1 defines model for .
-type ComputerSystemV1280BootBootSourceOverrideEnabled1 = interface{}
+// ComputerSystemV1290BootBootSourceOverrideEnabled1 defines model for .
+type ComputerSystemV1290BootBootSourceOverrideEnabled1 = interface{}
 
-// ComputerSystemV1280Boot_BootSourceOverrideEnabled The state of the boot source override feature.
-type ComputerSystemV1280Boot_BootSourceOverrideEnabled struct {
+// ComputerSystemV1290Boot_BootSourceOverrideEnabled The state of the boot source override feature.
+type ComputerSystemV1290Boot_BootSourceOverrideEnabled struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootBootSourceOverrideMode1 defines model for .
-type ComputerSystemV1280BootBootSourceOverrideMode1 = interface{}
+// ComputerSystemV1290BootBootSourceOverrideMode1 defines model for .
+type ComputerSystemV1290BootBootSourceOverrideMode1 = interface{}
 
-// ComputerSystemV1280Boot_BootSourceOverrideMode The BIOS boot mode to use when the system boots from the `BootSourceOverrideTarget` boot source.
-type ComputerSystemV1280Boot_BootSourceOverrideMode struct {
+// ComputerSystemV1290Boot_BootSourceOverrideMode The BIOS boot mode to use when the system boots from the `BootSourceOverrideTarget` boot source.
+type ComputerSystemV1290Boot_BootSourceOverrideMode struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootBootSourceOverrideTarget1 defines model for .
-type ComputerSystemV1280BootBootSourceOverrideTarget1 = interface{}
+// ComputerSystemV1290BootBootSourceOverrideTarget1 defines model for .
+type ComputerSystemV1290BootBootSourceOverrideTarget1 = interface{}
 
-// ComputerSystemV1280Boot_BootSourceOverrideTarget The current boot source to use at the next boot instead of the normal boot device, if `BootSourceOverrideEnabled` does not contain `Disabled`.
-type ComputerSystemV1280Boot_BootSourceOverrideTarget struct {
+// ComputerSystemV1290Boot_BootSourceOverrideTarget The current boot source to use at the next boot instead of the normal boot device, if `BootSourceOverrideEnabled` does not contain `Disabled`.
+type ComputerSystemV1290Boot_BootSourceOverrideTarget struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootStopBootOnFault1 defines model for .
-type ComputerSystemV1280BootStopBootOnFault1 = interface{}
+// ComputerSystemV1290BootStopBootOnFault1 defines model for .
+type ComputerSystemV1290BootStopBootOnFault1 = interface{}
 
-// ComputerSystemV1280Boot_StopBootOnFault If the boot should stop on a fault.
-type ComputerSystemV1280Boot_StopBootOnFault struct {
+// ComputerSystemV1290Boot_StopBootOnFault If the boot should stop on a fault.
+type ComputerSystemV1290Boot_StopBootOnFault struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootTrustedModuleRequiredToBoot1 defines model for .
-type ComputerSystemV1280BootTrustedModuleRequiredToBoot1 = interface{}
+// ComputerSystemV1290BootTrustedModuleRequiredToBoot1 defines model for .
+type ComputerSystemV1290BootTrustedModuleRequiredToBoot1 = interface{}
 
-// ComputerSystemV1280Boot_TrustedModuleRequiredToBoot The Trusted Module boot requirement.
-type ComputerSystemV1280Boot_TrustedModuleRequiredToBoot struct {
+// ComputerSystemV1290Boot_TrustedModuleRequiredToBoot The Trusted Module boot requirement.
+type ComputerSystemV1290Boot_TrustedModuleRequiredToBoot struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootOrderTypes The enumerations of `BootOrderTypes` specify the choice of boot order property to use when controller the persistent boot order for this computer system.
-type ComputerSystemV1280BootOrderTypes string
+// ComputerSystemV1290BootOrderTypes The enumerations of `BootOrderTypes` specify the choice of boot order property to use when controller the persistent boot order for this computer system.
+type ComputerSystemV1290BootOrderTypes string
 
-// ComputerSystemV1280BootProgress This object describes the last boot progress state.
-type ComputerSystemV1280BootProgress struct {
+// ComputerSystemV1290BootProgress This object describes the last boot progress state.
+type ComputerSystemV1290BootProgress struct {
 	// LastBootTimeSeconds The number of seconds the system spent booting to the operating system during the last boot.
 	LastBootTimeSeconds *float32 `json:"LastBootTimeSeconds,omitempty"`
 
 	// LastState The last boot progress state.
-	LastState *ComputerSystemV1280BootProgress_LastState `json:"LastState,omitempty"`
+	LastState *ComputerSystemV1290BootProgress_LastState `json:"LastState,omitempty"`
 
 	// LastStateTime The date and time when the last boot state was updated.
 	LastStateTime *time.Time `json:"LastStateTime,omitempty"`
@@ -2602,42 +2650,42 @@ type ComputerSystemV1280BootProgress struct {
 	OemLastState *string `json:"OemLastState,omitempty"`
 }
 
-// ComputerSystemV1280BootProgressLastState1 defines model for .
-type ComputerSystemV1280BootProgressLastState1 = interface{}
+// ComputerSystemV1290BootProgressLastState1 defines model for .
+type ComputerSystemV1290BootProgressLastState1 = interface{}
 
-// ComputerSystemV1280BootProgress_LastState The last boot progress state.
-type ComputerSystemV1280BootProgress_LastState struct {
+// ComputerSystemV1290BootProgress_LastState The last boot progress state.
+type ComputerSystemV1290BootProgress_LastState struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280BootProgressTypes defines model for ComputerSystem_v1_28_0_BootProgressTypes.
-type ComputerSystemV1280BootProgressTypes string
+// ComputerSystemV1290BootProgressTypes defines model for ComputerSystem_v1_29_0_BootProgressTypes.
+type ComputerSystemV1290BootProgressTypes string
 
-// ComputerSystemV1280BootSourceOverrideEnabled defines model for ComputerSystem_v1_28_0_BootSourceOverrideEnabled.
-type ComputerSystemV1280BootSourceOverrideEnabled string
+// ComputerSystemV1290BootSourceOverrideEnabled defines model for ComputerSystem_v1_29_0_BootSourceOverrideEnabled.
+type ComputerSystemV1290BootSourceOverrideEnabled string
 
-// ComputerSystemV1280BootSourceOverrideMode defines model for ComputerSystem_v1_28_0_BootSourceOverrideMode.
-type ComputerSystemV1280BootSourceOverrideMode string
+// ComputerSystemV1290BootSourceOverrideMode defines model for ComputerSystem_v1_29_0_BootSourceOverrideMode.
+type ComputerSystemV1290BootSourceOverrideMode string
 
-// ComputerSystemV1280Composition Information about the composition capabilities and state of a computer system.
-type ComputerSystemV1280Composition struct {
+// ComputerSystemV1290Composition Information about the composition capabilities and state of a computer system.
+type ComputerSystemV1290Composition struct {
 	// UseCases The composition use cases in which this computer system can participate.
-	UseCases *[]ComputerSystemV1280Composition_UseCases_Item `json:"UseCases,omitempty"`
+	UseCases *[]ComputerSystemV1290Composition_UseCases_Item `json:"UseCases,omitempty"`
 }
 
-// ComputerSystemV1280CompositionUseCases1 defines model for .
-type ComputerSystemV1280CompositionUseCases1 = interface{}
+// ComputerSystemV1290CompositionUseCases1 defines model for .
+type ComputerSystemV1290CompositionUseCases1 = interface{}
 
-// ComputerSystemV1280Composition_UseCases_Item defines model for ComputerSystem_v1_28_0_Composition.UseCases.Item.
-type ComputerSystemV1280Composition_UseCases_Item struct {
+// ComputerSystemV1290Composition_UseCases_Item defines model for ComputerSystem_v1_29_0_Composition.UseCases.Item.
+type ComputerSystemV1290Composition_UseCases_Item struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280CompositionUseCase defines model for ComputerSystem_v1_28_0_CompositionUseCase.
-type ComputerSystemV1280CompositionUseCase string
+// ComputerSystemV1290CompositionUseCase defines model for ComputerSystem_v1_29_0_CompositionUseCase.
+type ComputerSystemV1290CompositionUseCase string
 
-// ComputerSystemV1280ComputerSystem The `ComputerSystem` schema represents a computer or system instance and the software-visible resources, or items within the data plane, such as memory, CPU, and other devices that it can access.  Details of those resources or subsystems are also linked through this resource.
-type ComputerSystemV1280ComputerSystem struct {
+// ComputerSystemV1290ComputerSystem The `ComputerSystem` schema represents a computer or system instance and the software-visible resources, or items within the data plane, such as memory, CPU, and other devices that it can access.  Details of those resources or subsystems are also linked through this resource.
+type ComputerSystemV1290ComputerSystem struct {
 	// OdataContext The OData description of a payload.
 	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
 
@@ -2651,7 +2699,7 @@ type ComputerSystemV1280ComputerSystem struct {
 	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
 
 	// Actions The available actions for this resource.
-	Actions *ComputerSystemV1280Actions `json:"Actions,omitempty"`
+	Actions *ComputerSystemV1290Actions `json:"Actions,omitempty"`
 
 	// AssetTag The user-definable tag that can track this computer system for inventory or other client purposes.
 	AssetTag *string `json:"AssetTag,omitempty"`
@@ -2663,20 +2711,20 @@ type ComputerSystemV1280ComputerSystem struct {
 	BiosVersion *string `json:"BiosVersion,omitempty"`
 
 	// Boot The boot information for this resource.
-	Boot *ComputerSystemV1280Boot `json:"Boot,omitempty"`
+	Boot *ComputerSystemV1290Boot `json:"Boot,omitempty"`
 
 	// BootImagePushURI The URI used to perform a Redfish Specification-defined multipart HTTP or HTTPS push upload, configuration, and immediate boot from a virtual media image.
 	BootImagePushURI *string `json:"BootImagePushURI,omitempty"`
 
 	// BootProgress This object describes the last boot progress state.
-	BootProgress *ComputerSystemV1280ComputerSystem_BootProgress `json:"BootProgress,omitempty"`
+	BootProgress *ComputerSystemV1290ComputerSystem_BootProgress `json:"BootProgress,omitempty"`
 
 	// Certificates A reference to a resource.
 	Certificates *OdataV4IdRef `json:"Certificates,omitempty"`
 
 	// Composition Information about the composition capabilities and state of the computer system.
-	Composition *ComputerSystemV1280ComputerSystem_Composition `json:"Composition,omitempty"`
-	Description *ComputerSystemV1280ComputerSystem_Description `json:"Description,omitempty"`
+	Composition *ComputerSystemV1290ComputerSystem_Composition `json:"Composition,omitempty"`
+	Description *ComputerSystemV1290ComputerSystem_Description `json:"Description,omitempty"`
 
 	// EthernetInterfaces A reference to a resource.
 	EthernetInterfaces *OdataV4IdRef `json:"EthernetInterfaces,omitempty"`
@@ -2684,8 +2732,8 @@ type ComputerSystemV1280ComputerSystem struct {
 	// FabricAdapters A reference to a resource.
 	FabricAdapters *OdataV4IdRef `json:"FabricAdapters,omitempty"`
 
-	// GraphicalConsole The information about a graphical console service for this system.
-	GraphicalConsole *ComputerSystemV1280HostGraphicalConsole `json:"GraphicalConsole,omitempty"`
+	// GraphicalConsole The information about the graphical console services that this system provides.
+	GraphicalConsole *ComputerSystemV1290HostGraphicalConsole `json:"GraphicalConsole,omitempty"`
 
 	// GraphicsControllers A reference to a resource.
 	GraphicsControllers *OdataV4IdRef `json:"GraphicsControllers,omitempty"`
@@ -2694,36 +2742,36 @@ type ComputerSystemV1280ComputerSystem struct {
 	HostName *string `json:"HostName,omitempty"`
 
 	// HostWatchdogTimer This type describes the host watchdog timer functionality for this system.
-	HostWatchdogTimer *ComputerSystemV1280WatchdogTimer `json:"HostWatchdogTimer,omitempty"`
+	HostWatchdogTimer *ComputerSystemV1290WatchdogTimer `json:"HostWatchdogTimer,omitempty"`
 
 	// HostedServices The services that might be running or installed on the system.
-	HostedServices *ComputerSystemV1280HostedServices `json:"HostedServices,omitempty"`
+	HostedServices *ComputerSystemV1290HostedServices `json:"HostedServices,omitempty"`
 
 	// HostingRoles The hosting roles that this computer system supports.
-	HostingRoles *[]ComputerSystemV1280HostingRole `json:"HostingRoles,omitempty"`
+	HostingRoles *[]ComputerSystemV1290HostingRole `json:"HostingRoles,omitempty"`
 
 	// IPMIHostInterface The information about the in-band IPMI service for this system.
-	IPMIHostInterface *ComputerSystemV1280IPMIHostInterface `json:"IPMIHostInterface,omitempty"`
+	IPMIHostInterface *ComputerSystemV1290IPMIHostInterface `json:"IPMIHostInterface,omitempty"`
 
 	// ID The unique identifier for this resource within the collection of similar resources.
 	ID ResourceID `json:"Id"`
 
 	// IdlePowerSaver The idle power saver settings of the computer system.
-	IdlePowerSaver *ComputerSystemV1280ComputerSystem_IdlePowerSaver `json:"IdlePowerSaver,omitempty"`
+	IdlePowerSaver *ComputerSystemV1290ComputerSystem_IdlePowerSaver `json:"IdlePowerSaver,omitempty"`
 
 	// IndicatorLED The state of the indicator LED, which identifies the system.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
-	IndicatorLED *ComputerSystemV1280ComputerSystem_IndicatorLED `json:"IndicatorLED,omitempty"`
+	IndicatorLED *ComputerSystemV1290ComputerSystem_IndicatorLED `json:"IndicatorLED,omitempty"`
 
 	// KeyManagement The key management settings of the computer system.
-	KeyManagement  *ComputerSystemV1280ComputerSystem_KeyManagement `json:"KeyManagement,omitempty"`
-	LastResetCause *ComputerSystemV1280LastResetCauses              `json:"LastResetCause,omitempty"`
+	KeyManagement  *ComputerSystemV1290ComputerSystem_KeyManagement `json:"KeyManagement,omitempty"`
+	LastResetCause *ComputerSystemV1290LastResetCauses              `json:"LastResetCause,omitempty"`
 
 	// LastResetTime The date and time when the system was last reset or rebooted.
 	LastResetTime *time.Time `json:"LastResetTime,omitempty"`
 
 	// Links The links to other resources that are related to this resource.
-	Links *ComputerSystemV1280Links `json:"Links,omitempty"`
+	Links *ComputerSystemV1290Links `json:"Links,omitempty"`
 
 	// LocationIndicatorActive An indicator allowing an operator to physically locate this resource.
 	LocationIndicatorActive *bool `json:"LocationIndicatorActive,omitempty"`
@@ -2739,7 +2787,7 @@ type ComputerSystemV1280ComputerSystem struct {
 
 	// Measurements An array of DSP0274-defined measurement blocks.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
-	Measurements *[]SoftwareInventoryV1140MeasurementBlock `json:"Measurements,omitempty"`
+	Measurements *[]SoftwareInventoryV1150MeasurementBlock `json:"Measurements,omitempty"`
 
 	// Memory A reference to a resource.
 	Memory *OdataV4IdRef `json:"Memory,omitempty"`
@@ -2748,7 +2796,7 @@ type ComputerSystemV1280ComputerSystem struct {
 	MemoryDomains *OdataV4IdRef `json:"MemoryDomains,omitempty"`
 
 	// MemorySummary The memory of the system in general detail.
-	MemorySummary *ComputerSystemV1280MemorySummary `json:"MemorySummary,omitempty"`
+	MemorySummary *ComputerSystemV1290MemorySummary `json:"MemorySummary,omitempty"`
 
 	// Model The product name for this system, without the manufacturer name.
 	Model *string `json:"Model,omitempty"`
@@ -2787,7 +2835,7 @@ type ComputerSystemV1280ComputerSystem struct {
 	PowerCycleDelaySeconds *float32 `json:"PowerCycleDelaySeconds,omitempty"`
 
 	// PowerMode The power mode setting of the computer system.
-	PowerMode *ComputerSystemV1280ComputerSystem_PowerMode `json:"PowerMode,omitempty"`
+	PowerMode *ComputerSystemV1290ComputerSystem_PowerMode `json:"PowerMode,omitempty"`
 
 	// PowerOffDelaySeconds The number of seconds to delay power off during a reset.  Zero seconds indicates no delay to power off.
 	PowerOffDelaySeconds *float32 `json:"PowerOffDelaySeconds,omitempty"`
@@ -2796,19 +2844,22 @@ type ComputerSystemV1280ComputerSystem struct {
 	PowerOnDelaySeconds *float32 `json:"PowerOnDelaySeconds,omitempty"`
 
 	// PowerRestorePolicy The enumerations of `PowerRestorePolicyTypes` specify the choice of power state for the system when power is applied.
-	PowerRestorePolicy *ComputerSystemV1280PowerRestorePolicyTypes `json:"PowerRestorePolicy,omitempty"`
+	PowerRestorePolicy *ComputerSystemV1290PowerRestorePolicyTypes `json:"PowerRestorePolicy,omitempty"`
 
 	// PowerState The current power state of the system.
-	PowerState *ComputerSystemV1280ComputerSystem_PowerState `json:"PowerState,omitempty"`
+	PowerState *ComputerSystemV1290ComputerSystem_PowerState `json:"PowerState,omitempty"`
 
 	// ProcessorSummary The central processors of the system in general detail.
-	ProcessorSummary *ComputerSystemV1280ProcessorSummary `json:"ProcessorSummary,omitempty"`
+	ProcessorSummary *ComputerSystemV1290ProcessorSummary `json:"ProcessorSummary,omitempty"`
 
 	// Processors A reference to a resource.
 	Processors *OdataV4IdRef `json:"Processors,omitempty"`
 
+	// ProductionDate The production or manufacturing date of this system.
+	ProductionDate *time.Time `json:"ProductionDate,omitempty"`
+
 	// Redundancy The link to a collection of redundancy entities.  Each entity specifies a kind and level of redundancy and a collection, or redundancy set, of other computer systems that provide the specified redundancy to this computer system.
-	Redundancy *[]RedundancyV170Redundancy `json:"Redundancy,omitempty"`
+	Redundancy *[]RedundancyV171Redundancy `json:"Redundancy,omitempty"`
 
 	// RedundancyOdataCount The number of items in a collection.
 	RedundancyOdataCount *OdataV4Count `json:"Redundancy@odata.count,omitempty"`
@@ -2820,7 +2871,7 @@ type ComputerSystemV1280ComputerSystem struct {
 	SecureBoot *OdataV4IdRef `json:"SecureBoot,omitempty"`
 
 	// SerialConsole The information about the serial console services that this system provides.
-	SerialConsole *ComputerSystemV1280HostSerialConsole `json:"SerialConsole,omitempty"`
+	SerialConsole *ComputerSystemV1290HostSerialConsole `json:"SerialConsole,omitempty"`
 
 	// SerialNumber The serial number for this system.
 	SerialNumber *string `json:"SerialNumber,omitempty"`
@@ -2836,102 +2887,108 @@ type ComputerSystemV1280ComputerSystem struct {
 
 	// SubModel The sub-model for this system.
 	SubModel   *string                        `json:"SubModel,omitempty"`
-	SystemType *ComputerSystemV1280SystemType `json:"SystemType,omitempty"`
+	SystemType *ComputerSystemV1290SystemType `json:"SystemType,omitempty"`
 
 	// TrustedModules An array of trusted modules in the system.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
-	TrustedModules *[]ComputerSystemV1280TrustedModules `json:"TrustedModules,omitempty"`
+	TrustedModules *[]ComputerSystemV1290TrustedModules `json:"TrustedModules,omitempty"`
 
 	// USBControllers A reference to a resource.
 	USBControllers *OdataV4IdRef `json:"USBControllers,omitempty"`
 
 	// UUID The UUID for this system.
-	UUID *ComputerSystemV1280ComputerSystem_UUID `json:"UUID,omitempty"`
+	UUID *ComputerSystemV1290ComputerSystem_UUID `json:"UUID,omitempty"`
 
 	// VirtualMedia A reference to a resource.
 	VirtualMedia *OdataV4IdRef `json:"VirtualMedia,omitempty"`
 
 	// VirtualMediaConfig The information about virtual media service for this system.
-	VirtualMediaConfig *ComputerSystemV1280VirtualMediaConfig `json:"VirtualMediaConfig,omitempty"`
+	VirtualMediaConfig *ComputerSystemV1290VirtualMediaConfig `json:"VirtualMediaConfig,omitempty"`
 
 	// Virtualization The information about the virtualization abilities that this system provides.
-	Virtualization *ComputerSystemV1280Virtualization `json:"Virtualization,omitempty"`
+	Virtualization *ComputerSystemV1290Virtualization `json:"Virtualization,omitempty"`
 }
 
-// ComputerSystemV1280ComputerSystemBootProgress1 defines model for .
-type ComputerSystemV1280ComputerSystemBootProgress1 = interface{}
+// ComputerSystemV1290ComputerSystemBootProgress1 defines model for .
+type ComputerSystemV1290ComputerSystemBootProgress1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_BootProgress This object describes the last boot progress state.
-type ComputerSystemV1280ComputerSystem_BootProgress struct {
+// ComputerSystemV1290ComputerSystem_BootProgress This object describes the last boot progress state.
+type ComputerSystemV1290ComputerSystem_BootProgress struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemComposition1 defines model for .
-type ComputerSystemV1280ComputerSystemComposition1 = interface{}
+// ComputerSystemV1290ComputerSystemComposition1 defines model for .
+type ComputerSystemV1290ComputerSystemComposition1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_Composition Information about the composition capabilities and state of the computer system.
-type ComputerSystemV1280ComputerSystem_Composition struct {
+// ComputerSystemV1290ComputerSystem_Composition Information about the composition capabilities and state of the computer system.
+type ComputerSystemV1290ComputerSystem_Composition struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemDescription1 defines model for .
-type ComputerSystemV1280ComputerSystemDescription1 = interface{}
+// ComputerSystemV1290ComputerSystemDescription1 defines model for .
+type ComputerSystemV1290ComputerSystemDescription1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_Description defines model for ComputerSystemV1280ComputerSystem.Description.
-type ComputerSystemV1280ComputerSystem_Description struct {
+// ComputerSystemV1290ComputerSystem_Description defines model for ComputerSystemV1290ComputerSystem.Description.
+type ComputerSystemV1290ComputerSystem_Description struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemIdlePowerSaver1 defines model for .
-type ComputerSystemV1280ComputerSystemIdlePowerSaver1 = interface{}
+// ComputerSystemV1290ComputerSystemIdlePowerSaver1 defines model for .
+type ComputerSystemV1290ComputerSystemIdlePowerSaver1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_IdlePowerSaver The idle power saver settings of the computer system.
-type ComputerSystemV1280ComputerSystem_IdlePowerSaver struct {
+// ComputerSystemV1290ComputerSystem_IdlePowerSaver The idle power saver settings of the computer system.
+type ComputerSystemV1290ComputerSystem_IdlePowerSaver struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemIndicatorLED1 defines model for .
-type ComputerSystemV1280ComputerSystemIndicatorLED1 = interface{}
+// ComputerSystemV1290ComputerSystemIndicatorLED1 defines model for .
+type ComputerSystemV1290ComputerSystemIndicatorLED1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_IndicatorLED The state of the indicator LED, which identifies the system.
-type ComputerSystemV1280ComputerSystem_IndicatorLED struct {
+// ComputerSystemV1290ComputerSystem_IndicatorLED The state of the indicator LED, which identifies the system.
+type ComputerSystemV1290ComputerSystem_IndicatorLED struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemKeyManagement1 defines model for .
-type ComputerSystemV1280ComputerSystemKeyManagement1 = interface{}
+// ComputerSystemV1290ComputerSystemKeyManagement1 defines model for .
+type ComputerSystemV1290ComputerSystemKeyManagement1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_KeyManagement The key management settings of the computer system.
-type ComputerSystemV1280ComputerSystem_KeyManagement struct {
+// ComputerSystemV1290ComputerSystem_KeyManagement The key management settings of the computer system.
+type ComputerSystemV1290ComputerSystem_KeyManagement struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemPowerMode1 defines model for .
-type ComputerSystemV1280ComputerSystemPowerMode1 = interface{}
+// ComputerSystemV1290ComputerSystemPowerMode1 defines model for .
+type ComputerSystemV1290ComputerSystemPowerMode1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_PowerMode The power mode setting of the computer system.
-type ComputerSystemV1280ComputerSystem_PowerMode struct {
+// ComputerSystemV1290ComputerSystem_PowerMode The power mode setting of the computer system.
+type ComputerSystemV1290ComputerSystem_PowerMode struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemPowerState1 defines model for .
-type ComputerSystemV1280ComputerSystemPowerState1 = interface{}
+// ComputerSystemV1290ComputerSystemPowerState1 defines model for .
+type ComputerSystemV1290ComputerSystemPowerState1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_PowerState The current power state of the system.
-type ComputerSystemV1280ComputerSystem_PowerState struct {
+// ComputerSystemV1290ComputerSystem_PowerState The current power state of the system.
+type ComputerSystemV1290ComputerSystem_PowerState struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280ComputerSystemUUID1 defines model for .
-type ComputerSystemV1280ComputerSystemUUID1 = interface{}
+// ComputerSystemV1290ComputerSystemUUID1 defines model for .
+type ComputerSystemV1290ComputerSystemUUID1 = interface{}
 
-// ComputerSystemV1280ComputerSystem_UUID The UUID for this system.
-type ComputerSystemV1280ComputerSystem_UUID struct {
+// ComputerSystemV1290ComputerSystem_UUID The UUID for this system.
+type ComputerSystemV1290ComputerSystem_UUID struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280Decommission This action decommissions a system.
-type ComputerSystemV1280Decommission struct {
+// ComputerSystemV1290ConsoleAccessMode defines model for ComputerSystem_v1_29_0_ConsoleAccessMode.
+type ComputerSystemV1290ConsoleAccessMode string
+
+// ComputerSystemV1290ConsoleAuthenticationMethod defines model for ComputerSystem_v1_29_0_ConsoleAuthenticationMethod.
+type ComputerSystemV1290ConsoleAuthenticationMethod string
+
+// ComputerSystemV1290Decommission This action decommissions a system.
+type ComputerSystemV1290Decommission struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -2939,8 +2996,8 @@ type ComputerSystemV1280Decommission struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ComputerSystemV1280ExportConfiguration This action exports the configuration of a system in a vendor-specific format.
-type ComputerSystemV1280ExportConfiguration struct {
+// ComputerSystemV1290ExportConfiguration This action exports the configuration of a system in a vendor-specific format.
+type ComputerSystemV1290ExportConfiguration struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -2948,44 +3005,166 @@ type ComputerSystemV1280ExportConfiguration struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ComputerSystemV1280GraphicalConnectTypesSupported defines model for ComputerSystem_v1_28_0_GraphicalConnectTypesSupported.
-type ComputerSystemV1280GraphicalConnectTypesSupported string
+// ComputerSystemV1290GraphicalConnectTypesSupported defines model for ComputerSystem_v1_29_0_GraphicalConnectTypesSupported.
+type ComputerSystemV1290GraphicalConnectTypesSupported string
 
-// ComputerSystemV1280HostGraphicalConsole The information about a graphical console service for this system.
-type ComputerSystemV1280HostGraphicalConsole struct {
-	// ConnectTypesSupported This property enumerates the graphical console connection types that the implementation allows.
-	ConnectTypesSupported *[]ComputerSystemV1280GraphicalConnectTypesSupported `json:"ConnectTypesSupported,omitempty"`
+// ComputerSystemV1290GraphicalConsoleGetOneTimeURL This action generates a single-use URL for accessing the graphical console.
+type ComputerSystemV1290GraphicalConsoleGetOneTimeURL struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
 
-	// MaxConcurrentSessions The maximum number of service sessions, regardless of protocol, that this system can support.
-	MaxConcurrentSessions *int64 `json:"MaxConcurrentSessions,omitempty"`
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ComputerSystemV1290GraphicalConsoleProtocol The information about a graphical console service that this system provides.
+type ComputerSystemV1290GraphicalConsoleProtocol struct {
+	// AllowsSharedAccess An indication of whether multiple users can access the console simultaneously.
+	AllowsSharedAccess *bool `json:"AllowsSharedAccess,omitempty"`
+
+	// AuthenticationMethod The authentication method required for accessing the graphical console.
+	AuthenticationMethod *ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod `json:"AuthenticationMethod,omitempty"`
+
+	// HostName The hostname or IP address to use when connecting to the graphical console.
+	HostName *string `json:"HostName,omitempty"`
 
 	// Port The protocol port.
 	Port *int64 `json:"Port,omitempty"`
 
 	// ServiceEnabled An indication of whether the service is enabled for this system.
 	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+
+	// SupportedAccessModes The access modes supported by this console service.
+	SupportedAccessModes *[]ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item `json:"SupportedAccessModes,omitempty"`
 }
 
-// ComputerSystemV1280HostSerialConsole The information about the serial console services that this system provides.
-type ComputerSystemV1280HostSerialConsole struct {
+// ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1 defines model for .
+type ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1 = interface{}
+
+// ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod The authentication method required for accessing the graphical console.
+type ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod struct {
+	union json.RawMessage
+}
+
+// ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1 defines model for .
+type ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1 = interface{}
+
+// ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item defines model for ComputerSystem_v1_29_0_GraphicalConsoleProtocol.SupportedAccessModes.Item.
+type ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item struct {
+	union json.RawMessage
+}
+
+// ComputerSystemV1290GraphicalConsoleSetOneTimePassword This action sets a one-time or single-use password for accessing the graphical console.
+type ComputerSystemV1290GraphicalConsoleSetOneTimePassword struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ComputerSystemV1290GraphicalConsoleSetPassword This action sets a persistent password for accessing the graphical console.
+type ComputerSystemV1290GraphicalConsoleSetPassword struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// ComputerSystemV1290HTML5Console The information about an HTML5 graphical console service that this system provides.
+type ComputerSystemV1290HTML5Console struct {
+	// AllowsSharedAccess An indication of whether multiple users can access the console simultaneously.
+	AllowsSharedAccess *bool `json:"AllowsSharedAccess,omitempty"`
+
+	// AuthenticationMethod The authentication method required for accessing the graphical console.
+	AuthenticationMethod *ComputerSystemV1290HTML5Console_AuthenticationMethod `json:"AuthenticationMethod,omitempty"`
+
+	// ConsoleURI The URI at which to access the HTML5 graphical console.
+	ConsoleURI *string `json:"ConsoleURI,omitempty"`
+
+	// HostName The hostname or IP address to use when connecting to the graphical console.
+	HostName *string `json:"HostName,omitempty"`
+
+	// Port The protocol port.
+	Port *int64 `json:"Port,omitempty"`
+
+	// ServiceEnabled An indication of whether the service is enabled for this system.
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+
+	// SupportedAccessModes The access modes supported by this console service.
+	SupportedAccessModes *[]ComputerSystemV1290HTML5Console_SupportedAccessModes_Item `json:"SupportedAccessModes,omitempty"`
+
+	// SupportsOneTimeURL An indication of whether the HTML5 console service supports generating one-time URLs.
+	SupportsOneTimeURL *bool `json:"SupportsOneTimeURL,omitempty"`
+}
+
+// ComputerSystemV1290HTML5ConsoleAuthenticationMethod1 defines model for .
+type ComputerSystemV1290HTML5ConsoleAuthenticationMethod1 = interface{}
+
+// ComputerSystemV1290HTML5Console_AuthenticationMethod The authentication method required for accessing the graphical console.
+type ComputerSystemV1290HTML5Console_AuthenticationMethod struct {
+	union json.RawMessage
+}
+
+// ComputerSystemV1290HTML5ConsoleSupportedAccessModes1 defines model for .
+type ComputerSystemV1290HTML5ConsoleSupportedAccessModes1 = interface{}
+
+// ComputerSystemV1290HTML5Console_SupportedAccessModes_Item defines model for ComputerSystem_v1_29_0_HTML5Console.SupportedAccessModes.Item.
+type ComputerSystemV1290HTML5Console_SupportedAccessModes_Item struct {
+	union json.RawMessage
+}
+
+// ComputerSystemV1290HostGraphicalConsole The information about the graphical console services that this system provides.
+type ComputerSystemV1290HostGraphicalConsole struct {
+	// ConnectTypesSupported This property enumerates the graphical console connection types that the implementation allows.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	ConnectTypesSupported *[]ComputerSystemV1290GraphicalConnectTypesSupported `json:"ConnectTypesSupported,omitempty"`
+
+	// HTML5 The information about an HTML5 graphical console service that this system provides.
+	HTML5 *ComputerSystemV1290HTML5Console `json:"HTML5,omitempty"`
+
+	// KVMIP The information about a graphical console service that this system provides.
+	KVMIP *ComputerSystemV1290GraphicalConsoleProtocol `json:"KVMIP,omitempty"`
+
+	// MaxConcurrentSessions The maximum number of service sessions, regardless of protocol, that this system can support.
+	MaxConcurrentSessions *int64 `json:"MaxConcurrentSessions,omitempty"`
+
+	// Port The protocol port.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Port *int64 `json:"Port,omitempty"`
+
+	// RDP The information about a graphical console service that this system provides.
+	RDP *ComputerSystemV1290GraphicalConsoleProtocol `json:"RDP,omitempty"`
+
+	// ServiceEnabled An indication of whether the service is enabled for this system.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+
+	// VNC The information about a VNC graphical console service that this system provides.
+	VNC *ComputerSystemV1290VNCConsole `json:"VNC,omitempty"`
+}
+
+// ComputerSystemV1290HostSerialConsole The information about the serial console services that this system provides.
+type ComputerSystemV1290HostSerialConsole struct {
 	// IPMI The information about a serial console service that this system provides.
-	IPMI *ComputerSystemV1280SerialConsoleProtocol `json:"IPMI,omitempty"`
+	IPMI *ComputerSystemV1290SerialConsoleProtocol `json:"IPMI,omitempty"`
 
 	// MaxConcurrentSessions The maximum number of service sessions, regardless of protocol, that this system can support.
 	MaxConcurrentSessions *int64 `json:"MaxConcurrentSessions,omitempty"`
 
 	// SSH The information about a serial console service that this system provides.
-	SSH *ComputerSystemV1280SerialConsoleProtocol `json:"SSH,omitempty"`
+	SSH *ComputerSystemV1290SerialConsoleProtocol `json:"SSH,omitempty"`
 
 	// Telnet The information about a serial console service that this system provides.
-	Telnet *ComputerSystemV1280SerialConsoleProtocol `json:"Telnet,omitempty"`
+	Telnet *ComputerSystemV1290SerialConsoleProtocol `json:"Telnet,omitempty"`
 
 	// WebSocket The information about a WebSocket serial console service that this system provides.
-	WebSocket *ComputerSystemV1280WebSocketConsole `json:"WebSocket,omitempty"`
+	WebSocket *ComputerSystemV1290WebSocketConsole `json:"WebSocket,omitempty"`
 }
 
-// ComputerSystemV1280HostedServices The services that might be running or installed on the system.
-type ComputerSystemV1280HostedServices struct {
+// ComputerSystemV1290HostedServices The services that might be running or installed on the system.
+type ComputerSystemV1290HostedServices struct {
 	// Oem The OEM extension.
 	Oem *ResourceOem `json:"Oem,omitempty"`
 
@@ -2993,17 +3172,17 @@ type ComputerSystemV1280HostedServices struct {
 	StorageServices *OdataV4IdRef `json:"StorageServices,omitempty"`
 }
 
-// ComputerSystemV1280HostingRole The enumerations of `HostingRole` specify different features that the hosting computer system supports.
-type ComputerSystemV1280HostingRole string
+// ComputerSystemV1290HostingRole The enumerations of `HostingRole` specify different features that the hosting computer system supports.
+type ComputerSystemV1290HostingRole string
 
-// ComputerSystemV1280IPMIHostInterface The information about the in-band IPMI service for this system.
-type ComputerSystemV1280IPMIHostInterface struct {
+// ComputerSystemV1290IPMIHostInterface The information about the in-band IPMI service for this system.
+type ComputerSystemV1290IPMIHostInterface struct {
 	// ServiceEnabled An indication of whether the service is enabled for this system.
 	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
 }
 
-// ComputerSystemV1280IdlePowerSaver The idle power saver settings of a computer system.
-type ComputerSystemV1280IdlePowerSaver struct {
+// ComputerSystemV1290IdlePowerSaver The idle power saver settings of a computer system.
+type ComputerSystemV1290IdlePowerSaver struct {
 	// Enabled An indication of whether idle power saver is enabled.
 	Enabled *bool `json:"Enabled,omitempty"`
 
@@ -3020,20 +3199,20 @@ type ComputerSystemV1280IdlePowerSaver struct {
 	ExitUtilizationPercent *float32 `json:"ExitUtilizationPercent,omitempty"`
 }
 
-// ComputerSystemV1280IndicatorLED defines model for ComputerSystem_v1_28_0_IndicatorLED.
-type ComputerSystemV1280IndicatorLED string
+// ComputerSystemV1290IndicatorLED defines model for ComputerSystem_v1_29_0_IndicatorLED.
+type ComputerSystemV1290IndicatorLED string
 
-// ComputerSystemV1280InterfaceType defines model for ComputerSystem_v1_28_0_InterfaceType.
-type ComputerSystemV1280InterfaceType string
+// ComputerSystemV1290InterfaceType defines model for ComputerSystem_v1_29_0_InterfaceType.
+type ComputerSystemV1290InterfaceType string
 
-// ComputerSystemV1280InterfaceTypeSelection The enumerations of `InterfaceTypeSelection` specify the method for switching the TrustedModule InterfaceType, for instance between TPM1_2 and TPM2_0, if supported.
-type ComputerSystemV1280InterfaceTypeSelection string
+// ComputerSystemV1290InterfaceTypeSelection The enumerations of `InterfaceTypeSelection` specify the method for switching the TrustedModule InterfaceType, for instance between TPM1_2 and TPM2_0, if supported.
+type ComputerSystemV1290InterfaceTypeSelection string
 
-// ComputerSystemV1280KMIPCachePolicy defines model for ComputerSystem_v1_28_0_KMIPCachePolicy.
-type ComputerSystemV1280KMIPCachePolicy string
+// ComputerSystemV1290KMIPCachePolicy defines model for ComputerSystem_v1_29_0_KMIPCachePolicy.
+type ComputerSystemV1290KMIPCachePolicy string
 
-// ComputerSystemV1280KMIPServer The KMIP server settings for a computer system.
-type ComputerSystemV1280KMIPServer struct {
+// ComputerSystemV1290KMIPServer The KMIP server settings for a computer system.
+type ComputerSystemV1290KMIPServer struct {
 	// Address The KMIP server address.
 	Address *string `json:"Address,omitempty"`
 
@@ -3041,7 +3220,7 @@ type ComputerSystemV1280KMIPServer struct {
 	CacheDuration *string `json:"CacheDuration,omitempty"`
 
 	// CachePolicy The cache policy to control how KMIP data is cached.
-	CachePolicy *ComputerSystemV1280KMIPServer_CachePolicy `json:"CachePolicy,omitempty"`
+	CachePolicy *ComputerSystemV1290KMIPServer_CachePolicy `json:"CachePolicy,omitempty"`
 
 	// Password The password to access the KMIP server.  The value is `null` in responses.
 	Password *string `json:"Password,omitempty"`
@@ -3053,16 +3232,16 @@ type ComputerSystemV1280KMIPServer struct {
 	Username *string `json:"Username,omitempty"`
 }
 
-// ComputerSystemV1280KMIPServerCachePolicy1 defines model for .
-type ComputerSystemV1280KMIPServerCachePolicy1 = interface{}
+// ComputerSystemV1290KMIPServerCachePolicy1 defines model for .
+type ComputerSystemV1290KMIPServerCachePolicy1 = interface{}
 
-// ComputerSystemV1280KMIPServer_CachePolicy The cache policy to control how KMIP data is cached.
-type ComputerSystemV1280KMIPServer_CachePolicy struct {
+// ComputerSystemV1290KMIPServer_CachePolicy The cache policy to control how KMIP data is cached.
+type ComputerSystemV1290KMIPServer_CachePolicy struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280KeyManagement The key management settings of a computer system.
-type ComputerSystemV1280KeyManagement struct {
+// ComputerSystemV1290KeyManagement The key management settings of a computer system.
+type ComputerSystemV1290KeyManagement struct {
 	// KMIPCertificates A reference to a resource.
 	KMIPCertificates *OdataV4IdRef `json:"KMIPCertificates,omitempty"`
 
@@ -3070,22 +3249,22 @@ type ComputerSystemV1280KeyManagement struct {
 	KMIPClientCertificates *OdataV4IdRef `json:"KMIPClientCertificates,omitempty"`
 
 	// KMIPServers The KMIP servers to which this computer system is subscribed.
-	KMIPServers *[]ComputerSystemV1280KeyManagement_KMIPServers_Item `json:"KMIPServers,omitempty"`
+	KMIPServers *[]ComputerSystemV1290KeyManagement_KMIPServers_Item `json:"KMIPServers,omitempty"`
 }
 
-// ComputerSystemV1280KeyManagementKMIPServers1 defines model for .
-type ComputerSystemV1280KeyManagementKMIPServers1 = interface{}
+// ComputerSystemV1290KeyManagementKMIPServers1 defines model for .
+type ComputerSystemV1290KeyManagementKMIPServers1 = interface{}
 
-// ComputerSystemV1280KeyManagement_KMIPServers_Item defines model for ComputerSystem_v1_28_0_KeyManagement.KMIPServers.Item.
-type ComputerSystemV1280KeyManagement_KMIPServers_Item struct {
+// ComputerSystemV1290KeyManagement_KMIPServers_Item defines model for ComputerSystem_v1_29_0_KeyManagement.KMIPServers.Item.
+type ComputerSystemV1290KeyManagement_KMIPServers_Item struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280LastResetCauses defines model for ComputerSystem_v1_28_0_LastResetCauses.
-type ComputerSystemV1280LastResetCauses string
+// ComputerSystemV1290LastResetCauses defines model for ComputerSystem_v1_29_0_LastResetCauses.
+type ComputerSystemV1290LastResetCauses string
 
-// ComputerSystemV1280Links The links to other resources that are related to this resource.
-type ComputerSystemV1280Links struct {
+// ComputerSystemV1290Links The links to other resources that are related to this resource.
+type ComputerSystemV1290Links struct {
 	// Chassis An array of links to the chassis that contains this system.
 	Chassis *[]OdataV4IdRef `json:"Chassis,omitempty"`
 
@@ -3111,7 +3290,7 @@ type ComputerSystemV1280Links struct {
 	EndpointsOdataCount *OdataV4Count `json:"Endpoints@odata.count,omitempty"`
 
 	// HostingComputerSystem The link to the system that is hosting this virtual machine.
-	HostingComputerSystem *ComputerSystemV1280Links_HostingComputerSystem `json:"HostingComputerSystem,omitempty"`
+	HostingComputerSystem *ComputerSystemV1290Links_HostingComputerSystem `json:"HostingComputerSystem,omitempty"`
 
 	// ManagedBy An array of links to the managers responsible for this system.
 	ManagedBy *[]OdataV4IdRef `json:"ManagedBy,omitempty"`
@@ -3159,21 +3338,21 @@ type ComputerSystemV1280Links struct {
 	VirtualMachinesOdataCount *OdataV4Count `json:"VirtualMachines@odata.count,omitempty"`
 }
 
-// ComputerSystemV1280LinksHostingComputerSystem1 defines model for .
-type ComputerSystemV1280LinksHostingComputerSystem1 = interface{}
+// ComputerSystemV1290LinksHostingComputerSystem1 defines model for .
+type ComputerSystemV1290LinksHostingComputerSystem1 = interface{}
 
-// ComputerSystemV1280Links_HostingComputerSystem The link to the system that is hosting this virtual machine.
-type ComputerSystemV1280Links_HostingComputerSystem struct {
+// ComputerSystemV1290Links_HostingComputerSystem The link to the system that is hosting this virtual machine.
+type ComputerSystemV1290Links_HostingComputerSystem struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280MemoryMirroring defines model for ComputerSystem_v1_28_0_MemoryMirroring.
-type ComputerSystemV1280MemoryMirroring string
+// ComputerSystemV1290MemoryMirroring defines model for ComputerSystem_v1_29_0_MemoryMirroring.
+type ComputerSystemV1290MemoryMirroring string
 
-// ComputerSystemV1280MemorySummary The memory of the system in general detail.
-type ComputerSystemV1280MemorySummary struct {
+// ComputerSystemV1290MemorySummary The memory of the system in general detail.
+type ComputerSystemV1290MemorySummary struct {
 	// MemoryMirroring The ability and type of memory mirroring that this computer system supports.
-	MemoryMirroring *ComputerSystemV1280MemorySummary_MemoryMirroring `json:"MemoryMirroring,omitempty"`
+	MemoryMirroring *ComputerSystemV1290MemorySummary_MemoryMirroring `json:"MemoryMirroring,omitempty"`
 
 	// Metrics A reference to a resource.
 	Metrics *OdataV4IdRef `json:"Metrics,omitempty"`
@@ -3188,25 +3367,25 @@ type ComputerSystemV1280MemorySummary struct {
 	TotalSystemPersistentMemoryGiB *float32 `json:"TotalSystemPersistentMemoryGiB,omitempty"`
 }
 
-// ComputerSystemV1280MemorySummaryMemoryMirroring1 defines model for .
-type ComputerSystemV1280MemorySummaryMemoryMirroring1 = interface{}
+// ComputerSystemV1290MemorySummaryMemoryMirroring1 defines model for .
+type ComputerSystemV1290MemorySummaryMemoryMirroring1 = interface{}
 
-// ComputerSystemV1280MemorySummary_MemoryMirroring The ability and type of memory mirroring that this computer system supports.
-type ComputerSystemV1280MemorySummary_MemoryMirroring struct {
+// ComputerSystemV1290MemorySummary_MemoryMirroring The ability and type of memory mirroring that this computer system supports.
+type ComputerSystemV1290MemorySummary_MemoryMirroring struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280OemActions The available OEM-specific actions for this resource.
-type ComputerSystemV1280OemActions map[string]interface{}
+// ComputerSystemV1290OemActions The available OEM-specific actions for this resource.
+type ComputerSystemV1290OemActions map[string]interface{}
 
-// ComputerSystemV1280PowerMode defines model for ComputerSystem_v1_28_0_PowerMode.
-type ComputerSystemV1280PowerMode string
+// ComputerSystemV1290PowerMode defines model for ComputerSystem_v1_29_0_PowerMode.
+type ComputerSystemV1290PowerMode string
 
-// ComputerSystemV1280PowerRestorePolicyTypes The enumerations of `PowerRestorePolicyTypes` specify the choice of power state for the system when power is applied.
-type ComputerSystemV1280PowerRestorePolicyTypes string
+// ComputerSystemV1290PowerRestorePolicyTypes The enumerations of `PowerRestorePolicyTypes` specify the choice of power state for the system when power is applied.
+type ComputerSystemV1290PowerRestorePolicyTypes string
 
-// ComputerSystemV1280ProcessorSummary The central processors of the system in general detail.
-type ComputerSystemV1280ProcessorSummary struct {
+// ComputerSystemV1290ProcessorSummary The central processors of the system in general detail.
+type ComputerSystemV1290ProcessorSummary struct {
 	// CoreCount The number of processor cores in the system.
 	CoreCount *int64 `json:"CoreCount,omitempty"`
 
@@ -3229,8 +3408,8 @@ type ComputerSystemV1280ProcessorSummary struct {
 	ThreadingEnabled *bool `json:"ThreadingEnabled,omitempty"`
 }
 
-// ComputerSystemV1280RemoveResourceBlock This action removes a resource block from a system.
-type ComputerSystemV1280RemoveResourceBlock struct {
+// ComputerSystemV1290RemoveResourceBlock This action removes a resource block from a system.
+type ComputerSystemV1290RemoveResourceBlock struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -3238,8 +3417,8 @@ type ComputerSystemV1280RemoveResourceBlock struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ComputerSystemV1280Reset This action resets the system.
-type ComputerSystemV1280Reset struct {
+// ComputerSystemV1290Reset This action resets the system.
+type ComputerSystemV1290Reset struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -3247,13 +3426,13 @@ type ComputerSystemV1280Reset struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ComputerSystemV1280ResetRequestBody This action resets the system.
-type ComputerSystemV1280ResetRequestBody struct {
+// ComputerSystemV1290ResetRequestBody This action resets the system.
+type ComputerSystemV1290ResetRequestBody struct {
 	ResetType *ResourceResetType `json:"ResetType,omitempty"`
 }
 
-// ComputerSystemV1280SerialConsoleProtocol The information about a serial console service that this system provides.
-type ComputerSystemV1280SerialConsoleProtocol struct {
+// ComputerSystemV1290SerialConsoleProtocol The information about a serial console service that this system provides.
+type ComputerSystemV1290SerialConsoleProtocol struct {
 	// ConsoleEntryCommand The command string passed to the service to select or enter the system's serial console.
 	ConsoleEntryCommand *string `json:"ConsoleEntryCommand,omitempty"`
 
@@ -3270,8 +3449,8 @@ type ComputerSystemV1280SerialConsoleProtocol struct {
 	SharedWithManagerCLI *bool `json:"SharedWithManagerCLI,omitempty"`
 }
 
-// ComputerSystemV1280SetDefaultBootOrder This action sets the `BootOrder` property to the default settings.
-type ComputerSystemV1280SetDefaultBootOrder struct {
+// ComputerSystemV1290SetDefaultBootOrder This action sets the `BootOrder` property to the default settings.
+type ComputerSystemV1290SetDefaultBootOrder struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -3279,17 +3458,17 @@ type ComputerSystemV1280SetDefaultBootOrder struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ComputerSystemV1280StopBootOnFault defines model for ComputerSystem_v1_28_0_StopBootOnFault.
-type ComputerSystemV1280StopBootOnFault string
+// ComputerSystemV1290StopBootOnFault defines model for ComputerSystem_v1_29_0_StopBootOnFault.
+type ComputerSystemV1290StopBootOnFault string
 
-// ComputerSystemV1280SystemType defines model for ComputerSystem_v1_28_0_SystemType.
-type ComputerSystemV1280SystemType string
+// ComputerSystemV1290SystemType defines model for ComputerSystem_v1_29_0_SystemType.
+type ComputerSystemV1290SystemType string
 
-// ComputerSystemV1280TrustedModuleRequiredToBoot defines model for ComputerSystem_v1_28_0_TrustedModuleRequiredToBoot.
-type ComputerSystemV1280TrustedModuleRequiredToBoot string
+// ComputerSystemV1290TrustedModuleRequiredToBoot defines model for ComputerSystem_v1_29_0_TrustedModuleRequiredToBoot.
+type ComputerSystemV1290TrustedModuleRequiredToBoot string
 
-// ComputerSystemV1280TrustedModules The Trusted Module installed in the system.
-type ComputerSystemV1280TrustedModules struct {
+// ComputerSystemV1290TrustedModules The Trusted Module installed in the system.
+type ComputerSystemV1290TrustedModules struct {
 	// FirmwareVersion The firmware version of this Trusted Module.
 	FirmwareVersion *string `json:"FirmwareVersion,omitempty"`
 
@@ -3297,10 +3476,10 @@ type ComputerSystemV1280TrustedModules struct {
 	FirmwareVersion2 *string `json:"FirmwareVersion2,omitempty"`
 
 	// InterfaceType The interface type of the Trusted Module.
-	InterfaceType *ComputerSystemV1280TrustedModules_InterfaceType `json:"InterfaceType,omitempty"`
+	InterfaceType *ComputerSystemV1290TrustedModules_InterfaceType `json:"InterfaceType,omitempty"`
 
 	// InterfaceTypeSelection The interface type selection supported by this Trusted Module.
-	InterfaceTypeSelection *ComputerSystemV1280TrustedModules_InterfaceTypeSelection `json:"InterfaceTypeSelection,omitempty"`
+	InterfaceTypeSelection *ComputerSystemV1290TrustedModules_InterfaceTypeSelection `json:"InterfaceTypeSelection,omitempty"`
 
 	// Oem The OEM extension.
 	Oem *ResourceOem `json:"Oem,omitempty"`
@@ -3309,24 +3488,70 @@ type ComputerSystemV1280TrustedModules struct {
 	Status *ResourceStatus `json:"Status,omitempty"`
 }
 
-// ComputerSystemV1280TrustedModulesInterfaceType1 defines model for .
-type ComputerSystemV1280TrustedModulesInterfaceType1 = interface{}
+// ComputerSystemV1290TrustedModulesInterfaceType1 defines model for .
+type ComputerSystemV1290TrustedModulesInterfaceType1 = interface{}
 
-// ComputerSystemV1280TrustedModules_InterfaceType The interface type of the Trusted Module.
-type ComputerSystemV1280TrustedModules_InterfaceType struct {
+// ComputerSystemV1290TrustedModules_InterfaceType The interface type of the Trusted Module.
+type ComputerSystemV1290TrustedModules_InterfaceType struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280TrustedModulesInterfaceTypeSelection1 defines model for .
-type ComputerSystemV1280TrustedModulesInterfaceTypeSelection1 = interface{}
+// ComputerSystemV1290TrustedModulesInterfaceTypeSelection1 defines model for .
+type ComputerSystemV1290TrustedModulesInterfaceTypeSelection1 = interface{}
 
-// ComputerSystemV1280TrustedModules_InterfaceTypeSelection The interface type selection supported by this Trusted Module.
-type ComputerSystemV1280TrustedModules_InterfaceTypeSelection struct {
+// ComputerSystemV1290TrustedModules_InterfaceTypeSelection The interface type selection supported by this Trusted Module.
+type ComputerSystemV1290TrustedModules_InterfaceTypeSelection struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280VirtualMediaConfig The information about virtual media service for this system.
-type ComputerSystemV1280VirtualMediaConfig struct {
+// ComputerSystemV1290VNCConsole The information about a VNC graphical console service that this system provides.
+type ComputerSystemV1290VNCConsole struct {
+	// AllowsSharedAccess An indication of whether multiple users can access the console simultaneously.
+	AllowsSharedAccess *bool `json:"AllowsSharedAccess,omitempty"`
+
+	// AuthenticationMethod The authentication method required for accessing the graphical console.
+	AuthenticationMethod *ComputerSystemV1290VNCConsole_AuthenticationMethod `json:"AuthenticationMethod,omitempty"`
+
+	// HostName The hostname or IP address to use when connecting to the graphical console.
+	HostName *string `json:"HostName,omitempty"`
+
+	// Port The protocol port.
+	Port *int64 `json:"Port,omitempty"`
+
+	// ServiceEnabled An indication of whether the service is enabled for this system.
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+
+	// SupportedAccessModes The access modes supported by this console service.
+	SupportedAccessModes *[]ComputerSystemV1290VNCConsole_SupportedAccessModes_Item `json:"SupportedAccessModes,omitempty"`
+
+	// SupportedEncodings The encoding methods supported by the VNC service.
+	SupportedEncodings *[]*string `json:"SupportedEncodings,omitempty"`
+
+	// SupportsOneTimePassword An indication of whether the VNC service supports one-time or single-use passwords.
+	SupportsOneTimePassword *bool `json:"SupportsOneTimePassword,omitempty"`
+
+	// SupportsPersistentPassword An indication of whether the VNC service supports setting a persistent password.
+	SupportsPersistentPassword *bool `json:"SupportsPersistentPassword,omitempty"`
+}
+
+// ComputerSystemV1290VNCConsoleAuthenticationMethod1 defines model for .
+type ComputerSystemV1290VNCConsoleAuthenticationMethod1 = interface{}
+
+// ComputerSystemV1290VNCConsole_AuthenticationMethod The authentication method required for accessing the graphical console.
+type ComputerSystemV1290VNCConsole_AuthenticationMethod struct {
+	union json.RawMessage
+}
+
+// ComputerSystemV1290VNCConsoleSupportedAccessModes1 defines model for .
+type ComputerSystemV1290VNCConsoleSupportedAccessModes1 = interface{}
+
+// ComputerSystemV1290VNCConsole_SupportedAccessModes_Item defines model for ComputerSystem_v1_29_0_VNCConsole.SupportedAccessModes.Item.
+type ComputerSystemV1290VNCConsole_SupportedAccessModes_Item struct {
+	union json.RawMessage
+}
+
+// ComputerSystemV1290VirtualMediaConfig The information about virtual media service for this system.
+type ComputerSystemV1290VirtualMediaConfig struct {
 	// Port The protocol port.
 	Port *int64 `json:"Port,omitempty"`
 
@@ -3334,8 +3559,8 @@ type ComputerSystemV1280VirtualMediaConfig struct {
 	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
 }
 
-// ComputerSystemV1280Virtualization The information about the virtualization abilities that this system provides.
-type ComputerSystemV1280Virtualization struct {
+// ComputerSystemV1290Virtualization The information about the virtualization abilities that this system provides.
+type ComputerSystemV1290Virtualization struct {
 	// CPUOffload An indication of whether the CPUs of the system is providing offload for virtualization. Examples of this are AMD-V, Intel VT-x, Intel VT-i, or ARM EL2.
 	CPUOffload *bool `json:"CPUOffload,omitempty"`
 
@@ -3343,11 +3568,11 @@ type ComputerSystemV1280Virtualization struct {
 	DeviceIsolation *bool `json:"DeviceIsolation,omitempty"`
 }
 
-// ComputerSystemV1280WatchdogTimeoutActions The enumerations of `WatchdogTimeoutActions` specify the choice of action to take when the host watchdog timer reaches its timeout value.
-type ComputerSystemV1280WatchdogTimeoutActions string
+// ComputerSystemV1290WatchdogTimeoutActions The enumerations of `WatchdogTimeoutActions` specify the choice of action to take when the host watchdog timer reaches its timeout value.
+type ComputerSystemV1290WatchdogTimeoutActions string
 
-// ComputerSystemV1280WatchdogTimer This type describes the host watchdog timer functionality for this system.
-type ComputerSystemV1280WatchdogTimer struct {
+// ComputerSystemV1290WatchdogTimer This type describes the host watchdog timer functionality for this system.
+type ComputerSystemV1290WatchdogTimer struct {
 	// FunctionEnabled An indication of whether a user has enabled the host watchdog timer functionality.  This property indicates only that a user has enabled the timer.  To activate the timer, installation of additional host-based software is necessary; an update to this property does not initiate the timer.
 	FunctionEnabled *bool `json:"FunctionEnabled"`
 
@@ -3358,33 +3583,33 @@ type ComputerSystemV1280WatchdogTimer struct {
 	Status *ResourceStatus `json:"Status,omitempty"`
 
 	// TimeoutAction The action to perform when the watchdog timer reaches its timeout value.
-	TimeoutAction ComputerSystemV1280WatchdogTimer_TimeoutAction `json:"TimeoutAction"`
+	TimeoutAction ComputerSystemV1290WatchdogTimer_TimeoutAction `json:"TimeoutAction"`
 
 	// WarningAction The action to perform when the watchdog timer is close to reaching its timeout value.  This action typically occurs from three to ten seconds before to the timeout value, but the exact timing is dependent on the implementation.
-	WarningAction *ComputerSystemV1280WatchdogTimer_WarningAction `json:"WarningAction,omitempty"`
+	WarningAction *ComputerSystemV1290WatchdogTimer_WarningAction `json:"WarningAction,omitempty"`
 }
 
-// ComputerSystemV1280WatchdogTimerTimeoutAction1 defines model for .
-type ComputerSystemV1280WatchdogTimerTimeoutAction1 = interface{}
+// ComputerSystemV1290WatchdogTimerTimeoutAction1 defines model for .
+type ComputerSystemV1290WatchdogTimerTimeoutAction1 = interface{}
 
-// ComputerSystemV1280WatchdogTimer_TimeoutAction The action to perform when the watchdog timer reaches its timeout value.
-type ComputerSystemV1280WatchdogTimer_TimeoutAction struct {
+// ComputerSystemV1290WatchdogTimer_TimeoutAction The action to perform when the watchdog timer reaches its timeout value.
+type ComputerSystemV1290WatchdogTimer_TimeoutAction struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280WatchdogTimerWarningAction1 defines model for .
-type ComputerSystemV1280WatchdogTimerWarningAction1 = interface{}
+// ComputerSystemV1290WatchdogTimerWarningAction1 defines model for .
+type ComputerSystemV1290WatchdogTimerWarningAction1 = interface{}
 
-// ComputerSystemV1280WatchdogTimer_WarningAction The action to perform when the watchdog timer is close to reaching its timeout value.  This action typically occurs from three to ten seconds before to the timeout value, but the exact timing is dependent on the implementation.
-type ComputerSystemV1280WatchdogTimer_WarningAction struct {
+// ComputerSystemV1290WatchdogTimer_WarningAction The action to perform when the watchdog timer is close to reaching its timeout value.  This action typically occurs from three to ten seconds before to the timeout value, but the exact timing is dependent on the implementation.
+type ComputerSystemV1290WatchdogTimer_WarningAction struct {
 	union json.RawMessage
 }
 
-// ComputerSystemV1280WatchdogWarningActions The enumerations of `WatchdogWarningActions` specify the choice of action to take when the host watchdog timer is close (typically 3-10 seconds) to reaching its timeout value.
-type ComputerSystemV1280WatchdogWarningActions string
+// ComputerSystemV1290WatchdogWarningActions The enumerations of `WatchdogWarningActions` specify the choice of action to take when the host watchdog timer is close (typically 3-10 seconds) to reaching its timeout value.
+type ComputerSystemV1290WatchdogWarningActions string
 
-// ComputerSystemV1280WebSocketConsole The information about a WebSocket serial console service that this system provides.
-type ComputerSystemV1280WebSocketConsole struct {
+// ComputerSystemV1290WebSocketConsole The information about a WebSocket serial console service that this system provides.
+type ComputerSystemV1290WebSocketConsole struct {
 	// ConsoleURI The URI at which to access the WebSocket serial console.
 	ConsoleURI *string `json:"ConsoleURI,omitempty"`
 
@@ -3395,11 +3620,11 @@ type ComputerSystemV1280WebSocketConsole struct {
 	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
 }
 
-// ControlV180ControlMode defines model for Control_v1_8_0_ControlMode.
-type ControlV180ControlMode string
+// ControlV181ControlMode defines model for Control_v1_8_1_ControlMode.
+type ControlV181ControlMode string
 
-// ControlV180ControlRangeExcerpt The `Control` schema describes a control point and its properties.
-type ControlV180ControlRangeExcerpt struct {
+// ControlV181ControlRangeExcerpt The `Control` schema describes a control point and its properties.
+type ControlV181ControlRangeExcerpt struct {
 	// AllowableMax The maximum possible setting for this control.
 	AllowableMax *float32 `json:"AllowableMax,omitempty"`
 
@@ -3410,10 +3635,13 @@ type ControlV180ControlRangeExcerpt struct {
 	AllowableNumericValues *[]*float32 `json:"AllowableNumericValues,omitempty"`
 
 	// ControlMode The current operating mode of the control.
-	ControlMode *ControlV180ControlRangeExcerpt_ControlMode `json:"ControlMode,omitempty"`
+	ControlMode *ControlV181ControlRangeExcerpt_ControlMode `json:"ControlMode,omitempty"`
 
 	// DataSourceURI The link to the resource that provides the data for this control.
 	DataSourceURI *string `json:"DataSourceUri,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
 
 	// Reading The reading of the sensor associated with this control.
 	Reading *float32 `json:"Reading,omitempty"`
@@ -3425,11 +3653,11 @@ type ControlV180ControlRangeExcerpt struct {
 	SettingMin *float32 `json:"SettingMin,omitempty"`
 }
 
-// ControlV180ControlRangeExcerptControlMode1 defines model for .
-type ControlV180ControlRangeExcerptControlMode1 = interface{}
+// ControlV181ControlRangeExcerptControlMode1 defines model for .
+type ControlV181ControlRangeExcerptControlMode1 = interface{}
 
-// ControlV180ControlRangeExcerpt_ControlMode The current operating mode of the control.
-type ControlV180ControlRangeExcerpt_ControlMode struct {
+// ControlV181ControlRangeExcerpt_ControlMode The current operating mode of the control.
+type ControlV181ControlRangeExcerpt_ControlMode struct {
 	union json.RawMessage
 }
 
@@ -3633,7 +3861,7 @@ type ManagerV1250Manager struct {
 	Actions *ManagerV1250Actions `json:"Actions,omitempty"`
 
 	// AdditionalFirmwareVersions Additional versions.
-	AdditionalFirmwareVersions *SoftwareInventoryV1140AdditionalVersions `json:"AdditionalFirmwareVersions,omitempty"`
+	AdditionalFirmwareVersions *SoftwareInventoryV1150AdditionalVersions `json:"AdditionalFirmwareVersions,omitempty"`
 
 	// AutoDSTEnabled An indication of whether the manager is configured for automatic Daylight Saving Time (DST) adjustment.
 	AutoDSTEnabled *bool `json:"AutoDSTEnabled,omitempty"`
@@ -3682,7 +3910,7 @@ type ManagerV1250Manager struct {
 	Links *ManagerV1250Links `json:"Links,omitempty"`
 
 	// Location The location of a resource.
-	Location *ResourceV1240Location `json:"Location,omitempty"`
+	Location *ResourceV1250Location `json:"Location,omitempty"`
 
 	// LocationIndicatorActive An indicator allowing an operator to physically locate this resource.
 	LocationIndicatorActive *bool `json:"LocationIndicatorActive,omitempty"`
@@ -3699,7 +3927,7 @@ type ManagerV1250Manager struct {
 
 	// Measurements An array of DSP0274-defined measurement blocks.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
-	Measurements *[]SoftwareInventoryV1140MeasurementBlock `json:"Measurements,omitempty"`
+	Measurements *[]SoftwareInventoryV1150MeasurementBlock `json:"Measurements,omitempty"`
 
 	// Model The model information of this manager, as defined by the manufacturer.
 	Model *string `json:"Model,omitempty"`
@@ -3726,7 +3954,7 @@ type ManagerV1250Manager struct {
 	ReadyToRemove *bool `json:"ReadyToRemove,omitempty"`
 
 	// Redundancy The redundancy information for the managers of this system.
-	Redundancy *[]RedundancyV170Redundancy `json:"Redundancy,omitempty"`
+	Redundancy *[]RedundancyV171Redundancy `json:"Redundancy,omitempty"`
 
 	// RedundancyOdataCount The number of items in a collection.
 	RedundancyOdataCount *OdataV4Count `json:"Redundancy@odata.count,omitempty"`
@@ -3935,11 +4163,49 @@ type MessageV130Message struct {
 	Username *string `json:"Username,omitempty"`
 }
 
+// MessageV140Message The message that the Redfish service returns.
+type MessageV140Message struct {
+	// Message The human-readable message.
+	Message *string `json:"Message,omitempty"`
+
+	// MessageArgs An array of message arguments that are substituted for the arguments in the message when looked up in the message registry.
+	MessageArgs *[]string `json:"MessageArgs,omitempty"`
+
+	// MessageID The identifier for the message.
+	MessageID       *string         `json:"MessageId,omitempty"`
+	MessageSeverity *ResourceHealth `json:"MessageSeverity,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// RelatedProperties A set of properties described by the message.
+	RelatedProperties *[]string `json:"RelatedProperties,omitempty"`
+
+	// Resolution Used to provide suggestions on how to resolve the situation that caused the message.
+	Resolution *string `json:"Resolution,omitempty"`
+
+	// ResolutionSteps The list of recommended steps to resolve the situation that caused the message.
+	ResolutionSteps *[]ResolutionStepV110ResolutionStep `json:"ResolutionSteps,omitempty"`
+
+	// Severity The severity of the message.
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	Severity *string `json:"Severity,omitempty"`
+
+	// UserAuthenticationSource The source of authentication for the user associated with the message.
+	UserAuthenticationSource *string `json:"UserAuthenticationSource,omitempty"`
+
+	// Username The username of the account associated with the message.
+	Username *string `json:"Username,omitempty"`
+
+	// VendorCode The vendor-defined code used to identify this message.
+	VendorCode *string `json:"VendorCode,omitempty"`
+}
+
 // PCIeDevicePCIeTypes defines model for PCIeDevice_PCIeTypes.
 type PCIeDevicePCIeTypes string
 
-// PCIeDeviceV1220PCIeInterface Properties that describe a PCIe interface.
-type PCIeDeviceV1220PCIeInterface struct {
+// PCIeDeviceV1230PCIeInterface Properties that describe a PCIe interface.
+type PCIeDeviceV1230PCIeInterface struct {
 	// LanesInUse The number of PCIe lanes in use by this device.
 	LanesInUse *int64 `json:"LanesInUse,omitempty"`
 
@@ -3947,28 +4213,28 @@ type PCIeDeviceV1220PCIeInterface struct {
 	MaxLanes *int64 `json:"MaxLanes,omitempty"`
 
 	// MaxPCIeType The highest version of the PCIe specification supported by this device.
-	MaxPCIeType *PCIeDeviceV1220PCIeInterface_MaxPCIeType `json:"MaxPCIeType,omitempty"`
+	MaxPCIeType *PCIeDeviceV1230PCIeInterface_MaxPCIeType `json:"MaxPCIeType,omitempty"`
 
 	// Oem The OEM extension.
 	Oem *ResourceOem `json:"Oem,omitempty"`
 
 	// PCIeType The version of the PCIe specification in use by this device.
-	PCIeType *PCIeDeviceV1220PCIeInterface_PCIeType `json:"PCIeType,omitempty"`
+	PCIeType *PCIeDeviceV1230PCIeInterface_PCIeType `json:"PCIeType,omitempty"`
 }
 
-// PCIeDeviceV1220PCIeInterfaceMaxPCIeType1 defines model for .
-type PCIeDeviceV1220PCIeInterfaceMaxPCIeType1 = interface{}
+// PCIeDeviceV1230PCIeInterfaceMaxPCIeType1 defines model for .
+type PCIeDeviceV1230PCIeInterfaceMaxPCIeType1 = interface{}
 
-// PCIeDeviceV1220PCIeInterface_MaxPCIeType The highest version of the PCIe specification supported by this device.
-type PCIeDeviceV1220PCIeInterface_MaxPCIeType struct {
+// PCIeDeviceV1230PCIeInterface_MaxPCIeType The highest version of the PCIe specification supported by this device.
+type PCIeDeviceV1230PCIeInterface_MaxPCIeType struct {
 	union json.RawMessage
 }
 
-// PCIeDeviceV1220PCIeInterfacePCIeType1 defines model for .
-type PCIeDeviceV1220PCIeInterfacePCIeType1 = interface{}
+// PCIeDeviceV1230PCIeInterfacePCIeType1 defines model for .
+type PCIeDeviceV1230PCIeInterfacePCIeType1 = interface{}
 
-// PCIeDeviceV1220PCIeInterface_PCIeType The version of the PCIe specification in use by this device.
-type PCIeDeviceV1220PCIeInterface_PCIeType struct {
+// PCIeDeviceV1230PCIeInterface_PCIeType The version of the PCIe specification in use by this device.
+type PCIeDeviceV1230PCIeInterface_PCIeType struct {
 	union json.RawMessage
 }
 
@@ -4011,23 +4277,23 @@ type ProcessorCollectionProcessorCollection_Description struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230Actions The available actions for this resource.
-type ProcessorV1230Actions struct {
+// ProcessorV1240Actions The available actions for this resource.
+type ProcessorV1240Actions struct {
 	// HashProcessorReset This action resets the processor.
-	HashProcessorReset *ProcessorV1230Reset `json:"#Processor.Reset,omitempty"`
+	HashProcessorReset *ProcessorV1240Reset `json:"#Processor.Reset,omitempty"`
 
 	// HashProcessorResetToDefaults The action resets the values of writable properties to factory defaults.
-	HashProcessorResetToDefaults *ProcessorV1230ResetToDefaults `json:"#Processor.ResetToDefaults,omitempty"`
+	HashProcessorResetToDefaults *ProcessorV1240ResetToDefaults `json:"#Processor.ResetToDefaults,omitempty"`
 
 	// Oem The available OEM-specific actions for this resource.
-	Oem *ProcessorV1230OemActions `json:"Oem,omitempty"`
+	Oem *ProcessorV1240OemActions `json:"Oem,omitempty"`
 }
 
-// ProcessorV1230BaseSpeedPriorityState defines model for Processor_v1_23_0_BaseSpeedPriorityState.
-type ProcessorV1230BaseSpeedPriorityState string
+// ProcessorV1240BaseSpeedPriorityState defines model for Processor_v1_24_0_BaseSpeedPriorityState.
+type ProcessorV1240BaseSpeedPriorityState string
 
-// ProcessorV1230EthernetInterface This type defines an Ethernet interface.
-type ProcessorV1230EthernetInterface struct {
+// ProcessorV1240EthernetInterface This type defines an Ethernet interface.
+type ProcessorV1240EthernetInterface struct {
 	// MaxLanes The number of lanes supported by this interface.
 	MaxLanes *int64 `json:"MaxLanes,omitempty"`
 
@@ -4038,10 +4304,10 @@ type ProcessorV1230EthernetInterface struct {
 	Oem *ResourceOem `json:"Oem,omitempty"`
 }
 
-// ProcessorV1230FPGA The properties of the FPGA device.
-type ProcessorV1230FPGA struct {
+// ProcessorV1240FPGA The properties of the FPGA device.
+type ProcessorV1240FPGA struct {
 	// ExternalInterfaces An array of the FPGA external interfaces.
-	ExternalInterfaces *[]ProcessorV1230ProcessorInterface `json:"ExternalInterfaces,omitempty"`
+	ExternalInterfaces *[]ProcessorV1240ProcessorInterface `json:"ExternalInterfaces,omitempty"`
 
 	// FirmwareID The FPGA firmware identifier.
 	FirmwareID *string `json:"FirmwareId,omitempty"`
@@ -4052,10 +4318,10 @@ type ProcessorV1230FPGA struct {
 	// FirmwareVersion The FPGA firmware version.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	FirmwareVersion *string                 `json:"FirmwareVersion,omitempty"`
-	FpgaType        *ProcessorV1230FpgaType `json:"FpgaType,omitempty"`
+	FpgaType        *ProcessorV1240FpgaType `json:"FpgaType,omitempty"`
 
 	// HostInterface This type describes an interface between the system, or external connection, and the processor.
-	HostInterface *ProcessorV1230ProcessorInterface `json:"HostInterface,omitempty"`
+	HostInterface *ProcessorV1240ProcessorInterface `json:"HostInterface,omitempty"`
 
 	// Model The FPGA model.
 	Model *string `json:"Model,omitempty"`
@@ -4070,11 +4336,11 @@ type ProcessorV1230FPGA struct {
 	ProgrammableFromHost *bool `json:"ProgrammableFromHost,omitempty"`
 
 	// ReconfigurationSlots An array of the FPGA reconfiguration slots.  An FPGA uses a reconfiguration slot to contain an acceleration function that can change as the FPGA is provisioned.
-	ReconfigurationSlots *[]ProcessorV1230FpgaReconfigurationSlot `json:"ReconfigurationSlots,omitempty"`
+	ReconfigurationSlots *[]ProcessorV1240FpgaReconfigurationSlot `json:"ReconfigurationSlots,omitempty"`
 }
 
-// ProcessorV1230FpgaReconfigurationSlot This type describes the FPGA reconfiguration slot.  An FPGA uses a reconfiguration slot to contain an acceleration function that can change as the FPGA is provisioned.
-type ProcessorV1230FpgaReconfigurationSlot struct {
+// ProcessorV1240FpgaReconfigurationSlot This type describes the FPGA reconfiguration slot.  An FPGA uses a reconfiguration slot to contain an acceleration function that can change as the FPGA is provisioned.
+type ProcessorV1240FpgaReconfigurationSlot struct {
 	// AccelerationFunction A reference to a resource.
 	AccelerationFunction *OdataV4IdRef `json:"AccelerationFunction,omitempty"`
 
@@ -4085,25 +4351,25 @@ type ProcessorV1230FpgaReconfigurationSlot struct {
 	SlotID *string `json:"SlotId,omitempty"`
 
 	// UUID The UUID for this reconfiguration slot.
-	UUID *ProcessorV1230FpgaReconfigurationSlot_UUID `json:"UUID,omitempty"`
+	UUID *ProcessorV1240FpgaReconfigurationSlot_UUID `json:"UUID,omitempty"`
 }
 
-// ProcessorV1230FpgaReconfigurationSlotUUID1 defines model for .
-type ProcessorV1230FpgaReconfigurationSlotUUID1 = interface{}
+// ProcessorV1240FpgaReconfigurationSlotUUID1 defines model for .
+type ProcessorV1240FpgaReconfigurationSlotUUID1 = interface{}
 
-// ProcessorV1230FpgaReconfigurationSlot_UUID The UUID for this reconfiguration slot.
-type ProcessorV1230FpgaReconfigurationSlot_UUID struct {
+// ProcessorV1240FpgaReconfigurationSlot_UUID The UUID for this reconfiguration slot.
+type ProcessorV1240FpgaReconfigurationSlot_UUID struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230FpgaType defines model for Processor_v1_23_0_FpgaType.
-type ProcessorV1230FpgaType string
+// ProcessorV1240FpgaType defines model for Processor_v1_24_0_FpgaType.
+type ProcessorV1240FpgaType string
 
-// ProcessorV1230InstructionSet defines model for Processor_v1_23_0_InstructionSet.
-type ProcessorV1230InstructionSet string
+// ProcessorV1240InstructionSet defines model for Processor_v1_24_0_InstructionSet.
+type ProcessorV1240InstructionSet string
 
-// ProcessorV1230Links The links to other resources that are related to this resource.
-type ProcessorV1230Links struct {
+// ProcessorV1240Links The links to other resources that are related to this resource.
+type ProcessorV1240Links struct {
 	// Chassis A reference to a resource.
 	Chassis *OdataV4IdRef `json:"Chassis,omitempty"`
 
@@ -4126,7 +4392,7 @@ type ProcessorV1230Links struct {
 	FabricAdaptersOdataCount *OdataV4Count `json:"FabricAdapters@odata.count,omitempty"`
 
 	// GraphicsController A link to the graphics controller associated with this processor.
-	GraphicsController *ProcessorV1230Links_GraphicsController `json:"GraphicsController,omitempty"`
+	GraphicsController *ProcessorV1240Links_GraphicsController `json:"GraphicsController,omitempty"`
 
 	// Memory An array of links to the memory associated with this processor.
 	Memory *[]OdataV4IdRef `json:"Memory,omitempty"`
@@ -4153,16 +4419,16 @@ type ProcessorV1230Links struct {
 	PCIeFunctionsOdataCount *OdataV4Count `json:"PCIeFunctions@odata.count,omitempty"`
 }
 
-// ProcessorV1230LinksGraphicsController1 defines model for .
-type ProcessorV1230LinksGraphicsController1 = interface{}
+// ProcessorV1240LinksGraphicsController1 defines model for .
+type ProcessorV1240LinksGraphicsController1 = interface{}
 
-// ProcessorV1230Links_GraphicsController A link to the graphics controller associated with this processor.
-type ProcessorV1230Links_GraphicsController struct {
+// ProcessorV1240Links_GraphicsController A link to the graphics controller associated with this processor.
+type ProcessorV1240Links_GraphicsController struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230MemorySummary The summary of all memory associated with a processor.
-type ProcessorV1230MemorySummary struct {
+// ProcessorV1240MemorySummary The summary of all memory associated with a processor.
+type ProcessorV1240MemorySummary struct {
 	// ECCModeEnabled An indication of whether memory ECC mode is enabled for this processor.
 	ECCModeEnabled *bool `json:"ECCModeEnabled,omitempty"`
 
@@ -4176,11 +4442,11 @@ type ProcessorV1230MemorySummary struct {
 	TotalMemorySizeMiB *int64 `json:"TotalMemorySizeMiB,omitempty"`
 }
 
-// ProcessorV1230OemActions The available OEM-specific actions for this resource.
-type ProcessorV1230OemActions map[string]interface{}
+// ProcessorV1240OemActions The available OEM-specific actions for this resource.
+type ProcessorV1240OemActions map[string]interface{}
 
-// ProcessorV1230Processor The `Processor` schema describes the information about a single processor that a system contains.  A processor includes both performance characteristics, clock speed, architecture, core count, and so on, and compatibility, such as the CPU ID instruction results.  It also describes the location, such as a slot, socket, or bay, where a unit can be installed, by populating a resource instance with an absent state if a unit is not present.
-type ProcessorV1230Processor struct {
+// ProcessorV1240Processor The `Processor` schema describes the information about a single processor that a system contains.  A processor includes both performance characteristics, clock speed, architecture, core count, and so on, and compatibility, such as the CPU ID instruction results.  It also describes the location, such as a slot, socket, or bay, where a unit can be installed, by populating a resource instance with an absent state if a unit is not present.
+type ProcessorV1240Processor struct {
 	// OdataContext The OData description of a payload.
 	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
 
@@ -4197,10 +4463,10 @@ type ProcessorV1230Processor struct {
 	AccelerationFunctions *OdataV4IdRef `json:"AccelerationFunctions,omitempty"`
 
 	// Actions The available actions for this resource.
-	Actions *ProcessorV1230Actions `json:"Actions,omitempty"`
+	Actions *ProcessorV1240Actions `json:"Actions,omitempty"`
 
 	// AdditionalFirmwareVersions Additional versions.
-	AdditionalFirmwareVersions *SoftwareInventoryV1140AdditionalVersions `json:"AdditionalFirmwareVersions,omitempty"`
+	AdditionalFirmwareVersions *SoftwareInventoryV1150AdditionalVersions `json:"AdditionalFirmwareVersions,omitempty"`
 
 	// AppliedOperatingConfig A reference to a resource.
 	AppliedOperatingConfig *OdataV4IdRef `json:"AppliedOperatingConfig,omitempty"`
@@ -4212,14 +4478,14 @@ type ProcessorV1230Processor struct {
 	BaseSpeedMHz *int64 `json:"BaseSpeedMHz,omitempty"`
 
 	// BaseSpeedPriorityState The state of the base frequency settings of the operation configuration applied to this processor.
-	BaseSpeedPriorityState *ProcessorV1230Processor_BaseSpeedPriorityState `json:"BaseSpeedPriorityState,omitempty"`
+	BaseSpeedPriorityState *ProcessorV1240Processor_BaseSpeedPriorityState `json:"BaseSpeedPriorityState,omitempty"`
 
 	// CacheMemory A reference to a resource.
 	CacheMemory *OdataV4IdRef `json:"CacheMemory,omitempty"`
 
 	// Certificates A reference to a resource.
 	Certificates *OdataV4IdRef                        `json:"Certificates,omitempty"`
-	Description  *ProcessorV1230Processor_Description `json:"Description,omitempty"`
+	Description  *ProcessorV1240Processor_Description `json:"Description,omitempty"`
 
 	// Enabled An indication of whether this processor is enabled.
 	Enabled *bool `json:"Enabled,omitempty"`
@@ -4228,13 +4494,16 @@ type ProcessorV1230Processor struct {
 	EnvironmentMetrics *OdataV4IdRef `json:"EnvironmentMetrics,omitempty"`
 
 	// FPGA The properties of the FPGA device.
-	FPGA *ProcessorV1230FPGA `json:"FPGA,omitempty"`
+	FPGA *ProcessorV1240FPGA `json:"FPGA,omitempty"`
 
 	// Family The processor family.
 	Family *string `json:"Family,omitempty"`
 
 	// FirmwareVersion The firmware version of the processor.
 	FirmwareVersion *string `json:"FirmwareVersion,omitempty"`
+
+	// HardwareSecurityVersion The security version of the processor hardware.
+	HardwareSecurityVersion *string `json:"HardwareSecurityVersion,omitempty"`
 
 	// HighSpeedCoreIDs The list of core identifiers corresponding to the cores that have been configured with the higher clock speed from the operating configuration applied to this processor.
 	HighSpeedCoreIDs *[]*int64 `json:"HighSpeedCoreIDs,omitempty"`
@@ -4243,13 +4512,13 @@ type ProcessorV1230Processor struct {
 	ID ResourceID `json:"Id"`
 
 	// InstructionSet The instruction set of the processor.
-	InstructionSet *ProcessorV1230Processor_InstructionSet `json:"InstructionSet,omitempty"`
+	InstructionSet *ProcessorV1240Processor_InstructionSet `json:"InstructionSet,omitempty"`
 
 	// Links The links to other resources that are related to this resource.
-	Links *ProcessorV1230Links `json:"Links,omitempty"`
+	Links *ProcessorV1240Links `json:"Links,omitempty"`
 
 	// Location The location of a resource.
-	Location *ResourceV1240Location `json:"Location,omitempty"`
+	Location *ResourceV1250Location `json:"Location,omitempty"`
 
 	// LocationIndicatorActive An indicator allowing an operator to physically locate this resource.
 	LocationIndicatorActive *bool `json:"LocationIndicatorActive,omitempty"`
@@ -4265,10 +4534,10 @@ type ProcessorV1230Processor struct {
 
 	// Measurements An array of DSP0274-defined measurement blocks.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
-	Measurements *[]SoftwareInventoryV1140MeasurementBlock `json:"Measurements,omitempty"`
+	Measurements *[]SoftwareInventoryV1150MeasurementBlock `json:"Measurements,omitempty"`
 
 	// MemorySummary The summary of all memory associated with a processor.
-	MemorySummary *ProcessorV1230MemorySummary `json:"MemorySummary,omitempty"`
+	MemorySummary *ProcessorV1240MemorySummary `json:"MemorySummary,omitempty"`
 
 	// Metrics A reference to a resource.
 	Metrics *OdataV4IdRef `json:"Metrics,omitempty"`
@@ -4292,7 +4561,7 @@ type ProcessorV1230Processor struct {
 	OperatingSpeedMHz *int64 `json:"OperatingSpeedMHz,omitempty"`
 
 	// OperatingSpeedRangeMHz Range of allowed operating speeds (MHz).
-	OperatingSpeedRangeMHz *ProcessorV1230Processor_OperatingSpeedRangeMHz `json:"OperatingSpeedRangeMHz,omitempty"`
+	OperatingSpeedRangeMHz *ProcessorV1240Processor_OperatingSpeedRangeMHz `json:"OperatingSpeedRangeMHz,omitempty"`
 
 	// PartNumber The part number of the processor.
 	PartNumber *string `json:"PartNumber,omitempty"`
@@ -4301,22 +4570,22 @@ type ProcessorV1230Processor struct {
 	Ports *OdataV4IdRef `json:"Ports,omitempty"`
 
 	// PowerState The current power state of the processor.
-	PowerState *ProcessorV1230Processor_PowerState `json:"PowerState,omitempty"`
+	PowerState *ProcessorV1240Processor_PowerState `json:"PowerState,omitempty"`
 
 	// ProcessorArchitecture The architecture of the processor.
-	ProcessorArchitecture *ProcessorV1230Processor_ProcessorArchitecture `json:"ProcessorArchitecture,omitempty"`
+	ProcessorArchitecture *ProcessorV1240Processor_ProcessorArchitecture `json:"ProcessorArchitecture,omitempty"`
 
 	// ProcessorID The identification information for a processor.
-	ProcessorID *ProcessorV1230ProcessorID `json:"ProcessorId,omitempty"`
+	ProcessorID *ProcessorV1240ProcessorID `json:"ProcessorId,omitempty"`
 
 	// ProcessorIndex The logical index of this processor within the system.
 	ProcessorIndex *int64 `json:"ProcessorIndex,omitempty"`
 
 	// ProcessorMemory The memory directly attached or integrated within this processor.  Examples include internal cache, dedicated memory for the processor, and system memory.
-	ProcessorMemory *[]ProcessorV1230ProcessorMemory `json:"ProcessorMemory,omitempty"`
+	ProcessorMemory *[]ProcessorV1240ProcessorMemory `json:"ProcessorMemory,omitempty"`
 
 	// ProcessorType The type of processor.
-	ProcessorType *ProcessorV1230Processor_ProcessorType `json:"ProcessorType,omitempty"`
+	ProcessorType *ProcessorV1240Processor_ProcessorType `json:"ProcessorType,omitempty"`
 
 	// Replaceable An indication of whether this component can be independently replaced as allowed by the vendor's replacement policy.
 	Replaceable *bool `json:"Replaceable,omitempty"`
@@ -4343,13 +4612,13 @@ type ProcessorV1230Processor struct {
 	SubProcessors *OdataV4IdRef `json:"SubProcessors,omitempty"`
 
 	// SystemInterface This type describes an interface between the system, or external connection, and the processor.
-	SystemInterface *ProcessorV1230ProcessorInterface `json:"SystemInterface,omitempty"`
+	SystemInterface *ProcessorV1240ProcessorInterface `json:"SystemInterface,omitempty"`
 
 	// TDPWatts The nominal Thermal Design Power (TDP) in watt units.
 	TDPWatts *int64 `json:"TDPWatts,omitempty"`
 
 	// ThrottleCauses The causes of the processor being throttled.
-	ThrottleCauses *[]ProcessorV1230Processor_ThrottleCauses_Item `json:"ThrottleCauses,omitempty"`
+	ThrottleCauses *[]ProcessorV1240Processor_ThrottleCauses_Item `json:"ThrottleCauses,omitempty"`
 
 	// Throttled An indication of whether the processor is throttled.
 	Throttled *bool `json:"Throttled,omitempty"`
@@ -4367,103 +4636,103 @@ type ProcessorV1230Processor struct {
 	TotalThreads *int64 `json:"TotalThreads,omitempty"`
 
 	// TurboState The state of turbo for this processor.
-	TurboState *ProcessorV1230Processor_TurboState `json:"TurboState,omitempty"`
+	TurboState *ProcessorV1240Processor_TurboState `json:"TurboState,omitempty"`
 
 	// UALink The UALink attributes of a processor.
-	UALink *ProcessorV1230UALink `json:"UALink,omitempty"`
+	UALink *ProcessorV1240UALink `json:"UALink,omitempty"`
 
 	// UUID The UUID for this processor.
-	UUID *ProcessorV1230Processor_UUID `json:"UUID,omitempty"`
+	UUID *ProcessorV1240Processor_UUID `json:"UUID,omitempty"`
 
 	// Version The hardware version of the processor.
 	Version *string `json:"Version,omitempty"`
 }
 
-// ProcessorV1230ProcessorBaseSpeedPriorityState1 defines model for .
-type ProcessorV1230ProcessorBaseSpeedPriorityState1 = interface{}
+// ProcessorV1240ProcessorBaseSpeedPriorityState1 defines model for .
+type ProcessorV1240ProcessorBaseSpeedPriorityState1 = interface{}
 
-// ProcessorV1230Processor_BaseSpeedPriorityState The state of the base frequency settings of the operation configuration applied to this processor.
-type ProcessorV1230Processor_BaseSpeedPriorityState struct {
+// ProcessorV1240Processor_BaseSpeedPriorityState The state of the base frequency settings of the operation configuration applied to this processor.
+type ProcessorV1240Processor_BaseSpeedPriorityState struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorDescription1 defines model for .
-type ProcessorV1230ProcessorDescription1 = interface{}
+// ProcessorV1240ProcessorDescription1 defines model for .
+type ProcessorV1240ProcessorDescription1 = interface{}
 
-// ProcessorV1230Processor_Description defines model for ProcessorV1230Processor.Description.
-type ProcessorV1230Processor_Description struct {
+// ProcessorV1240Processor_Description defines model for ProcessorV1240Processor.Description.
+type ProcessorV1240Processor_Description struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorInstructionSet1 defines model for .
-type ProcessorV1230ProcessorInstructionSet1 = interface{}
+// ProcessorV1240ProcessorInstructionSet1 defines model for .
+type ProcessorV1240ProcessorInstructionSet1 = interface{}
 
-// ProcessorV1230Processor_InstructionSet The instruction set of the processor.
-type ProcessorV1230Processor_InstructionSet struct {
+// ProcessorV1240Processor_InstructionSet The instruction set of the processor.
+type ProcessorV1240Processor_InstructionSet struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorOperatingSpeedRangeMHz1 defines model for .
-type ProcessorV1230ProcessorOperatingSpeedRangeMHz1 = interface{}
+// ProcessorV1240ProcessorOperatingSpeedRangeMHz1 defines model for .
+type ProcessorV1240ProcessorOperatingSpeedRangeMHz1 = interface{}
 
-// ProcessorV1230Processor_OperatingSpeedRangeMHz Range of allowed operating speeds (MHz).
-type ProcessorV1230Processor_OperatingSpeedRangeMHz struct {
+// ProcessorV1240Processor_OperatingSpeedRangeMHz Range of allowed operating speeds (MHz).
+type ProcessorV1240Processor_OperatingSpeedRangeMHz struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorPowerState1 defines model for .
-type ProcessorV1230ProcessorPowerState1 = interface{}
+// ProcessorV1240ProcessorPowerState1 defines model for .
+type ProcessorV1240ProcessorPowerState1 = interface{}
 
-// ProcessorV1230Processor_PowerState The current power state of the processor.
-type ProcessorV1230Processor_PowerState struct {
+// ProcessorV1240Processor_PowerState The current power state of the processor.
+type ProcessorV1240Processor_PowerState struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorProcessorArchitecture1 defines model for .
-type ProcessorV1230ProcessorProcessorArchitecture1 = interface{}
+// ProcessorV1240ProcessorProcessorArchitecture1 defines model for .
+type ProcessorV1240ProcessorProcessorArchitecture1 = interface{}
 
-// ProcessorV1230Processor_ProcessorArchitecture The architecture of the processor.
-type ProcessorV1230Processor_ProcessorArchitecture struct {
+// ProcessorV1240Processor_ProcessorArchitecture The architecture of the processor.
+type ProcessorV1240Processor_ProcessorArchitecture struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorProcessorType1 defines model for .
-type ProcessorV1230ProcessorProcessorType1 = interface{}
+// ProcessorV1240ProcessorProcessorType1 defines model for .
+type ProcessorV1240ProcessorProcessorType1 = interface{}
 
-// ProcessorV1230Processor_ProcessorType The type of processor.
-type ProcessorV1230Processor_ProcessorType struct {
+// ProcessorV1240Processor_ProcessorType The type of processor.
+type ProcessorV1240Processor_ProcessorType struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorThrottleCauses1 defines model for .
-type ProcessorV1230ProcessorThrottleCauses1 = interface{}
+// ProcessorV1240ProcessorThrottleCauses1 defines model for .
+type ProcessorV1240ProcessorThrottleCauses1 = interface{}
 
-// ProcessorV1230Processor_ThrottleCauses_Item defines model for Processor_v1_23_0_Processor.ThrottleCauses.Item.
-type ProcessorV1230Processor_ThrottleCauses_Item struct {
+// ProcessorV1240Processor_ThrottleCauses_Item defines model for Processor_v1_24_0_Processor.ThrottleCauses.Item.
+type ProcessorV1240Processor_ThrottleCauses_Item struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorTurboState1 defines model for .
-type ProcessorV1230ProcessorTurboState1 = interface{}
+// ProcessorV1240ProcessorTurboState1 defines model for .
+type ProcessorV1240ProcessorTurboState1 = interface{}
 
-// ProcessorV1230Processor_TurboState The state of turbo for this processor.
-type ProcessorV1230Processor_TurboState struct {
+// ProcessorV1240Processor_TurboState The state of turbo for this processor.
+type ProcessorV1240Processor_TurboState struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorUUID1 defines model for .
-type ProcessorV1230ProcessorUUID1 = interface{}
+// ProcessorV1240ProcessorUUID1 defines model for .
+type ProcessorV1240ProcessorUUID1 = interface{}
 
-// ProcessorV1230Processor_UUID The UUID for this processor.
-type ProcessorV1230Processor_UUID struct {
+// ProcessorV1240Processor_UUID The UUID for this processor.
+type ProcessorV1240Processor_UUID struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorArchitecture defines model for Processor_v1_23_0_ProcessorArchitecture.
-type ProcessorV1230ProcessorArchitecture string
+// ProcessorV1240ProcessorArchitecture defines model for Processor_v1_24_0_ProcessorArchitecture.
+type ProcessorV1240ProcessorArchitecture string
 
-// ProcessorV1230ProcessorID The identification information for a processor.
-type ProcessorV1230ProcessorID struct {
+// ProcessorV1240ProcessorID The identification information for a processor.
+type ProcessorV1240ProcessorID struct {
 	// EffectiveFamily The effective family for this processor.
 	EffectiveFamily *string `json:"EffectiveFamily,omitempty"`
 
@@ -4486,28 +4755,28 @@ type ProcessorV1230ProcessorID struct {
 	VendorID *string `json:"VendorId,omitempty"`
 }
 
-// ProcessorV1230ProcessorInterface This type describes an interface between the system, or external connection, and the processor.
-type ProcessorV1230ProcessorInterface struct {
+// ProcessorV1240ProcessorInterface This type describes an interface between the system, or external connection, and the processor.
+type ProcessorV1240ProcessorInterface struct {
 	// Ethernet This type defines an Ethernet interface.
-	Ethernet *ProcessorV1230EthernetInterface `json:"Ethernet,omitempty"`
+	Ethernet *ProcessorV1240EthernetInterface `json:"Ethernet,omitempty"`
 
 	// InterfaceType The interface type.
-	InterfaceType *ProcessorV1230ProcessorInterface_InterfaceType `json:"InterfaceType,omitempty"`
+	InterfaceType *ProcessorV1240ProcessorInterface_InterfaceType `json:"InterfaceType,omitempty"`
 
 	// PCIe Properties that describe a PCIe interface.
-	PCIe *PCIeDeviceV1220PCIeInterface `json:"PCIe,omitempty"`
+	PCIe *PCIeDeviceV1230PCIeInterface `json:"PCIe,omitempty"`
 }
 
-// ProcessorV1230ProcessorInterfaceInterfaceType1 defines model for .
-type ProcessorV1230ProcessorInterfaceInterfaceType1 = interface{}
+// ProcessorV1240ProcessorInterfaceInterfaceType1 defines model for .
+type ProcessorV1240ProcessorInterfaceInterfaceType1 = interface{}
 
-// ProcessorV1230ProcessorInterface_InterfaceType The interface type.
-type ProcessorV1230ProcessorInterface_InterfaceType struct {
+// ProcessorV1240ProcessorInterface_InterfaceType The interface type.
+type ProcessorV1240ProcessorInterface_InterfaceType struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorMemory This type describes the memory directly attached or integrated within a processor.
-type ProcessorV1230ProcessorMemory struct {
+// ProcessorV1240ProcessorMemory This type describes the memory directly attached or integrated within a processor.
+type ProcessorV1240ProcessorMemory struct {
 	// CapacityMiB The memory capacity in MiB.
 	CapacityMiB *int64 `json:"CapacityMiB,omitempty"`
 
@@ -4515,28 +4784,28 @@ type ProcessorV1230ProcessorMemory struct {
 	IntegratedMemory *bool `json:"IntegratedMemory,omitempty"`
 
 	// MemoryType The type of memory used by this processor.
-	MemoryType *ProcessorV1230ProcessorMemory_MemoryType `json:"MemoryType,omitempty"`
+	MemoryType *ProcessorV1240ProcessorMemory_MemoryType `json:"MemoryType,omitempty"`
 
 	// SpeedMHz The operating speed of the memory in MHz.
 	SpeedMHz *int64 `json:"SpeedMHz,omitempty"`
 }
 
-// ProcessorV1230ProcessorMemoryMemoryType1 defines model for .
-type ProcessorV1230ProcessorMemoryMemoryType1 = interface{}
+// ProcessorV1240ProcessorMemoryMemoryType1 defines model for .
+type ProcessorV1240ProcessorMemoryMemoryType1 = interface{}
 
-// ProcessorV1230ProcessorMemory_MemoryType The type of memory used by this processor.
-type ProcessorV1230ProcessorMemory_MemoryType struct {
+// ProcessorV1240ProcessorMemory_MemoryType The type of memory used by this processor.
+type ProcessorV1240ProcessorMemory_MemoryType struct {
 	union json.RawMessage
 }
 
-// ProcessorV1230ProcessorMemoryType defines model for Processor_v1_23_0_ProcessorMemoryType.
-type ProcessorV1230ProcessorMemoryType string
+// ProcessorV1240ProcessorMemoryType defines model for Processor_v1_24_0_ProcessorMemoryType.
+type ProcessorV1240ProcessorMemoryType string
 
-// ProcessorV1230ProcessorType defines model for Processor_v1_23_0_ProcessorType.
-type ProcessorV1230ProcessorType string
+// ProcessorV1240ProcessorType defines model for Processor_v1_24_0_ProcessorType.
+type ProcessorV1240ProcessorType string
 
-// ProcessorV1230Reset This action resets the processor.
-type ProcessorV1230Reset struct {
+// ProcessorV1240Reset This action resets the processor.
+type ProcessorV1240Reset struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -4544,8 +4813,8 @@ type ProcessorV1230Reset struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ProcessorV1230ResetToDefaults The action resets the values of writable properties to factory defaults.
-type ProcessorV1230ResetToDefaults struct {
+// ProcessorV1240ResetToDefaults The action resets the values of writable properties to factory defaults.
+type ProcessorV1240ResetToDefaults struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -4553,19 +4822,22 @@ type ProcessorV1230ResetToDefaults struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// ProcessorV1230SystemInterfaceType defines model for Processor_v1_23_0_SystemInterfaceType.
-type ProcessorV1230SystemInterfaceType string
+// ProcessorV1240SystemInterfaceType defines model for Processor_v1_24_0_SystemInterfaceType.
+type ProcessorV1240SystemInterfaceType string
 
-// ProcessorV1230ThrottleCause defines model for Processor_v1_23_0_ThrottleCause.
-type ProcessorV1230ThrottleCause string
+// ProcessorV1240ThrottleCause defines model for Processor_v1_24_0_ThrottleCause.
+type ProcessorV1240ThrottleCause string
 
-// ProcessorV1230TurboState defines model for Processor_v1_23_0_TurboState.
-type ProcessorV1230TurboState string
+// ProcessorV1240TurboState defines model for Processor_v1_24_0_TurboState.
+type ProcessorV1240TurboState string
 
-// ProcessorV1230UALink The UALink attributes of a processor.
-type ProcessorV1230UALink struct {
+// ProcessorV1240UALink The UALink attributes of a processor.
+type ProcessorV1240UALink struct {
 	// AcceleratorID The UALink Accelerator ID of the processor.
 	AcceleratorID *int64 `json:"AcceleratorID,omitempty"`
+
+	// MaxSupportedAcceleratorID The maximum supported UALink Accelerator ID of the processor.
+	MaxSupportedAcceleratorID *int64 `json:"MaxSupportedAcceleratorID,omitempty"`
 }
 
 // RedfishError The error payload from a Redfish service.
@@ -4583,22 +4855,22 @@ type RedfishError struct {
 	} `json:"error"`
 }
 
-// RedundancyV170Actions The available actions for this resource.
-type RedundancyV170Actions struct {
+// RedundancyV171Actions The available actions for this resource.
+type RedundancyV171Actions struct {
 	// Oem The available OEM-specific actions for this resource.
-	Oem *RedundancyV170OemActions `json:"Oem,omitempty"`
+	Oem *RedundancyV171OemActions `json:"Oem,omitempty"`
 }
 
-// RedundancyV170OemActions The available OEM-specific actions for this resource.
-type RedundancyV170OemActions map[string]interface{}
+// RedundancyV171OemActions The available OEM-specific actions for this resource.
+type RedundancyV171OemActions map[string]interface{}
 
-// RedundancyV170Redundancy The common redundancy definition and structure used in other Redfish schemas.
-type RedundancyV170Redundancy struct {
+// RedundancyV171Redundancy The common redundancy definition and structure used in other Redfish schemas.
+type RedundancyV171Redundancy struct {
 	// OdataID The unique identifier for a resource.
 	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
 
 	// Actions The available actions for this resource.
-	Actions *RedundancyV170Actions `json:"Actions,omitempty"`
+	Actions *RedundancyV171Actions `json:"Actions,omitempty"`
 
 	// ActiveRedundancySet The links to the active members included in this redundancy set.
 	ActiveRedundancySet *[]OdataV4IdRef `json:"ActiveRedundancySet,omitempty"`
@@ -4613,13 +4885,13 @@ type RedundancyV170Redundancy struct {
 	MemberID *string `json:"MemberId,omitempty"`
 
 	// MinNumNeeded The minimum number of members needed for this group to remain operational or functional.
-	MinNumNeeded *int64 `json:"MinNumNeeded,omitempty"`
+	MinNumNeeded *int64 `json:"MinNumNeeded"`
 
 	// MinNumNeededForFaultTolerance The minimum number of members needed for this group to be redundant.
 	MinNumNeededForFaultTolerance *int64 `json:"MinNumNeededForFaultTolerance,omitempty"`
 
 	// Mode The redundancy mode of the group.
-	Mode RedundancyV170Redundancy_Mode `json:"Mode"`
+	Mode RedundancyV171Redundancy_Mode `json:"Mode"`
 
 	// Name The name of the resource or array member.
 	Name *string `json:"Name,omitempty"`
@@ -4640,16 +4912,16 @@ type RedundancyV170Redundancy struct {
 	Status ResourceStatus `json:"Status"`
 }
 
-// RedundancyV170RedundancyMode1 defines model for .
-type RedundancyV170RedundancyMode1 = interface{}
+// RedundancyV171RedundancyMode1 defines model for .
+type RedundancyV171RedundancyMode1 = interface{}
 
-// RedundancyV170Redundancy_Mode The redundancy mode of the group.
-type RedundancyV170Redundancy_Mode struct {
+// RedundancyV171Redundancy_Mode The redundancy mode of the group.
+type RedundancyV171Redundancy_Mode struct {
 	union json.RawMessage
 }
 
-// RedundancyV170RedundancyMode defines model for Redundancy_v1_7_0_RedundancyMode.
-type RedundancyV170RedundancyMode string
+// RedundancyV171RedundancyMode defines model for Redundancy_v1_7_1_RedundancyMode.
+type RedundancyV171RedundancyMode string
 
 // ResolutionStepV110ResolutionStep This type describes a recommended step of the service-defined resolution.
 type ResolutionStepV110ResolutionStep struct {
@@ -4730,11 +5002,14 @@ type ResourceCondition struct {
 	// Timestamp The time the condition occurred.
 	Timestamp *time.Time `json:"Timestamp,omitempty"`
 
-	// UserAuthenticationSource The source of authentication for the username property associated with the condition.
+	// UserAuthenticationSource The source of authentication for the user associated with the condition.
 	UserAuthenticationSource *string `json:"UserAuthenticationSource,omitempty"`
 
 	// Username The username of the account associated with the condition.
 	Username *string `json:"Username,omitempty"`
+
+	// VendorCode The vendor-defined code used to identify this condition.
+	VendorCode *string `json:"VendorCode,omitempty"`
 }
 
 // ResourceConditionConditionType1 defines model for .
@@ -4825,8 +5100,8 @@ type ResourceUUID = string
 // ResourceV1220ConditionType defines model for Resource_v1_22_0_ConditionType.
 type ResourceV1220ConditionType string
 
-// ResourceV1240ContactInfo Contact information for this resource.
-type ResourceV1240ContactInfo struct {
+// ResourceV1250ContactInfo Contact information for this resource.
+type ResourceV1250ContactInfo struct {
 	// ContactName Name of this contact.
 	ContactName *string `json:"ContactName,omitempty"`
 
@@ -4837,13 +5112,13 @@ type ResourceV1240ContactInfo struct {
 	PhoneNumber *string `json:"PhoneNumber,omitempty"`
 }
 
-// ResourceV1240Location The location of a resource.
-type ResourceV1240Location struct {
+// ResourceV1250Location The location of a resource.
+type ResourceV1250Location struct {
 	// AltitudeMeters The altitude of the resource in meters.
 	AltitudeMeters *float32 `json:"AltitudeMeters,omitempty"`
 
 	// Contacts An array of contact information.
-	Contacts *[]ResourceV1240Location_Contacts_Item `json:"Contacts,omitempty"`
+	Contacts *[]ResourceV1250Location_Contacts_Item `json:"Contacts,omitempty"`
 
 	// Info The location of the resource.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
@@ -4863,80 +5138,80 @@ type ResourceV1240Location struct {
 	Oem *ResourceOem `json:"Oem,omitempty"`
 
 	// PartLocation The part location for a resource within an enclosure.
-	PartLocation *ResourceV1240PartLocation `json:"PartLocation,omitempty"`
+	PartLocation *ResourceV1250PartLocation `json:"PartLocation,omitempty"`
 
 	// PartLocationContext Human-readable string to enable differentiation between `PartLocation` values for parts in the same enclosure, which might include hierarchical information of containing `PartLocation` values for the part.
 	PartLocationContext *string `json:"PartLocationContext,omitempty"`
 
 	// PhysicalAddress The physical address for a resource.
-	PhysicalAddress *ResourceV1240PhysicalAddress `json:"PhysicalAddress,omitempty"`
+	PhysicalAddress *ResourceV1250PhysicalAddress `json:"PhysicalAddress,omitempty"`
 
 	// Placement The placement within the addressed location.
-	Placement *ResourceV1240Placement `json:"Placement,omitempty"`
+	Placement *ResourceV1250Placement `json:"Placement,omitempty"`
 
 	// PostalAddress The postal address for a resource.
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
-	PostalAddress *ResourceV1240PostalAddress `json:"PostalAddress,omitempty"`
+	PostalAddress *ResourceV1250PostalAddress `json:"PostalAddress,omitempty"`
 }
 
-// ResourceV1240LocationContacts1 defines model for .
-type ResourceV1240LocationContacts1 = interface{}
+// ResourceV1250LocationContacts1 defines model for .
+type ResourceV1250LocationContacts1 = interface{}
 
-// ResourceV1240Location_Contacts_Item defines model for Resource_v1_24_0_Location.Contacts.Item.
-type ResourceV1240Location_Contacts_Item struct {
+// ResourceV1250Location_Contacts_Item defines model for Resource_v1_25_0_Location.Contacts.Item.
+type ResourceV1250Location_Contacts_Item struct {
 	union json.RawMessage
 }
 
-// ResourceV1240LocationType The types of locations for a part within an enclosure.
-type ResourceV1240LocationType string
+// ResourceV1250LocationType The types of locations for a part within an enclosure.
+type ResourceV1250LocationType string
 
-// ResourceV1240Orientation The orientations for the ordering of the part location ordinal value.
-type ResourceV1240Orientation string
+// ResourceV1250Orientation The orientations for the ordering of the part location ordinal value.
+type ResourceV1250Orientation string
 
-// ResourceV1240PartLocation The part location for a resource within an enclosure.
-type ResourceV1240PartLocation struct {
+// ResourceV1250PartLocation The part location for a resource within an enclosure.
+type ResourceV1250PartLocation struct {
 	// LocationOrdinalValue The number that represents the location of the part.  For example, if `LocationType` is `Slot` and this unit is in slot 2, the LocationOrdinalValue is `2`.
 	LocationOrdinalValue *int64 `json:"LocationOrdinalValue,omitempty"`
 
 	// LocationType The type of location of the part.
-	LocationType *ResourceV1240PartLocation_LocationType `json:"LocationType,omitempty"`
+	LocationType *ResourceV1250PartLocation_LocationType `json:"LocationType,omitempty"`
 
 	// Orientation The orientation for the ordering of the slot enumeration used by the `LocationOrdinalValue` property.
-	Orientation *ResourceV1240PartLocation_Orientation `json:"Orientation,omitempty"`
+	Orientation *ResourceV1250PartLocation_Orientation `json:"Orientation,omitempty"`
 
 	// Reference The reference point for the part location.  Provides guidance about the general location of the part.
-	Reference *ResourceV1240PartLocation_Reference `json:"Reference,omitempty"`
+	Reference *ResourceV1250PartLocation_Reference `json:"Reference,omitempty"`
 
 	// ServiceLabel The label of the part location, such as a silk-screened name or a printed label.
 	ServiceLabel *string `json:"ServiceLabel,omitempty"`
 }
 
-// ResourceV1240PartLocationLocationType1 defines model for .
-type ResourceV1240PartLocationLocationType1 = interface{}
+// ResourceV1250PartLocationLocationType1 defines model for .
+type ResourceV1250PartLocationLocationType1 = interface{}
 
-// ResourceV1240PartLocation_LocationType The type of location of the part.
-type ResourceV1240PartLocation_LocationType struct {
+// ResourceV1250PartLocation_LocationType The type of location of the part.
+type ResourceV1250PartLocation_LocationType struct {
 	union json.RawMessage
 }
 
-// ResourceV1240PartLocationOrientation1 defines model for .
-type ResourceV1240PartLocationOrientation1 = interface{}
+// ResourceV1250PartLocationOrientation1 defines model for .
+type ResourceV1250PartLocationOrientation1 = interface{}
 
-// ResourceV1240PartLocation_Orientation The orientation for the ordering of the slot enumeration used by the `LocationOrdinalValue` property.
-type ResourceV1240PartLocation_Orientation struct {
+// ResourceV1250PartLocation_Orientation The orientation for the ordering of the slot enumeration used by the `LocationOrdinalValue` property.
+type ResourceV1250PartLocation_Orientation struct {
 	union json.RawMessage
 }
 
-// ResourceV1240PartLocationReference1 defines model for .
-type ResourceV1240PartLocationReference1 = interface{}
+// ResourceV1250PartLocationReference1 defines model for .
+type ResourceV1250PartLocationReference1 = interface{}
 
-// ResourceV1240PartLocation_Reference The reference point for the part location.  Provides guidance about the general location of the part.
-type ResourceV1240PartLocation_Reference struct {
+// ResourceV1250PartLocation_Reference The reference point for the part location.  Provides guidance about the general location of the part.
+type ResourceV1250PartLocation_Reference struct {
 	union json.RawMessage
 }
 
-// ResourceV1240PhysicalAddress The physical address for a resource.
-type ResourceV1240PhysicalAddress struct {
+// ResourceV1250PhysicalAddress The physical address for a resource.
+type ResourceV1250PhysicalAddress struct {
 	// City City, township, or shi (JP).
 	City *string `json:"City,omitempty"`
 
@@ -4959,8 +5234,8 @@ type ResourceV1240PhysicalAddress struct {
 	StreetAddress *string `json:"StreetAddress,omitempty"`
 }
 
-// ResourceV1240Placement The placement within the addressed location.
-type ResourceV1240Placement struct {
+// ResourceV1250Placement The placement within the addressed location.
+type ResourceV1250Placement struct {
 	// AdditionalInfo Area designation or other additional info.
 	AdditionalInfo *string `json:"AdditionalInfo,omitempty"`
 
@@ -4974,7 +5249,7 @@ type ResourceV1240Placement struct {
 	RackOffset *int64 `json:"RackOffset,omitempty"`
 
 	// RackOffsetUnits The type of rack units in use.
-	RackOffsetUnits *ResourceV1240Placement_RackOffsetUnits `json:"RackOffsetUnits,omitempty"`
+	RackOffsetUnits *ResourceV1250Placement_RackOffsetUnits `json:"RackOffsetUnits,omitempty"`
 
 	// Room The name or number of the room.
 	Room *string `json:"Room,omitempty"`
@@ -4983,16 +5258,16 @@ type ResourceV1240Placement struct {
 	Row *string `json:"Row,omitempty"`
 }
 
-// ResourceV1240PlacementRackOffsetUnits1 defines model for .
-type ResourceV1240PlacementRackOffsetUnits1 = interface{}
+// ResourceV1250PlacementRackOffsetUnits1 defines model for .
+type ResourceV1250PlacementRackOffsetUnits1 = interface{}
 
-// ResourceV1240Placement_RackOffsetUnits The type of rack units in use.
-type ResourceV1240Placement_RackOffsetUnits struct {
+// ResourceV1250Placement_RackOffsetUnits The type of rack units in use.
+type ResourceV1250Placement_RackOffsetUnits struct {
 	union json.RawMessage
 }
 
-// ResourceV1240PostalAddress The postal address for a resource.
-type ResourceV1240PostalAddress struct {
+// ResourceV1250PostalAddress The postal address for a resource.
+type ResourceV1250PostalAddress struct {
 	// AdditionalCode The additional code.
 	AdditionalCode *string `json:"AdditionalCode,omitempty"`
 
@@ -5095,11 +5370,11 @@ type ResourceV1240PostalAddress struct {
 	Unit *string `json:"Unit,omitempty"`
 }
 
-// ResourceV1240RackUnits The type of rack unit in use.
-type ResourceV1240RackUnits string
+// ResourceV1250RackUnits The type of rack unit in use.
+type ResourceV1250RackUnits string
 
-// ResourceV1240Reference The reference areas for the location of the part within an enclosure.
-type ResourceV1240Reference string
+// ResourceV1250Reference The reference areas for the location of the part within an enclosure.
+type ResourceV1250Reference string
 
 // SecureBootDatabaseCollectionSecureBootDatabaseCollection The collection of `SecureBootDatabase` resource instances.
 type SecureBootDatabaseCollectionSecureBootDatabaseCollection struct {
@@ -5206,20 +5481,20 @@ type SecureBootDatabaseV103SecureBootDatabase_Description struct {
 	union json.RawMessage
 }
 
-// SecureBootV120Actions The available actions for this resource.
-type SecureBootV120Actions struct {
+// SecureBootV121Actions The available actions for this resource.
+type SecureBootV121Actions struct {
 	// HashSecureBootResetKeys This action resets the UEFI Secure Boot keys.
-	HashSecureBootResetKeys *SecureBootV120ResetKeys `json:"#SecureBoot.ResetKeys,omitempty"`
+	HashSecureBootResetKeys *SecureBootV121ResetKeys `json:"#SecureBoot.ResetKeys,omitempty"`
 
 	// Oem The available OEM-specific actions for this resource.
-	Oem *SecureBootV120OemActions `json:"Oem,omitempty"`
+	Oem *SecureBootV121OemActions `json:"Oem,omitempty"`
 }
 
-// SecureBootV120OemActions The available OEM-specific actions for this resource.
-type SecureBootV120OemActions map[string]interface{}
+// SecureBootV121OemActions The available OEM-specific actions for this resource.
+type SecureBootV121OemActions map[string]interface{}
 
-// SecureBootV120ResetKeys This action resets the UEFI Secure Boot keys.
-type SecureBootV120ResetKeys struct {
+// SecureBootV121ResetKeys This action resets the UEFI Secure Boot keys.
+type SecureBootV121ResetKeys struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -5227,8 +5502,8 @@ type SecureBootV120ResetKeys struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// SecureBootV120SecureBoot The `SecureBoot` schema contains UEFI Secure Boot information and represents properties for managing the UEFI Secure Boot functionality of a system.
-type SecureBootV120SecureBoot struct {
+// SecureBootV121SecureBoot The `SecureBoot` schema contains UEFI Secure Boot information and represents properties for managing the UEFI Secure Boot functionality of a system.
+type SecureBootV121SecureBoot struct {
 	// OdataContext The OData description of a payload.
 	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
 
@@ -5242,8 +5517,8 @@ type SecureBootV120SecureBoot struct {
 	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
 
 	// Actions The available actions for this resource.
-	Actions     *SecureBootV120Actions                `json:"Actions,omitempty"`
-	Description *SecureBootV120SecureBoot_Description `json:"Description,omitempty"`
+	Actions     *SecureBootV121Actions                `json:"Actions,omitempty"`
+	Description *SecureBootV121SecureBoot_Description `json:"Description,omitempty"`
 
 	// ID The unique identifier for this resource within the collection of similar resources.
 	ID ResourceID `json:"Id"`
@@ -5255,61 +5530,61 @@ type SecureBootV120SecureBoot struct {
 	Oem *ResourceOem `json:"Oem,omitempty"`
 
 	// SecureBootCurrentBoot The UEFI Secure Boot state during the current boot cycle.
-	SecureBootCurrentBoot *SecureBootV120SecureBoot_SecureBootCurrentBoot `json:"SecureBootCurrentBoot,omitempty"`
+	SecureBootCurrentBoot *SecureBootV121SecureBoot_SecureBootCurrentBoot `json:"SecureBootCurrentBoot,omitempty"`
 
 	// SecureBootDatabases A reference to a resource.
 	SecureBootDatabases *OdataV4IdRef `json:"SecureBootDatabases,omitempty"`
 
 	// SecureBootDesiredMode The desired UEFI Secure Boot Mode for the next boot.
-	SecureBootDesiredMode *SecureBootV120SecureBoot_SecureBootDesiredMode `json:"SecureBootDesiredMode,omitempty"`
+	SecureBootDesiredMode *SecureBootV121SecureBoot_SecureBootDesiredMode `json:"SecureBootDesiredMode,omitempty"`
 
 	// SecureBootEnable An indication of whether UEFI Secure Boot is enabled.
 	SecureBootEnable *bool `json:"SecureBootEnable,omitempty"`
 
 	// SecureBootMode The current UEFI Secure Boot Mode.
-	SecureBootMode *SecureBootV120SecureBoot_SecureBootMode `json:"SecureBootMode,omitempty"`
+	SecureBootMode *SecureBootV121SecureBoot_SecureBootMode `json:"SecureBootMode,omitempty"`
 }
 
-// SecureBootV120SecureBootDescription1 defines model for .
-type SecureBootV120SecureBootDescription1 = interface{}
+// SecureBootV121SecureBootDescription1 defines model for .
+type SecureBootV121SecureBootDescription1 = interface{}
 
-// SecureBootV120SecureBoot_Description defines model for SecureBootV120SecureBoot.Description.
-type SecureBootV120SecureBoot_Description struct {
+// SecureBootV121SecureBoot_Description defines model for SecureBootV121SecureBoot.Description.
+type SecureBootV121SecureBoot_Description struct {
 	union json.RawMessage
 }
 
-// SecureBootV120SecureBootSecureBootCurrentBoot1 defines model for .
-type SecureBootV120SecureBootSecureBootCurrentBoot1 = interface{}
+// SecureBootV121SecureBootSecureBootCurrentBoot1 defines model for .
+type SecureBootV121SecureBootSecureBootCurrentBoot1 = interface{}
 
-// SecureBootV120SecureBoot_SecureBootCurrentBoot The UEFI Secure Boot state during the current boot cycle.
-type SecureBootV120SecureBoot_SecureBootCurrentBoot struct {
+// SecureBootV121SecureBoot_SecureBootCurrentBoot The UEFI Secure Boot state during the current boot cycle.
+type SecureBootV121SecureBoot_SecureBootCurrentBoot struct {
 	union json.RawMessage
 }
 
-// SecureBootV120SecureBootSecureBootDesiredMode1 defines model for .
-type SecureBootV120SecureBootSecureBootDesiredMode1 = interface{}
+// SecureBootV121SecureBootSecureBootDesiredMode1 defines model for .
+type SecureBootV121SecureBootSecureBootDesiredMode1 = interface{}
 
-// SecureBootV120SecureBoot_SecureBootDesiredMode The desired UEFI Secure Boot Mode for the next boot.
-type SecureBootV120SecureBoot_SecureBootDesiredMode struct {
+// SecureBootV121SecureBoot_SecureBootDesiredMode The desired UEFI Secure Boot Mode for the next boot.
+type SecureBootV121SecureBoot_SecureBootDesiredMode struct {
 	union json.RawMessage
 }
 
-// SecureBootV120SecureBootSecureBootMode1 defines model for .
-type SecureBootV120SecureBootSecureBootMode1 = interface{}
+// SecureBootV121SecureBootSecureBootMode1 defines model for .
+type SecureBootV121SecureBootSecureBootMode1 = interface{}
 
-// SecureBootV120SecureBoot_SecureBootMode The current UEFI Secure Boot Mode.
-type SecureBootV120SecureBoot_SecureBootMode struct {
+// SecureBootV121SecureBoot_SecureBootMode The current UEFI Secure Boot Mode.
+type SecureBootV121SecureBoot_SecureBootMode struct {
 	union json.RawMessage
 }
 
-// SecureBootV120SecureBootCurrentBootType defines model for SecureBoot_v1_2_0_SecureBootCurrentBootType.
-type SecureBootV120SecureBootCurrentBootType string
+// SecureBootV121SecureBootCurrentBootType defines model for SecureBoot_v1_2_1_SecureBootCurrentBootType.
+type SecureBootV121SecureBootCurrentBootType string
 
-// SecureBootV120SecureBootModeType defines model for SecureBoot_v1_2_0_SecureBootModeType.
-type SecureBootV120SecureBootModeType string
+// SecureBootV121SecureBootModeType defines model for SecureBoot_v1_2_1_SecureBootModeType.
+type SecureBootV121SecureBootModeType string
 
-// ServiceRootV1210DeepOperations The information about deep operations that the service supports.
-type ServiceRootV1210DeepOperations struct {
+// ServiceRootV1220DeepOperations The information about deep operations that the service supports.
+type ServiceRootV1220DeepOperations struct {
 	// DeepPATCH An indication of whether the service supports the deep `PATCH` operation.
 	DeepPATCH *bool `json:"DeepPATCH,omitempty"`
 
@@ -5320,8 +5595,8 @@ type ServiceRootV1210DeepOperations struct {
 	MaxLevels *int64 `json:"MaxLevels,omitempty"`
 }
 
-// ServiceRootV1210Expand The information about the use of `$expand` in the service.
-type ServiceRootV1210Expand struct {
+// ServiceRootV1220Expand The information about the use of `$expand` in the service.
+type ServiceRootV1220Expand struct {
 	// ExpandAll An indication of whether the service supports the asterisk (`*`) option of the `$expand` query parameter.
 	ExpandAll *bool `json:"ExpandAll,omitempty"`
 
@@ -5338,8 +5613,8 @@ type ServiceRootV1210Expand struct {
 	NoLinks *bool `json:"NoLinks,omitempty"`
 }
 
-// ServiceRootV1210Links The links to other resources that are related to this resource.
-type ServiceRootV1210Links struct {
+// ServiceRootV1220Links The links to other resources that are related to this resource.
+type ServiceRootV1220Links struct {
 	// ManagerProvidingService A reference to a resource.
 	ManagerProvidingService *OdataV4IdRef `json:"ManagerProvidingService,omitempty"`
 
@@ -5350,19 +5625,22 @@ type ServiceRootV1210Links struct {
 	Sessions OdataV4IdRef `json:"Sessions"`
 }
 
-// ServiceRootV1210ProtocolFeaturesSupported The information about protocol features that the service supports.
-type ServiceRootV1210ProtocolFeaturesSupported struct {
+// ServiceRootV1220ProtocolFeaturesSupported The information about protocol features that the service supports.
+type ServiceRootV1220ProtocolFeaturesSupported struct {
+	// Alias An indication of whether the service supports the use of alias values in URI segments for redirecting requests to resource collection members.
+	Alias *bool `json:"Alias,omitempty"`
+
 	// ClientContextQuery An indication of whether the service supports the `clientcontext` query parameter for incremental retrieval from resource collections.
 	ClientContextQuery *bool `json:"ClientContextQuery,omitempty"`
 
 	// DeepOperations The information about deep operations that the service supports.
-	DeepOperations *ServiceRootV1210DeepOperations `json:"DeepOperations,omitempty"`
+	DeepOperations *ServiceRootV1220DeepOperations `json:"DeepOperations,omitempty"`
 
 	// ExcerptQuery An indication of whether the service supports the `excerpt` query parameter.
 	ExcerptQuery *bool `json:"ExcerptQuery,omitempty"`
 
 	// ExpandQuery The information about the use of `$expand` in the service.
-	ExpandQuery *ServiceRootV1210Expand `json:"ExpandQuery,omitempty"`
+	ExpandQuery *ServiceRootV1220Expand `json:"ExpandQuery,omitempty"`
 
 	// FilterQuery An indication of whether the service supports the `$filter` query parameter.
 	FilterQuery *bool `json:"FilterQuery,omitempty"`
@@ -5389,8 +5667,8 @@ type ServiceRootV1210ProtocolFeaturesSupported struct {
 	TopSkipQuery *bool `json:"TopSkipQuery,omitempty"`
 }
 
-// ServiceRootV1210ServiceRoot The `ServiceRoot` schema describes the root of the Redfish service, located at the '/redfish/v1' URI.  All other resources accessible through the Redfish interface on this device are linked directly or indirectly from the service root.
-type ServiceRootV1210ServiceRoot struct {
+// ServiceRootV1220ServiceRoot The `ServiceRoot` schema describes the root of the Redfish service, located at the '/redfish/v1' URI.  All other resources accessible through the Redfish interface on this device are linked directly or indirectly from the service root.
+type ServiceRootV1220ServiceRoot struct {
 	// OdataContext The OData description of a payload.
 	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
 
@@ -5426,7 +5704,7 @@ type ServiceRootV1210ServiceRoot struct {
 
 	// CompositionService A reference to a resource.
 	CompositionService *OdataV4IdRef                            `json:"CompositionService,omitempty"`
-	Description        *ServiceRootV1210ServiceRoot_Description `json:"Description,omitempty"`
+	Description        *ServiceRootV1220ServiceRoot_Description `json:"Description,omitempty"`
 
 	// EventService A reference to a resource.
 	EventService *OdataV4IdRef `json:"EventService,omitempty"`
@@ -5453,7 +5731,7 @@ type ServiceRootV1210ServiceRoot struct {
 	LicenseService *OdataV4IdRef `json:"LicenseService,omitempty"`
 
 	// Links The links to other resources that are related to this resource.
-	Links ServiceRootV1210Links `json:"Links"`
+	Links ServiceRootV1220Links `json:"Links"`
 
 	// Managers A reference to a resource.
 	Managers *OdataV4IdRef `json:"Managers,omitempty"`
@@ -5467,6 +5745,9 @@ type ServiceRootV1210ServiceRoot struct {
 	// Oem The OEM extension.
 	Oem *ResourceOem `json:"Oem,omitempty"`
 
+	// PolicyService A reference to a resource.
+	PolicyService *OdataV4IdRef `json:"PolicyService,omitempty"`
+
 	// PowerEquipment A reference to a resource.
 	PowerEquipment *OdataV4IdRef `json:"PowerEquipment,omitempty"`
 
@@ -5474,7 +5755,7 @@ type ServiceRootV1210ServiceRoot struct {
 	Product *string `json:"Product,omitempty"`
 
 	// ProtocolFeaturesSupported The information about protocol features that the service supports.
-	ProtocolFeaturesSupported *ServiceRootV1210ProtocolFeaturesSupported `json:"ProtocolFeaturesSupported,omitempty"`
+	ProtocolFeaturesSupported *ServiceRootV1220ProtocolFeaturesSupported `json:"ProtocolFeaturesSupported,omitempty"`
 
 	// RedfishVersion The version of the Redfish service.
 	RedfishVersion *string `json:"RedfishVersion,omitempty"`
@@ -5531,11 +5812,11 @@ type ServiceRootV1210ServiceRoot struct {
 	Vendor *string `json:"Vendor,omitempty"`
 }
 
-// ServiceRootV1210ServiceRootDescription1 defines model for .
-type ServiceRootV1210ServiceRootDescription1 = interface{}
+// ServiceRootV1220ServiceRootDescription1 defines model for .
+type ServiceRootV1220ServiceRootDescription1 = interface{}
 
-// ServiceRootV1210ServiceRoot_Description defines model for ServiceRootV1210ServiceRoot.Description.
-type ServiceRootV1210ServiceRoot_Description struct {
+// ServiceRootV1220ServiceRoot_Description defines model for ServiceRootV1220ServiceRoot.Description.
+type ServiceRootV1220ServiceRoot_Description struct {
 	union json.RawMessage
 }
 
@@ -5551,7 +5832,7 @@ type SettingsV150Settings struct {
 	MaintenanceWindowResource *OdataV4IdRef `json:"MaintenanceWindowResource,omitempty"`
 
 	// Messages An array of messages associated with the settings.
-	Messages *[]SchemasMessageV130Message `json:"Messages,omitempty"`
+	Messages *[]SchemasMessageV140Message `json:"Messages,omitempty"`
 
 	// SettingsObject A reference to a resource.
 	SettingsObject *OdataV4IdRef `json:"SettingsObject,omitempty"`
@@ -5563,8 +5844,8 @@ type SettingsV150Settings struct {
 	Time *time.Time `json:"Time,omitempty"`
 }
 
-// SoftwareInventoryV1140AdditionalVersions Additional versions.
-type SoftwareInventoryV1140AdditionalVersions struct {
+// SoftwareInventoryV1150AdditionalVersions Additional versions.
+type SoftwareInventoryV1150AdditionalVersions struct {
 	// BootParameters The version of the configuration file that contains the initial boot parameters of this software, such as parameters for U-Boot.
 	BootParameters *string `json:"BootParameters,omitempty"`
 
@@ -5587,8 +5868,8 @@ type SoftwareInventoryV1140AdditionalVersions struct {
 	Oem *ResourceOem `json:"Oem,omitempty"`
 }
 
-// SoftwareInventoryV1140MeasurementBlock The DSP0274-defined measurement block information.
-type SoftwareInventoryV1140MeasurementBlock struct {
+// SoftwareInventoryV1150MeasurementBlock The DSP0274-defined measurement block information.
+type SoftwareInventoryV1150MeasurementBlock struct {
 	// Measurement The hexadecimal string representation of the numeric value of the DSP0274-defined 'Measurement' field of the measurement block.
 	Measurement *string `json:"Measurement,omitempty"`
 
@@ -5672,7 +5953,7 @@ type TaskV174Task struct {
 	Links *TaskV174Links `json:"Links,omitempty"`
 
 	// Messages An array of messages associated with the task.
-	Messages *[]MessageV130Message `json:"Messages,omitempty"`
+	Messages *[]MessageV140Message `json:"Messages,omitempty"`
 
 	// Name The name of the resource or array member.
 	Name ResourceName `json:"Name"`
@@ -5748,23 +6029,23 @@ type VirtualMediaCollectionVirtualMediaCollection_Description struct {
 	union json.RawMessage
 }
 
-// VirtualMediaV165Actions The available actions for this resource.
-type VirtualMediaV165Actions struct {
+// VirtualMediaV170Actions The available actions for this resource.
+type VirtualMediaV170Actions struct {
 	// HashVirtualMediaEjectMedia This action detaches remote media from virtual media.
-	HashVirtualMediaEjectMedia *VirtualMediaV165EjectMedia `json:"#VirtualMedia.EjectMedia,omitempty"`
+	HashVirtualMediaEjectMedia *VirtualMediaV170EjectMedia `json:"#VirtualMedia.EjectMedia,omitempty"`
 
 	// HashVirtualMediaInsertMedia This action attaches remote media to virtual media.
-	HashVirtualMediaInsertMedia *VirtualMediaV165InsertMedia `json:"#VirtualMedia.InsertMedia,omitempty"`
+	HashVirtualMediaInsertMedia *VirtualMediaV170InsertMedia `json:"#VirtualMedia.InsertMedia,omitempty"`
 
 	// Oem The available OEM-specific actions for this resource.
-	Oem *VirtualMediaV165OemActions `json:"Oem,omitempty"`
+	Oem *VirtualMediaV170OemActions `json:"Oem,omitempty"`
 }
 
-// VirtualMediaV165ConnectedVia defines model for VirtualMedia_v1_6_5_ConnectedVia.
-type VirtualMediaV165ConnectedVia string
+// VirtualMediaV170ConnectedVia defines model for VirtualMedia_v1_7_0_ConnectedVia.
+type VirtualMediaV170ConnectedVia string
 
-// VirtualMediaV165EjectMedia This action detaches remote media from virtual media.
-type VirtualMediaV165EjectMedia struct {
+// VirtualMediaV170EjectMedia This action detaches remote media from virtual media.
+type VirtualMediaV170EjectMedia struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -5772,14 +6053,17 @@ type VirtualMediaV165EjectMedia struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// VirtualMediaV165EjectMediaRequestBody This action detaches remote media from virtual media.
-type VirtualMediaV165EjectMediaRequestBody = map[string]interface{}
+// VirtualMediaV170EjectMediaRequestBody This action detaches remote media from virtual media.
+type VirtualMediaV170EjectMediaRequestBody = map[string]interface{}
 
-// VirtualMediaV165EjectPolicy defines model for VirtualMedia_v1_6_5_EjectPolicy.
-type VirtualMediaV165EjectPolicy string
+// VirtualMediaV170EjectPolicy defines model for VirtualMedia_v1_7_0_EjectPolicy.
+type VirtualMediaV170EjectPolicy string
 
-// VirtualMediaV165InsertMedia This action attaches remote media to virtual media.
-type VirtualMediaV165InsertMedia struct {
+// VirtualMediaV170HTTPHeaderProperty The HTTP header value is the property value.  The header name is the property name.
+type VirtualMediaV170HTTPHeaderProperty = map[string]interface{}
+
+// VirtualMediaV170InsertMedia This action attaches remote media to virtual media.
+type VirtualMediaV170InsertMedia struct {
 	// Target Link to invoke action
 	Target *string `json:"target,omitempty"`
 
@@ -5787,8 +6071,11 @@ type VirtualMediaV165InsertMedia struct {
 	Title *string `json:"title,omitempty"`
 }
 
-// VirtualMediaV165InsertMediaRequestBody This action attaches remote media to virtual media.
-type VirtualMediaV165InsertMediaRequestBody struct {
+// VirtualMediaV170InsertMediaRequestBody This action attaches remote media to virtual media.
+type VirtualMediaV170InsertMediaRequestBody struct {
+	// HTTPHeaders The HTTP header value is the property value.  The header name is the property name.
+	HTTPHeaders *VirtualMediaV170HTTPHeaderProperty `json:"HTTPHeaders,omitempty"`
+
 	// Image The URI of the media to attach to the virtual media.
 	Image string `json:"Image"`
 
@@ -5797,8 +6084,8 @@ type VirtualMediaV165InsertMediaRequestBody struct {
 
 	// Password The password to access the URI specified by the `Image` parameter.
 	Password             *string                               `json:"Password,omitempty"`
-	TransferMethod       *VirtualMediaV165TransferMethod       `json:"TransferMethod,omitempty"`
-	TransferProtocolType *VirtualMediaV165TransferProtocolType `json:"TransferProtocolType,omitempty"`
+	TransferMethod       *VirtualMediaV170TransferMethod       `json:"TransferMethod,omitempty"`
+	TransferProtocolType *VirtualMediaV170TransferProtocolType `json:"TransferProtocolType,omitempty"`
 
 	// UserName The username to access the URI specified by the `Image` parameter.
 	UserName *string `json:"UserName,omitempty"`
@@ -5807,20 +6094,20 @@ type VirtualMediaV165InsertMediaRequestBody struct {
 	WriteProtected *bool `json:"WriteProtected,omitempty"`
 }
 
-// VirtualMediaV165MediaType defines model for VirtualMedia_v1_6_5_MediaType.
-type VirtualMediaV165MediaType string
+// VirtualMediaV170MediaType defines model for VirtualMedia_v1_7_0_MediaType.
+type VirtualMediaV170MediaType string
 
-// VirtualMediaV165OemActions The available OEM-specific actions for this resource.
-type VirtualMediaV165OemActions map[string]interface{}
+// VirtualMediaV170OemActions The available OEM-specific actions for this resource.
+type VirtualMediaV170OemActions map[string]interface{}
 
-// VirtualMediaV165TransferMethod defines model for VirtualMedia_v1_6_5_TransferMethod.
-type VirtualMediaV165TransferMethod string
+// VirtualMediaV170TransferMethod defines model for VirtualMedia_v1_7_0_TransferMethod.
+type VirtualMediaV170TransferMethod string
 
-// VirtualMediaV165TransferProtocolType defines model for VirtualMedia_v1_6_5_TransferProtocolType.
-type VirtualMediaV165TransferProtocolType string
+// VirtualMediaV170TransferProtocolType defines model for VirtualMedia_v1_7_0_TransferProtocolType.
+type VirtualMediaV170TransferProtocolType string
 
-// VirtualMediaV165VirtualMedia The `VirtualMedia` schema contains properties related to the monitor and control of an instance of virtual media, such as a remote CD, DVD, or USB device.  A manager for a system or device provides virtual media functionality.
-type VirtualMediaV165VirtualMedia struct {
+// VirtualMediaV170VirtualMedia The `VirtualMedia` schema contains properties related to the monitor and control of an instance of virtual media, such as a remote CD, DVD, or USB device.  A manager for a system or device provides virtual media functionality.
+type VirtualMediaV170VirtualMedia struct {
 	// OdataContext The OData description of a payload.
 	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
 
@@ -5834,7 +6121,7 @@ type VirtualMediaV165VirtualMedia struct {
 	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
 
 	// Actions The available actions for this resource.
-	Actions *VirtualMediaV165Actions `json:"Actions,omitempty"`
+	Actions *VirtualMediaV170Actions `json:"Actions,omitempty"`
 
 	// Certificates A reference to a resource.
 	Certificates *OdataV4IdRef `json:"Certificates,omitempty"`
@@ -5843,14 +6130,17 @@ type VirtualMediaV165VirtualMedia struct {
 	ClientCertificates *OdataV4IdRef `json:"ClientCertificates,omitempty"`
 
 	// ConnectedVia The current virtual media connection method.
-	ConnectedVia *VirtualMediaV165VirtualMedia_ConnectedVia `json:"ConnectedVia,omitempty"`
-	Description  *VirtualMediaV165VirtualMedia_Description  `json:"Description,omitempty"`
+	ConnectedVia *VirtualMediaV170VirtualMedia_ConnectedVia `json:"ConnectedVia,omitempty"`
+	Description  *VirtualMediaV170VirtualMedia_Description  `json:"Description,omitempty"`
 
 	// EjectPolicy The ejection policy for the virtual media.
-	EjectPolicy *VirtualMediaV165VirtualMedia_EjectPolicy `json:"EjectPolicy,omitempty"`
+	EjectPolicy *VirtualMediaV170VirtualMedia_EjectPolicy `json:"EjectPolicy,omitempty"`
 
 	// EjectTimeout Timeout value before the virtual media is automatically ejected.
 	EjectTimeout *string `json:"EjectTimeout,omitempty"`
+
+	// HTTPHeaders The HTTP header value is the property value.  The header name is the property name.
+	HTTPHeaders *VirtualMediaV170HTTPHeaderProperty `json:"HTTPHeaders,omitempty"`
 
 	// ID The unique identifier for this resource within the collection of similar resources.
 	ID ResourceID `json:"Id"`
@@ -5865,7 +6155,7 @@ type VirtualMediaV165VirtualMedia struct {
 	Inserted *bool `json:"Inserted,omitempty"`
 
 	// MediaTypes The media types supported as virtual media.
-	MediaTypes *[]VirtualMediaV165MediaType `json:"MediaTypes,omitempty"`
+	MediaTypes *[]VirtualMediaV170MediaType `json:"MediaTypes,omitempty"`
 
 	// Name The name of the resource or array member.
 	Name ResourceName `json:"Name"`
@@ -5880,10 +6170,10 @@ type VirtualMediaV165VirtualMedia struct {
 	Status *ResourceStatus `json:"Status,omitempty"`
 
 	// TransferMethod The transfer method to use with the image.
-	TransferMethod *VirtualMediaV165VirtualMedia_TransferMethod `json:"TransferMethod,omitempty"`
+	TransferMethod *VirtualMediaV170VirtualMedia_TransferMethod `json:"TransferMethod,omitempty"`
 
 	// TransferProtocolType The network protocol to use with the URI specified by the `Image` property.
-	TransferProtocolType *VirtualMediaV165VirtualMedia_TransferProtocolType `json:"TransferProtocolType,omitempty"`
+	TransferProtocolType *VirtualMediaV170VirtualMedia_TransferProtocolType `json:"TransferProtocolType,omitempty"`
 
 	// UserName The username to access the URI specified by the `Image` property.
 	UserName *string `json:"UserName,omitempty"`
@@ -5895,43 +6185,43 @@ type VirtualMediaV165VirtualMedia struct {
 	WriteProtected *bool `json:"WriteProtected,omitempty"`
 }
 
-// VirtualMediaV165VirtualMediaConnectedVia1 defines model for .
-type VirtualMediaV165VirtualMediaConnectedVia1 = interface{}
+// VirtualMediaV170VirtualMediaConnectedVia1 defines model for .
+type VirtualMediaV170VirtualMediaConnectedVia1 = interface{}
 
-// VirtualMediaV165VirtualMedia_ConnectedVia The current virtual media connection method.
-type VirtualMediaV165VirtualMedia_ConnectedVia struct {
+// VirtualMediaV170VirtualMedia_ConnectedVia The current virtual media connection method.
+type VirtualMediaV170VirtualMedia_ConnectedVia struct {
 	union json.RawMessage
 }
 
-// VirtualMediaV165VirtualMediaDescription1 defines model for .
-type VirtualMediaV165VirtualMediaDescription1 = interface{}
+// VirtualMediaV170VirtualMediaDescription1 defines model for .
+type VirtualMediaV170VirtualMediaDescription1 = interface{}
 
-// VirtualMediaV165VirtualMedia_Description defines model for VirtualMediaV165VirtualMedia.Description.
-type VirtualMediaV165VirtualMedia_Description struct {
+// VirtualMediaV170VirtualMedia_Description defines model for VirtualMediaV170VirtualMedia.Description.
+type VirtualMediaV170VirtualMedia_Description struct {
 	union json.RawMessage
 }
 
-// VirtualMediaV165VirtualMediaEjectPolicy1 defines model for .
-type VirtualMediaV165VirtualMediaEjectPolicy1 = interface{}
+// VirtualMediaV170VirtualMediaEjectPolicy1 defines model for .
+type VirtualMediaV170VirtualMediaEjectPolicy1 = interface{}
 
-// VirtualMediaV165VirtualMedia_EjectPolicy The ejection policy for the virtual media.
-type VirtualMediaV165VirtualMedia_EjectPolicy struct {
+// VirtualMediaV170VirtualMedia_EjectPolicy The ejection policy for the virtual media.
+type VirtualMediaV170VirtualMedia_EjectPolicy struct {
 	union json.RawMessage
 }
 
-// VirtualMediaV165VirtualMediaTransferMethod1 defines model for .
-type VirtualMediaV165VirtualMediaTransferMethod1 = interface{}
+// VirtualMediaV170VirtualMediaTransferMethod1 defines model for .
+type VirtualMediaV170VirtualMediaTransferMethod1 = interface{}
 
-// VirtualMediaV165VirtualMedia_TransferMethod The transfer method to use with the image.
-type VirtualMediaV165VirtualMedia_TransferMethod struct {
+// VirtualMediaV170VirtualMedia_TransferMethod The transfer method to use with the image.
+type VirtualMediaV170VirtualMedia_TransferMethod struct {
 	union json.RawMessage
 }
 
-// VirtualMediaV165VirtualMediaTransferProtocolType1 defines model for .
-type VirtualMediaV165VirtualMediaTransferProtocolType1 = interface{}
+// VirtualMediaV170VirtualMediaTransferProtocolType1 defines model for .
+type VirtualMediaV170VirtualMediaTransferProtocolType1 = interface{}
 
-// VirtualMediaV165VirtualMedia_TransferProtocolType The network protocol to use with the URI specified by the `Image` property.
-type VirtualMediaV165VirtualMedia_TransferProtocolType struct {
+// VirtualMediaV170VirtualMedia_TransferProtocolType The network protocol to use with the URI specified by the `Image` property.
+type VirtualMediaV170VirtualMedia_TransferProtocolType struct {
 	union json.RawMessage
 }
 
@@ -5959,8 +6249,8 @@ type OdataV4NextLink = string
 // OdataV4Type The type of a resource.
 type OdataV4Type = string
 
-// SchemasMessageV130Message The message that the Redfish service returns.
-type SchemasMessageV130Message struct {
+// SchemasMessageV140Message The message that the Redfish service returns.
+type SchemasMessageV140Message struct {
 	// Message The human-readable message.
 	Message *string `json:"Message,omitempty"`
 
@@ -5987,11 +6277,14 @@ type SchemasMessageV130Message struct {
 	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
 	Severity *string `json:"Severity,omitempty"`
 
-	// UserAuthenticationSource The source of authentication for the username property associated with the message.
+	// UserAuthenticationSource The source of authentication for the user associated with the message.
 	UserAuthenticationSource *string `json:"UserAuthenticationSource,omitempty"`
 
 	// Username The username of the account associated with the message.
 	Username *string `json:"Username,omitempty"`
+
+	// VendorCode The vendor-defined code used to identify this message.
+	VendorCode *string `json:"VendorCode,omitempty"`
 }
 
 // SchemasResolutionStepV110ResolutionStep This type describes a recommended step of the service-defined resolution.
@@ -6047,28 +6340,28 @@ type PatchRedfishV1ManagersManagerIDJSONRequestBody = ManagerV1250Manager
 type PutRedfishV1ManagersManagerIDJSONRequestBody = ManagerV1250Manager
 
 // PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody defines body for PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID for application/json ContentType.
-type PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody = VirtualMediaV165VirtualMedia
+type PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody = VirtualMediaV170VirtualMedia
 
 // PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody defines body for PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID for application/json ContentType.
-type PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody = VirtualMediaV165VirtualMedia
+type PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDJSONRequestBody = VirtualMediaV170VirtualMedia
 
 // PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMediaJSONRequestBody defines body for PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia for application/json ContentType.
-type PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMediaJSONRequestBody = VirtualMediaV165EjectMediaRequestBody
+type PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMediaJSONRequestBody = VirtualMediaV170EjectMediaRequestBody
 
 // PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMediaJSONRequestBody defines body for PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia for application/json ContentType.
-type PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMediaJSONRequestBody = VirtualMediaV165InsertMediaRequestBody
+type PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMediaJSONRequestBody = VirtualMediaV170InsertMediaRequestBody
 
 // PostRedfishV1SystemsJSONRequestBody defines body for PostRedfishV1Systems for application/json ContentType.
-type PostRedfishV1SystemsJSONRequestBody = ComputerSystemV1280ComputerSystem
+type PostRedfishV1SystemsJSONRequestBody = ComputerSystemV1290ComputerSystem
 
 // PatchRedfishV1SystemsComputerSystemIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemID for application/json ContentType.
-type PatchRedfishV1SystemsComputerSystemIDJSONRequestBody = ComputerSystemV1280ComputerSystem
+type PatchRedfishV1SystemsComputerSystemIDJSONRequestBody = ComputerSystemV1290ComputerSystem
 
 // PutRedfishV1SystemsComputerSystemIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemID for application/json ContentType.
-type PutRedfishV1SystemsComputerSystemIDJSONRequestBody = ComputerSystemV1280ComputerSystem
+type PutRedfishV1SystemsComputerSystemIDJSONRequestBody = ComputerSystemV1290ComputerSystem
 
 // PostRedfishV1SystemsComputerSystemIDActionsComputerSystemResetJSONRequestBody defines body for PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset for application/json ContentType.
-type PostRedfishV1SystemsComputerSystemIDActionsComputerSystemResetJSONRequestBody = ComputerSystemV1280ResetRequestBody
+type PostRedfishV1SystemsComputerSystemIDActionsComputerSystemResetJSONRequestBody = ComputerSystemV1290ResetRequestBody
 
 // PatchRedfishV1SystemsComputerSystemIDBiosJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDBios for application/json ContentType.
 type PatchRedfishV1SystemsComputerSystemIDBiosJSONRequestBody = BiosV130Bios
@@ -6083,16 +6376,16 @@ type PatchRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130
 type PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130Bios
 
 // PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID for application/json ContentType.
-type PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1230Processor
+type PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1240Processor
 
 // PutRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDProcessorsProcessorID for application/json ContentType.
-type PutRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1230Processor
+type PutRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1240Processor
 
 // PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDSecureBoot for application/json ContentType.
-type PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV120SecureBoot
+type PatchRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV121SecureBoot
 
 // PutRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDSecureBoot for application/json ContentType.
-type PutRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV120SecureBoot
+type PutRedfishV1SystemsComputerSystemIDSecureBootJSONRequestBody = SecureBootV121SecureBoot
 
 // PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesJSONRequestBody defines body for PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates for application/json ContentType.
 type PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesJSONRequestBody = CertificateV1110Certificate
@@ -6661,22 +6954,22 @@ func (t *ComputerSystemCollectionComputerSystemCollection_Description) Unmarshal
 	return err
 }
 
-// AsComputerSystemBootSource returns the union data inside the ComputerSystemV1280Boot_AliasBootOrder_Item as a ComputerSystemBootSource
-func (t ComputerSystemV1280Boot_AliasBootOrder_Item) AsComputerSystemBootSource() (ComputerSystemBootSource, error) {
+// AsComputerSystemBootSource returns the union data inside the ComputerSystemV1290Boot_AliasBootOrder_Item as a ComputerSystemBootSource
+func (t ComputerSystemV1290Boot_AliasBootOrder_Item) AsComputerSystemBootSource() (ComputerSystemBootSource, error) {
 	var body ComputerSystemBootSource
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemBootSource overwrites any union data inside the ComputerSystemV1280Boot_AliasBootOrder_Item as the provided ComputerSystemBootSource
-func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) FromComputerSystemBootSource(v ComputerSystemBootSource) error {
+// FromComputerSystemBootSource overwrites any union data inside the ComputerSystemV1290Boot_AliasBootOrder_Item as the provided ComputerSystemBootSource
+func (t *ComputerSystemV1290Boot_AliasBootOrder_Item) FromComputerSystemBootSource(v ComputerSystemBootSource) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemBootSource performs a merge with any union data inside the ComputerSystemV1280Boot_AliasBootOrder_Item, using the provided ComputerSystemBootSource
-func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) MergeComputerSystemBootSource(v ComputerSystemBootSource) error {
+// MergeComputerSystemBootSource performs a merge with any union data inside the ComputerSystemV1290Boot_AliasBootOrder_Item, using the provided ComputerSystemBootSource
+func (t *ComputerSystemV1290Boot_AliasBootOrder_Item) MergeComputerSystemBootSource(v ComputerSystemBootSource) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6687,22 +6980,22 @@ func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) MergeComputerSystemBootSou
 	return err
 }
 
-// AsComputerSystemV1280BootAliasBootOrder1 returns the union data inside the ComputerSystemV1280Boot_AliasBootOrder_Item as a ComputerSystemV1280BootAliasBootOrder1
-func (t ComputerSystemV1280Boot_AliasBootOrder_Item) AsComputerSystemV1280BootAliasBootOrder1() (ComputerSystemV1280BootAliasBootOrder1, error) {
-	var body ComputerSystemV1280BootAliasBootOrder1
+// AsComputerSystemV1290BootAliasBootOrder1 returns the union data inside the ComputerSystemV1290Boot_AliasBootOrder_Item as a ComputerSystemV1290BootAliasBootOrder1
+func (t ComputerSystemV1290Boot_AliasBootOrder_Item) AsComputerSystemV1290BootAliasBootOrder1() (ComputerSystemV1290BootAliasBootOrder1, error) {
+	var body ComputerSystemV1290BootAliasBootOrder1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootAliasBootOrder1 overwrites any union data inside the ComputerSystemV1280Boot_AliasBootOrder_Item as the provided ComputerSystemV1280BootAliasBootOrder1
-func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) FromComputerSystemV1280BootAliasBootOrder1(v ComputerSystemV1280BootAliasBootOrder1) error {
+// FromComputerSystemV1290BootAliasBootOrder1 overwrites any union data inside the ComputerSystemV1290Boot_AliasBootOrder_Item as the provided ComputerSystemV1290BootAliasBootOrder1
+func (t *ComputerSystemV1290Boot_AliasBootOrder_Item) FromComputerSystemV1290BootAliasBootOrder1(v ComputerSystemV1290BootAliasBootOrder1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootAliasBootOrder1 performs a merge with any union data inside the ComputerSystemV1280Boot_AliasBootOrder_Item, using the provided ComputerSystemV1280BootAliasBootOrder1
-func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) MergeComputerSystemV1280BootAliasBootOrder1(v ComputerSystemV1280BootAliasBootOrder1) error {
+// MergeComputerSystemV1290BootAliasBootOrder1 performs a merge with any union data inside the ComputerSystemV1290Boot_AliasBootOrder_Item, using the provided ComputerSystemV1290BootAliasBootOrder1
+func (t *ComputerSystemV1290Boot_AliasBootOrder_Item) MergeComputerSystemV1290BootAliasBootOrder1(v ComputerSystemV1290BootAliasBootOrder1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6713,32 +7006,32 @@ func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) MergeComputerSystemV1280Bo
 	return err
 }
 
-func (t ComputerSystemV1280Boot_AliasBootOrder_Item) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_AliasBootOrder_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_AliasBootOrder_Item) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_AliasBootOrder_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280AutomaticRetryConfig returns the union data inside the ComputerSystemV1280Boot_AutomaticRetryConfig as a ComputerSystemV1280AutomaticRetryConfig
-func (t ComputerSystemV1280Boot_AutomaticRetryConfig) AsComputerSystemV1280AutomaticRetryConfig() (ComputerSystemV1280AutomaticRetryConfig, error) {
-	var body ComputerSystemV1280AutomaticRetryConfig
+// AsComputerSystemV1290AutomaticRetryConfig returns the union data inside the ComputerSystemV1290Boot_AutomaticRetryConfig as a ComputerSystemV1290AutomaticRetryConfig
+func (t ComputerSystemV1290Boot_AutomaticRetryConfig) AsComputerSystemV1290AutomaticRetryConfig() (ComputerSystemV1290AutomaticRetryConfig, error) {
+	var body ComputerSystemV1290AutomaticRetryConfig
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280AutomaticRetryConfig overwrites any union data inside the ComputerSystemV1280Boot_AutomaticRetryConfig as the provided ComputerSystemV1280AutomaticRetryConfig
-func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) FromComputerSystemV1280AutomaticRetryConfig(v ComputerSystemV1280AutomaticRetryConfig) error {
+// FromComputerSystemV1290AutomaticRetryConfig overwrites any union data inside the ComputerSystemV1290Boot_AutomaticRetryConfig as the provided ComputerSystemV1290AutomaticRetryConfig
+func (t *ComputerSystemV1290Boot_AutomaticRetryConfig) FromComputerSystemV1290AutomaticRetryConfig(v ComputerSystemV1290AutomaticRetryConfig) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280AutomaticRetryConfig performs a merge with any union data inside the ComputerSystemV1280Boot_AutomaticRetryConfig, using the provided ComputerSystemV1280AutomaticRetryConfig
-func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) MergeComputerSystemV1280AutomaticRetryConfig(v ComputerSystemV1280AutomaticRetryConfig) error {
+// MergeComputerSystemV1290AutomaticRetryConfig performs a merge with any union data inside the ComputerSystemV1290Boot_AutomaticRetryConfig, using the provided ComputerSystemV1290AutomaticRetryConfig
+func (t *ComputerSystemV1290Boot_AutomaticRetryConfig) MergeComputerSystemV1290AutomaticRetryConfig(v ComputerSystemV1290AutomaticRetryConfig) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6749,22 +7042,22 @@ func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) MergeComputerSystemV1280A
 	return err
 }
 
-// AsComputerSystemV1280BootAutomaticRetryConfig1 returns the union data inside the ComputerSystemV1280Boot_AutomaticRetryConfig as a ComputerSystemV1280BootAutomaticRetryConfig1
-func (t ComputerSystemV1280Boot_AutomaticRetryConfig) AsComputerSystemV1280BootAutomaticRetryConfig1() (ComputerSystemV1280BootAutomaticRetryConfig1, error) {
-	var body ComputerSystemV1280BootAutomaticRetryConfig1
+// AsComputerSystemV1290BootAutomaticRetryConfig1 returns the union data inside the ComputerSystemV1290Boot_AutomaticRetryConfig as a ComputerSystemV1290BootAutomaticRetryConfig1
+func (t ComputerSystemV1290Boot_AutomaticRetryConfig) AsComputerSystemV1290BootAutomaticRetryConfig1() (ComputerSystemV1290BootAutomaticRetryConfig1, error) {
+	var body ComputerSystemV1290BootAutomaticRetryConfig1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootAutomaticRetryConfig1 overwrites any union data inside the ComputerSystemV1280Boot_AutomaticRetryConfig as the provided ComputerSystemV1280BootAutomaticRetryConfig1
-func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) FromComputerSystemV1280BootAutomaticRetryConfig1(v ComputerSystemV1280BootAutomaticRetryConfig1) error {
+// FromComputerSystemV1290BootAutomaticRetryConfig1 overwrites any union data inside the ComputerSystemV1290Boot_AutomaticRetryConfig as the provided ComputerSystemV1290BootAutomaticRetryConfig1
+func (t *ComputerSystemV1290Boot_AutomaticRetryConfig) FromComputerSystemV1290BootAutomaticRetryConfig1(v ComputerSystemV1290BootAutomaticRetryConfig1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootAutomaticRetryConfig1 performs a merge with any union data inside the ComputerSystemV1280Boot_AutomaticRetryConfig, using the provided ComputerSystemV1280BootAutomaticRetryConfig1
-func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) MergeComputerSystemV1280BootAutomaticRetryConfig1(v ComputerSystemV1280BootAutomaticRetryConfig1) error {
+// MergeComputerSystemV1290BootAutomaticRetryConfig1 performs a merge with any union data inside the ComputerSystemV1290Boot_AutomaticRetryConfig, using the provided ComputerSystemV1290BootAutomaticRetryConfig1
+func (t *ComputerSystemV1290Boot_AutomaticRetryConfig) MergeComputerSystemV1290BootAutomaticRetryConfig1(v ComputerSystemV1290BootAutomaticRetryConfig1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6775,32 +7068,32 @@ func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) MergeComputerSystemV1280B
 	return err
 }
 
-func (t ComputerSystemV1280Boot_AutomaticRetryConfig) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_AutomaticRetryConfig) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_AutomaticRetryConfig) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_AutomaticRetryConfig) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280BootOrderTypes returns the union data inside the ComputerSystemV1280Boot_BootOrderPropertySelection as a ComputerSystemV1280BootOrderTypes
-func (t ComputerSystemV1280Boot_BootOrderPropertySelection) AsComputerSystemV1280BootOrderTypes() (ComputerSystemV1280BootOrderTypes, error) {
-	var body ComputerSystemV1280BootOrderTypes
+// AsComputerSystemV1290BootOrderTypes returns the union data inside the ComputerSystemV1290Boot_BootOrderPropertySelection as a ComputerSystemV1290BootOrderTypes
+func (t ComputerSystemV1290Boot_BootOrderPropertySelection) AsComputerSystemV1290BootOrderTypes() (ComputerSystemV1290BootOrderTypes, error) {
+	var body ComputerSystemV1290BootOrderTypes
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootOrderTypes overwrites any union data inside the ComputerSystemV1280Boot_BootOrderPropertySelection as the provided ComputerSystemV1280BootOrderTypes
-func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) FromComputerSystemV1280BootOrderTypes(v ComputerSystemV1280BootOrderTypes) error {
+// FromComputerSystemV1290BootOrderTypes overwrites any union data inside the ComputerSystemV1290Boot_BootOrderPropertySelection as the provided ComputerSystemV1290BootOrderTypes
+func (t *ComputerSystemV1290Boot_BootOrderPropertySelection) FromComputerSystemV1290BootOrderTypes(v ComputerSystemV1290BootOrderTypes) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootOrderTypes performs a merge with any union data inside the ComputerSystemV1280Boot_BootOrderPropertySelection, using the provided ComputerSystemV1280BootOrderTypes
-func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) MergeComputerSystemV1280BootOrderTypes(v ComputerSystemV1280BootOrderTypes) error {
+// MergeComputerSystemV1290BootOrderTypes performs a merge with any union data inside the ComputerSystemV1290Boot_BootOrderPropertySelection, using the provided ComputerSystemV1290BootOrderTypes
+func (t *ComputerSystemV1290Boot_BootOrderPropertySelection) MergeComputerSystemV1290BootOrderTypes(v ComputerSystemV1290BootOrderTypes) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6811,22 +7104,22 @@ func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) MergeComputerSystem
 	return err
 }
 
-// AsComputerSystemV1280BootBootOrderPropertySelection1 returns the union data inside the ComputerSystemV1280Boot_BootOrderPropertySelection as a ComputerSystemV1280BootBootOrderPropertySelection1
-func (t ComputerSystemV1280Boot_BootOrderPropertySelection) AsComputerSystemV1280BootBootOrderPropertySelection1() (ComputerSystemV1280BootBootOrderPropertySelection1, error) {
-	var body ComputerSystemV1280BootBootOrderPropertySelection1
+// AsComputerSystemV1290BootBootOrderPropertySelection1 returns the union data inside the ComputerSystemV1290Boot_BootOrderPropertySelection as a ComputerSystemV1290BootBootOrderPropertySelection1
+func (t ComputerSystemV1290Boot_BootOrderPropertySelection) AsComputerSystemV1290BootBootOrderPropertySelection1() (ComputerSystemV1290BootBootOrderPropertySelection1, error) {
+	var body ComputerSystemV1290BootBootOrderPropertySelection1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootBootOrderPropertySelection1 overwrites any union data inside the ComputerSystemV1280Boot_BootOrderPropertySelection as the provided ComputerSystemV1280BootBootOrderPropertySelection1
-func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) FromComputerSystemV1280BootBootOrderPropertySelection1(v ComputerSystemV1280BootBootOrderPropertySelection1) error {
+// FromComputerSystemV1290BootBootOrderPropertySelection1 overwrites any union data inside the ComputerSystemV1290Boot_BootOrderPropertySelection as the provided ComputerSystemV1290BootBootOrderPropertySelection1
+func (t *ComputerSystemV1290Boot_BootOrderPropertySelection) FromComputerSystemV1290BootBootOrderPropertySelection1(v ComputerSystemV1290BootBootOrderPropertySelection1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootBootOrderPropertySelection1 performs a merge with any union data inside the ComputerSystemV1280Boot_BootOrderPropertySelection, using the provided ComputerSystemV1280BootBootOrderPropertySelection1
-func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) MergeComputerSystemV1280BootBootOrderPropertySelection1(v ComputerSystemV1280BootBootOrderPropertySelection1) error {
+// MergeComputerSystemV1290BootBootOrderPropertySelection1 performs a merge with any union data inside the ComputerSystemV1290Boot_BootOrderPropertySelection, using the provided ComputerSystemV1290BootBootOrderPropertySelection1
+func (t *ComputerSystemV1290Boot_BootOrderPropertySelection) MergeComputerSystemV1290BootBootOrderPropertySelection1(v ComputerSystemV1290BootBootOrderPropertySelection1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6837,32 +7130,32 @@ func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) MergeComputerSystem
 	return err
 }
 
-func (t ComputerSystemV1280Boot_BootOrderPropertySelection) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_BootOrderPropertySelection) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_BootOrderPropertySelection) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_BootOrderPropertySelection) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280BootSourceOverrideEnabled returns the union data inside the ComputerSystemV1280Boot_BootSourceOverrideEnabled as a ComputerSystemV1280BootSourceOverrideEnabled
-func (t ComputerSystemV1280Boot_BootSourceOverrideEnabled) AsComputerSystemV1280BootSourceOverrideEnabled() (ComputerSystemV1280BootSourceOverrideEnabled, error) {
-	var body ComputerSystemV1280BootSourceOverrideEnabled
+// AsComputerSystemV1290BootSourceOverrideEnabled returns the union data inside the ComputerSystemV1290Boot_BootSourceOverrideEnabled as a ComputerSystemV1290BootSourceOverrideEnabled
+func (t ComputerSystemV1290Boot_BootSourceOverrideEnabled) AsComputerSystemV1290BootSourceOverrideEnabled() (ComputerSystemV1290BootSourceOverrideEnabled, error) {
+	var body ComputerSystemV1290BootSourceOverrideEnabled
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootSourceOverrideEnabled overwrites any union data inside the ComputerSystemV1280Boot_BootSourceOverrideEnabled as the provided ComputerSystemV1280BootSourceOverrideEnabled
-func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) FromComputerSystemV1280BootSourceOverrideEnabled(v ComputerSystemV1280BootSourceOverrideEnabled) error {
+// FromComputerSystemV1290BootSourceOverrideEnabled overwrites any union data inside the ComputerSystemV1290Boot_BootSourceOverrideEnabled as the provided ComputerSystemV1290BootSourceOverrideEnabled
+func (t *ComputerSystemV1290Boot_BootSourceOverrideEnabled) FromComputerSystemV1290BootSourceOverrideEnabled(v ComputerSystemV1290BootSourceOverrideEnabled) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootSourceOverrideEnabled performs a merge with any union data inside the ComputerSystemV1280Boot_BootSourceOverrideEnabled, using the provided ComputerSystemV1280BootSourceOverrideEnabled
-func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) MergeComputerSystemV1280BootSourceOverrideEnabled(v ComputerSystemV1280BootSourceOverrideEnabled) error {
+// MergeComputerSystemV1290BootSourceOverrideEnabled performs a merge with any union data inside the ComputerSystemV1290Boot_BootSourceOverrideEnabled, using the provided ComputerSystemV1290BootSourceOverrideEnabled
+func (t *ComputerSystemV1290Boot_BootSourceOverrideEnabled) MergeComputerSystemV1290BootSourceOverrideEnabled(v ComputerSystemV1290BootSourceOverrideEnabled) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6873,22 +7166,22 @@ func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) MergeComputerSystemV
 	return err
 }
 
-// AsComputerSystemV1280BootBootSourceOverrideEnabled1 returns the union data inside the ComputerSystemV1280Boot_BootSourceOverrideEnabled as a ComputerSystemV1280BootBootSourceOverrideEnabled1
-func (t ComputerSystemV1280Boot_BootSourceOverrideEnabled) AsComputerSystemV1280BootBootSourceOverrideEnabled1() (ComputerSystemV1280BootBootSourceOverrideEnabled1, error) {
-	var body ComputerSystemV1280BootBootSourceOverrideEnabled1
+// AsComputerSystemV1290BootBootSourceOverrideEnabled1 returns the union data inside the ComputerSystemV1290Boot_BootSourceOverrideEnabled as a ComputerSystemV1290BootBootSourceOverrideEnabled1
+func (t ComputerSystemV1290Boot_BootSourceOverrideEnabled) AsComputerSystemV1290BootBootSourceOverrideEnabled1() (ComputerSystemV1290BootBootSourceOverrideEnabled1, error) {
+	var body ComputerSystemV1290BootBootSourceOverrideEnabled1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootBootSourceOverrideEnabled1 overwrites any union data inside the ComputerSystemV1280Boot_BootSourceOverrideEnabled as the provided ComputerSystemV1280BootBootSourceOverrideEnabled1
-func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) FromComputerSystemV1280BootBootSourceOverrideEnabled1(v ComputerSystemV1280BootBootSourceOverrideEnabled1) error {
+// FromComputerSystemV1290BootBootSourceOverrideEnabled1 overwrites any union data inside the ComputerSystemV1290Boot_BootSourceOverrideEnabled as the provided ComputerSystemV1290BootBootSourceOverrideEnabled1
+func (t *ComputerSystemV1290Boot_BootSourceOverrideEnabled) FromComputerSystemV1290BootBootSourceOverrideEnabled1(v ComputerSystemV1290BootBootSourceOverrideEnabled1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootBootSourceOverrideEnabled1 performs a merge with any union data inside the ComputerSystemV1280Boot_BootSourceOverrideEnabled, using the provided ComputerSystemV1280BootBootSourceOverrideEnabled1
-func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) MergeComputerSystemV1280BootBootSourceOverrideEnabled1(v ComputerSystemV1280BootBootSourceOverrideEnabled1) error {
+// MergeComputerSystemV1290BootBootSourceOverrideEnabled1 performs a merge with any union data inside the ComputerSystemV1290Boot_BootSourceOverrideEnabled, using the provided ComputerSystemV1290BootBootSourceOverrideEnabled1
+func (t *ComputerSystemV1290Boot_BootSourceOverrideEnabled) MergeComputerSystemV1290BootBootSourceOverrideEnabled1(v ComputerSystemV1290BootBootSourceOverrideEnabled1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6899,32 +7192,32 @@ func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) MergeComputerSystemV
 	return err
 }
 
-func (t ComputerSystemV1280Boot_BootSourceOverrideEnabled) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_BootSourceOverrideEnabled) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_BootSourceOverrideEnabled) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_BootSourceOverrideEnabled) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280BootSourceOverrideMode returns the union data inside the ComputerSystemV1280Boot_BootSourceOverrideMode as a ComputerSystemV1280BootSourceOverrideMode
-func (t ComputerSystemV1280Boot_BootSourceOverrideMode) AsComputerSystemV1280BootSourceOverrideMode() (ComputerSystemV1280BootSourceOverrideMode, error) {
-	var body ComputerSystemV1280BootSourceOverrideMode
+// AsComputerSystemV1290BootSourceOverrideMode returns the union data inside the ComputerSystemV1290Boot_BootSourceOverrideMode as a ComputerSystemV1290BootSourceOverrideMode
+func (t ComputerSystemV1290Boot_BootSourceOverrideMode) AsComputerSystemV1290BootSourceOverrideMode() (ComputerSystemV1290BootSourceOverrideMode, error) {
+	var body ComputerSystemV1290BootSourceOverrideMode
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootSourceOverrideMode overwrites any union data inside the ComputerSystemV1280Boot_BootSourceOverrideMode as the provided ComputerSystemV1280BootSourceOverrideMode
-func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) FromComputerSystemV1280BootSourceOverrideMode(v ComputerSystemV1280BootSourceOverrideMode) error {
+// FromComputerSystemV1290BootSourceOverrideMode overwrites any union data inside the ComputerSystemV1290Boot_BootSourceOverrideMode as the provided ComputerSystemV1290BootSourceOverrideMode
+func (t *ComputerSystemV1290Boot_BootSourceOverrideMode) FromComputerSystemV1290BootSourceOverrideMode(v ComputerSystemV1290BootSourceOverrideMode) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootSourceOverrideMode performs a merge with any union data inside the ComputerSystemV1280Boot_BootSourceOverrideMode, using the provided ComputerSystemV1280BootSourceOverrideMode
-func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) MergeComputerSystemV1280BootSourceOverrideMode(v ComputerSystemV1280BootSourceOverrideMode) error {
+// MergeComputerSystemV1290BootSourceOverrideMode performs a merge with any union data inside the ComputerSystemV1290Boot_BootSourceOverrideMode, using the provided ComputerSystemV1290BootSourceOverrideMode
+func (t *ComputerSystemV1290Boot_BootSourceOverrideMode) MergeComputerSystemV1290BootSourceOverrideMode(v ComputerSystemV1290BootSourceOverrideMode) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6935,22 +7228,22 @@ func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) MergeComputerSystemV128
 	return err
 }
 
-// AsComputerSystemV1280BootBootSourceOverrideMode1 returns the union data inside the ComputerSystemV1280Boot_BootSourceOverrideMode as a ComputerSystemV1280BootBootSourceOverrideMode1
-func (t ComputerSystemV1280Boot_BootSourceOverrideMode) AsComputerSystemV1280BootBootSourceOverrideMode1() (ComputerSystemV1280BootBootSourceOverrideMode1, error) {
-	var body ComputerSystemV1280BootBootSourceOverrideMode1
+// AsComputerSystemV1290BootBootSourceOverrideMode1 returns the union data inside the ComputerSystemV1290Boot_BootSourceOverrideMode as a ComputerSystemV1290BootBootSourceOverrideMode1
+func (t ComputerSystemV1290Boot_BootSourceOverrideMode) AsComputerSystemV1290BootBootSourceOverrideMode1() (ComputerSystemV1290BootBootSourceOverrideMode1, error) {
+	var body ComputerSystemV1290BootBootSourceOverrideMode1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootBootSourceOverrideMode1 overwrites any union data inside the ComputerSystemV1280Boot_BootSourceOverrideMode as the provided ComputerSystemV1280BootBootSourceOverrideMode1
-func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) FromComputerSystemV1280BootBootSourceOverrideMode1(v ComputerSystemV1280BootBootSourceOverrideMode1) error {
+// FromComputerSystemV1290BootBootSourceOverrideMode1 overwrites any union data inside the ComputerSystemV1290Boot_BootSourceOverrideMode as the provided ComputerSystemV1290BootBootSourceOverrideMode1
+func (t *ComputerSystemV1290Boot_BootSourceOverrideMode) FromComputerSystemV1290BootBootSourceOverrideMode1(v ComputerSystemV1290BootBootSourceOverrideMode1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootBootSourceOverrideMode1 performs a merge with any union data inside the ComputerSystemV1280Boot_BootSourceOverrideMode, using the provided ComputerSystemV1280BootBootSourceOverrideMode1
-func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) MergeComputerSystemV1280BootBootSourceOverrideMode1(v ComputerSystemV1280BootBootSourceOverrideMode1) error {
+// MergeComputerSystemV1290BootBootSourceOverrideMode1 performs a merge with any union data inside the ComputerSystemV1290Boot_BootSourceOverrideMode, using the provided ComputerSystemV1290BootBootSourceOverrideMode1
+func (t *ComputerSystemV1290Boot_BootSourceOverrideMode) MergeComputerSystemV1290BootBootSourceOverrideMode1(v ComputerSystemV1290BootBootSourceOverrideMode1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6961,32 +7254,32 @@ func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) MergeComputerSystemV128
 	return err
 }
 
-func (t ComputerSystemV1280Boot_BootSourceOverrideMode) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_BootSourceOverrideMode) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_BootSourceOverrideMode) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_BootSourceOverrideMode) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemBootSource returns the union data inside the ComputerSystemV1280Boot_BootSourceOverrideTarget as a ComputerSystemBootSource
-func (t ComputerSystemV1280Boot_BootSourceOverrideTarget) AsComputerSystemBootSource() (ComputerSystemBootSource, error) {
+// AsComputerSystemBootSource returns the union data inside the ComputerSystemV1290Boot_BootSourceOverrideTarget as a ComputerSystemBootSource
+func (t ComputerSystemV1290Boot_BootSourceOverrideTarget) AsComputerSystemBootSource() (ComputerSystemBootSource, error) {
 	var body ComputerSystemBootSource
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemBootSource overwrites any union data inside the ComputerSystemV1280Boot_BootSourceOverrideTarget as the provided ComputerSystemBootSource
-func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) FromComputerSystemBootSource(v ComputerSystemBootSource) error {
+// FromComputerSystemBootSource overwrites any union data inside the ComputerSystemV1290Boot_BootSourceOverrideTarget as the provided ComputerSystemBootSource
+func (t *ComputerSystemV1290Boot_BootSourceOverrideTarget) FromComputerSystemBootSource(v ComputerSystemBootSource) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemBootSource performs a merge with any union data inside the ComputerSystemV1280Boot_BootSourceOverrideTarget, using the provided ComputerSystemBootSource
-func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) MergeComputerSystemBootSource(v ComputerSystemBootSource) error {
+// MergeComputerSystemBootSource performs a merge with any union data inside the ComputerSystemV1290Boot_BootSourceOverrideTarget, using the provided ComputerSystemBootSource
+func (t *ComputerSystemV1290Boot_BootSourceOverrideTarget) MergeComputerSystemBootSource(v ComputerSystemBootSource) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -6997,22 +7290,22 @@ func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) MergeComputerSystemBo
 	return err
 }
 
-// AsComputerSystemV1280BootBootSourceOverrideTarget1 returns the union data inside the ComputerSystemV1280Boot_BootSourceOverrideTarget as a ComputerSystemV1280BootBootSourceOverrideTarget1
-func (t ComputerSystemV1280Boot_BootSourceOverrideTarget) AsComputerSystemV1280BootBootSourceOverrideTarget1() (ComputerSystemV1280BootBootSourceOverrideTarget1, error) {
-	var body ComputerSystemV1280BootBootSourceOverrideTarget1
+// AsComputerSystemV1290BootBootSourceOverrideTarget1 returns the union data inside the ComputerSystemV1290Boot_BootSourceOverrideTarget as a ComputerSystemV1290BootBootSourceOverrideTarget1
+func (t ComputerSystemV1290Boot_BootSourceOverrideTarget) AsComputerSystemV1290BootBootSourceOverrideTarget1() (ComputerSystemV1290BootBootSourceOverrideTarget1, error) {
+	var body ComputerSystemV1290BootBootSourceOverrideTarget1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootBootSourceOverrideTarget1 overwrites any union data inside the ComputerSystemV1280Boot_BootSourceOverrideTarget as the provided ComputerSystemV1280BootBootSourceOverrideTarget1
-func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) FromComputerSystemV1280BootBootSourceOverrideTarget1(v ComputerSystemV1280BootBootSourceOverrideTarget1) error {
+// FromComputerSystemV1290BootBootSourceOverrideTarget1 overwrites any union data inside the ComputerSystemV1290Boot_BootSourceOverrideTarget as the provided ComputerSystemV1290BootBootSourceOverrideTarget1
+func (t *ComputerSystemV1290Boot_BootSourceOverrideTarget) FromComputerSystemV1290BootBootSourceOverrideTarget1(v ComputerSystemV1290BootBootSourceOverrideTarget1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootBootSourceOverrideTarget1 performs a merge with any union data inside the ComputerSystemV1280Boot_BootSourceOverrideTarget, using the provided ComputerSystemV1280BootBootSourceOverrideTarget1
-func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) MergeComputerSystemV1280BootBootSourceOverrideTarget1(v ComputerSystemV1280BootBootSourceOverrideTarget1) error {
+// MergeComputerSystemV1290BootBootSourceOverrideTarget1 performs a merge with any union data inside the ComputerSystemV1290Boot_BootSourceOverrideTarget, using the provided ComputerSystemV1290BootBootSourceOverrideTarget1
+func (t *ComputerSystemV1290Boot_BootSourceOverrideTarget) MergeComputerSystemV1290BootBootSourceOverrideTarget1(v ComputerSystemV1290BootBootSourceOverrideTarget1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7023,32 +7316,32 @@ func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) MergeComputerSystemV1
 	return err
 }
 
-func (t ComputerSystemV1280Boot_BootSourceOverrideTarget) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_BootSourceOverrideTarget) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_BootSourceOverrideTarget) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_BootSourceOverrideTarget) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280StopBootOnFault returns the union data inside the ComputerSystemV1280Boot_StopBootOnFault as a ComputerSystemV1280StopBootOnFault
-func (t ComputerSystemV1280Boot_StopBootOnFault) AsComputerSystemV1280StopBootOnFault() (ComputerSystemV1280StopBootOnFault, error) {
-	var body ComputerSystemV1280StopBootOnFault
+// AsComputerSystemV1290StopBootOnFault returns the union data inside the ComputerSystemV1290Boot_StopBootOnFault as a ComputerSystemV1290StopBootOnFault
+func (t ComputerSystemV1290Boot_StopBootOnFault) AsComputerSystemV1290StopBootOnFault() (ComputerSystemV1290StopBootOnFault, error) {
+	var body ComputerSystemV1290StopBootOnFault
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280StopBootOnFault overwrites any union data inside the ComputerSystemV1280Boot_StopBootOnFault as the provided ComputerSystemV1280StopBootOnFault
-func (t *ComputerSystemV1280Boot_StopBootOnFault) FromComputerSystemV1280StopBootOnFault(v ComputerSystemV1280StopBootOnFault) error {
+// FromComputerSystemV1290StopBootOnFault overwrites any union data inside the ComputerSystemV1290Boot_StopBootOnFault as the provided ComputerSystemV1290StopBootOnFault
+func (t *ComputerSystemV1290Boot_StopBootOnFault) FromComputerSystemV1290StopBootOnFault(v ComputerSystemV1290StopBootOnFault) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280StopBootOnFault performs a merge with any union data inside the ComputerSystemV1280Boot_StopBootOnFault, using the provided ComputerSystemV1280StopBootOnFault
-func (t *ComputerSystemV1280Boot_StopBootOnFault) MergeComputerSystemV1280StopBootOnFault(v ComputerSystemV1280StopBootOnFault) error {
+// MergeComputerSystemV1290StopBootOnFault performs a merge with any union data inside the ComputerSystemV1290Boot_StopBootOnFault, using the provided ComputerSystemV1290StopBootOnFault
+func (t *ComputerSystemV1290Boot_StopBootOnFault) MergeComputerSystemV1290StopBootOnFault(v ComputerSystemV1290StopBootOnFault) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7059,22 +7352,22 @@ func (t *ComputerSystemV1280Boot_StopBootOnFault) MergeComputerSystemV1280StopBo
 	return err
 }
 
-// AsComputerSystemV1280BootStopBootOnFault1 returns the union data inside the ComputerSystemV1280Boot_StopBootOnFault as a ComputerSystemV1280BootStopBootOnFault1
-func (t ComputerSystemV1280Boot_StopBootOnFault) AsComputerSystemV1280BootStopBootOnFault1() (ComputerSystemV1280BootStopBootOnFault1, error) {
-	var body ComputerSystemV1280BootStopBootOnFault1
+// AsComputerSystemV1290BootStopBootOnFault1 returns the union data inside the ComputerSystemV1290Boot_StopBootOnFault as a ComputerSystemV1290BootStopBootOnFault1
+func (t ComputerSystemV1290Boot_StopBootOnFault) AsComputerSystemV1290BootStopBootOnFault1() (ComputerSystemV1290BootStopBootOnFault1, error) {
+	var body ComputerSystemV1290BootStopBootOnFault1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootStopBootOnFault1 overwrites any union data inside the ComputerSystemV1280Boot_StopBootOnFault as the provided ComputerSystemV1280BootStopBootOnFault1
-func (t *ComputerSystemV1280Boot_StopBootOnFault) FromComputerSystemV1280BootStopBootOnFault1(v ComputerSystemV1280BootStopBootOnFault1) error {
+// FromComputerSystemV1290BootStopBootOnFault1 overwrites any union data inside the ComputerSystemV1290Boot_StopBootOnFault as the provided ComputerSystemV1290BootStopBootOnFault1
+func (t *ComputerSystemV1290Boot_StopBootOnFault) FromComputerSystemV1290BootStopBootOnFault1(v ComputerSystemV1290BootStopBootOnFault1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootStopBootOnFault1 performs a merge with any union data inside the ComputerSystemV1280Boot_StopBootOnFault, using the provided ComputerSystemV1280BootStopBootOnFault1
-func (t *ComputerSystemV1280Boot_StopBootOnFault) MergeComputerSystemV1280BootStopBootOnFault1(v ComputerSystemV1280BootStopBootOnFault1) error {
+// MergeComputerSystemV1290BootStopBootOnFault1 performs a merge with any union data inside the ComputerSystemV1290Boot_StopBootOnFault, using the provided ComputerSystemV1290BootStopBootOnFault1
+func (t *ComputerSystemV1290Boot_StopBootOnFault) MergeComputerSystemV1290BootStopBootOnFault1(v ComputerSystemV1290BootStopBootOnFault1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7085,32 +7378,32 @@ func (t *ComputerSystemV1280Boot_StopBootOnFault) MergeComputerSystemV1280BootSt
 	return err
 }
 
-func (t ComputerSystemV1280Boot_StopBootOnFault) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_StopBootOnFault) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_StopBootOnFault) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_StopBootOnFault) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280TrustedModuleRequiredToBoot returns the union data inside the ComputerSystemV1280Boot_TrustedModuleRequiredToBoot as a ComputerSystemV1280TrustedModuleRequiredToBoot
-func (t ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) AsComputerSystemV1280TrustedModuleRequiredToBoot() (ComputerSystemV1280TrustedModuleRequiredToBoot, error) {
-	var body ComputerSystemV1280TrustedModuleRequiredToBoot
+// AsComputerSystemV1290TrustedModuleRequiredToBoot returns the union data inside the ComputerSystemV1290Boot_TrustedModuleRequiredToBoot as a ComputerSystemV1290TrustedModuleRequiredToBoot
+func (t ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) AsComputerSystemV1290TrustedModuleRequiredToBoot() (ComputerSystemV1290TrustedModuleRequiredToBoot, error) {
+	var body ComputerSystemV1290TrustedModuleRequiredToBoot
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280TrustedModuleRequiredToBoot overwrites any union data inside the ComputerSystemV1280Boot_TrustedModuleRequiredToBoot as the provided ComputerSystemV1280TrustedModuleRequiredToBoot
-func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) FromComputerSystemV1280TrustedModuleRequiredToBoot(v ComputerSystemV1280TrustedModuleRequiredToBoot) error {
+// FromComputerSystemV1290TrustedModuleRequiredToBoot overwrites any union data inside the ComputerSystemV1290Boot_TrustedModuleRequiredToBoot as the provided ComputerSystemV1290TrustedModuleRequiredToBoot
+func (t *ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) FromComputerSystemV1290TrustedModuleRequiredToBoot(v ComputerSystemV1290TrustedModuleRequiredToBoot) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280TrustedModuleRequiredToBoot performs a merge with any union data inside the ComputerSystemV1280Boot_TrustedModuleRequiredToBoot, using the provided ComputerSystemV1280TrustedModuleRequiredToBoot
-func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) MergeComputerSystemV1280TrustedModuleRequiredToBoot(v ComputerSystemV1280TrustedModuleRequiredToBoot) error {
+// MergeComputerSystemV1290TrustedModuleRequiredToBoot performs a merge with any union data inside the ComputerSystemV1290Boot_TrustedModuleRequiredToBoot, using the provided ComputerSystemV1290TrustedModuleRequiredToBoot
+func (t *ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) MergeComputerSystemV1290TrustedModuleRequiredToBoot(v ComputerSystemV1290TrustedModuleRequiredToBoot) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7121,22 +7414,22 @@ func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) MergeComputerSyste
 	return err
 }
 
-// AsComputerSystemV1280BootTrustedModuleRequiredToBoot1 returns the union data inside the ComputerSystemV1280Boot_TrustedModuleRequiredToBoot as a ComputerSystemV1280BootTrustedModuleRequiredToBoot1
-func (t ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) AsComputerSystemV1280BootTrustedModuleRequiredToBoot1() (ComputerSystemV1280BootTrustedModuleRequiredToBoot1, error) {
-	var body ComputerSystemV1280BootTrustedModuleRequiredToBoot1
+// AsComputerSystemV1290BootTrustedModuleRequiredToBoot1 returns the union data inside the ComputerSystemV1290Boot_TrustedModuleRequiredToBoot as a ComputerSystemV1290BootTrustedModuleRequiredToBoot1
+func (t ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) AsComputerSystemV1290BootTrustedModuleRequiredToBoot1() (ComputerSystemV1290BootTrustedModuleRequiredToBoot1, error) {
+	var body ComputerSystemV1290BootTrustedModuleRequiredToBoot1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootTrustedModuleRequiredToBoot1 overwrites any union data inside the ComputerSystemV1280Boot_TrustedModuleRequiredToBoot as the provided ComputerSystemV1280BootTrustedModuleRequiredToBoot1
-func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) FromComputerSystemV1280BootTrustedModuleRequiredToBoot1(v ComputerSystemV1280BootTrustedModuleRequiredToBoot1) error {
+// FromComputerSystemV1290BootTrustedModuleRequiredToBoot1 overwrites any union data inside the ComputerSystemV1290Boot_TrustedModuleRequiredToBoot as the provided ComputerSystemV1290BootTrustedModuleRequiredToBoot1
+func (t *ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) FromComputerSystemV1290BootTrustedModuleRequiredToBoot1(v ComputerSystemV1290BootTrustedModuleRequiredToBoot1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootTrustedModuleRequiredToBoot1 performs a merge with any union data inside the ComputerSystemV1280Boot_TrustedModuleRequiredToBoot, using the provided ComputerSystemV1280BootTrustedModuleRequiredToBoot1
-func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) MergeComputerSystemV1280BootTrustedModuleRequiredToBoot1(v ComputerSystemV1280BootTrustedModuleRequiredToBoot1) error {
+// MergeComputerSystemV1290BootTrustedModuleRequiredToBoot1 performs a merge with any union data inside the ComputerSystemV1290Boot_TrustedModuleRequiredToBoot, using the provided ComputerSystemV1290BootTrustedModuleRequiredToBoot1
+func (t *ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) MergeComputerSystemV1290BootTrustedModuleRequiredToBoot1(v ComputerSystemV1290BootTrustedModuleRequiredToBoot1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7147,32 +7440,32 @@ func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) MergeComputerSyste
 	return err
 }
 
-func (t ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Boot_TrustedModuleRequiredToBoot) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Boot_TrustedModuleRequiredToBoot) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280BootProgressTypes returns the union data inside the ComputerSystemV1280BootProgress_LastState as a ComputerSystemV1280BootProgressTypes
-func (t ComputerSystemV1280BootProgress_LastState) AsComputerSystemV1280BootProgressTypes() (ComputerSystemV1280BootProgressTypes, error) {
-	var body ComputerSystemV1280BootProgressTypes
+// AsComputerSystemV1290BootProgressTypes returns the union data inside the ComputerSystemV1290BootProgress_LastState as a ComputerSystemV1290BootProgressTypes
+func (t ComputerSystemV1290BootProgress_LastState) AsComputerSystemV1290BootProgressTypes() (ComputerSystemV1290BootProgressTypes, error) {
+	var body ComputerSystemV1290BootProgressTypes
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootProgressTypes overwrites any union data inside the ComputerSystemV1280BootProgress_LastState as the provided ComputerSystemV1280BootProgressTypes
-func (t *ComputerSystemV1280BootProgress_LastState) FromComputerSystemV1280BootProgressTypes(v ComputerSystemV1280BootProgressTypes) error {
+// FromComputerSystemV1290BootProgressTypes overwrites any union data inside the ComputerSystemV1290BootProgress_LastState as the provided ComputerSystemV1290BootProgressTypes
+func (t *ComputerSystemV1290BootProgress_LastState) FromComputerSystemV1290BootProgressTypes(v ComputerSystemV1290BootProgressTypes) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootProgressTypes performs a merge with any union data inside the ComputerSystemV1280BootProgress_LastState, using the provided ComputerSystemV1280BootProgressTypes
-func (t *ComputerSystemV1280BootProgress_LastState) MergeComputerSystemV1280BootProgressTypes(v ComputerSystemV1280BootProgressTypes) error {
+// MergeComputerSystemV1290BootProgressTypes performs a merge with any union data inside the ComputerSystemV1290BootProgress_LastState, using the provided ComputerSystemV1290BootProgressTypes
+func (t *ComputerSystemV1290BootProgress_LastState) MergeComputerSystemV1290BootProgressTypes(v ComputerSystemV1290BootProgressTypes) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7183,22 +7476,22 @@ func (t *ComputerSystemV1280BootProgress_LastState) MergeComputerSystemV1280Boot
 	return err
 }
 
-// AsComputerSystemV1280BootProgressLastState1 returns the union data inside the ComputerSystemV1280BootProgress_LastState as a ComputerSystemV1280BootProgressLastState1
-func (t ComputerSystemV1280BootProgress_LastState) AsComputerSystemV1280BootProgressLastState1() (ComputerSystemV1280BootProgressLastState1, error) {
-	var body ComputerSystemV1280BootProgressLastState1
+// AsComputerSystemV1290BootProgressLastState1 returns the union data inside the ComputerSystemV1290BootProgress_LastState as a ComputerSystemV1290BootProgressLastState1
+func (t ComputerSystemV1290BootProgress_LastState) AsComputerSystemV1290BootProgressLastState1() (ComputerSystemV1290BootProgressLastState1, error) {
+	var body ComputerSystemV1290BootProgressLastState1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootProgressLastState1 overwrites any union data inside the ComputerSystemV1280BootProgress_LastState as the provided ComputerSystemV1280BootProgressLastState1
-func (t *ComputerSystemV1280BootProgress_LastState) FromComputerSystemV1280BootProgressLastState1(v ComputerSystemV1280BootProgressLastState1) error {
+// FromComputerSystemV1290BootProgressLastState1 overwrites any union data inside the ComputerSystemV1290BootProgress_LastState as the provided ComputerSystemV1290BootProgressLastState1
+func (t *ComputerSystemV1290BootProgress_LastState) FromComputerSystemV1290BootProgressLastState1(v ComputerSystemV1290BootProgressLastState1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootProgressLastState1 performs a merge with any union data inside the ComputerSystemV1280BootProgress_LastState, using the provided ComputerSystemV1280BootProgressLastState1
-func (t *ComputerSystemV1280BootProgress_LastState) MergeComputerSystemV1280BootProgressLastState1(v ComputerSystemV1280BootProgressLastState1) error {
+// MergeComputerSystemV1290BootProgressLastState1 performs a merge with any union data inside the ComputerSystemV1290BootProgress_LastState, using the provided ComputerSystemV1290BootProgressLastState1
+func (t *ComputerSystemV1290BootProgress_LastState) MergeComputerSystemV1290BootProgressLastState1(v ComputerSystemV1290BootProgressLastState1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7209,32 +7502,32 @@ func (t *ComputerSystemV1280BootProgress_LastState) MergeComputerSystemV1280Boot
 	return err
 }
 
-func (t ComputerSystemV1280BootProgress_LastState) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290BootProgress_LastState) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280BootProgress_LastState) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290BootProgress_LastState) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280CompositionUseCase returns the union data inside the ComputerSystemV1280Composition_UseCases_Item as a ComputerSystemV1280CompositionUseCase
-func (t ComputerSystemV1280Composition_UseCases_Item) AsComputerSystemV1280CompositionUseCase() (ComputerSystemV1280CompositionUseCase, error) {
-	var body ComputerSystemV1280CompositionUseCase
+// AsComputerSystemV1290CompositionUseCase returns the union data inside the ComputerSystemV1290Composition_UseCases_Item as a ComputerSystemV1290CompositionUseCase
+func (t ComputerSystemV1290Composition_UseCases_Item) AsComputerSystemV1290CompositionUseCase() (ComputerSystemV1290CompositionUseCase, error) {
+	var body ComputerSystemV1290CompositionUseCase
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280CompositionUseCase overwrites any union data inside the ComputerSystemV1280Composition_UseCases_Item as the provided ComputerSystemV1280CompositionUseCase
-func (t *ComputerSystemV1280Composition_UseCases_Item) FromComputerSystemV1280CompositionUseCase(v ComputerSystemV1280CompositionUseCase) error {
+// FromComputerSystemV1290CompositionUseCase overwrites any union data inside the ComputerSystemV1290Composition_UseCases_Item as the provided ComputerSystemV1290CompositionUseCase
+func (t *ComputerSystemV1290Composition_UseCases_Item) FromComputerSystemV1290CompositionUseCase(v ComputerSystemV1290CompositionUseCase) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280CompositionUseCase performs a merge with any union data inside the ComputerSystemV1280Composition_UseCases_Item, using the provided ComputerSystemV1280CompositionUseCase
-func (t *ComputerSystemV1280Composition_UseCases_Item) MergeComputerSystemV1280CompositionUseCase(v ComputerSystemV1280CompositionUseCase) error {
+// MergeComputerSystemV1290CompositionUseCase performs a merge with any union data inside the ComputerSystemV1290Composition_UseCases_Item, using the provided ComputerSystemV1290CompositionUseCase
+func (t *ComputerSystemV1290Composition_UseCases_Item) MergeComputerSystemV1290CompositionUseCase(v ComputerSystemV1290CompositionUseCase) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7245,22 +7538,22 @@ func (t *ComputerSystemV1280Composition_UseCases_Item) MergeComputerSystemV1280C
 	return err
 }
 
-// AsComputerSystemV1280CompositionUseCases1 returns the union data inside the ComputerSystemV1280Composition_UseCases_Item as a ComputerSystemV1280CompositionUseCases1
-func (t ComputerSystemV1280Composition_UseCases_Item) AsComputerSystemV1280CompositionUseCases1() (ComputerSystemV1280CompositionUseCases1, error) {
-	var body ComputerSystemV1280CompositionUseCases1
+// AsComputerSystemV1290CompositionUseCases1 returns the union data inside the ComputerSystemV1290Composition_UseCases_Item as a ComputerSystemV1290CompositionUseCases1
+func (t ComputerSystemV1290Composition_UseCases_Item) AsComputerSystemV1290CompositionUseCases1() (ComputerSystemV1290CompositionUseCases1, error) {
+	var body ComputerSystemV1290CompositionUseCases1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280CompositionUseCases1 overwrites any union data inside the ComputerSystemV1280Composition_UseCases_Item as the provided ComputerSystemV1280CompositionUseCases1
-func (t *ComputerSystemV1280Composition_UseCases_Item) FromComputerSystemV1280CompositionUseCases1(v ComputerSystemV1280CompositionUseCases1) error {
+// FromComputerSystemV1290CompositionUseCases1 overwrites any union data inside the ComputerSystemV1290Composition_UseCases_Item as the provided ComputerSystemV1290CompositionUseCases1
+func (t *ComputerSystemV1290Composition_UseCases_Item) FromComputerSystemV1290CompositionUseCases1(v ComputerSystemV1290CompositionUseCases1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280CompositionUseCases1 performs a merge with any union data inside the ComputerSystemV1280Composition_UseCases_Item, using the provided ComputerSystemV1280CompositionUseCases1
-func (t *ComputerSystemV1280Composition_UseCases_Item) MergeComputerSystemV1280CompositionUseCases1(v ComputerSystemV1280CompositionUseCases1) error {
+// MergeComputerSystemV1290CompositionUseCases1 performs a merge with any union data inside the ComputerSystemV1290Composition_UseCases_Item, using the provided ComputerSystemV1290CompositionUseCases1
+func (t *ComputerSystemV1290Composition_UseCases_Item) MergeComputerSystemV1290CompositionUseCases1(v ComputerSystemV1290CompositionUseCases1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7271,32 +7564,32 @@ func (t *ComputerSystemV1280Composition_UseCases_Item) MergeComputerSystemV1280C
 	return err
 }
 
-func (t ComputerSystemV1280Composition_UseCases_Item) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Composition_UseCases_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Composition_UseCases_Item) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Composition_UseCases_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280BootProgress returns the union data inside the ComputerSystemV1280ComputerSystem_BootProgress as a ComputerSystemV1280BootProgress
-func (t ComputerSystemV1280ComputerSystem_BootProgress) AsComputerSystemV1280BootProgress() (ComputerSystemV1280BootProgress, error) {
-	var body ComputerSystemV1280BootProgress
+// AsComputerSystemV1290BootProgress returns the union data inside the ComputerSystemV1290ComputerSystem_BootProgress as a ComputerSystemV1290BootProgress
+func (t ComputerSystemV1290ComputerSystem_BootProgress) AsComputerSystemV1290BootProgress() (ComputerSystemV1290BootProgress, error) {
+	var body ComputerSystemV1290BootProgress
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280BootProgress overwrites any union data inside the ComputerSystemV1280ComputerSystem_BootProgress as the provided ComputerSystemV1280BootProgress
-func (t *ComputerSystemV1280ComputerSystem_BootProgress) FromComputerSystemV1280BootProgress(v ComputerSystemV1280BootProgress) error {
+// FromComputerSystemV1290BootProgress overwrites any union data inside the ComputerSystemV1290ComputerSystem_BootProgress as the provided ComputerSystemV1290BootProgress
+func (t *ComputerSystemV1290ComputerSystem_BootProgress) FromComputerSystemV1290BootProgress(v ComputerSystemV1290BootProgress) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280BootProgress performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_BootProgress, using the provided ComputerSystemV1280BootProgress
-func (t *ComputerSystemV1280ComputerSystem_BootProgress) MergeComputerSystemV1280BootProgress(v ComputerSystemV1280BootProgress) error {
+// MergeComputerSystemV1290BootProgress performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_BootProgress, using the provided ComputerSystemV1290BootProgress
+func (t *ComputerSystemV1290ComputerSystem_BootProgress) MergeComputerSystemV1290BootProgress(v ComputerSystemV1290BootProgress) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7307,22 +7600,22 @@ func (t *ComputerSystemV1280ComputerSystem_BootProgress) MergeComputerSystemV128
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemBootProgress1 returns the union data inside the ComputerSystemV1280ComputerSystem_BootProgress as a ComputerSystemV1280ComputerSystemBootProgress1
-func (t ComputerSystemV1280ComputerSystem_BootProgress) AsComputerSystemV1280ComputerSystemBootProgress1() (ComputerSystemV1280ComputerSystemBootProgress1, error) {
-	var body ComputerSystemV1280ComputerSystemBootProgress1
+// AsComputerSystemV1290ComputerSystemBootProgress1 returns the union data inside the ComputerSystemV1290ComputerSystem_BootProgress as a ComputerSystemV1290ComputerSystemBootProgress1
+func (t ComputerSystemV1290ComputerSystem_BootProgress) AsComputerSystemV1290ComputerSystemBootProgress1() (ComputerSystemV1290ComputerSystemBootProgress1, error) {
+	var body ComputerSystemV1290ComputerSystemBootProgress1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemBootProgress1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_BootProgress as the provided ComputerSystemV1280ComputerSystemBootProgress1
-func (t *ComputerSystemV1280ComputerSystem_BootProgress) FromComputerSystemV1280ComputerSystemBootProgress1(v ComputerSystemV1280ComputerSystemBootProgress1) error {
+// FromComputerSystemV1290ComputerSystemBootProgress1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_BootProgress as the provided ComputerSystemV1290ComputerSystemBootProgress1
+func (t *ComputerSystemV1290ComputerSystem_BootProgress) FromComputerSystemV1290ComputerSystemBootProgress1(v ComputerSystemV1290ComputerSystemBootProgress1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemBootProgress1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_BootProgress, using the provided ComputerSystemV1280ComputerSystemBootProgress1
-func (t *ComputerSystemV1280ComputerSystem_BootProgress) MergeComputerSystemV1280ComputerSystemBootProgress1(v ComputerSystemV1280ComputerSystemBootProgress1) error {
+// MergeComputerSystemV1290ComputerSystemBootProgress1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_BootProgress, using the provided ComputerSystemV1290ComputerSystemBootProgress1
+func (t *ComputerSystemV1290ComputerSystem_BootProgress) MergeComputerSystemV1290ComputerSystemBootProgress1(v ComputerSystemV1290ComputerSystemBootProgress1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7333,32 +7626,32 @@ func (t *ComputerSystemV1280ComputerSystem_BootProgress) MergeComputerSystemV128
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_BootProgress) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_BootProgress) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_BootProgress) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_BootProgress) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280Composition returns the union data inside the ComputerSystemV1280ComputerSystem_Composition as a ComputerSystemV1280Composition
-func (t ComputerSystemV1280ComputerSystem_Composition) AsComputerSystemV1280Composition() (ComputerSystemV1280Composition, error) {
-	var body ComputerSystemV1280Composition
+// AsComputerSystemV1290Composition returns the union data inside the ComputerSystemV1290ComputerSystem_Composition as a ComputerSystemV1290Composition
+func (t ComputerSystemV1290ComputerSystem_Composition) AsComputerSystemV1290Composition() (ComputerSystemV1290Composition, error) {
+	var body ComputerSystemV1290Composition
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280Composition overwrites any union data inside the ComputerSystemV1280ComputerSystem_Composition as the provided ComputerSystemV1280Composition
-func (t *ComputerSystemV1280ComputerSystem_Composition) FromComputerSystemV1280Composition(v ComputerSystemV1280Composition) error {
+// FromComputerSystemV1290Composition overwrites any union data inside the ComputerSystemV1290ComputerSystem_Composition as the provided ComputerSystemV1290Composition
+func (t *ComputerSystemV1290ComputerSystem_Composition) FromComputerSystemV1290Composition(v ComputerSystemV1290Composition) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280Composition performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_Composition, using the provided ComputerSystemV1280Composition
-func (t *ComputerSystemV1280ComputerSystem_Composition) MergeComputerSystemV1280Composition(v ComputerSystemV1280Composition) error {
+// MergeComputerSystemV1290Composition performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_Composition, using the provided ComputerSystemV1290Composition
+func (t *ComputerSystemV1290ComputerSystem_Composition) MergeComputerSystemV1290Composition(v ComputerSystemV1290Composition) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7369,22 +7662,22 @@ func (t *ComputerSystemV1280ComputerSystem_Composition) MergeComputerSystemV1280
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemComposition1 returns the union data inside the ComputerSystemV1280ComputerSystem_Composition as a ComputerSystemV1280ComputerSystemComposition1
-func (t ComputerSystemV1280ComputerSystem_Composition) AsComputerSystemV1280ComputerSystemComposition1() (ComputerSystemV1280ComputerSystemComposition1, error) {
-	var body ComputerSystemV1280ComputerSystemComposition1
+// AsComputerSystemV1290ComputerSystemComposition1 returns the union data inside the ComputerSystemV1290ComputerSystem_Composition as a ComputerSystemV1290ComputerSystemComposition1
+func (t ComputerSystemV1290ComputerSystem_Composition) AsComputerSystemV1290ComputerSystemComposition1() (ComputerSystemV1290ComputerSystemComposition1, error) {
+	var body ComputerSystemV1290ComputerSystemComposition1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemComposition1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_Composition as the provided ComputerSystemV1280ComputerSystemComposition1
-func (t *ComputerSystemV1280ComputerSystem_Composition) FromComputerSystemV1280ComputerSystemComposition1(v ComputerSystemV1280ComputerSystemComposition1) error {
+// FromComputerSystemV1290ComputerSystemComposition1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_Composition as the provided ComputerSystemV1290ComputerSystemComposition1
+func (t *ComputerSystemV1290ComputerSystem_Composition) FromComputerSystemV1290ComputerSystemComposition1(v ComputerSystemV1290ComputerSystemComposition1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemComposition1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_Composition, using the provided ComputerSystemV1280ComputerSystemComposition1
-func (t *ComputerSystemV1280ComputerSystem_Composition) MergeComputerSystemV1280ComputerSystemComposition1(v ComputerSystemV1280ComputerSystemComposition1) error {
+// MergeComputerSystemV1290ComputerSystemComposition1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_Composition, using the provided ComputerSystemV1290ComputerSystemComposition1
+func (t *ComputerSystemV1290ComputerSystem_Composition) MergeComputerSystemV1290ComputerSystemComposition1(v ComputerSystemV1290ComputerSystemComposition1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7395,32 +7688,32 @@ func (t *ComputerSystemV1280ComputerSystem_Composition) MergeComputerSystemV1280
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_Composition) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_Composition) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_Composition) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_Composition) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceDescription returns the union data inside the ComputerSystemV1280ComputerSystem_Description as a ResourceDescription
-func (t ComputerSystemV1280ComputerSystem_Description) AsResourceDescription() (ResourceDescription, error) {
+// AsResourceDescription returns the union data inside the ComputerSystemV1290ComputerSystem_Description as a ResourceDescription
+func (t ComputerSystemV1290ComputerSystem_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceDescription overwrites any union data inside the ComputerSystemV1280ComputerSystem_Description as the provided ResourceDescription
-func (t *ComputerSystemV1280ComputerSystem_Description) FromResourceDescription(v ResourceDescription) error {
+// FromResourceDescription overwrites any union data inside the ComputerSystemV1290ComputerSystem_Description as the provided ResourceDescription
+func (t *ComputerSystemV1290ComputerSystem_Description) FromResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceDescription performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_Description, using the provided ResourceDescription
-func (t *ComputerSystemV1280ComputerSystem_Description) MergeResourceDescription(v ResourceDescription) error {
+// MergeResourceDescription performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_Description, using the provided ResourceDescription
+func (t *ComputerSystemV1290ComputerSystem_Description) MergeResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7431,22 +7724,22 @@ func (t *ComputerSystemV1280ComputerSystem_Description) MergeResourceDescription
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemDescription1 returns the union data inside the ComputerSystemV1280ComputerSystem_Description as a ComputerSystemV1280ComputerSystemDescription1
-func (t ComputerSystemV1280ComputerSystem_Description) AsComputerSystemV1280ComputerSystemDescription1() (ComputerSystemV1280ComputerSystemDescription1, error) {
-	var body ComputerSystemV1280ComputerSystemDescription1
+// AsComputerSystemV1290ComputerSystemDescription1 returns the union data inside the ComputerSystemV1290ComputerSystem_Description as a ComputerSystemV1290ComputerSystemDescription1
+func (t ComputerSystemV1290ComputerSystem_Description) AsComputerSystemV1290ComputerSystemDescription1() (ComputerSystemV1290ComputerSystemDescription1, error) {
+	var body ComputerSystemV1290ComputerSystemDescription1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemDescription1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_Description as the provided ComputerSystemV1280ComputerSystemDescription1
-func (t *ComputerSystemV1280ComputerSystem_Description) FromComputerSystemV1280ComputerSystemDescription1(v ComputerSystemV1280ComputerSystemDescription1) error {
+// FromComputerSystemV1290ComputerSystemDescription1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_Description as the provided ComputerSystemV1290ComputerSystemDescription1
+func (t *ComputerSystemV1290ComputerSystem_Description) FromComputerSystemV1290ComputerSystemDescription1(v ComputerSystemV1290ComputerSystemDescription1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemDescription1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_Description, using the provided ComputerSystemV1280ComputerSystemDescription1
-func (t *ComputerSystemV1280ComputerSystem_Description) MergeComputerSystemV1280ComputerSystemDescription1(v ComputerSystemV1280ComputerSystemDescription1) error {
+// MergeComputerSystemV1290ComputerSystemDescription1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_Description, using the provided ComputerSystemV1290ComputerSystemDescription1
+func (t *ComputerSystemV1290ComputerSystem_Description) MergeComputerSystemV1290ComputerSystemDescription1(v ComputerSystemV1290ComputerSystemDescription1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7457,32 +7750,32 @@ func (t *ComputerSystemV1280ComputerSystem_Description) MergeComputerSystemV1280
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_Description) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_Description) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_Description) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_Description) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280IdlePowerSaver returns the union data inside the ComputerSystemV1280ComputerSystem_IdlePowerSaver as a ComputerSystemV1280IdlePowerSaver
-func (t ComputerSystemV1280ComputerSystem_IdlePowerSaver) AsComputerSystemV1280IdlePowerSaver() (ComputerSystemV1280IdlePowerSaver, error) {
-	var body ComputerSystemV1280IdlePowerSaver
+// AsComputerSystemV1290IdlePowerSaver returns the union data inside the ComputerSystemV1290ComputerSystem_IdlePowerSaver as a ComputerSystemV1290IdlePowerSaver
+func (t ComputerSystemV1290ComputerSystem_IdlePowerSaver) AsComputerSystemV1290IdlePowerSaver() (ComputerSystemV1290IdlePowerSaver, error) {
+	var body ComputerSystemV1290IdlePowerSaver
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280IdlePowerSaver overwrites any union data inside the ComputerSystemV1280ComputerSystem_IdlePowerSaver as the provided ComputerSystemV1280IdlePowerSaver
-func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) FromComputerSystemV1280IdlePowerSaver(v ComputerSystemV1280IdlePowerSaver) error {
+// FromComputerSystemV1290IdlePowerSaver overwrites any union data inside the ComputerSystemV1290ComputerSystem_IdlePowerSaver as the provided ComputerSystemV1290IdlePowerSaver
+func (t *ComputerSystemV1290ComputerSystem_IdlePowerSaver) FromComputerSystemV1290IdlePowerSaver(v ComputerSystemV1290IdlePowerSaver) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280IdlePowerSaver performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_IdlePowerSaver, using the provided ComputerSystemV1280IdlePowerSaver
-func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) MergeComputerSystemV1280IdlePowerSaver(v ComputerSystemV1280IdlePowerSaver) error {
+// MergeComputerSystemV1290IdlePowerSaver performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_IdlePowerSaver, using the provided ComputerSystemV1290IdlePowerSaver
+func (t *ComputerSystemV1290ComputerSystem_IdlePowerSaver) MergeComputerSystemV1290IdlePowerSaver(v ComputerSystemV1290IdlePowerSaver) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7493,22 +7786,22 @@ func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) MergeComputerSystemV1
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemIdlePowerSaver1 returns the union data inside the ComputerSystemV1280ComputerSystem_IdlePowerSaver as a ComputerSystemV1280ComputerSystemIdlePowerSaver1
-func (t ComputerSystemV1280ComputerSystem_IdlePowerSaver) AsComputerSystemV1280ComputerSystemIdlePowerSaver1() (ComputerSystemV1280ComputerSystemIdlePowerSaver1, error) {
-	var body ComputerSystemV1280ComputerSystemIdlePowerSaver1
+// AsComputerSystemV1290ComputerSystemIdlePowerSaver1 returns the union data inside the ComputerSystemV1290ComputerSystem_IdlePowerSaver as a ComputerSystemV1290ComputerSystemIdlePowerSaver1
+func (t ComputerSystemV1290ComputerSystem_IdlePowerSaver) AsComputerSystemV1290ComputerSystemIdlePowerSaver1() (ComputerSystemV1290ComputerSystemIdlePowerSaver1, error) {
+	var body ComputerSystemV1290ComputerSystemIdlePowerSaver1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemIdlePowerSaver1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_IdlePowerSaver as the provided ComputerSystemV1280ComputerSystemIdlePowerSaver1
-func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) FromComputerSystemV1280ComputerSystemIdlePowerSaver1(v ComputerSystemV1280ComputerSystemIdlePowerSaver1) error {
+// FromComputerSystemV1290ComputerSystemIdlePowerSaver1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_IdlePowerSaver as the provided ComputerSystemV1290ComputerSystemIdlePowerSaver1
+func (t *ComputerSystemV1290ComputerSystem_IdlePowerSaver) FromComputerSystemV1290ComputerSystemIdlePowerSaver1(v ComputerSystemV1290ComputerSystemIdlePowerSaver1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemIdlePowerSaver1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_IdlePowerSaver, using the provided ComputerSystemV1280ComputerSystemIdlePowerSaver1
-func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) MergeComputerSystemV1280ComputerSystemIdlePowerSaver1(v ComputerSystemV1280ComputerSystemIdlePowerSaver1) error {
+// MergeComputerSystemV1290ComputerSystemIdlePowerSaver1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_IdlePowerSaver, using the provided ComputerSystemV1290ComputerSystemIdlePowerSaver1
+func (t *ComputerSystemV1290ComputerSystem_IdlePowerSaver) MergeComputerSystemV1290ComputerSystemIdlePowerSaver1(v ComputerSystemV1290ComputerSystemIdlePowerSaver1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7519,32 +7812,32 @@ func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) MergeComputerSystemV1
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_IdlePowerSaver) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_IdlePowerSaver) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_IdlePowerSaver) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_IdlePowerSaver) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280IndicatorLED returns the union data inside the ComputerSystemV1280ComputerSystem_IndicatorLED as a ComputerSystemV1280IndicatorLED
-func (t ComputerSystemV1280ComputerSystem_IndicatorLED) AsComputerSystemV1280IndicatorLED() (ComputerSystemV1280IndicatorLED, error) {
-	var body ComputerSystemV1280IndicatorLED
+// AsComputerSystemV1290IndicatorLED returns the union data inside the ComputerSystemV1290ComputerSystem_IndicatorLED as a ComputerSystemV1290IndicatorLED
+func (t ComputerSystemV1290ComputerSystem_IndicatorLED) AsComputerSystemV1290IndicatorLED() (ComputerSystemV1290IndicatorLED, error) {
+	var body ComputerSystemV1290IndicatorLED
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280IndicatorLED overwrites any union data inside the ComputerSystemV1280ComputerSystem_IndicatorLED as the provided ComputerSystemV1280IndicatorLED
-func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) FromComputerSystemV1280IndicatorLED(v ComputerSystemV1280IndicatorLED) error {
+// FromComputerSystemV1290IndicatorLED overwrites any union data inside the ComputerSystemV1290ComputerSystem_IndicatorLED as the provided ComputerSystemV1290IndicatorLED
+func (t *ComputerSystemV1290ComputerSystem_IndicatorLED) FromComputerSystemV1290IndicatorLED(v ComputerSystemV1290IndicatorLED) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280IndicatorLED performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_IndicatorLED, using the provided ComputerSystemV1280IndicatorLED
-func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) MergeComputerSystemV1280IndicatorLED(v ComputerSystemV1280IndicatorLED) error {
+// MergeComputerSystemV1290IndicatorLED performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_IndicatorLED, using the provided ComputerSystemV1290IndicatorLED
+func (t *ComputerSystemV1290ComputerSystem_IndicatorLED) MergeComputerSystemV1290IndicatorLED(v ComputerSystemV1290IndicatorLED) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7555,22 +7848,22 @@ func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) MergeComputerSystemV128
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemIndicatorLED1 returns the union data inside the ComputerSystemV1280ComputerSystem_IndicatorLED as a ComputerSystemV1280ComputerSystemIndicatorLED1
-func (t ComputerSystemV1280ComputerSystem_IndicatorLED) AsComputerSystemV1280ComputerSystemIndicatorLED1() (ComputerSystemV1280ComputerSystemIndicatorLED1, error) {
-	var body ComputerSystemV1280ComputerSystemIndicatorLED1
+// AsComputerSystemV1290ComputerSystemIndicatorLED1 returns the union data inside the ComputerSystemV1290ComputerSystem_IndicatorLED as a ComputerSystemV1290ComputerSystemIndicatorLED1
+func (t ComputerSystemV1290ComputerSystem_IndicatorLED) AsComputerSystemV1290ComputerSystemIndicatorLED1() (ComputerSystemV1290ComputerSystemIndicatorLED1, error) {
+	var body ComputerSystemV1290ComputerSystemIndicatorLED1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemIndicatorLED1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_IndicatorLED as the provided ComputerSystemV1280ComputerSystemIndicatorLED1
-func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) FromComputerSystemV1280ComputerSystemIndicatorLED1(v ComputerSystemV1280ComputerSystemIndicatorLED1) error {
+// FromComputerSystemV1290ComputerSystemIndicatorLED1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_IndicatorLED as the provided ComputerSystemV1290ComputerSystemIndicatorLED1
+func (t *ComputerSystemV1290ComputerSystem_IndicatorLED) FromComputerSystemV1290ComputerSystemIndicatorLED1(v ComputerSystemV1290ComputerSystemIndicatorLED1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemIndicatorLED1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_IndicatorLED, using the provided ComputerSystemV1280ComputerSystemIndicatorLED1
-func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) MergeComputerSystemV1280ComputerSystemIndicatorLED1(v ComputerSystemV1280ComputerSystemIndicatorLED1) error {
+// MergeComputerSystemV1290ComputerSystemIndicatorLED1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_IndicatorLED, using the provided ComputerSystemV1290ComputerSystemIndicatorLED1
+func (t *ComputerSystemV1290ComputerSystem_IndicatorLED) MergeComputerSystemV1290ComputerSystemIndicatorLED1(v ComputerSystemV1290ComputerSystemIndicatorLED1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7581,32 +7874,32 @@ func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) MergeComputerSystemV128
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_IndicatorLED) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_IndicatorLED) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_IndicatorLED) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_IndicatorLED) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280KeyManagement returns the union data inside the ComputerSystemV1280ComputerSystem_KeyManagement as a ComputerSystemV1280KeyManagement
-func (t ComputerSystemV1280ComputerSystem_KeyManagement) AsComputerSystemV1280KeyManagement() (ComputerSystemV1280KeyManagement, error) {
-	var body ComputerSystemV1280KeyManagement
+// AsComputerSystemV1290KeyManagement returns the union data inside the ComputerSystemV1290ComputerSystem_KeyManagement as a ComputerSystemV1290KeyManagement
+func (t ComputerSystemV1290ComputerSystem_KeyManagement) AsComputerSystemV1290KeyManagement() (ComputerSystemV1290KeyManagement, error) {
+	var body ComputerSystemV1290KeyManagement
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280KeyManagement overwrites any union data inside the ComputerSystemV1280ComputerSystem_KeyManagement as the provided ComputerSystemV1280KeyManagement
-func (t *ComputerSystemV1280ComputerSystem_KeyManagement) FromComputerSystemV1280KeyManagement(v ComputerSystemV1280KeyManagement) error {
+// FromComputerSystemV1290KeyManagement overwrites any union data inside the ComputerSystemV1290ComputerSystem_KeyManagement as the provided ComputerSystemV1290KeyManagement
+func (t *ComputerSystemV1290ComputerSystem_KeyManagement) FromComputerSystemV1290KeyManagement(v ComputerSystemV1290KeyManagement) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280KeyManagement performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_KeyManagement, using the provided ComputerSystemV1280KeyManagement
-func (t *ComputerSystemV1280ComputerSystem_KeyManagement) MergeComputerSystemV1280KeyManagement(v ComputerSystemV1280KeyManagement) error {
+// MergeComputerSystemV1290KeyManagement performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_KeyManagement, using the provided ComputerSystemV1290KeyManagement
+func (t *ComputerSystemV1290ComputerSystem_KeyManagement) MergeComputerSystemV1290KeyManagement(v ComputerSystemV1290KeyManagement) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7617,22 +7910,22 @@ func (t *ComputerSystemV1280ComputerSystem_KeyManagement) MergeComputerSystemV12
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemKeyManagement1 returns the union data inside the ComputerSystemV1280ComputerSystem_KeyManagement as a ComputerSystemV1280ComputerSystemKeyManagement1
-func (t ComputerSystemV1280ComputerSystem_KeyManagement) AsComputerSystemV1280ComputerSystemKeyManagement1() (ComputerSystemV1280ComputerSystemKeyManagement1, error) {
-	var body ComputerSystemV1280ComputerSystemKeyManagement1
+// AsComputerSystemV1290ComputerSystemKeyManagement1 returns the union data inside the ComputerSystemV1290ComputerSystem_KeyManagement as a ComputerSystemV1290ComputerSystemKeyManagement1
+func (t ComputerSystemV1290ComputerSystem_KeyManagement) AsComputerSystemV1290ComputerSystemKeyManagement1() (ComputerSystemV1290ComputerSystemKeyManagement1, error) {
+	var body ComputerSystemV1290ComputerSystemKeyManagement1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemKeyManagement1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_KeyManagement as the provided ComputerSystemV1280ComputerSystemKeyManagement1
-func (t *ComputerSystemV1280ComputerSystem_KeyManagement) FromComputerSystemV1280ComputerSystemKeyManagement1(v ComputerSystemV1280ComputerSystemKeyManagement1) error {
+// FromComputerSystemV1290ComputerSystemKeyManagement1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_KeyManagement as the provided ComputerSystemV1290ComputerSystemKeyManagement1
+func (t *ComputerSystemV1290ComputerSystem_KeyManagement) FromComputerSystemV1290ComputerSystemKeyManagement1(v ComputerSystemV1290ComputerSystemKeyManagement1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemKeyManagement1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_KeyManagement, using the provided ComputerSystemV1280ComputerSystemKeyManagement1
-func (t *ComputerSystemV1280ComputerSystem_KeyManagement) MergeComputerSystemV1280ComputerSystemKeyManagement1(v ComputerSystemV1280ComputerSystemKeyManagement1) error {
+// MergeComputerSystemV1290ComputerSystemKeyManagement1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_KeyManagement, using the provided ComputerSystemV1290ComputerSystemKeyManagement1
+func (t *ComputerSystemV1290ComputerSystem_KeyManagement) MergeComputerSystemV1290ComputerSystemKeyManagement1(v ComputerSystemV1290ComputerSystemKeyManagement1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7643,32 +7936,32 @@ func (t *ComputerSystemV1280ComputerSystem_KeyManagement) MergeComputerSystemV12
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_KeyManagement) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_KeyManagement) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_KeyManagement) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_KeyManagement) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280PowerMode returns the union data inside the ComputerSystemV1280ComputerSystem_PowerMode as a ComputerSystemV1280PowerMode
-func (t ComputerSystemV1280ComputerSystem_PowerMode) AsComputerSystemV1280PowerMode() (ComputerSystemV1280PowerMode, error) {
-	var body ComputerSystemV1280PowerMode
+// AsComputerSystemV1290PowerMode returns the union data inside the ComputerSystemV1290ComputerSystem_PowerMode as a ComputerSystemV1290PowerMode
+func (t ComputerSystemV1290ComputerSystem_PowerMode) AsComputerSystemV1290PowerMode() (ComputerSystemV1290PowerMode, error) {
+	var body ComputerSystemV1290PowerMode
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280PowerMode overwrites any union data inside the ComputerSystemV1280ComputerSystem_PowerMode as the provided ComputerSystemV1280PowerMode
-func (t *ComputerSystemV1280ComputerSystem_PowerMode) FromComputerSystemV1280PowerMode(v ComputerSystemV1280PowerMode) error {
+// FromComputerSystemV1290PowerMode overwrites any union data inside the ComputerSystemV1290ComputerSystem_PowerMode as the provided ComputerSystemV1290PowerMode
+func (t *ComputerSystemV1290ComputerSystem_PowerMode) FromComputerSystemV1290PowerMode(v ComputerSystemV1290PowerMode) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280PowerMode performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_PowerMode, using the provided ComputerSystemV1280PowerMode
-func (t *ComputerSystemV1280ComputerSystem_PowerMode) MergeComputerSystemV1280PowerMode(v ComputerSystemV1280PowerMode) error {
+// MergeComputerSystemV1290PowerMode performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_PowerMode, using the provided ComputerSystemV1290PowerMode
+func (t *ComputerSystemV1290ComputerSystem_PowerMode) MergeComputerSystemV1290PowerMode(v ComputerSystemV1290PowerMode) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7679,22 +7972,22 @@ func (t *ComputerSystemV1280ComputerSystem_PowerMode) MergeComputerSystemV1280Po
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemPowerMode1 returns the union data inside the ComputerSystemV1280ComputerSystem_PowerMode as a ComputerSystemV1280ComputerSystemPowerMode1
-func (t ComputerSystemV1280ComputerSystem_PowerMode) AsComputerSystemV1280ComputerSystemPowerMode1() (ComputerSystemV1280ComputerSystemPowerMode1, error) {
-	var body ComputerSystemV1280ComputerSystemPowerMode1
+// AsComputerSystemV1290ComputerSystemPowerMode1 returns the union data inside the ComputerSystemV1290ComputerSystem_PowerMode as a ComputerSystemV1290ComputerSystemPowerMode1
+func (t ComputerSystemV1290ComputerSystem_PowerMode) AsComputerSystemV1290ComputerSystemPowerMode1() (ComputerSystemV1290ComputerSystemPowerMode1, error) {
+	var body ComputerSystemV1290ComputerSystemPowerMode1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemPowerMode1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_PowerMode as the provided ComputerSystemV1280ComputerSystemPowerMode1
-func (t *ComputerSystemV1280ComputerSystem_PowerMode) FromComputerSystemV1280ComputerSystemPowerMode1(v ComputerSystemV1280ComputerSystemPowerMode1) error {
+// FromComputerSystemV1290ComputerSystemPowerMode1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_PowerMode as the provided ComputerSystemV1290ComputerSystemPowerMode1
+func (t *ComputerSystemV1290ComputerSystem_PowerMode) FromComputerSystemV1290ComputerSystemPowerMode1(v ComputerSystemV1290ComputerSystemPowerMode1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemPowerMode1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_PowerMode, using the provided ComputerSystemV1280ComputerSystemPowerMode1
-func (t *ComputerSystemV1280ComputerSystem_PowerMode) MergeComputerSystemV1280ComputerSystemPowerMode1(v ComputerSystemV1280ComputerSystemPowerMode1) error {
+// MergeComputerSystemV1290ComputerSystemPowerMode1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_PowerMode, using the provided ComputerSystemV1290ComputerSystemPowerMode1
+func (t *ComputerSystemV1290ComputerSystem_PowerMode) MergeComputerSystemV1290ComputerSystemPowerMode1(v ComputerSystemV1290ComputerSystemPowerMode1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7705,32 +7998,32 @@ func (t *ComputerSystemV1280ComputerSystem_PowerMode) MergeComputerSystemV1280Co
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_PowerMode) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_PowerMode) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_PowerMode) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_PowerMode) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourcePowerState returns the union data inside the ComputerSystemV1280ComputerSystem_PowerState as a ResourcePowerState
-func (t ComputerSystemV1280ComputerSystem_PowerState) AsResourcePowerState() (ResourcePowerState, error) {
+// AsResourcePowerState returns the union data inside the ComputerSystemV1290ComputerSystem_PowerState as a ResourcePowerState
+func (t ComputerSystemV1290ComputerSystem_PowerState) AsResourcePowerState() (ResourcePowerState, error) {
 	var body ResourcePowerState
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourcePowerState overwrites any union data inside the ComputerSystemV1280ComputerSystem_PowerState as the provided ResourcePowerState
-func (t *ComputerSystemV1280ComputerSystem_PowerState) FromResourcePowerState(v ResourcePowerState) error {
+// FromResourcePowerState overwrites any union data inside the ComputerSystemV1290ComputerSystem_PowerState as the provided ResourcePowerState
+func (t *ComputerSystemV1290ComputerSystem_PowerState) FromResourcePowerState(v ResourcePowerState) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourcePowerState performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_PowerState, using the provided ResourcePowerState
-func (t *ComputerSystemV1280ComputerSystem_PowerState) MergeResourcePowerState(v ResourcePowerState) error {
+// MergeResourcePowerState performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_PowerState, using the provided ResourcePowerState
+func (t *ComputerSystemV1290ComputerSystem_PowerState) MergeResourcePowerState(v ResourcePowerState) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7741,22 +8034,22 @@ func (t *ComputerSystemV1280ComputerSystem_PowerState) MergeResourcePowerState(v
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemPowerState1 returns the union data inside the ComputerSystemV1280ComputerSystem_PowerState as a ComputerSystemV1280ComputerSystemPowerState1
-func (t ComputerSystemV1280ComputerSystem_PowerState) AsComputerSystemV1280ComputerSystemPowerState1() (ComputerSystemV1280ComputerSystemPowerState1, error) {
-	var body ComputerSystemV1280ComputerSystemPowerState1
+// AsComputerSystemV1290ComputerSystemPowerState1 returns the union data inside the ComputerSystemV1290ComputerSystem_PowerState as a ComputerSystemV1290ComputerSystemPowerState1
+func (t ComputerSystemV1290ComputerSystem_PowerState) AsComputerSystemV1290ComputerSystemPowerState1() (ComputerSystemV1290ComputerSystemPowerState1, error) {
+	var body ComputerSystemV1290ComputerSystemPowerState1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemPowerState1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_PowerState as the provided ComputerSystemV1280ComputerSystemPowerState1
-func (t *ComputerSystemV1280ComputerSystem_PowerState) FromComputerSystemV1280ComputerSystemPowerState1(v ComputerSystemV1280ComputerSystemPowerState1) error {
+// FromComputerSystemV1290ComputerSystemPowerState1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_PowerState as the provided ComputerSystemV1290ComputerSystemPowerState1
+func (t *ComputerSystemV1290ComputerSystem_PowerState) FromComputerSystemV1290ComputerSystemPowerState1(v ComputerSystemV1290ComputerSystemPowerState1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemPowerState1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_PowerState, using the provided ComputerSystemV1280ComputerSystemPowerState1
-func (t *ComputerSystemV1280ComputerSystem_PowerState) MergeComputerSystemV1280ComputerSystemPowerState1(v ComputerSystemV1280ComputerSystemPowerState1) error {
+// MergeComputerSystemV1290ComputerSystemPowerState1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_PowerState, using the provided ComputerSystemV1290ComputerSystemPowerState1
+func (t *ComputerSystemV1290ComputerSystem_PowerState) MergeComputerSystemV1290ComputerSystemPowerState1(v ComputerSystemV1290ComputerSystemPowerState1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7767,32 +8060,32 @@ func (t *ComputerSystemV1280ComputerSystem_PowerState) MergeComputerSystemV1280C
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_PowerState) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_PowerState) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_PowerState) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_PowerState) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceUUID returns the union data inside the ComputerSystemV1280ComputerSystem_UUID as a ResourceUUID
-func (t ComputerSystemV1280ComputerSystem_UUID) AsResourceUUID() (ResourceUUID, error) {
+// AsResourceUUID returns the union data inside the ComputerSystemV1290ComputerSystem_UUID as a ResourceUUID
+func (t ComputerSystemV1290ComputerSystem_UUID) AsResourceUUID() (ResourceUUID, error) {
 	var body ResourceUUID
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceUUID overwrites any union data inside the ComputerSystemV1280ComputerSystem_UUID as the provided ResourceUUID
-func (t *ComputerSystemV1280ComputerSystem_UUID) FromResourceUUID(v ResourceUUID) error {
+// FromResourceUUID overwrites any union data inside the ComputerSystemV1290ComputerSystem_UUID as the provided ResourceUUID
+func (t *ComputerSystemV1290ComputerSystem_UUID) FromResourceUUID(v ResourceUUID) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceUUID performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_UUID, using the provided ResourceUUID
-func (t *ComputerSystemV1280ComputerSystem_UUID) MergeResourceUUID(v ResourceUUID) error {
+// MergeResourceUUID performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_UUID, using the provided ResourceUUID
+func (t *ComputerSystemV1290ComputerSystem_UUID) MergeResourceUUID(v ResourceUUID) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7803,22 +8096,22 @@ func (t *ComputerSystemV1280ComputerSystem_UUID) MergeResourceUUID(v ResourceUUI
 	return err
 }
 
-// AsComputerSystemV1280ComputerSystemUUID1 returns the union data inside the ComputerSystemV1280ComputerSystem_UUID as a ComputerSystemV1280ComputerSystemUUID1
-func (t ComputerSystemV1280ComputerSystem_UUID) AsComputerSystemV1280ComputerSystemUUID1() (ComputerSystemV1280ComputerSystemUUID1, error) {
-	var body ComputerSystemV1280ComputerSystemUUID1
+// AsComputerSystemV1290ComputerSystemUUID1 returns the union data inside the ComputerSystemV1290ComputerSystem_UUID as a ComputerSystemV1290ComputerSystemUUID1
+func (t ComputerSystemV1290ComputerSystem_UUID) AsComputerSystemV1290ComputerSystemUUID1() (ComputerSystemV1290ComputerSystemUUID1, error) {
+	var body ComputerSystemV1290ComputerSystemUUID1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280ComputerSystemUUID1 overwrites any union data inside the ComputerSystemV1280ComputerSystem_UUID as the provided ComputerSystemV1280ComputerSystemUUID1
-func (t *ComputerSystemV1280ComputerSystem_UUID) FromComputerSystemV1280ComputerSystemUUID1(v ComputerSystemV1280ComputerSystemUUID1) error {
+// FromComputerSystemV1290ComputerSystemUUID1 overwrites any union data inside the ComputerSystemV1290ComputerSystem_UUID as the provided ComputerSystemV1290ComputerSystemUUID1
+func (t *ComputerSystemV1290ComputerSystem_UUID) FromComputerSystemV1290ComputerSystemUUID1(v ComputerSystemV1290ComputerSystemUUID1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280ComputerSystemUUID1 performs a merge with any union data inside the ComputerSystemV1280ComputerSystem_UUID, using the provided ComputerSystemV1280ComputerSystemUUID1
-func (t *ComputerSystemV1280ComputerSystem_UUID) MergeComputerSystemV1280ComputerSystemUUID1(v ComputerSystemV1280ComputerSystemUUID1) error {
+// MergeComputerSystemV1290ComputerSystemUUID1 performs a merge with any union data inside the ComputerSystemV1290ComputerSystem_UUID, using the provided ComputerSystemV1290ComputerSystemUUID1
+func (t *ComputerSystemV1290ComputerSystem_UUID) MergeComputerSystemV1290ComputerSystemUUID1(v ComputerSystemV1290ComputerSystemUUID1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7829,32 +8122,32 @@ func (t *ComputerSystemV1280ComputerSystem_UUID) MergeComputerSystemV1280Compute
 	return err
 }
 
-func (t ComputerSystemV1280ComputerSystem_UUID) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290ComputerSystem_UUID) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280ComputerSystem_UUID) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290ComputerSystem_UUID) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280KMIPCachePolicy returns the union data inside the ComputerSystemV1280KMIPServer_CachePolicy as a ComputerSystemV1280KMIPCachePolicy
-func (t ComputerSystemV1280KMIPServer_CachePolicy) AsComputerSystemV1280KMIPCachePolicy() (ComputerSystemV1280KMIPCachePolicy, error) {
-	var body ComputerSystemV1280KMIPCachePolicy
+// AsComputerSystemV1290ConsoleAuthenticationMethod returns the union data inside the ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod as a ComputerSystemV1290ConsoleAuthenticationMethod
+func (t ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) AsComputerSystemV1290ConsoleAuthenticationMethod() (ComputerSystemV1290ConsoleAuthenticationMethod, error) {
+	var body ComputerSystemV1290ConsoleAuthenticationMethod
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280KMIPCachePolicy overwrites any union data inside the ComputerSystemV1280KMIPServer_CachePolicy as the provided ComputerSystemV1280KMIPCachePolicy
-func (t *ComputerSystemV1280KMIPServer_CachePolicy) FromComputerSystemV1280KMIPCachePolicy(v ComputerSystemV1280KMIPCachePolicy) error {
+// FromComputerSystemV1290ConsoleAuthenticationMethod overwrites any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod as the provided ComputerSystemV1290ConsoleAuthenticationMethod
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) FromComputerSystemV1290ConsoleAuthenticationMethod(v ComputerSystemV1290ConsoleAuthenticationMethod) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280KMIPCachePolicy performs a merge with any union data inside the ComputerSystemV1280KMIPServer_CachePolicy, using the provided ComputerSystemV1280KMIPCachePolicy
-func (t *ComputerSystemV1280KMIPServer_CachePolicy) MergeComputerSystemV1280KMIPCachePolicy(v ComputerSystemV1280KMIPCachePolicy) error {
+// MergeComputerSystemV1290ConsoleAuthenticationMethod performs a merge with any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod, using the provided ComputerSystemV1290ConsoleAuthenticationMethod
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) MergeComputerSystemV1290ConsoleAuthenticationMethod(v ComputerSystemV1290ConsoleAuthenticationMethod) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7865,22 +8158,22 @@ func (t *ComputerSystemV1280KMIPServer_CachePolicy) MergeComputerSystemV1280KMIP
 	return err
 }
 
-// AsComputerSystemV1280KMIPServerCachePolicy1 returns the union data inside the ComputerSystemV1280KMIPServer_CachePolicy as a ComputerSystemV1280KMIPServerCachePolicy1
-func (t ComputerSystemV1280KMIPServer_CachePolicy) AsComputerSystemV1280KMIPServerCachePolicy1() (ComputerSystemV1280KMIPServerCachePolicy1, error) {
-	var body ComputerSystemV1280KMIPServerCachePolicy1
+// AsComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1 returns the union data inside the ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod as a ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1
+func (t ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) AsComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1() (ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1, error) {
+	var body ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280KMIPServerCachePolicy1 overwrites any union data inside the ComputerSystemV1280KMIPServer_CachePolicy as the provided ComputerSystemV1280KMIPServerCachePolicy1
-func (t *ComputerSystemV1280KMIPServer_CachePolicy) FromComputerSystemV1280KMIPServerCachePolicy1(v ComputerSystemV1280KMIPServerCachePolicy1) error {
+// FromComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1 overwrites any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod as the provided ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) FromComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1(v ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280KMIPServerCachePolicy1 performs a merge with any union data inside the ComputerSystemV1280KMIPServer_CachePolicy, using the provided ComputerSystemV1280KMIPServerCachePolicy1
-func (t *ComputerSystemV1280KMIPServer_CachePolicy) MergeComputerSystemV1280KMIPServerCachePolicy1(v ComputerSystemV1280KMIPServerCachePolicy1) error {
+// MergeComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1 performs a merge with any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod, using the provided ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) MergeComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1(v ComputerSystemV1290GraphicalConsoleProtocolAuthenticationMethod1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7891,32 +8184,32 @@ func (t *ComputerSystemV1280KMIPServer_CachePolicy) MergeComputerSystemV1280KMIP
 	return err
 }
 
-func (t ComputerSystemV1280KMIPServer_CachePolicy) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280KMIPServer_CachePolicy) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_AuthenticationMethod) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280KMIPServer returns the union data inside the ComputerSystemV1280KeyManagement_KMIPServers_Item as a ComputerSystemV1280KMIPServer
-func (t ComputerSystemV1280KeyManagement_KMIPServers_Item) AsComputerSystemV1280KMIPServer() (ComputerSystemV1280KMIPServer, error) {
-	var body ComputerSystemV1280KMIPServer
+// AsComputerSystemV1290ConsoleAccessMode returns the union data inside the ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item as a ComputerSystemV1290ConsoleAccessMode
+func (t ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) AsComputerSystemV1290ConsoleAccessMode() (ComputerSystemV1290ConsoleAccessMode, error) {
+	var body ComputerSystemV1290ConsoleAccessMode
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280KMIPServer overwrites any union data inside the ComputerSystemV1280KeyManagement_KMIPServers_Item as the provided ComputerSystemV1280KMIPServer
-func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) FromComputerSystemV1280KMIPServer(v ComputerSystemV1280KMIPServer) error {
+// FromComputerSystemV1290ConsoleAccessMode overwrites any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item as the provided ComputerSystemV1290ConsoleAccessMode
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) FromComputerSystemV1290ConsoleAccessMode(v ComputerSystemV1290ConsoleAccessMode) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280KMIPServer performs a merge with any union data inside the ComputerSystemV1280KeyManagement_KMIPServers_Item, using the provided ComputerSystemV1280KMIPServer
-func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) MergeComputerSystemV1280KMIPServer(v ComputerSystemV1280KMIPServer) error {
+// MergeComputerSystemV1290ConsoleAccessMode performs a merge with any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item, using the provided ComputerSystemV1290ConsoleAccessMode
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) MergeComputerSystemV1290ConsoleAccessMode(v ComputerSystemV1290ConsoleAccessMode) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7927,22 +8220,22 @@ func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) MergeComputerSystemV
 	return err
 }
 
-// AsComputerSystemV1280KeyManagementKMIPServers1 returns the union data inside the ComputerSystemV1280KeyManagement_KMIPServers_Item as a ComputerSystemV1280KeyManagementKMIPServers1
-func (t ComputerSystemV1280KeyManagement_KMIPServers_Item) AsComputerSystemV1280KeyManagementKMIPServers1() (ComputerSystemV1280KeyManagementKMIPServers1, error) {
-	var body ComputerSystemV1280KeyManagementKMIPServers1
+// AsComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1 returns the union data inside the ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item as a ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1
+func (t ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) AsComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1() (ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1, error) {
+	var body ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280KeyManagementKMIPServers1 overwrites any union data inside the ComputerSystemV1280KeyManagement_KMIPServers_Item as the provided ComputerSystemV1280KeyManagementKMIPServers1
-func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) FromComputerSystemV1280KeyManagementKMIPServers1(v ComputerSystemV1280KeyManagementKMIPServers1) error {
+// FromComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1 overwrites any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item as the provided ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) FromComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1(v ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280KeyManagementKMIPServers1 performs a merge with any union data inside the ComputerSystemV1280KeyManagement_KMIPServers_Item, using the provided ComputerSystemV1280KeyManagementKMIPServers1
-func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) MergeComputerSystemV1280KeyManagementKMIPServers1(v ComputerSystemV1280KeyManagementKMIPServers1) error {
+// MergeComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1 performs a merge with any union data inside the ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item, using the provided ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) MergeComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1(v ComputerSystemV1290GraphicalConsoleProtocolSupportedAccessModes1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7953,32 +8246,280 @@ func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) MergeComputerSystemV
 	return err
 }
 
-func (t ComputerSystemV1280KeyManagement_KMIPServers_Item) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280KeyManagement_KMIPServers_Item) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290GraphicalConsoleProtocol_SupportedAccessModes_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsOdataV4IdRef returns the union data inside the ComputerSystemV1280Links_HostingComputerSystem as a OdataV4IdRef
-func (t ComputerSystemV1280Links_HostingComputerSystem) AsOdataV4IdRef() (OdataV4IdRef, error) {
+// AsComputerSystemV1290ConsoleAuthenticationMethod returns the union data inside the ComputerSystemV1290HTML5Console_AuthenticationMethod as a ComputerSystemV1290ConsoleAuthenticationMethod
+func (t ComputerSystemV1290HTML5Console_AuthenticationMethod) AsComputerSystemV1290ConsoleAuthenticationMethod() (ComputerSystemV1290ConsoleAuthenticationMethod, error) {
+	var body ComputerSystemV1290ConsoleAuthenticationMethod
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290ConsoleAuthenticationMethod overwrites any union data inside the ComputerSystemV1290HTML5Console_AuthenticationMethod as the provided ComputerSystemV1290ConsoleAuthenticationMethod
+func (t *ComputerSystemV1290HTML5Console_AuthenticationMethod) FromComputerSystemV1290ConsoleAuthenticationMethod(v ComputerSystemV1290ConsoleAuthenticationMethod) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290ConsoleAuthenticationMethod performs a merge with any union data inside the ComputerSystemV1290HTML5Console_AuthenticationMethod, using the provided ComputerSystemV1290ConsoleAuthenticationMethod
+func (t *ComputerSystemV1290HTML5Console_AuthenticationMethod) MergeComputerSystemV1290ConsoleAuthenticationMethod(v ComputerSystemV1290ConsoleAuthenticationMethod) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsComputerSystemV1290HTML5ConsoleAuthenticationMethod1 returns the union data inside the ComputerSystemV1290HTML5Console_AuthenticationMethod as a ComputerSystemV1290HTML5ConsoleAuthenticationMethod1
+func (t ComputerSystemV1290HTML5Console_AuthenticationMethod) AsComputerSystemV1290HTML5ConsoleAuthenticationMethod1() (ComputerSystemV1290HTML5ConsoleAuthenticationMethod1, error) {
+	var body ComputerSystemV1290HTML5ConsoleAuthenticationMethod1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290HTML5ConsoleAuthenticationMethod1 overwrites any union data inside the ComputerSystemV1290HTML5Console_AuthenticationMethod as the provided ComputerSystemV1290HTML5ConsoleAuthenticationMethod1
+func (t *ComputerSystemV1290HTML5Console_AuthenticationMethod) FromComputerSystemV1290HTML5ConsoleAuthenticationMethod1(v ComputerSystemV1290HTML5ConsoleAuthenticationMethod1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290HTML5ConsoleAuthenticationMethod1 performs a merge with any union data inside the ComputerSystemV1290HTML5Console_AuthenticationMethod, using the provided ComputerSystemV1290HTML5ConsoleAuthenticationMethod1
+func (t *ComputerSystemV1290HTML5Console_AuthenticationMethod) MergeComputerSystemV1290HTML5ConsoleAuthenticationMethod1(v ComputerSystemV1290HTML5ConsoleAuthenticationMethod1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ComputerSystemV1290HTML5Console_AuthenticationMethod) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ComputerSystemV1290HTML5Console_AuthenticationMethod) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsComputerSystemV1290ConsoleAccessMode returns the union data inside the ComputerSystemV1290HTML5Console_SupportedAccessModes_Item as a ComputerSystemV1290ConsoleAccessMode
+func (t ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) AsComputerSystemV1290ConsoleAccessMode() (ComputerSystemV1290ConsoleAccessMode, error) {
+	var body ComputerSystemV1290ConsoleAccessMode
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290ConsoleAccessMode overwrites any union data inside the ComputerSystemV1290HTML5Console_SupportedAccessModes_Item as the provided ComputerSystemV1290ConsoleAccessMode
+func (t *ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) FromComputerSystemV1290ConsoleAccessMode(v ComputerSystemV1290ConsoleAccessMode) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290ConsoleAccessMode performs a merge with any union data inside the ComputerSystemV1290HTML5Console_SupportedAccessModes_Item, using the provided ComputerSystemV1290ConsoleAccessMode
+func (t *ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) MergeComputerSystemV1290ConsoleAccessMode(v ComputerSystemV1290ConsoleAccessMode) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsComputerSystemV1290HTML5ConsoleSupportedAccessModes1 returns the union data inside the ComputerSystemV1290HTML5Console_SupportedAccessModes_Item as a ComputerSystemV1290HTML5ConsoleSupportedAccessModes1
+func (t ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) AsComputerSystemV1290HTML5ConsoleSupportedAccessModes1() (ComputerSystemV1290HTML5ConsoleSupportedAccessModes1, error) {
+	var body ComputerSystemV1290HTML5ConsoleSupportedAccessModes1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290HTML5ConsoleSupportedAccessModes1 overwrites any union data inside the ComputerSystemV1290HTML5Console_SupportedAccessModes_Item as the provided ComputerSystemV1290HTML5ConsoleSupportedAccessModes1
+func (t *ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) FromComputerSystemV1290HTML5ConsoleSupportedAccessModes1(v ComputerSystemV1290HTML5ConsoleSupportedAccessModes1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290HTML5ConsoleSupportedAccessModes1 performs a merge with any union data inside the ComputerSystemV1290HTML5Console_SupportedAccessModes_Item, using the provided ComputerSystemV1290HTML5ConsoleSupportedAccessModes1
+func (t *ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) MergeComputerSystemV1290HTML5ConsoleSupportedAccessModes1(v ComputerSystemV1290HTML5ConsoleSupportedAccessModes1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ComputerSystemV1290HTML5Console_SupportedAccessModes_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsComputerSystemV1290KMIPCachePolicy returns the union data inside the ComputerSystemV1290KMIPServer_CachePolicy as a ComputerSystemV1290KMIPCachePolicy
+func (t ComputerSystemV1290KMIPServer_CachePolicy) AsComputerSystemV1290KMIPCachePolicy() (ComputerSystemV1290KMIPCachePolicy, error) {
+	var body ComputerSystemV1290KMIPCachePolicy
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290KMIPCachePolicy overwrites any union data inside the ComputerSystemV1290KMIPServer_CachePolicy as the provided ComputerSystemV1290KMIPCachePolicy
+func (t *ComputerSystemV1290KMIPServer_CachePolicy) FromComputerSystemV1290KMIPCachePolicy(v ComputerSystemV1290KMIPCachePolicy) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290KMIPCachePolicy performs a merge with any union data inside the ComputerSystemV1290KMIPServer_CachePolicy, using the provided ComputerSystemV1290KMIPCachePolicy
+func (t *ComputerSystemV1290KMIPServer_CachePolicy) MergeComputerSystemV1290KMIPCachePolicy(v ComputerSystemV1290KMIPCachePolicy) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsComputerSystemV1290KMIPServerCachePolicy1 returns the union data inside the ComputerSystemV1290KMIPServer_CachePolicy as a ComputerSystemV1290KMIPServerCachePolicy1
+func (t ComputerSystemV1290KMIPServer_CachePolicy) AsComputerSystemV1290KMIPServerCachePolicy1() (ComputerSystemV1290KMIPServerCachePolicy1, error) {
+	var body ComputerSystemV1290KMIPServerCachePolicy1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290KMIPServerCachePolicy1 overwrites any union data inside the ComputerSystemV1290KMIPServer_CachePolicy as the provided ComputerSystemV1290KMIPServerCachePolicy1
+func (t *ComputerSystemV1290KMIPServer_CachePolicy) FromComputerSystemV1290KMIPServerCachePolicy1(v ComputerSystemV1290KMIPServerCachePolicy1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290KMIPServerCachePolicy1 performs a merge with any union data inside the ComputerSystemV1290KMIPServer_CachePolicy, using the provided ComputerSystemV1290KMIPServerCachePolicy1
+func (t *ComputerSystemV1290KMIPServer_CachePolicy) MergeComputerSystemV1290KMIPServerCachePolicy1(v ComputerSystemV1290KMIPServerCachePolicy1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ComputerSystemV1290KMIPServer_CachePolicy) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ComputerSystemV1290KMIPServer_CachePolicy) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsComputerSystemV1290KMIPServer returns the union data inside the ComputerSystemV1290KeyManagement_KMIPServers_Item as a ComputerSystemV1290KMIPServer
+func (t ComputerSystemV1290KeyManagement_KMIPServers_Item) AsComputerSystemV1290KMIPServer() (ComputerSystemV1290KMIPServer, error) {
+	var body ComputerSystemV1290KMIPServer
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290KMIPServer overwrites any union data inside the ComputerSystemV1290KeyManagement_KMIPServers_Item as the provided ComputerSystemV1290KMIPServer
+func (t *ComputerSystemV1290KeyManagement_KMIPServers_Item) FromComputerSystemV1290KMIPServer(v ComputerSystemV1290KMIPServer) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290KMIPServer performs a merge with any union data inside the ComputerSystemV1290KeyManagement_KMIPServers_Item, using the provided ComputerSystemV1290KMIPServer
+func (t *ComputerSystemV1290KeyManagement_KMIPServers_Item) MergeComputerSystemV1290KMIPServer(v ComputerSystemV1290KMIPServer) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsComputerSystemV1290KeyManagementKMIPServers1 returns the union data inside the ComputerSystemV1290KeyManagement_KMIPServers_Item as a ComputerSystemV1290KeyManagementKMIPServers1
+func (t ComputerSystemV1290KeyManagement_KMIPServers_Item) AsComputerSystemV1290KeyManagementKMIPServers1() (ComputerSystemV1290KeyManagementKMIPServers1, error) {
+	var body ComputerSystemV1290KeyManagementKMIPServers1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290KeyManagementKMIPServers1 overwrites any union data inside the ComputerSystemV1290KeyManagement_KMIPServers_Item as the provided ComputerSystemV1290KeyManagementKMIPServers1
+func (t *ComputerSystemV1290KeyManagement_KMIPServers_Item) FromComputerSystemV1290KeyManagementKMIPServers1(v ComputerSystemV1290KeyManagementKMIPServers1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290KeyManagementKMIPServers1 performs a merge with any union data inside the ComputerSystemV1290KeyManagement_KMIPServers_Item, using the provided ComputerSystemV1290KeyManagementKMIPServers1
+func (t *ComputerSystemV1290KeyManagement_KMIPServers_Item) MergeComputerSystemV1290KeyManagementKMIPServers1(v ComputerSystemV1290KeyManagementKMIPServers1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ComputerSystemV1290KeyManagement_KMIPServers_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ComputerSystemV1290KeyManagement_KMIPServers_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsOdataV4IdRef returns the union data inside the ComputerSystemV1290Links_HostingComputerSystem as a OdataV4IdRef
+func (t ComputerSystemV1290Links_HostingComputerSystem) AsOdataV4IdRef() (OdataV4IdRef, error) {
 	var body OdataV4IdRef
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromOdataV4IdRef overwrites any union data inside the ComputerSystemV1280Links_HostingComputerSystem as the provided OdataV4IdRef
-func (t *ComputerSystemV1280Links_HostingComputerSystem) FromOdataV4IdRef(v OdataV4IdRef) error {
+// FromOdataV4IdRef overwrites any union data inside the ComputerSystemV1290Links_HostingComputerSystem as the provided OdataV4IdRef
+func (t *ComputerSystemV1290Links_HostingComputerSystem) FromOdataV4IdRef(v OdataV4IdRef) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeOdataV4IdRef performs a merge with any union data inside the ComputerSystemV1280Links_HostingComputerSystem, using the provided OdataV4IdRef
-func (t *ComputerSystemV1280Links_HostingComputerSystem) MergeOdataV4IdRef(v OdataV4IdRef) error {
+// MergeOdataV4IdRef performs a merge with any union data inside the ComputerSystemV1290Links_HostingComputerSystem, using the provided OdataV4IdRef
+func (t *ComputerSystemV1290Links_HostingComputerSystem) MergeOdataV4IdRef(v OdataV4IdRef) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -7989,22 +8530,22 @@ func (t *ComputerSystemV1280Links_HostingComputerSystem) MergeOdataV4IdRef(v Oda
 	return err
 }
 
-// AsComputerSystemV1280LinksHostingComputerSystem1 returns the union data inside the ComputerSystemV1280Links_HostingComputerSystem as a ComputerSystemV1280LinksHostingComputerSystem1
-func (t ComputerSystemV1280Links_HostingComputerSystem) AsComputerSystemV1280LinksHostingComputerSystem1() (ComputerSystemV1280LinksHostingComputerSystem1, error) {
-	var body ComputerSystemV1280LinksHostingComputerSystem1
+// AsComputerSystemV1290LinksHostingComputerSystem1 returns the union data inside the ComputerSystemV1290Links_HostingComputerSystem as a ComputerSystemV1290LinksHostingComputerSystem1
+func (t ComputerSystemV1290Links_HostingComputerSystem) AsComputerSystemV1290LinksHostingComputerSystem1() (ComputerSystemV1290LinksHostingComputerSystem1, error) {
+	var body ComputerSystemV1290LinksHostingComputerSystem1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280LinksHostingComputerSystem1 overwrites any union data inside the ComputerSystemV1280Links_HostingComputerSystem as the provided ComputerSystemV1280LinksHostingComputerSystem1
-func (t *ComputerSystemV1280Links_HostingComputerSystem) FromComputerSystemV1280LinksHostingComputerSystem1(v ComputerSystemV1280LinksHostingComputerSystem1) error {
+// FromComputerSystemV1290LinksHostingComputerSystem1 overwrites any union data inside the ComputerSystemV1290Links_HostingComputerSystem as the provided ComputerSystemV1290LinksHostingComputerSystem1
+func (t *ComputerSystemV1290Links_HostingComputerSystem) FromComputerSystemV1290LinksHostingComputerSystem1(v ComputerSystemV1290LinksHostingComputerSystem1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280LinksHostingComputerSystem1 performs a merge with any union data inside the ComputerSystemV1280Links_HostingComputerSystem, using the provided ComputerSystemV1280LinksHostingComputerSystem1
-func (t *ComputerSystemV1280Links_HostingComputerSystem) MergeComputerSystemV1280LinksHostingComputerSystem1(v ComputerSystemV1280LinksHostingComputerSystem1) error {
+// MergeComputerSystemV1290LinksHostingComputerSystem1 performs a merge with any union data inside the ComputerSystemV1290Links_HostingComputerSystem, using the provided ComputerSystemV1290LinksHostingComputerSystem1
+func (t *ComputerSystemV1290Links_HostingComputerSystem) MergeComputerSystemV1290LinksHostingComputerSystem1(v ComputerSystemV1290LinksHostingComputerSystem1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8015,32 +8556,32 @@ func (t *ComputerSystemV1280Links_HostingComputerSystem) MergeComputerSystemV128
 	return err
 }
 
-func (t ComputerSystemV1280Links_HostingComputerSystem) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290Links_HostingComputerSystem) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280Links_HostingComputerSystem) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290Links_HostingComputerSystem) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280MemoryMirroring returns the union data inside the ComputerSystemV1280MemorySummary_MemoryMirroring as a ComputerSystemV1280MemoryMirroring
-func (t ComputerSystemV1280MemorySummary_MemoryMirroring) AsComputerSystemV1280MemoryMirroring() (ComputerSystemV1280MemoryMirroring, error) {
-	var body ComputerSystemV1280MemoryMirroring
+// AsComputerSystemV1290MemoryMirroring returns the union data inside the ComputerSystemV1290MemorySummary_MemoryMirroring as a ComputerSystemV1290MemoryMirroring
+func (t ComputerSystemV1290MemorySummary_MemoryMirroring) AsComputerSystemV1290MemoryMirroring() (ComputerSystemV1290MemoryMirroring, error) {
+	var body ComputerSystemV1290MemoryMirroring
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280MemoryMirroring overwrites any union data inside the ComputerSystemV1280MemorySummary_MemoryMirroring as the provided ComputerSystemV1280MemoryMirroring
-func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) FromComputerSystemV1280MemoryMirroring(v ComputerSystemV1280MemoryMirroring) error {
+// FromComputerSystemV1290MemoryMirroring overwrites any union data inside the ComputerSystemV1290MemorySummary_MemoryMirroring as the provided ComputerSystemV1290MemoryMirroring
+func (t *ComputerSystemV1290MemorySummary_MemoryMirroring) FromComputerSystemV1290MemoryMirroring(v ComputerSystemV1290MemoryMirroring) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280MemoryMirroring performs a merge with any union data inside the ComputerSystemV1280MemorySummary_MemoryMirroring, using the provided ComputerSystemV1280MemoryMirroring
-func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) MergeComputerSystemV1280MemoryMirroring(v ComputerSystemV1280MemoryMirroring) error {
+// MergeComputerSystemV1290MemoryMirroring performs a merge with any union data inside the ComputerSystemV1290MemorySummary_MemoryMirroring, using the provided ComputerSystemV1290MemoryMirroring
+func (t *ComputerSystemV1290MemorySummary_MemoryMirroring) MergeComputerSystemV1290MemoryMirroring(v ComputerSystemV1290MemoryMirroring) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8051,22 +8592,22 @@ func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) MergeComputerSystemV1
 	return err
 }
 
-// AsComputerSystemV1280MemorySummaryMemoryMirroring1 returns the union data inside the ComputerSystemV1280MemorySummary_MemoryMirroring as a ComputerSystemV1280MemorySummaryMemoryMirroring1
-func (t ComputerSystemV1280MemorySummary_MemoryMirroring) AsComputerSystemV1280MemorySummaryMemoryMirroring1() (ComputerSystemV1280MemorySummaryMemoryMirroring1, error) {
-	var body ComputerSystemV1280MemorySummaryMemoryMirroring1
+// AsComputerSystemV1290MemorySummaryMemoryMirroring1 returns the union data inside the ComputerSystemV1290MemorySummary_MemoryMirroring as a ComputerSystemV1290MemorySummaryMemoryMirroring1
+func (t ComputerSystemV1290MemorySummary_MemoryMirroring) AsComputerSystemV1290MemorySummaryMemoryMirroring1() (ComputerSystemV1290MemorySummaryMemoryMirroring1, error) {
+	var body ComputerSystemV1290MemorySummaryMemoryMirroring1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280MemorySummaryMemoryMirroring1 overwrites any union data inside the ComputerSystemV1280MemorySummary_MemoryMirroring as the provided ComputerSystemV1280MemorySummaryMemoryMirroring1
-func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) FromComputerSystemV1280MemorySummaryMemoryMirroring1(v ComputerSystemV1280MemorySummaryMemoryMirroring1) error {
+// FromComputerSystemV1290MemorySummaryMemoryMirroring1 overwrites any union data inside the ComputerSystemV1290MemorySummary_MemoryMirroring as the provided ComputerSystemV1290MemorySummaryMemoryMirroring1
+func (t *ComputerSystemV1290MemorySummary_MemoryMirroring) FromComputerSystemV1290MemorySummaryMemoryMirroring1(v ComputerSystemV1290MemorySummaryMemoryMirroring1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280MemorySummaryMemoryMirroring1 performs a merge with any union data inside the ComputerSystemV1280MemorySummary_MemoryMirroring, using the provided ComputerSystemV1280MemorySummaryMemoryMirroring1
-func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) MergeComputerSystemV1280MemorySummaryMemoryMirroring1(v ComputerSystemV1280MemorySummaryMemoryMirroring1) error {
+// MergeComputerSystemV1290MemorySummaryMemoryMirroring1 performs a merge with any union data inside the ComputerSystemV1290MemorySummary_MemoryMirroring, using the provided ComputerSystemV1290MemorySummaryMemoryMirroring1
+func (t *ComputerSystemV1290MemorySummary_MemoryMirroring) MergeComputerSystemV1290MemorySummaryMemoryMirroring1(v ComputerSystemV1290MemorySummaryMemoryMirroring1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8077,32 +8618,32 @@ func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) MergeComputerSystemV1
 	return err
 }
 
-func (t ComputerSystemV1280MemorySummary_MemoryMirroring) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290MemorySummary_MemoryMirroring) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280MemorySummary_MemoryMirroring) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290MemorySummary_MemoryMirroring) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280InterfaceType returns the union data inside the ComputerSystemV1280TrustedModules_InterfaceType as a ComputerSystemV1280InterfaceType
-func (t ComputerSystemV1280TrustedModules_InterfaceType) AsComputerSystemV1280InterfaceType() (ComputerSystemV1280InterfaceType, error) {
-	var body ComputerSystemV1280InterfaceType
+// AsComputerSystemV1290InterfaceType returns the union data inside the ComputerSystemV1290TrustedModules_InterfaceType as a ComputerSystemV1290InterfaceType
+func (t ComputerSystemV1290TrustedModules_InterfaceType) AsComputerSystemV1290InterfaceType() (ComputerSystemV1290InterfaceType, error) {
+	var body ComputerSystemV1290InterfaceType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280InterfaceType overwrites any union data inside the ComputerSystemV1280TrustedModules_InterfaceType as the provided ComputerSystemV1280InterfaceType
-func (t *ComputerSystemV1280TrustedModules_InterfaceType) FromComputerSystemV1280InterfaceType(v ComputerSystemV1280InterfaceType) error {
+// FromComputerSystemV1290InterfaceType overwrites any union data inside the ComputerSystemV1290TrustedModules_InterfaceType as the provided ComputerSystemV1290InterfaceType
+func (t *ComputerSystemV1290TrustedModules_InterfaceType) FromComputerSystemV1290InterfaceType(v ComputerSystemV1290InterfaceType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280InterfaceType performs a merge with any union data inside the ComputerSystemV1280TrustedModules_InterfaceType, using the provided ComputerSystemV1280InterfaceType
-func (t *ComputerSystemV1280TrustedModules_InterfaceType) MergeComputerSystemV1280InterfaceType(v ComputerSystemV1280InterfaceType) error {
+// MergeComputerSystemV1290InterfaceType performs a merge with any union data inside the ComputerSystemV1290TrustedModules_InterfaceType, using the provided ComputerSystemV1290InterfaceType
+func (t *ComputerSystemV1290TrustedModules_InterfaceType) MergeComputerSystemV1290InterfaceType(v ComputerSystemV1290InterfaceType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8113,22 +8654,22 @@ func (t *ComputerSystemV1280TrustedModules_InterfaceType) MergeComputerSystemV12
 	return err
 }
 
-// AsComputerSystemV1280TrustedModulesInterfaceType1 returns the union data inside the ComputerSystemV1280TrustedModules_InterfaceType as a ComputerSystemV1280TrustedModulesInterfaceType1
-func (t ComputerSystemV1280TrustedModules_InterfaceType) AsComputerSystemV1280TrustedModulesInterfaceType1() (ComputerSystemV1280TrustedModulesInterfaceType1, error) {
-	var body ComputerSystemV1280TrustedModulesInterfaceType1
+// AsComputerSystemV1290TrustedModulesInterfaceType1 returns the union data inside the ComputerSystemV1290TrustedModules_InterfaceType as a ComputerSystemV1290TrustedModulesInterfaceType1
+func (t ComputerSystemV1290TrustedModules_InterfaceType) AsComputerSystemV1290TrustedModulesInterfaceType1() (ComputerSystemV1290TrustedModulesInterfaceType1, error) {
+	var body ComputerSystemV1290TrustedModulesInterfaceType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280TrustedModulesInterfaceType1 overwrites any union data inside the ComputerSystemV1280TrustedModules_InterfaceType as the provided ComputerSystemV1280TrustedModulesInterfaceType1
-func (t *ComputerSystemV1280TrustedModules_InterfaceType) FromComputerSystemV1280TrustedModulesInterfaceType1(v ComputerSystemV1280TrustedModulesInterfaceType1) error {
+// FromComputerSystemV1290TrustedModulesInterfaceType1 overwrites any union data inside the ComputerSystemV1290TrustedModules_InterfaceType as the provided ComputerSystemV1290TrustedModulesInterfaceType1
+func (t *ComputerSystemV1290TrustedModules_InterfaceType) FromComputerSystemV1290TrustedModulesInterfaceType1(v ComputerSystemV1290TrustedModulesInterfaceType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280TrustedModulesInterfaceType1 performs a merge with any union data inside the ComputerSystemV1280TrustedModules_InterfaceType, using the provided ComputerSystemV1280TrustedModulesInterfaceType1
-func (t *ComputerSystemV1280TrustedModules_InterfaceType) MergeComputerSystemV1280TrustedModulesInterfaceType1(v ComputerSystemV1280TrustedModulesInterfaceType1) error {
+// MergeComputerSystemV1290TrustedModulesInterfaceType1 performs a merge with any union data inside the ComputerSystemV1290TrustedModules_InterfaceType, using the provided ComputerSystemV1290TrustedModulesInterfaceType1
+func (t *ComputerSystemV1290TrustedModules_InterfaceType) MergeComputerSystemV1290TrustedModulesInterfaceType1(v ComputerSystemV1290TrustedModulesInterfaceType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8139,32 +8680,32 @@ func (t *ComputerSystemV1280TrustedModules_InterfaceType) MergeComputerSystemV12
 	return err
 }
 
-func (t ComputerSystemV1280TrustedModules_InterfaceType) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290TrustedModules_InterfaceType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280TrustedModules_InterfaceType) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290TrustedModules_InterfaceType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280InterfaceTypeSelection returns the union data inside the ComputerSystemV1280TrustedModules_InterfaceTypeSelection as a ComputerSystemV1280InterfaceTypeSelection
-func (t ComputerSystemV1280TrustedModules_InterfaceTypeSelection) AsComputerSystemV1280InterfaceTypeSelection() (ComputerSystemV1280InterfaceTypeSelection, error) {
-	var body ComputerSystemV1280InterfaceTypeSelection
+// AsComputerSystemV1290InterfaceTypeSelection returns the union data inside the ComputerSystemV1290TrustedModules_InterfaceTypeSelection as a ComputerSystemV1290InterfaceTypeSelection
+func (t ComputerSystemV1290TrustedModules_InterfaceTypeSelection) AsComputerSystemV1290InterfaceTypeSelection() (ComputerSystemV1290InterfaceTypeSelection, error) {
+	var body ComputerSystemV1290InterfaceTypeSelection
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280InterfaceTypeSelection overwrites any union data inside the ComputerSystemV1280TrustedModules_InterfaceTypeSelection as the provided ComputerSystemV1280InterfaceTypeSelection
-func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) FromComputerSystemV1280InterfaceTypeSelection(v ComputerSystemV1280InterfaceTypeSelection) error {
+// FromComputerSystemV1290InterfaceTypeSelection overwrites any union data inside the ComputerSystemV1290TrustedModules_InterfaceTypeSelection as the provided ComputerSystemV1290InterfaceTypeSelection
+func (t *ComputerSystemV1290TrustedModules_InterfaceTypeSelection) FromComputerSystemV1290InterfaceTypeSelection(v ComputerSystemV1290InterfaceTypeSelection) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280InterfaceTypeSelection performs a merge with any union data inside the ComputerSystemV1280TrustedModules_InterfaceTypeSelection, using the provided ComputerSystemV1280InterfaceTypeSelection
-func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) MergeComputerSystemV1280InterfaceTypeSelection(v ComputerSystemV1280InterfaceTypeSelection) error {
+// MergeComputerSystemV1290InterfaceTypeSelection performs a merge with any union data inside the ComputerSystemV1290TrustedModules_InterfaceTypeSelection, using the provided ComputerSystemV1290InterfaceTypeSelection
+func (t *ComputerSystemV1290TrustedModules_InterfaceTypeSelection) MergeComputerSystemV1290InterfaceTypeSelection(v ComputerSystemV1290InterfaceTypeSelection) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8175,22 +8716,22 @@ func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) MergeComputer
 	return err
 }
 
-// AsComputerSystemV1280TrustedModulesInterfaceTypeSelection1 returns the union data inside the ComputerSystemV1280TrustedModules_InterfaceTypeSelection as a ComputerSystemV1280TrustedModulesInterfaceTypeSelection1
-func (t ComputerSystemV1280TrustedModules_InterfaceTypeSelection) AsComputerSystemV1280TrustedModulesInterfaceTypeSelection1() (ComputerSystemV1280TrustedModulesInterfaceTypeSelection1, error) {
-	var body ComputerSystemV1280TrustedModulesInterfaceTypeSelection1
+// AsComputerSystemV1290TrustedModulesInterfaceTypeSelection1 returns the union data inside the ComputerSystemV1290TrustedModules_InterfaceTypeSelection as a ComputerSystemV1290TrustedModulesInterfaceTypeSelection1
+func (t ComputerSystemV1290TrustedModules_InterfaceTypeSelection) AsComputerSystemV1290TrustedModulesInterfaceTypeSelection1() (ComputerSystemV1290TrustedModulesInterfaceTypeSelection1, error) {
+	var body ComputerSystemV1290TrustedModulesInterfaceTypeSelection1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280TrustedModulesInterfaceTypeSelection1 overwrites any union data inside the ComputerSystemV1280TrustedModules_InterfaceTypeSelection as the provided ComputerSystemV1280TrustedModulesInterfaceTypeSelection1
-func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) FromComputerSystemV1280TrustedModulesInterfaceTypeSelection1(v ComputerSystemV1280TrustedModulesInterfaceTypeSelection1) error {
+// FromComputerSystemV1290TrustedModulesInterfaceTypeSelection1 overwrites any union data inside the ComputerSystemV1290TrustedModules_InterfaceTypeSelection as the provided ComputerSystemV1290TrustedModulesInterfaceTypeSelection1
+func (t *ComputerSystemV1290TrustedModules_InterfaceTypeSelection) FromComputerSystemV1290TrustedModulesInterfaceTypeSelection1(v ComputerSystemV1290TrustedModulesInterfaceTypeSelection1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280TrustedModulesInterfaceTypeSelection1 performs a merge with any union data inside the ComputerSystemV1280TrustedModules_InterfaceTypeSelection, using the provided ComputerSystemV1280TrustedModulesInterfaceTypeSelection1
-func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) MergeComputerSystemV1280TrustedModulesInterfaceTypeSelection1(v ComputerSystemV1280TrustedModulesInterfaceTypeSelection1) error {
+// MergeComputerSystemV1290TrustedModulesInterfaceTypeSelection1 performs a merge with any union data inside the ComputerSystemV1290TrustedModules_InterfaceTypeSelection, using the provided ComputerSystemV1290TrustedModulesInterfaceTypeSelection1
+func (t *ComputerSystemV1290TrustedModules_InterfaceTypeSelection) MergeComputerSystemV1290TrustedModulesInterfaceTypeSelection1(v ComputerSystemV1290TrustedModulesInterfaceTypeSelection1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8201,32 +8742,32 @@ func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) MergeComputer
 	return err
 }
 
-func (t ComputerSystemV1280TrustedModules_InterfaceTypeSelection) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290TrustedModules_InterfaceTypeSelection) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280TrustedModules_InterfaceTypeSelection) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290TrustedModules_InterfaceTypeSelection) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280WatchdogTimeoutActions returns the union data inside the ComputerSystemV1280WatchdogTimer_TimeoutAction as a ComputerSystemV1280WatchdogTimeoutActions
-func (t ComputerSystemV1280WatchdogTimer_TimeoutAction) AsComputerSystemV1280WatchdogTimeoutActions() (ComputerSystemV1280WatchdogTimeoutActions, error) {
-	var body ComputerSystemV1280WatchdogTimeoutActions
+// AsComputerSystemV1290ConsoleAuthenticationMethod returns the union data inside the ComputerSystemV1290VNCConsole_AuthenticationMethod as a ComputerSystemV1290ConsoleAuthenticationMethod
+func (t ComputerSystemV1290VNCConsole_AuthenticationMethod) AsComputerSystemV1290ConsoleAuthenticationMethod() (ComputerSystemV1290ConsoleAuthenticationMethod, error) {
+	var body ComputerSystemV1290ConsoleAuthenticationMethod
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280WatchdogTimeoutActions overwrites any union data inside the ComputerSystemV1280WatchdogTimer_TimeoutAction as the provided ComputerSystemV1280WatchdogTimeoutActions
-func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) FromComputerSystemV1280WatchdogTimeoutActions(v ComputerSystemV1280WatchdogTimeoutActions) error {
+// FromComputerSystemV1290ConsoleAuthenticationMethod overwrites any union data inside the ComputerSystemV1290VNCConsole_AuthenticationMethod as the provided ComputerSystemV1290ConsoleAuthenticationMethod
+func (t *ComputerSystemV1290VNCConsole_AuthenticationMethod) FromComputerSystemV1290ConsoleAuthenticationMethod(v ComputerSystemV1290ConsoleAuthenticationMethod) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280WatchdogTimeoutActions performs a merge with any union data inside the ComputerSystemV1280WatchdogTimer_TimeoutAction, using the provided ComputerSystemV1280WatchdogTimeoutActions
-func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) MergeComputerSystemV1280WatchdogTimeoutActions(v ComputerSystemV1280WatchdogTimeoutActions) error {
+// MergeComputerSystemV1290ConsoleAuthenticationMethod performs a merge with any union data inside the ComputerSystemV1290VNCConsole_AuthenticationMethod, using the provided ComputerSystemV1290ConsoleAuthenticationMethod
+func (t *ComputerSystemV1290VNCConsole_AuthenticationMethod) MergeComputerSystemV1290ConsoleAuthenticationMethod(v ComputerSystemV1290ConsoleAuthenticationMethod) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8237,22 +8778,22 @@ func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) MergeComputerSystemV128
 	return err
 }
 
-// AsComputerSystemV1280WatchdogTimerTimeoutAction1 returns the union data inside the ComputerSystemV1280WatchdogTimer_TimeoutAction as a ComputerSystemV1280WatchdogTimerTimeoutAction1
-func (t ComputerSystemV1280WatchdogTimer_TimeoutAction) AsComputerSystemV1280WatchdogTimerTimeoutAction1() (ComputerSystemV1280WatchdogTimerTimeoutAction1, error) {
-	var body ComputerSystemV1280WatchdogTimerTimeoutAction1
+// AsComputerSystemV1290VNCConsoleAuthenticationMethod1 returns the union data inside the ComputerSystemV1290VNCConsole_AuthenticationMethod as a ComputerSystemV1290VNCConsoleAuthenticationMethod1
+func (t ComputerSystemV1290VNCConsole_AuthenticationMethod) AsComputerSystemV1290VNCConsoleAuthenticationMethod1() (ComputerSystemV1290VNCConsoleAuthenticationMethod1, error) {
+	var body ComputerSystemV1290VNCConsoleAuthenticationMethod1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280WatchdogTimerTimeoutAction1 overwrites any union data inside the ComputerSystemV1280WatchdogTimer_TimeoutAction as the provided ComputerSystemV1280WatchdogTimerTimeoutAction1
-func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) FromComputerSystemV1280WatchdogTimerTimeoutAction1(v ComputerSystemV1280WatchdogTimerTimeoutAction1) error {
+// FromComputerSystemV1290VNCConsoleAuthenticationMethod1 overwrites any union data inside the ComputerSystemV1290VNCConsole_AuthenticationMethod as the provided ComputerSystemV1290VNCConsoleAuthenticationMethod1
+func (t *ComputerSystemV1290VNCConsole_AuthenticationMethod) FromComputerSystemV1290VNCConsoleAuthenticationMethod1(v ComputerSystemV1290VNCConsoleAuthenticationMethod1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280WatchdogTimerTimeoutAction1 performs a merge with any union data inside the ComputerSystemV1280WatchdogTimer_TimeoutAction, using the provided ComputerSystemV1280WatchdogTimerTimeoutAction1
-func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) MergeComputerSystemV1280WatchdogTimerTimeoutAction1(v ComputerSystemV1280WatchdogTimerTimeoutAction1) error {
+// MergeComputerSystemV1290VNCConsoleAuthenticationMethod1 performs a merge with any union data inside the ComputerSystemV1290VNCConsole_AuthenticationMethod, using the provided ComputerSystemV1290VNCConsoleAuthenticationMethod1
+func (t *ComputerSystemV1290VNCConsole_AuthenticationMethod) MergeComputerSystemV1290VNCConsoleAuthenticationMethod1(v ComputerSystemV1290VNCConsoleAuthenticationMethod1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8263,32 +8804,32 @@ func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) MergeComputerSystemV128
 	return err
 }
 
-func (t ComputerSystemV1280WatchdogTimer_TimeoutAction) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290VNCConsole_AuthenticationMethod) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280WatchdogTimer_TimeoutAction) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290VNCConsole_AuthenticationMethod) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsComputerSystemV1280WatchdogWarningActions returns the union data inside the ComputerSystemV1280WatchdogTimer_WarningAction as a ComputerSystemV1280WatchdogWarningActions
-func (t ComputerSystemV1280WatchdogTimer_WarningAction) AsComputerSystemV1280WatchdogWarningActions() (ComputerSystemV1280WatchdogWarningActions, error) {
-	var body ComputerSystemV1280WatchdogWarningActions
+// AsComputerSystemV1290ConsoleAccessMode returns the union data inside the ComputerSystemV1290VNCConsole_SupportedAccessModes_Item as a ComputerSystemV1290ConsoleAccessMode
+func (t ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) AsComputerSystemV1290ConsoleAccessMode() (ComputerSystemV1290ConsoleAccessMode, error) {
+	var body ComputerSystemV1290ConsoleAccessMode
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280WatchdogWarningActions overwrites any union data inside the ComputerSystemV1280WatchdogTimer_WarningAction as the provided ComputerSystemV1280WatchdogWarningActions
-func (t *ComputerSystemV1280WatchdogTimer_WarningAction) FromComputerSystemV1280WatchdogWarningActions(v ComputerSystemV1280WatchdogWarningActions) error {
+// FromComputerSystemV1290ConsoleAccessMode overwrites any union data inside the ComputerSystemV1290VNCConsole_SupportedAccessModes_Item as the provided ComputerSystemV1290ConsoleAccessMode
+func (t *ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) FromComputerSystemV1290ConsoleAccessMode(v ComputerSystemV1290ConsoleAccessMode) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280WatchdogWarningActions performs a merge with any union data inside the ComputerSystemV1280WatchdogTimer_WarningAction, using the provided ComputerSystemV1280WatchdogWarningActions
-func (t *ComputerSystemV1280WatchdogTimer_WarningAction) MergeComputerSystemV1280WatchdogWarningActions(v ComputerSystemV1280WatchdogWarningActions) error {
+// MergeComputerSystemV1290ConsoleAccessMode performs a merge with any union data inside the ComputerSystemV1290VNCConsole_SupportedAccessModes_Item, using the provided ComputerSystemV1290ConsoleAccessMode
+func (t *ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) MergeComputerSystemV1290ConsoleAccessMode(v ComputerSystemV1290ConsoleAccessMode) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8299,22 +8840,22 @@ func (t *ComputerSystemV1280WatchdogTimer_WarningAction) MergeComputerSystemV128
 	return err
 }
 
-// AsComputerSystemV1280WatchdogTimerWarningAction1 returns the union data inside the ComputerSystemV1280WatchdogTimer_WarningAction as a ComputerSystemV1280WatchdogTimerWarningAction1
-func (t ComputerSystemV1280WatchdogTimer_WarningAction) AsComputerSystemV1280WatchdogTimerWarningAction1() (ComputerSystemV1280WatchdogTimerWarningAction1, error) {
-	var body ComputerSystemV1280WatchdogTimerWarningAction1
+// AsComputerSystemV1290VNCConsoleSupportedAccessModes1 returns the union data inside the ComputerSystemV1290VNCConsole_SupportedAccessModes_Item as a ComputerSystemV1290VNCConsoleSupportedAccessModes1
+func (t ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) AsComputerSystemV1290VNCConsoleSupportedAccessModes1() (ComputerSystemV1290VNCConsoleSupportedAccessModes1, error) {
+	var body ComputerSystemV1290VNCConsoleSupportedAccessModes1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromComputerSystemV1280WatchdogTimerWarningAction1 overwrites any union data inside the ComputerSystemV1280WatchdogTimer_WarningAction as the provided ComputerSystemV1280WatchdogTimerWarningAction1
-func (t *ComputerSystemV1280WatchdogTimer_WarningAction) FromComputerSystemV1280WatchdogTimerWarningAction1(v ComputerSystemV1280WatchdogTimerWarningAction1) error {
+// FromComputerSystemV1290VNCConsoleSupportedAccessModes1 overwrites any union data inside the ComputerSystemV1290VNCConsole_SupportedAccessModes_Item as the provided ComputerSystemV1290VNCConsoleSupportedAccessModes1
+func (t *ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) FromComputerSystemV1290VNCConsoleSupportedAccessModes1(v ComputerSystemV1290VNCConsoleSupportedAccessModes1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeComputerSystemV1280WatchdogTimerWarningAction1 performs a merge with any union data inside the ComputerSystemV1280WatchdogTimer_WarningAction, using the provided ComputerSystemV1280WatchdogTimerWarningAction1
-func (t *ComputerSystemV1280WatchdogTimer_WarningAction) MergeComputerSystemV1280WatchdogTimerWarningAction1(v ComputerSystemV1280WatchdogTimerWarningAction1) error {
+// MergeComputerSystemV1290VNCConsoleSupportedAccessModes1 performs a merge with any union data inside the ComputerSystemV1290VNCConsole_SupportedAccessModes_Item, using the provided ComputerSystemV1290VNCConsoleSupportedAccessModes1
+func (t *ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) MergeComputerSystemV1290VNCConsoleSupportedAccessModes1(v ComputerSystemV1290VNCConsoleSupportedAccessModes1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8325,32 +8866,32 @@ func (t *ComputerSystemV1280WatchdogTimer_WarningAction) MergeComputerSystemV128
 	return err
 }
 
-func (t ComputerSystemV1280WatchdogTimer_WarningAction) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ComputerSystemV1280WatchdogTimer_WarningAction) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290VNCConsole_SupportedAccessModes_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsControlV180ControlMode returns the union data inside the ControlV180ControlRangeExcerpt_ControlMode as a ControlV180ControlMode
-func (t ControlV180ControlRangeExcerpt_ControlMode) AsControlV180ControlMode() (ControlV180ControlMode, error) {
-	var body ControlV180ControlMode
+// AsComputerSystemV1290WatchdogTimeoutActions returns the union data inside the ComputerSystemV1290WatchdogTimer_TimeoutAction as a ComputerSystemV1290WatchdogTimeoutActions
+func (t ComputerSystemV1290WatchdogTimer_TimeoutAction) AsComputerSystemV1290WatchdogTimeoutActions() (ComputerSystemV1290WatchdogTimeoutActions, error) {
+	var body ComputerSystemV1290WatchdogTimeoutActions
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromControlV180ControlMode overwrites any union data inside the ControlV180ControlRangeExcerpt_ControlMode as the provided ControlV180ControlMode
-func (t *ControlV180ControlRangeExcerpt_ControlMode) FromControlV180ControlMode(v ControlV180ControlMode) error {
+// FromComputerSystemV1290WatchdogTimeoutActions overwrites any union data inside the ComputerSystemV1290WatchdogTimer_TimeoutAction as the provided ComputerSystemV1290WatchdogTimeoutActions
+func (t *ComputerSystemV1290WatchdogTimer_TimeoutAction) FromComputerSystemV1290WatchdogTimeoutActions(v ComputerSystemV1290WatchdogTimeoutActions) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeControlV180ControlMode performs a merge with any union data inside the ControlV180ControlRangeExcerpt_ControlMode, using the provided ControlV180ControlMode
-func (t *ControlV180ControlRangeExcerpt_ControlMode) MergeControlV180ControlMode(v ControlV180ControlMode) error {
+// MergeComputerSystemV1290WatchdogTimeoutActions performs a merge with any union data inside the ComputerSystemV1290WatchdogTimer_TimeoutAction, using the provided ComputerSystemV1290WatchdogTimeoutActions
+func (t *ComputerSystemV1290WatchdogTimer_TimeoutAction) MergeComputerSystemV1290WatchdogTimeoutActions(v ComputerSystemV1290WatchdogTimeoutActions) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8361,22 +8902,22 @@ func (t *ControlV180ControlRangeExcerpt_ControlMode) MergeControlV180ControlMode
 	return err
 }
 
-// AsControlV180ControlRangeExcerptControlMode1 returns the union data inside the ControlV180ControlRangeExcerpt_ControlMode as a ControlV180ControlRangeExcerptControlMode1
-func (t ControlV180ControlRangeExcerpt_ControlMode) AsControlV180ControlRangeExcerptControlMode1() (ControlV180ControlRangeExcerptControlMode1, error) {
-	var body ControlV180ControlRangeExcerptControlMode1
+// AsComputerSystemV1290WatchdogTimerTimeoutAction1 returns the union data inside the ComputerSystemV1290WatchdogTimer_TimeoutAction as a ComputerSystemV1290WatchdogTimerTimeoutAction1
+func (t ComputerSystemV1290WatchdogTimer_TimeoutAction) AsComputerSystemV1290WatchdogTimerTimeoutAction1() (ComputerSystemV1290WatchdogTimerTimeoutAction1, error) {
+	var body ComputerSystemV1290WatchdogTimerTimeoutAction1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromControlV180ControlRangeExcerptControlMode1 overwrites any union data inside the ControlV180ControlRangeExcerpt_ControlMode as the provided ControlV180ControlRangeExcerptControlMode1
-func (t *ControlV180ControlRangeExcerpt_ControlMode) FromControlV180ControlRangeExcerptControlMode1(v ControlV180ControlRangeExcerptControlMode1) error {
+// FromComputerSystemV1290WatchdogTimerTimeoutAction1 overwrites any union data inside the ComputerSystemV1290WatchdogTimer_TimeoutAction as the provided ComputerSystemV1290WatchdogTimerTimeoutAction1
+func (t *ComputerSystemV1290WatchdogTimer_TimeoutAction) FromComputerSystemV1290WatchdogTimerTimeoutAction1(v ComputerSystemV1290WatchdogTimerTimeoutAction1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeControlV180ControlRangeExcerptControlMode1 performs a merge with any union data inside the ControlV180ControlRangeExcerpt_ControlMode, using the provided ControlV180ControlRangeExcerptControlMode1
-func (t *ControlV180ControlRangeExcerpt_ControlMode) MergeControlV180ControlRangeExcerptControlMode1(v ControlV180ControlRangeExcerptControlMode1) error {
+// MergeComputerSystemV1290WatchdogTimerTimeoutAction1 performs a merge with any union data inside the ComputerSystemV1290WatchdogTimer_TimeoutAction, using the provided ComputerSystemV1290WatchdogTimerTimeoutAction1
+func (t *ComputerSystemV1290WatchdogTimer_TimeoutAction) MergeComputerSystemV1290WatchdogTimerTimeoutAction1(v ComputerSystemV1290WatchdogTimerTimeoutAction1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8387,12 +8928,136 @@ func (t *ControlV180ControlRangeExcerpt_ControlMode) MergeControlV180ControlRang
 	return err
 }
 
-func (t ControlV180ControlRangeExcerpt_ControlMode) MarshalJSON() ([]byte, error) {
+func (t ComputerSystemV1290WatchdogTimer_TimeoutAction) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ControlV180ControlRangeExcerpt_ControlMode) UnmarshalJSON(b []byte) error {
+func (t *ComputerSystemV1290WatchdogTimer_TimeoutAction) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsComputerSystemV1290WatchdogWarningActions returns the union data inside the ComputerSystemV1290WatchdogTimer_WarningAction as a ComputerSystemV1290WatchdogWarningActions
+func (t ComputerSystemV1290WatchdogTimer_WarningAction) AsComputerSystemV1290WatchdogWarningActions() (ComputerSystemV1290WatchdogWarningActions, error) {
+	var body ComputerSystemV1290WatchdogWarningActions
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290WatchdogWarningActions overwrites any union data inside the ComputerSystemV1290WatchdogTimer_WarningAction as the provided ComputerSystemV1290WatchdogWarningActions
+func (t *ComputerSystemV1290WatchdogTimer_WarningAction) FromComputerSystemV1290WatchdogWarningActions(v ComputerSystemV1290WatchdogWarningActions) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290WatchdogWarningActions performs a merge with any union data inside the ComputerSystemV1290WatchdogTimer_WarningAction, using the provided ComputerSystemV1290WatchdogWarningActions
+func (t *ComputerSystemV1290WatchdogTimer_WarningAction) MergeComputerSystemV1290WatchdogWarningActions(v ComputerSystemV1290WatchdogWarningActions) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsComputerSystemV1290WatchdogTimerWarningAction1 returns the union data inside the ComputerSystemV1290WatchdogTimer_WarningAction as a ComputerSystemV1290WatchdogTimerWarningAction1
+func (t ComputerSystemV1290WatchdogTimer_WarningAction) AsComputerSystemV1290WatchdogTimerWarningAction1() (ComputerSystemV1290WatchdogTimerWarningAction1, error) {
+	var body ComputerSystemV1290WatchdogTimerWarningAction1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromComputerSystemV1290WatchdogTimerWarningAction1 overwrites any union data inside the ComputerSystemV1290WatchdogTimer_WarningAction as the provided ComputerSystemV1290WatchdogTimerWarningAction1
+func (t *ComputerSystemV1290WatchdogTimer_WarningAction) FromComputerSystemV1290WatchdogTimerWarningAction1(v ComputerSystemV1290WatchdogTimerWarningAction1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeComputerSystemV1290WatchdogTimerWarningAction1 performs a merge with any union data inside the ComputerSystemV1290WatchdogTimer_WarningAction, using the provided ComputerSystemV1290WatchdogTimerWarningAction1
+func (t *ComputerSystemV1290WatchdogTimer_WarningAction) MergeComputerSystemV1290WatchdogTimerWarningAction1(v ComputerSystemV1290WatchdogTimerWarningAction1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ComputerSystemV1290WatchdogTimer_WarningAction) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ComputerSystemV1290WatchdogTimer_WarningAction) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsControlV181ControlMode returns the union data inside the ControlV181ControlRangeExcerpt_ControlMode as a ControlV181ControlMode
+func (t ControlV181ControlRangeExcerpt_ControlMode) AsControlV181ControlMode() (ControlV181ControlMode, error) {
+	var body ControlV181ControlMode
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromControlV181ControlMode overwrites any union data inside the ControlV181ControlRangeExcerpt_ControlMode as the provided ControlV181ControlMode
+func (t *ControlV181ControlRangeExcerpt_ControlMode) FromControlV181ControlMode(v ControlV181ControlMode) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeControlV181ControlMode performs a merge with any union data inside the ControlV181ControlRangeExcerpt_ControlMode, using the provided ControlV181ControlMode
+func (t *ControlV181ControlRangeExcerpt_ControlMode) MergeControlV181ControlMode(v ControlV181ControlMode) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsControlV181ControlRangeExcerptControlMode1 returns the union data inside the ControlV181ControlRangeExcerpt_ControlMode as a ControlV181ControlRangeExcerptControlMode1
+func (t ControlV181ControlRangeExcerpt_ControlMode) AsControlV181ControlRangeExcerptControlMode1() (ControlV181ControlRangeExcerptControlMode1, error) {
+	var body ControlV181ControlRangeExcerptControlMode1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromControlV181ControlRangeExcerptControlMode1 overwrites any union data inside the ControlV181ControlRangeExcerpt_ControlMode as the provided ControlV181ControlRangeExcerptControlMode1
+func (t *ControlV181ControlRangeExcerpt_ControlMode) FromControlV181ControlRangeExcerptControlMode1(v ControlV181ControlRangeExcerptControlMode1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeControlV181ControlRangeExcerptControlMode1 performs a merge with any union data inside the ControlV181ControlRangeExcerpt_ControlMode, using the provided ControlV181ControlRangeExcerptControlMode1
+func (t *ControlV181ControlRangeExcerpt_ControlMode) MergeControlV181ControlRangeExcerptControlMode1(v ControlV181ControlRangeExcerptControlMode1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t ControlV181ControlRangeExcerpt_ControlMode) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *ControlV181ControlRangeExcerpt_ControlMode) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -8955,22 +9620,22 @@ func (t *ManagerV1250Manager_UUID) UnmarshalJSON(b []byte) error {
 	return err
 }
 
-// AsPCIeDevicePCIeTypes returns the union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as a PCIeDevicePCIeTypes
-func (t PCIeDeviceV1220PCIeInterface_MaxPCIeType) AsPCIeDevicePCIeTypes() (PCIeDevicePCIeTypes, error) {
+// AsPCIeDevicePCIeTypes returns the union data inside the PCIeDeviceV1230PCIeInterface_MaxPCIeType as a PCIeDevicePCIeTypes
+func (t PCIeDeviceV1230PCIeInterface_MaxPCIeType) AsPCIeDevicePCIeTypes() (PCIeDevicePCIeTypes, error) {
 	var body PCIeDevicePCIeTypes
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromPCIeDevicePCIeTypes overwrites any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as the provided PCIeDevicePCIeTypes
-func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) FromPCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+// FromPCIeDevicePCIeTypes overwrites any union data inside the PCIeDeviceV1230PCIeInterface_MaxPCIeType as the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1230PCIeInterface_MaxPCIeType) FromPCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergePCIeDevicePCIeTypes performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType, using the provided PCIeDevicePCIeTypes
-func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) MergePCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+// MergePCIeDevicePCIeTypes performs a merge with any union data inside the PCIeDeviceV1230PCIeInterface_MaxPCIeType, using the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1230PCIeInterface_MaxPCIeType) MergePCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -8981,22 +9646,22 @@ func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) MergePCIeDevicePCIeTypes(v PC
 	return err
 }
 
-// AsPCIeDeviceV1220PCIeInterfaceMaxPCIeType1 returns the union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as a PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
-func (t PCIeDeviceV1220PCIeInterface_MaxPCIeType) AsPCIeDeviceV1220PCIeInterfaceMaxPCIeType1() (PCIeDeviceV1220PCIeInterfaceMaxPCIeType1, error) {
-	var body PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
+// AsPCIeDeviceV1230PCIeInterfaceMaxPCIeType1 returns the union data inside the PCIeDeviceV1230PCIeInterface_MaxPCIeType as a PCIeDeviceV1230PCIeInterfaceMaxPCIeType1
+func (t PCIeDeviceV1230PCIeInterface_MaxPCIeType) AsPCIeDeviceV1230PCIeInterfaceMaxPCIeType1() (PCIeDeviceV1230PCIeInterfaceMaxPCIeType1, error) {
+	var body PCIeDeviceV1230PCIeInterfaceMaxPCIeType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromPCIeDeviceV1220PCIeInterfaceMaxPCIeType1 overwrites any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType as the provided PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
-func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) FromPCIeDeviceV1220PCIeInterfaceMaxPCIeType1(v PCIeDeviceV1220PCIeInterfaceMaxPCIeType1) error {
+// FromPCIeDeviceV1230PCIeInterfaceMaxPCIeType1 overwrites any union data inside the PCIeDeviceV1230PCIeInterface_MaxPCIeType as the provided PCIeDeviceV1230PCIeInterfaceMaxPCIeType1
+func (t *PCIeDeviceV1230PCIeInterface_MaxPCIeType) FromPCIeDeviceV1230PCIeInterfaceMaxPCIeType1(v PCIeDeviceV1230PCIeInterfaceMaxPCIeType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergePCIeDeviceV1220PCIeInterfaceMaxPCIeType1 performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_MaxPCIeType, using the provided PCIeDeviceV1220PCIeInterfaceMaxPCIeType1
-func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) MergePCIeDeviceV1220PCIeInterfaceMaxPCIeType1(v PCIeDeviceV1220PCIeInterfaceMaxPCIeType1) error {
+// MergePCIeDeviceV1230PCIeInterfaceMaxPCIeType1 performs a merge with any union data inside the PCIeDeviceV1230PCIeInterface_MaxPCIeType, using the provided PCIeDeviceV1230PCIeInterfaceMaxPCIeType1
+func (t *PCIeDeviceV1230PCIeInterface_MaxPCIeType) MergePCIeDeviceV1230PCIeInterfaceMaxPCIeType1(v PCIeDeviceV1230PCIeInterfaceMaxPCIeType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9007,32 +9672,32 @@ func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) MergePCIeDeviceV1220PCIeInter
 	return err
 }
 
-func (t PCIeDeviceV1220PCIeInterface_MaxPCIeType) MarshalJSON() ([]byte, error) {
+func (t PCIeDeviceV1230PCIeInterface_MaxPCIeType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *PCIeDeviceV1220PCIeInterface_MaxPCIeType) UnmarshalJSON(b []byte) error {
+func (t *PCIeDeviceV1230PCIeInterface_MaxPCIeType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsPCIeDevicePCIeTypes returns the union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as a PCIeDevicePCIeTypes
-func (t PCIeDeviceV1220PCIeInterface_PCIeType) AsPCIeDevicePCIeTypes() (PCIeDevicePCIeTypes, error) {
+// AsPCIeDevicePCIeTypes returns the union data inside the PCIeDeviceV1230PCIeInterface_PCIeType as a PCIeDevicePCIeTypes
+func (t PCIeDeviceV1230PCIeInterface_PCIeType) AsPCIeDevicePCIeTypes() (PCIeDevicePCIeTypes, error) {
 	var body PCIeDevicePCIeTypes
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromPCIeDevicePCIeTypes overwrites any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as the provided PCIeDevicePCIeTypes
-func (t *PCIeDeviceV1220PCIeInterface_PCIeType) FromPCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+// FromPCIeDevicePCIeTypes overwrites any union data inside the PCIeDeviceV1230PCIeInterface_PCIeType as the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1230PCIeInterface_PCIeType) FromPCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergePCIeDevicePCIeTypes performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType, using the provided PCIeDevicePCIeTypes
-func (t *PCIeDeviceV1220PCIeInterface_PCIeType) MergePCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
+// MergePCIeDevicePCIeTypes performs a merge with any union data inside the PCIeDeviceV1230PCIeInterface_PCIeType, using the provided PCIeDevicePCIeTypes
+func (t *PCIeDeviceV1230PCIeInterface_PCIeType) MergePCIeDevicePCIeTypes(v PCIeDevicePCIeTypes) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9043,22 +9708,22 @@ func (t *PCIeDeviceV1220PCIeInterface_PCIeType) MergePCIeDevicePCIeTypes(v PCIeD
 	return err
 }
 
-// AsPCIeDeviceV1220PCIeInterfacePCIeType1 returns the union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as a PCIeDeviceV1220PCIeInterfacePCIeType1
-func (t PCIeDeviceV1220PCIeInterface_PCIeType) AsPCIeDeviceV1220PCIeInterfacePCIeType1() (PCIeDeviceV1220PCIeInterfacePCIeType1, error) {
-	var body PCIeDeviceV1220PCIeInterfacePCIeType1
+// AsPCIeDeviceV1230PCIeInterfacePCIeType1 returns the union data inside the PCIeDeviceV1230PCIeInterface_PCIeType as a PCIeDeviceV1230PCIeInterfacePCIeType1
+func (t PCIeDeviceV1230PCIeInterface_PCIeType) AsPCIeDeviceV1230PCIeInterfacePCIeType1() (PCIeDeviceV1230PCIeInterfacePCIeType1, error) {
+	var body PCIeDeviceV1230PCIeInterfacePCIeType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromPCIeDeviceV1220PCIeInterfacePCIeType1 overwrites any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType as the provided PCIeDeviceV1220PCIeInterfacePCIeType1
-func (t *PCIeDeviceV1220PCIeInterface_PCIeType) FromPCIeDeviceV1220PCIeInterfacePCIeType1(v PCIeDeviceV1220PCIeInterfacePCIeType1) error {
+// FromPCIeDeviceV1230PCIeInterfacePCIeType1 overwrites any union data inside the PCIeDeviceV1230PCIeInterface_PCIeType as the provided PCIeDeviceV1230PCIeInterfacePCIeType1
+func (t *PCIeDeviceV1230PCIeInterface_PCIeType) FromPCIeDeviceV1230PCIeInterfacePCIeType1(v PCIeDeviceV1230PCIeInterfacePCIeType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergePCIeDeviceV1220PCIeInterfacePCIeType1 performs a merge with any union data inside the PCIeDeviceV1220PCIeInterface_PCIeType, using the provided PCIeDeviceV1220PCIeInterfacePCIeType1
-func (t *PCIeDeviceV1220PCIeInterface_PCIeType) MergePCIeDeviceV1220PCIeInterfacePCIeType1(v PCIeDeviceV1220PCIeInterfacePCIeType1) error {
+// MergePCIeDeviceV1230PCIeInterfacePCIeType1 performs a merge with any union data inside the PCIeDeviceV1230PCIeInterface_PCIeType, using the provided PCIeDeviceV1230PCIeInterfacePCIeType1
+func (t *PCIeDeviceV1230PCIeInterface_PCIeType) MergePCIeDeviceV1230PCIeInterfacePCIeType1(v PCIeDeviceV1230PCIeInterfacePCIeType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9069,12 +9734,12 @@ func (t *PCIeDeviceV1220PCIeInterface_PCIeType) MergePCIeDeviceV1220PCIeInterfac
 	return err
 }
 
-func (t PCIeDeviceV1220PCIeInterface_PCIeType) MarshalJSON() ([]byte, error) {
+func (t PCIeDeviceV1230PCIeInterface_PCIeType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *PCIeDeviceV1220PCIeInterface_PCIeType) UnmarshalJSON(b []byte) error {
+func (t *PCIeDeviceV1230PCIeInterface_PCIeType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -9141,22 +9806,22 @@ func (t *ProcessorCollectionProcessorCollection_Description) UnmarshalJSON(b []b
 	return err
 }
 
-// AsResourceUUID returns the union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as a ResourceUUID
-func (t ProcessorV1230FpgaReconfigurationSlot_UUID) AsResourceUUID() (ResourceUUID, error) {
+// AsResourceUUID returns the union data inside the ProcessorV1240FpgaReconfigurationSlot_UUID as a ResourceUUID
+func (t ProcessorV1240FpgaReconfigurationSlot_UUID) AsResourceUUID() (ResourceUUID, error) {
 	var body ResourceUUID
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceUUID overwrites any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as the provided ResourceUUID
-func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) FromResourceUUID(v ResourceUUID) error {
+// FromResourceUUID overwrites any union data inside the ProcessorV1240FpgaReconfigurationSlot_UUID as the provided ResourceUUID
+func (t *ProcessorV1240FpgaReconfigurationSlot_UUID) FromResourceUUID(v ResourceUUID) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceUUID performs a merge with any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID, using the provided ResourceUUID
-func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) MergeResourceUUID(v ResourceUUID) error {
+// MergeResourceUUID performs a merge with any union data inside the ProcessorV1240FpgaReconfigurationSlot_UUID, using the provided ResourceUUID
+func (t *ProcessorV1240FpgaReconfigurationSlot_UUID) MergeResourceUUID(v ResourceUUID) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9167,22 +9832,22 @@ func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) MergeResourceUUID(v Resourc
 	return err
 }
 
-// AsProcessorV1230FpgaReconfigurationSlotUUID1 returns the union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as a ProcessorV1230FpgaReconfigurationSlotUUID1
-func (t ProcessorV1230FpgaReconfigurationSlot_UUID) AsProcessorV1230FpgaReconfigurationSlotUUID1() (ProcessorV1230FpgaReconfigurationSlotUUID1, error) {
-	var body ProcessorV1230FpgaReconfigurationSlotUUID1
+// AsProcessorV1240FpgaReconfigurationSlotUUID1 returns the union data inside the ProcessorV1240FpgaReconfigurationSlot_UUID as a ProcessorV1240FpgaReconfigurationSlotUUID1
+func (t ProcessorV1240FpgaReconfigurationSlot_UUID) AsProcessorV1240FpgaReconfigurationSlotUUID1() (ProcessorV1240FpgaReconfigurationSlotUUID1, error) {
+	var body ProcessorV1240FpgaReconfigurationSlotUUID1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230FpgaReconfigurationSlotUUID1 overwrites any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID as the provided ProcessorV1230FpgaReconfigurationSlotUUID1
-func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) FromProcessorV1230FpgaReconfigurationSlotUUID1(v ProcessorV1230FpgaReconfigurationSlotUUID1) error {
+// FromProcessorV1240FpgaReconfigurationSlotUUID1 overwrites any union data inside the ProcessorV1240FpgaReconfigurationSlot_UUID as the provided ProcessorV1240FpgaReconfigurationSlotUUID1
+func (t *ProcessorV1240FpgaReconfigurationSlot_UUID) FromProcessorV1240FpgaReconfigurationSlotUUID1(v ProcessorV1240FpgaReconfigurationSlotUUID1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230FpgaReconfigurationSlotUUID1 performs a merge with any union data inside the ProcessorV1230FpgaReconfigurationSlot_UUID, using the provided ProcessorV1230FpgaReconfigurationSlotUUID1
-func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) MergeProcessorV1230FpgaReconfigurationSlotUUID1(v ProcessorV1230FpgaReconfigurationSlotUUID1) error {
+// MergeProcessorV1240FpgaReconfigurationSlotUUID1 performs a merge with any union data inside the ProcessorV1240FpgaReconfigurationSlot_UUID, using the provided ProcessorV1240FpgaReconfigurationSlotUUID1
+func (t *ProcessorV1240FpgaReconfigurationSlot_UUID) MergeProcessorV1240FpgaReconfigurationSlotUUID1(v ProcessorV1240FpgaReconfigurationSlotUUID1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9193,32 +9858,32 @@ func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) MergeProcessorV1230FpgaReco
 	return err
 }
 
-func (t ProcessorV1230FpgaReconfigurationSlot_UUID) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240FpgaReconfigurationSlot_UUID) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230FpgaReconfigurationSlot_UUID) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240FpgaReconfigurationSlot_UUID) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsOdataV4IdRef returns the union data inside the ProcessorV1230Links_GraphicsController as a OdataV4IdRef
-func (t ProcessorV1230Links_GraphicsController) AsOdataV4IdRef() (OdataV4IdRef, error) {
+// AsOdataV4IdRef returns the union data inside the ProcessorV1240Links_GraphicsController as a OdataV4IdRef
+func (t ProcessorV1240Links_GraphicsController) AsOdataV4IdRef() (OdataV4IdRef, error) {
 	var body OdataV4IdRef
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromOdataV4IdRef overwrites any union data inside the ProcessorV1230Links_GraphicsController as the provided OdataV4IdRef
-func (t *ProcessorV1230Links_GraphicsController) FromOdataV4IdRef(v OdataV4IdRef) error {
+// FromOdataV4IdRef overwrites any union data inside the ProcessorV1240Links_GraphicsController as the provided OdataV4IdRef
+func (t *ProcessorV1240Links_GraphicsController) FromOdataV4IdRef(v OdataV4IdRef) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeOdataV4IdRef performs a merge with any union data inside the ProcessorV1230Links_GraphicsController, using the provided OdataV4IdRef
-func (t *ProcessorV1230Links_GraphicsController) MergeOdataV4IdRef(v OdataV4IdRef) error {
+// MergeOdataV4IdRef performs a merge with any union data inside the ProcessorV1240Links_GraphicsController, using the provided OdataV4IdRef
+func (t *ProcessorV1240Links_GraphicsController) MergeOdataV4IdRef(v OdataV4IdRef) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9229,22 +9894,22 @@ func (t *ProcessorV1230Links_GraphicsController) MergeOdataV4IdRef(v OdataV4IdRe
 	return err
 }
 
-// AsProcessorV1230LinksGraphicsController1 returns the union data inside the ProcessorV1230Links_GraphicsController as a ProcessorV1230LinksGraphicsController1
-func (t ProcessorV1230Links_GraphicsController) AsProcessorV1230LinksGraphicsController1() (ProcessorV1230LinksGraphicsController1, error) {
-	var body ProcessorV1230LinksGraphicsController1
+// AsProcessorV1240LinksGraphicsController1 returns the union data inside the ProcessorV1240Links_GraphicsController as a ProcessorV1240LinksGraphicsController1
+func (t ProcessorV1240Links_GraphicsController) AsProcessorV1240LinksGraphicsController1() (ProcessorV1240LinksGraphicsController1, error) {
+	var body ProcessorV1240LinksGraphicsController1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230LinksGraphicsController1 overwrites any union data inside the ProcessorV1230Links_GraphicsController as the provided ProcessorV1230LinksGraphicsController1
-func (t *ProcessorV1230Links_GraphicsController) FromProcessorV1230LinksGraphicsController1(v ProcessorV1230LinksGraphicsController1) error {
+// FromProcessorV1240LinksGraphicsController1 overwrites any union data inside the ProcessorV1240Links_GraphicsController as the provided ProcessorV1240LinksGraphicsController1
+func (t *ProcessorV1240Links_GraphicsController) FromProcessorV1240LinksGraphicsController1(v ProcessorV1240LinksGraphicsController1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230LinksGraphicsController1 performs a merge with any union data inside the ProcessorV1230Links_GraphicsController, using the provided ProcessorV1230LinksGraphicsController1
-func (t *ProcessorV1230Links_GraphicsController) MergeProcessorV1230LinksGraphicsController1(v ProcessorV1230LinksGraphicsController1) error {
+// MergeProcessorV1240LinksGraphicsController1 performs a merge with any union data inside the ProcessorV1240Links_GraphicsController, using the provided ProcessorV1240LinksGraphicsController1
+func (t *ProcessorV1240Links_GraphicsController) MergeProcessorV1240LinksGraphicsController1(v ProcessorV1240LinksGraphicsController1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9255,32 +9920,32 @@ func (t *ProcessorV1230Links_GraphicsController) MergeProcessorV1230LinksGraphic
 	return err
 }
 
-func (t ProcessorV1230Links_GraphicsController) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Links_GraphicsController) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Links_GraphicsController) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Links_GraphicsController) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230BaseSpeedPriorityState returns the union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as a ProcessorV1230BaseSpeedPriorityState
-func (t ProcessorV1230Processor_BaseSpeedPriorityState) AsProcessorV1230BaseSpeedPriorityState() (ProcessorV1230BaseSpeedPriorityState, error) {
-	var body ProcessorV1230BaseSpeedPriorityState
+// AsProcessorV1240BaseSpeedPriorityState returns the union data inside the ProcessorV1240Processor_BaseSpeedPriorityState as a ProcessorV1240BaseSpeedPriorityState
+func (t ProcessorV1240Processor_BaseSpeedPriorityState) AsProcessorV1240BaseSpeedPriorityState() (ProcessorV1240BaseSpeedPriorityState, error) {
+	var body ProcessorV1240BaseSpeedPriorityState
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230BaseSpeedPriorityState overwrites any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as the provided ProcessorV1230BaseSpeedPriorityState
-func (t *ProcessorV1230Processor_BaseSpeedPriorityState) FromProcessorV1230BaseSpeedPriorityState(v ProcessorV1230BaseSpeedPriorityState) error {
+// FromProcessorV1240BaseSpeedPriorityState overwrites any union data inside the ProcessorV1240Processor_BaseSpeedPriorityState as the provided ProcessorV1240BaseSpeedPriorityState
+func (t *ProcessorV1240Processor_BaseSpeedPriorityState) FromProcessorV1240BaseSpeedPriorityState(v ProcessorV1240BaseSpeedPriorityState) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230BaseSpeedPriorityState performs a merge with any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState, using the provided ProcessorV1230BaseSpeedPriorityState
-func (t *ProcessorV1230Processor_BaseSpeedPriorityState) MergeProcessorV1230BaseSpeedPriorityState(v ProcessorV1230BaseSpeedPriorityState) error {
+// MergeProcessorV1240BaseSpeedPriorityState performs a merge with any union data inside the ProcessorV1240Processor_BaseSpeedPriorityState, using the provided ProcessorV1240BaseSpeedPriorityState
+func (t *ProcessorV1240Processor_BaseSpeedPriorityState) MergeProcessorV1240BaseSpeedPriorityState(v ProcessorV1240BaseSpeedPriorityState) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9291,22 +9956,22 @@ func (t *ProcessorV1230Processor_BaseSpeedPriorityState) MergeProcessorV1230Base
 	return err
 }
 
-// AsProcessorV1230ProcessorBaseSpeedPriorityState1 returns the union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as a ProcessorV1230ProcessorBaseSpeedPriorityState1
-func (t ProcessorV1230Processor_BaseSpeedPriorityState) AsProcessorV1230ProcessorBaseSpeedPriorityState1() (ProcessorV1230ProcessorBaseSpeedPriorityState1, error) {
-	var body ProcessorV1230ProcessorBaseSpeedPriorityState1
+// AsProcessorV1240ProcessorBaseSpeedPriorityState1 returns the union data inside the ProcessorV1240Processor_BaseSpeedPriorityState as a ProcessorV1240ProcessorBaseSpeedPriorityState1
+func (t ProcessorV1240Processor_BaseSpeedPriorityState) AsProcessorV1240ProcessorBaseSpeedPriorityState1() (ProcessorV1240ProcessorBaseSpeedPriorityState1, error) {
+	var body ProcessorV1240ProcessorBaseSpeedPriorityState1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorBaseSpeedPriorityState1 overwrites any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState as the provided ProcessorV1230ProcessorBaseSpeedPriorityState1
-func (t *ProcessorV1230Processor_BaseSpeedPriorityState) FromProcessorV1230ProcessorBaseSpeedPriorityState1(v ProcessorV1230ProcessorBaseSpeedPriorityState1) error {
+// FromProcessorV1240ProcessorBaseSpeedPriorityState1 overwrites any union data inside the ProcessorV1240Processor_BaseSpeedPriorityState as the provided ProcessorV1240ProcessorBaseSpeedPriorityState1
+func (t *ProcessorV1240Processor_BaseSpeedPriorityState) FromProcessorV1240ProcessorBaseSpeedPriorityState1(v ProcessorV1240ProcessorBaseSpeedPriorityState1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorBaseSpeedPriorityState1 performs a merge with any union data inside the ProcessorV1230Processor_BaseSpeedPriorityState, using the provided ProcessorV1230ProcessorBaseSpeedPriorityState1
-func (t *ProcessorV1230Processor_BaseSpeedPriorityState) MergeProcessorV1230ProcessorBaseSpeedPriorityState1(v ProcessorV1230ProcessorBaseSpeedPriorityState1) error {
+// MergeProcessorV1240ProcessorBaseSpeedPriorityState1 performs a merge with any union data inside the ProcessorV1240Processor_BaseSpeedPriorityState, using the provided ProcessorV1240ProcessorBaseSpeedPriorityState1
+func (t *ProcessorV1240Processor_BaseSpeedPriorityState) MergeProcessorV1240ProcessorBaseSpeedPriorityState1(v ProcessorV1240ProcessorBaseSpeedPriorityState1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9317,32 +9982,32 @@ func (t *ProcessorV1230Processor_BaseSpeedPriorityState) MergeProcessorV1230Proc
 	return err
 }
 
-func (t ProcessorV1230Processor_BaseSpeedPriorityState) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_BaseSpeedPriorityState) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_BaseSpeedPriorityState) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_BaseSpeedPriorityState) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceDescription returns the union data inside the ProcessorV1230Processor_Description as a ResourceDescription
-func (t ProcessorV1230Processor_Description) AsResourceDescription() (ResourceDescription, error) {
+// AsResourceDescription returns the union data inside the ProcessorV1240Processor_Description as a ResourceDescription
+func (t ProcessorV1240Processor_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceDescription overwrites any union data inside the ProcessorV1230Processor_Description as the provided ResourceDescription
-func (t *ProcessorV1230Processor_Description) FromResourceDescription(v ResourceDescription) error {
+// FromResourceDescription overwrites any union data inside the ProcessorV1240Processor_Description as the provided ResourceDescription
+func (t *ProcessorV1240Processor_Description) FromResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceDescription performs a merge with any union data inside the ProcessorV1230Processor_Description, using the provided ResourceDescription
-func (t *ProcessorV1230Processor_Description) MergeResourceDescription(v ResourceDescription) error {
+// MergeResourceDescription performs a merge with any union data inside the ProcessorV1240Processor_Description, using the provided ResourceDescription
+func (t *ProcessorV1240Processor_Description) MergeResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9353,22 +10018,22 @@ func (t *ProcessorV1230Processor_Description) MergeResourceDescription(v Resourc
 	return err
 }
 
-// AsProcessorV1230ProcessorDescription1 returns the union data inside the ProcessorV1230Processor_Description as a ProcessorV1230ProcessorDescription1
-func (t ProcessorV1230Processor_Description) AsProcessorV1230ProcessorDescription1() (ProcessorV1230ProcessorDescription1, error) {
-	var body ProcessorV1230ProcessorDescription1
+// AsProcessorV1240ProcessorDescription1 returns the union data inside the ProcessorV1240Processor_Description as a ProcessorV1240ProcessorDescription1
+func (t ProcessorV1240Processor_Description) AsProcessorV1240ProcessorDescription1() (ProcessorV1240ProcessorDescription1, error) {
+	var body ProcessorV1240ProcessorDescription1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorDescription1 overwrites any union data inside the ProcessorV1230Processor_Description as the provided ProcessorV1230ProcessorDescription1
-func (t *ProcessorV1230Processor_Description) FromProcessorV1230ProcessorDescription1(v ProcessorV1230ProcessorDescription1) error {
+// FromProcessorV1240ProcessorDescription1 overwrites any union data inside the ProcessorV1240Processor_Description as the provided ProcessorV1240ProcessorDescription1
+func (t *ProcessorV1240Processor_Description) FromProcessorV1240ProcessorDescription1(v ProcessorV1240ProcessorDescription1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorDescription1 performs a merge with any union data inside the ProcessorV1230Processor_Description, using the provided ProcessorV1230ProcessorDescription1
-func (t *ProcessorV1230Processor_Description) MergeProcessorV1230ProcessorDescription1(v ProcessorV1230ProcessorDescription1) error {
+// MergeProcessorV1240ProcessorDescription1 performs a merge with any union data inside the ProcessorV1240Processor_Description, using the provided ProcessorV1240ProcessorDescription1
+func (t *ProcessorV1240Processor_Description) MergeProcessorV1240ProcessorDescription1(v ProcessorV1240ProcessorDescription1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9379,32 +10044,32 @@ func (t *ProcessorV1230Processor_Description) MergeProcessorV1230ProcessorDescri
 	return err
 }
 
-func (t ProcessorV1230Processor_Description) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_Description) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_Description) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_Description) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230InstructionSet returns the union data inside the ProcessorV1230Processor_InstructionSet as a ProcessorV1230InstructionSet
-func (t ProcessorV1230Processor_InstructionSet) AsProcessorV1230InstructionSet() (ProcessorV1230InstructionSet, error) {
-	var body ProcessorV1230InstructionSet
+// AsProcessorV1240InstructionSet returns the union data inside the ProcessorV1240Processor_InstructionSet as a ProcessorV1240InstructionSet
+func (t ProcessorV1240Processor_InstructionSet) AsProcessorV1240InstructionSet() (ProcessorV1240InstructionSet, error) {
+	var body ProcessorV1240InstructionSet
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230InstructionSet overwrites any union data inside the ProcessorV1230Processor_InstructionSet as the provided ProcessorV1230InstructionSet
-func (t *ProcessorV1230Processor_InstructionSet) FromProcessorV1230InstructionSet(v ProcessorV1230InstructionSet) error {
+// FromProcessorV1240InstructionSet overwrites any union data inside the ProcessorV1240Processor_InstructionSet as the provided ProcessorV1240InstructionSet
+func (t *ProcessorV1240Processor_InstructionSet) FromProcessorV1240InstructionSet(v ProcessorV1240InstructionSet) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230InstructionSet performs a merge with any union data inside the ProcessorV1230Processor_InstructionSet, using the provided ProcessorV1230InstructionSet
-func (t *ProcessorV1230Processor_InstructionSet) MergeProcessorV1230InstructionSet(v ProcessorV1230InstructionSet) error {
+// MergeProcessorV1240InstructionSet performs a merge with any union data inside the ProcessorV1240Processor_InstructionSet, using the provided ProcessorV1240InstructionSet
+func (t *ProcessorV1240Processor_InstructionSet) MergeProcessorV1240InstructionSet(v ProcessorV1240InstructionSet) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9415,22 +10080,22 @@ func (t *ProcessorV1230Processor_InstructionSet) MergeProcessorV1230InstructionS
 	return err
 }
 
-// AsProcessorV1230ProcessorInstructionSet1 returns the union data inside the ProcessorV1230Processor_InstructionSet as a ProcessorV1230ProcessorInstructionSet1
-func (t ProcessorV1230Processor_InstructionSet) AsProcessorV1230ProcessorInstructionSet1() (ProcessorV1230ProcessorInstructionSet1, error) {
-	var body ProcessorV1230ProcessorInstructionSet1
+// AsProcessorV1240ProcessorInstructionSet1 returns the union data inside the ProcessorV1240Processor_InstructionSet as a ProcessorV1240ProcessorInstructionSet1
+func (t ProcessorV1240Processor_InstructionSet) AsProcessorV1240ProcessorInstructionSet1() (ProcessorV1240ProcessorInstructionSet1, error) {
+	var body ProcessorV1240ProcessorInstructionSet1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorInstructionSet1 overwrites any union data inside the ProcessorV1230Processor_InstructionSet as the provided ProcessorV1230ProcessorInstructionSet1
-func (t *ProcessorV1230Processor_InstructionSet) FromProcessorV1230ProcessorInstructionSet1(v ProcessorV1230ProcessorInstructionSet1) error {
+// FromProcessorV1240ProcessorInstructionSet1 overwrites any union data inside the ProcessorV1240Processor_InstructionSet as the provided ProcessorV1240ProcessorInstructionSet1
+func (t *ProcessorV1240Processor_InstructionSet) FromProcessorV1240ProcessorInstructionSet1(v ProcessorV1240ProcessorInstructionSet1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorInstructionSet1 performs a merge with any union data inside the ProcessorV1230Processor_InstructionSet, using the provided ProcessorV1230ProcessorInstructionSet1
-func (t *ProcessorV1230Processor_InstructionSet) MergeProcessorV1230ProcessorInstructionSet1(v ProcessorV1230ProcessorInstructionSet1) error {
+// MergeProcessorV1240ProcessorInstructionSet1 performs a merge with any union data inside the ProcessorV1240Processor_InstructionSet, using the provided ProcessorV1240ProcessorInstructionSet1
+func (t *ProcessorV1240Processor_InstructionSet) MergeProcessorV1240ProcessorInstructionSet1(v ProcessorV1240ProcessorInstructionSet1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9441,32 +10106,32 @@ func (t *ProcessorV1230Processor_InstructionSet) MergeProcessorV1230ProcessorIns
 	return err
 }
 
-func (t ProcessorV1230Processor_InstructionSet) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_InstructionSet) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_InstructionSet) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_InstructionSet) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsControlV180ControlRangeExcerpt returns the union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as a ControlV180ControlRangeExcerpt
-func (t ProcessorV1230Processor_OperatingSpeedRangeMHz) AsControlV180ControlRangeExcerpt() (ControlV180ControlRangeExcerpt, error) {
-	var body ControlV180ControlRangeExcerpt
+// AsControlV181ControlRangeExcerpt returns the union data inside the ProcessorV1240Processor_OperatingSpeedRangeMHz as a ControlV181ControlRangeExcerpt
+func (t ProcessorV1240Processor_OperatingSpeedRangeMHz) AsControlV181ControlRangeExcerpt() (ControlV181ControlRangeExcerpt, error) {
+	var body ControlV181ControlRangeExcerpt
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromControlV180ControlRangeExcerpt overwrites any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as the provided ControlV180ControlRangeExcerpt
-func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) FromControlV180ControlRangeExcerpt(v ControlV180ControlRangeExcerpt) error {
+// FromControlV181ControlRangeExcerpt overwrites any union data inside the ProcessorV1240Processor_OperatingSpeedRangeMHz as the provided ControlV181ControlRangeExcerpt
+func (t *ProcessorV1240Processor_OperatingSpeedRangeMHz) FromControlV181ControlRangeExcerpt(v ControlV181ControlRangeExcerpt) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeControlV180ControlRangeExcerpt performs a merge with any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz, using the provided ControlV180ControlRangeExcerpt
-func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) MergeControlV180ControlRangeExcerpt(v ControlV180ControlRangeExcerpt) error {
+// MergeControlV181ControlRangeExcerpt performs a merge with any union data inside the ProcessorV1240Processor_OperatingSpeedRangeMHz, using the provided ControlV181ControlRangeExcerpt
+func (t *ProcessorV1240Processor_OperatingSpeedRangeMHz) MergeControlV181ControlRangeExcerpt(v ControlV181ControlRangeExcerpt) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9477,22 +10142,22 @@ func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) MergeControlV180Control
 	return err
 }
 
-// AsProcessorV1230ProcessorOperatingSpeedRangeMHz1 returns the union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as a ProcessorV1230ProcessorOperatingSpeedRangeMHz1
-func (t ProcessorV1230Processor_OperatingSpeedRangeMHz) AsProcessorV1230ProcessorOperatingSpeedRangeMHz1() (ProcessorV1230ProcessorOperatingSpeedRangeMHz1, error) {
-	var body ProcessorV1230ProcessorOperatingSpeedRangeMHz1
+// AsProcessorV1240ProcessorOperatingSpeedRangeMHz1 returns the union data inside the ProcessorV1240Processor_OperatingSpeedRangeMHz as a ProcessorV1240ProcessorOperatingSpeedRangeMHz1
+func (t ProcessorV1240Processor_OperatingSpeedRangeMHz) AsProcessorV1240ProcessorOperatingSpeedRangeMHz1() (ProcessorV1240ProcessorOperatingSpeedRangeMHz1, error) {
+	var body ProcessorV1240ProcessorOperatingSpeedRangeMHz1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorOperatingSpeedRangeMHz1 overwrites any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz as the provided ProcessorV1230ProcessorOperatingSpeedRangeMHz1
-func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) FromProcessorV1230ProcessorOperatingSpeedRangeMHz1(v ProcessorV1230ProcessorOperatingSpeedRangeMHz1) error {
+// FromProcessorV1240ProcessorOperatingSpeedRangeMHz1 overwrites any union data inside the ProcessorV1240Processor_OperatingSpeedRangeMHz as the provided ProcessorV1240ProcessorOperatingSpeedRangeMHz1
+func (t *ProcessorV1240Processor_OperatingSpeedRangeMHz) FromProcessorV1240ProcessorOperatingSpeedRangeMHz1(v ProcessorV1240ProcessorOperatingSpeedRangeMHz1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorOperatingSpeedRangeMHz1 performs a merge with any union data inside the ProcessorV1230Processor_OperatingSpeedRangeMHz, using the provided ProcessorV1230ProcessorOperatingSpeedRangeMHz1
-func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) MergeProcessorV1230ProcessorOperatingSpeedRangeMHz1(v ProcessorV1230ProcessorOperatingSpeedRangeMHz1) error {
+// MergeProcessorV1240ProcessorOperatingSpeedRangeMHz1 performs a merge with any union data inside the ProcessorV1240Processor_OperatingSpeedRangeMHz, using the provided ProcessorV1240ProcessorOperatingSpeedRangeMHz1
+func (t *ProcessorV1240Processor_OperatingSpeedRangeMHz) MergeProcessorV1240ProcessorOperatingSpeedRangeMHz1(v ProcessorV1240ProcessorOperatingSpeedRangeMHz1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9503,32 +10168,32 @@ func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) MergeProcessorV1230Proc
 	return err
 }
 
-func (t ProcessorV1230Processor_OperatingSpeedRangeMHz) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_OperatingSpeedRangeMHz) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_OperatingSpeedRangeMHz) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_OperatingSpeedRangeMHz) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourcePowerState returns the union data inside the ProcessorV1230Processor_PowerState as a ResourcePowerState
-func (t ProcessorV1230Processor_PowerState) AsResourcePowerState() (ResourcePowerState, error) {
+// AsResourcePowerState returns the union data inside the ProcessorV1240Processor_PowerState as a ResourcePowerState
+func (t ProcessorV1240Processor_PowerState) AsResourcePowerState() (ResourcePowerState, error) {
 	var body ResourcePowerState
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourcePowerState overwrites any union data inside the ProcessorV1230Processor_PowerState as the provided ResourcePowerState
-func (t *ProcessorV1230Processor_PowerState) FromResourcePowerState(v ResourcePowerState) error {
+// FromResourcePowerState overwrites any union data inside the ProcessorV1240Processor_PowerState as the provided ResourcePowerState
+func (t *ProcessorV1240Processor_PowerState) FromResourcePowerState(v ResourcePowerState) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourcePowerState performs a merge with any union data inside the ProcessorV1230Processor_PowerState, using the provided ResourcePowerState
-func (t *ProcessorV1230Processor_PowerState) MergeResourcePowerState(v ResourcePowerState) error {
+// MergeResourcePowerState performs a merge with any union data inside the ProcessorV1240Processor_PowerState, using the provided ResourcePowerState
+func (t *ProcessorV1240Processor_PowerState) MergeResourcePowerState(v ResourcePowerState) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9539,22 +10204,22 @@ func (t *ProcessorV1230Processor_PowerState) MergeResourcePowerState(v ResourceP
 	return err
 }
 
-// AsProcessorV1230ProcessorPowerState1 returns the union data inside the ProcessorV1230Processor_PowerState as a ProcessorV1230ProcessorPowerState1
-func (t ProcessorV1230Processor_PowerState) AsProcessorV1230ProcessorPowerState1() (ProcessorV1230ProcessorPowerState1, error) {
-	var body ProcessorV1230ProcessorPowerState1
+// AsProcessorV1240ProcessorPowerState1 returns the union data inside the ProcessorV1240Processor_PowerState as a ProcessorV1240ProcessorPowerState1
+func (t ProcessorV1240Processor_PowerState) AsProcessorV1240ProcessorPowerState1() (ProcessorV1240ProcessorPowerState1, error) {
+	var body ProcessorV1240ProcessorPowerState1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorPowerState1 overwrites any union data inside the ProcessorV1230Processor_PowerState as the provided ProcessorV1230ProcessorPowerState1
-func (t *ProcessorV1230Processor_PowerState) FromProcessorV1230ProcessorPowerState1(v ProcessorV1230ProcessorPowerState1) error {
+// FromProcessorV1240ProcessorPowerState1 overwrites any union data inside the ProcessorV1240Processor_PowerState as the provided ProcessorV1240ProcessorPowerState1
+func (t *ProcessorV1240Processor_PowerState) FromProcessorV1240ProcessorPowerState1(v ProcessorV1240ProcessorPowerState1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorPowerState1 performs a merge with any union data inside the ProcessorV1230Processor_PowerState, using the provided ProcessorV1230ProcessorPowerState1
-func (t *ProcessorV1230Processor_PowerState) MergeProcessorV1230ProcessorPowerState1(v ProcessorV1230ProcessorPowerState1) error {
+// MergeProcessorV1240ProcessorPowerState1 performs a merge with any union data inside the ProcessorV1240Processor_PowerState, using the provided ProcessorV1240ProcessorPowerState1
+func (t *ProcessorV1240Processor_PowerState) MergeProcessorV1240ProcessorPowerState1(v ProcessorV1240ProcessorPowerState1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9565,32 +10230,32 @@ func (t *ProcessorV1230Processor_PowerState) MergeProcessorV1230ProcessorPowerSt
 	return err
 }
 
-func (t ProcessorV1230Processor_PowerState) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_PowerState) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_PowerState) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_PowerState) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230ProcessorArchitecture returns the union data inside the ProcessorV1230Processor_ProcessorArchitecture as a ProcessorV1230ProcessorArchitecture
-func (t ProcessorV1230Processor_ProcessorArchitecture) AsProcessorV1230ProcessorArchitecture() (ProcessorV1230ProcessorArchitecture, error) {
-	var body ProcessorV1230ProcessorArchitecture
+// AsProcessorV1240ProcessorArchitecture returns the union data inside the ProcessorV1240Processor_ProcessorArchitecture as a ProcessorV1240ProcessorArchitecture
+func (t ProcessorV1240Processor_ProcessorArchitecture) AsProcessorV1240ProcessorArchitecture() (ProcessorV1240ProcessorArchitecture, error) {
+	var body ProcessorV1240ProcessorArchitecture
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorArchitecture overwrites any union data inside the ProcessorV1230Processor_ProcessorArchitecture as the provided ProcessorV1230ProcessorArchitecture
-func (t *ProcessorV1230Processor_ProcessorArchitecture) FromProcessorV1230ProcessorArchitecture(v ProcessorV1230ProcessorArchitecture) error {
+// FromProcessorV1240ProcessorArchitecture overwrites any union data inside the ProcessorV1240Processor_ProcessorArchitecture as the provided ProcessorV1240ProcessorArchitecture
+func (t *ProcessorV1240Processor_ProcessorArchitecture) FromProcessorV1240ProcessorArchitecture(v ProcessorV1240ProcessorArchitecture) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorArchitecture performs a merge with any union data inside the ProcessorV1230Processor_ProcessorArchitecture, using the provided ProcessorV1230ProcessorArchitecture
-func (t *ProcessorV1230Processor_ProcessorArchitecture) MergeProcessorV1230ProcessorArchitecture(v ProcessorV1230ProcessorArchitecture) error {
+// MergeProcessorV1240ProcessorArchitecture performs a merge with any union data inside the ProcessorV1240Processor_ProcessorArchitecture, using the provided ProcessorV1240ProcessorArchitecture
+func (t *ProcessorV1240Processor_ProcessorArchitecture) MergeProcessorV1240ProcessorArchitecture(v ProcessorV1240ProcessorArchitecture) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9601,22 +10266,22 @@ func (t *ProcessorV1230Processor_ProcessorArchitecture) MergeProcessorV1230Proce
 	return err
 }
 
-// AsProcessorV1230ProcessorProcessorArchitecture1 returns the union data inside the ProcessorV1230Processor_ProcessorArchitecture as a ProcessorV1230ProcessorProcessorArchitecture1
-func (t ProcessorV1230Processor_ProcessorArchitecture) AsProcessorV1230ProcessorProcessorArchitecture1() (ProcessorV1230ProcessorProcessorArchitecture1, error) {
-	var body ProcessorV1230ProcessorProcessorArchitecture1
+// AsProcessorV1240ProcessorProcessorArchitecture1 returns the union data inside the ProcessorV1240Processor_ProcessorArchitecture as a ProcessorV1240ProcessorProcessorArchitecture1
+func (t ProcessorV1240Processor_ProcessorArchitecture) AsProcessorV1240ProcessorProcessorArchitecture1() (ProcessorV1240ProcessorProcessorArchitecture1, error) {
+	var body ProcessorV1240ProcessorProcessorArchitecture1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorProcessorArchitecture1 overwrites any union data inside the ProcessorV1230Processor_ProcessorArchitecture as the provided ProcessorV1230ProcessorProcessorArchitecture1
-func (t *ProcessorV1230Processor_ProcessorArchitecture) FromProcessorV1230ProcessorProcessorArchitecture1(v ProcessorV1230ProcessorProcessorArchitecture1) error {
+// FromProcessorV1240ProcessorProcessorArchitecture1 overwrites any union data inside the ProcessorV1240Processor_ProcessorArchitecture as the provided ProcessorV1240ProcessorProcessorArchitecture1
+func (t *ProcessorV1240Processor_ProcessorArchitecture) FromProcessorV1240ProcessorProcessorArchitecture1(v ProcessorV1240ProcessorProcessorArchitecture1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorProcessorArchitecture1 performs a merge with any union data inside the ProcessorV1230Processor_ProcessorArchitecture, using the provided ProcessorV1230ProcessorProcessorArchitecture1
-func (t *ProcessorV1230Processor_ProcessorArchitecture) MergeProcessorV1230ProcessorProcessorArchitecture1(v ProcessorV1230ProcessorProcessorArchitecture1) error {
+// MergeProcessorV1240ProcessorProcessorArchitecture1 performs a merge with any union data inside the ProcessorV1240Processor_ProcessorArchitecture, using the provided ProcessorV1240ProcessorProcessorArchitecture1
+func (t *ProcessorV1240Processor_ProcessorArchitecture) MergeProcessorV1240ProcessorProcessorArchitecture1(v ProcessorV1240ProcessorProcessorArchitecture1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9627,32 +10292,32 @@ func (t *ProcessorV1230Processor_ProcessorArchitecture) MergeProcessorV1230Proce
 	return err
 }
 
-func (t ProcessorV1230Processor_ProcessorArchitecture) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_ProcessorArchitecture) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_ProcessorArchitecture) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_ProcessorArchitecture) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230ProcessorType returns the union data inside the ProcessorV1230Processor_ProcessorType as a ProcessorV1230ProcessorType
-func (t ProcessorV1230Processor_ProcessorType) AsProcessorV1230ProcessorType() (ProcessorV1230ProcessorType, error) {
-	var body ProcessorV1230ProcessorType
+// AsProcessorV1240ProcessorType returns the union data inside the ProcessorV1240Processor_ProcessorType as a ProcessorV1240ProcessorType
+func (t ProcessorV1240Processor_ProcessorType) AsProcessorV1240ProcessorType() (ProcessorV1240ProcessorType, error) {
+	var body ProcessorV1240ProcessorType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorType overwrites any union data inside the ProcessorV1230Processor_ProcessorType as the provided ProcessorV1230ProcessorType
-func (t *ProcessorV1230Processor_ProcessorType) FromProcessorV1230ProcessorType(v ProcessorV1230ProcessorType) error {
+// FromProcessorV1240ProcessorType overwrites any union data inside the ProcessorV1240Processor_ProcessorType as the provided ProcessorV1240ProcessorType
+func (t *ProcessorV1240Processor_ProcessorType) FromProcessorV1240ProcessorType(v ProcessorV1240ProcessorType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorType performs a merge with any union data inside the ProcessorV1230Processor_ProcessorType, using the provided ProcessorV1230ProcessorType
-func (t *ProcessorV1230Processor_ProcessorType) MergeProcessorV1230ProcessorType(v ProcessorV1230ProcessorType) error {
+// MergeProcessorV1240ProcessorType performs a merge with any union data inside the ProcessorV1240Processor_ProcessorType, using the provided ProcessorV1240ProcessorType
+func (t *ProcessorV1240Processor_ProcessorType) MergeProcessorV1240ProcessorType(v ProcessorV1240ProcessorType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9663,22 +10328,22 @@ func (t *ProcessorV1230Processor_ProcessorType) MergeProcessorV1230ProcessorType
 	return err
 }
 
-// AsProcessorV1230ProcessorProcessorType1 returns the union data inside the ProcessorV1230Processor_ProcessorType as a ProcessorV1230ProcessorProcessorType1
-func (t ProcessorV1230Processor_ProcessorType) AsProcessorV1230ProcessorProcessorType1() (ProcessorV1230ProcessorProcessorType1, error) {
-	var body ProcessorV1230ProcessorProcessorType1
+// AsProcessorV1240ProcessorProcessorType1 returns the union data inside the ProcessorV1240Processor_ProcessorType as a ProcessorV1240ProcessorProcessorType1
+func (t ProcessorV1240Processor_ProcessorType) AsProcessorV1240ProcessorProcessorType1() (ProcessorV1240ProcessorProcessorType1, error) {
+	var body ProcessorV1240ProcessorProcessorType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorProcessorType1 overwrites any union data inside the ProcessorV1230Processor_ProcessorType as the provided ProcessorV1230ProcessorProcessorType1
-func (t *ProcessorV1230Processor_ProcessorType) FromProcessorV1230ProcessorProcessorType1(v ProcessorV1230ProcessorProcessorType1) error {
+// FromProcessorV1240ProcessorProcessorType1 overwrites any union data inside the ProcessorV1240Processor_ProcessorType as the provided ProcessorV1240ProcessorProcessorType1
+func (t *ProcessorV1240Processor_ProcessorType) FromProcessorV1240ProcessorProcessorType1(v ProcessorV1240ProcessorProcessorType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorProcessorType1 performs a merge with any union data inside the ProcessorV1230Processor_ProcessorType, using the provided ProcessorV1230ProcessorProcessorType1
-func (t *ProcessorV1230Processor_ProcessorType) MergeProcessorV1230ProcessorProcessorType1(v ProcessorV1230ProcessorProcessorType1) error {
+// MergeProcessorV1240ProcessorProcessorType1 performs a merge with any union data inside the ProcessorV1240Processor_ProcessorType, using the provided ProcessorV1240ProcessorProcessorType1
+func (t *ProcessorV1240Processor_ProcessorType) MergeProcessorV1240ProcessorProcessorType1(v ProcessorV1240ProcessorProcessorType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9689,32 +10354,32 @@ func (t *ProcessorV1230Processor_ProcessorType) MergeProcessorV1230ProcessorProc
 	return err
 }
 
-func (t ProcessorV1230Processor_ProcessorType) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_ProcessorType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_ProcessorType) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_ProcessorType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230ThrottleCause returns the union data inside the ProcessorV1230Processor_ThrottleCauses_Item as a ProcessorV1230ThrottleCause
-func (t ProcessorV1230Processor_ThrottleCauses_Item) AsProcessorV1230ThrottleCause() (ProcessorV1230ThrottleCause, error) {
-	var body ProcessorV1230ThrottleCause
+// AsProcessorV1240ThrottleCause returns the union data inside the ProcessorV1240Processor_ThrottleCauses_Item as a ProcessorV1240ThrottleCause
+func (t ProcessorV1240Processor_ThrottleCauses_Item) AsProcessorV1240ThrottleCause() (ProcessorV1240ThrottleCause, error) {
+	var body ProcessorV1240ThrottleCause
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ThrottleCause overwrites any union data inside the ProcessorV1230Processor_ThrottleCauses_Item as the provided ProcessorV1230ThrottleCause
-func (t *ProcessorV1230Processor_ThrottleCauses_Item) FromProcessorV1230ThrottleCause(v ProcessorV1230ThrottleCause) error {
+// FromProcessorV1240ThrottleCause overwrites any union data inside the ProcessorV1240Processor_ThrottleCauses_Item as the provided ProcessorV1240ThrottleCause
+func (t *ProcessorV1240Processor_ThrottleCauses_Item) FromProcessorV1240ThrottleCause(v ProcessorV1240ThrottleCause) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ThrottleCause performs a merge with any union data inside the ProcessorV1230Processor_ThrottleCauses_Item, using the provided ProcessorV1230ThrottleCause
-func (t *ProcessorV1230Processor_ThrottleCauses_Item) MergeProcessorV1230ThrottleCause(v ProcessorV1230ThrottleCause) error {
+// MergeProcessorV1240ThrottleCause performs a merge with any union data inside the ProcessorV1240Processor_ThrottleCauses_Item, using the provided ProcessorV1240ThrottleCause
+func (t *ProcessorV1240Processor_ThrottleCauses_Item) MergeProcessorV1240ThrottleCause(v ProcessorV1240ThrottleCause) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9725,22 +10390,22 @@ func (t *ProcessorV1230Processor_ThrottleCauses_Item) MergeProcessorV1230Throttl
 	return err
 }
 
-// AsProcessorV1230ProcessorThrottleCauses1 returns the union data inside the ProcessorV1230Processor_ThrottleCauses_Item as a ProcessorV1230ProcessorThrottleCauses1
-func (t ProcessorV1230Processor_ThrottleCauses_Item) AsProcessorV1230ProcessorThrottleCauses1() (ProcessorV1230ProcessorThrottleCauses1, error) {
-	var body ProcessorV1230ProcessorThrottleCauses1
+// AsProcessorV1240ProcessorThrottleCauses1 returns the union data inside the ProcessorV1240Processor_ThrottleCauses_Item as a ProcessorV1240ProcessorThrottleCauses1
+func (t ProcessorV1240Processor_ThrottleCauses_Item) AsProcessorV1240ProcessorThrottleCauses1() (ProcessorV1240ProcessorThrottleCauses1, error) {
+	var body ProcessorV1240ProcessorThrottleCauses1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorThrottleCauses1 overwrites any union data inside the ProcessorV1230Processor_ThrottleCauses_Item as the provided ProcessorV1230ProcessorThrottleCauses1
-func (t *ProcessorV1230Processor_ThrottleCauses_Item) FromProcessorV1230ProcessorThrottleCauses1(v ProcessorV1230ProcessorThrottleCauses1) error {
+// FromProcessorV1240ProcessorThrottleCauses1 overwrites any union data inside the ProcessorV1240Processor_ThrottleCauses_Item as the provided ProcessorV1240ProcessorThrottleCauses1
+func (t *ProcessorV1240Processor_ThrottleCauses_Item) FromProcessorV1240ProcessorThrottleCauses1(v ProcessorV1240ProcessorThrottleCauses1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorThrottleCauses1 performs a merge with any union data inside the ProcessorV1230Processor_ThrottleCauses_Item, using the provided ProcessorV1230ProcessorThrottleCauses1
-func (t *ProcessorV1230Processor_ThrottleCauses_Item) MergeProcessorV1230ProcessorThrottleCauses1(v ProcessorV1230ProcessorThrottleCauses1) error {
+// MergeProcessorV1240ProcessorThrottleCauses1 performs a merge with any union data inside the ProcessorV1240Processor_ThrottleCauses_Item, using the provided ProcessorV1240ProcessorThrottleCauses1
+func (t *ProcessorV1240Processor_ThrottleCauses_Item) MergeProcessorV1240ProcessorThrottleCauses1(v ProcessorV1240ProcessorThrottleCauses1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9751,32 +10416,32 @@ func (t *ProcessorV1230Processor_ThrottleCauses_Item) MergeProcessorV1230Process
 	return err
 }
 
-func (t ProcessorV1230Processor_ThrottleCauses_Item) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_ThrottleCauses_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_ThrottleCauses_Item) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_ThrottleCauses_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230TurboState returns the union data inside the ProcessorV1230Processor_TurboState as a ProcessorV1230TurboState
-func (t ProcessorV1230Processor_TurboState) AsProcessorV1230TurboState() (ProcessorV1230TurboState, error) {
-	var body ProcessorV1230TurboState
+// AsProcessorV1240TurboState returns the union data inside the ProcessorV1240Processor_TurboState as a ProcessorV1240TurboState
+func (t ProcessorV1240Processor_TurboState) AsProcessorV1240TurboState() (ProcessorV1240TurboState, error) {
+	var body ProcessorV1240TurboState
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230TurboState overwrites any union data inside the ProcessorV1230Processor_TurboState as the provided ProcessorV1230TurboState
-func (t *ProcessorV1230Processor_TurboState) FromProcessorV1230TurboState(v ProcessorV1230TurboState) error {
+// FromProcessorV1240TurboState overwrites any union data inside the ProcessorV1240Processor_TurboState as the provided ProcessorV1240TurboState
+func (t *ProcessorV1240Processor_TurboState) FromProcessorV1240TurboState(v ProcessorV1240TurboState) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230TurboState performs a merge with any union data inside the ProcessorV1230Processor_TurboState, using the provided ProcessorV1230TurboState
-func (t *ProcessorV1230Processor_TurboState) MergeProcessorV1230TurboState(v ProcessorV1230TurboState) error {
+// MergeProcessorV1240TurboState performs a merge with any union data inside the ProcessorV1240Processor_TurboState, using the provided ProcessorV1240TurboState
+func (t *ProcessorV1240Processor_TurboState) MergeProcessorV1240TurboState(v ProcessorV1240TurboState) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9787,22 +10452,22 @@ func (t *ProcessorV1230Processor_TurboState) MergeProcessorV1230TurboState(v Pro
 	return err
 }
 
-// AsProcessorV1230ProcessorTurboState1 returns the union data inside the ProcessorV1230Processor_TurboState as a ProcessorV1230ProcessorTurboState1
-func (t ProcessorV1230Processor_TurboState) AsProcessorV1230ProcessorTurboState1() (ProcessorV1230ProcessorTurboState1, error) {
-	var body ProcessorV1230ProcessorTurboState1
+// AsProcessorV1240ProcessorTurboState1 returns the union data inside the ProcessorV1240Processor_TurboState as a ProcessorV1240ProcessorTurboState1
+func (t ProcessorV1240Processor_TurboState) AsProcessorV1240ProcessorTurboState1() (ProcessorV1240ProcessorTurboState1, error) {
+	var body ProcessorV1240ProcessorTurboState1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorTurboState1 overwrites any union data inside the ProcessorV1230Processor_TurboState as the provided ProcessorV1230ProcessorTurboState1
-func (t *ProcessorV1230Processor_TurboState) FromProcessorV1230ProcessorTurboState1(v ProcessorV1230ProcessorTurboState1) error {
+// FromProcessorV1240ProcessorTurboState1 overwrites any union data inside the ProcessorV1240Processor_TurboState as the provided ProcessorV1240ProcessorTurboState1
+func (t *ProcessorV1240Processor_TurboState) FromProcessorV1240ProcessorTurboState1(v ProcessorV1240ProcessorTurboState1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorTurboState1 performs a merge with any union data inside the ProcessorV1230Processor_TurboState, using the provided ProcessorV1230ProcessorTurboState1
-func (t *ProcessorV1230Processor_TurboState) MergeProcessorV1230ProcessorTurboState1(v ProcessorV1230ProcessorTurboState1) error {
+// MergeProcessorV1240ProcessorTurboState1 performs a merge with any union data inside the ProcessorV1240Processor_TurboState, using the provided ProcessorV1240ProcessorTurboState1
+func (t *ProcessorV1240Processor_TurboState) MergeProcessorV1240ProcessorTurboState1(v ProcessorV1240ProcessorTurboState1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9813,32 +10478,32 @@ func (t *ProcessorV1230Processor_TurboState) MergeProcessorV1230ProcessorTurboSt
 	return err
 }
 
-func (t ProcessorV1230Processor_TurboState) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_TurboState) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_TurboState) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_TurboState) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceUUID returns the union data inside the ProcessorV1230Processor_UUID as a ResourceUUID
-func (t ProcessorV1230Processor_UUID) AsResourceUUID() (ResourceUUID, error) {
+// AsResourceUUID returns the union data inside the ProcessorV1240Processor_UUID as a ResourceUUID
+func (t ProcessorV1240Processor_UUID) AsResourceUUID() (ResourceUUID, error) {
 	var body ResourceUUID
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceUUID overwrites any union data inside the ProcessorV1230Processor_UUID as the provided ResourceUUID
-func (t *ProcessorV1230Processor_UUID) FromResourceUUID(v ResourceUUID) error {
+// FromResourceUUID overwrites any union data inside the ProcessorV1240Processor_UUID as the provided ResourceUUID
+func (t *ProcessorV1240Processor_UUID) FromResourceUUID(v ResourceUUID) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceUUID performs a merge with any union data inside the ProcessorV1230Processor_UUID, using the provided ResourceUUID
-func (t *ProcessorV1230Processor_UUID) MergeResourceUUID(v ResourceUUID) error {
+// MergeResourceUUID performs a merge with any union data inside the ProcessorV1240Processor_UUID, using the provided ResourceUUID
+func (t *ProcessorV1240Processor_UUID) MergeResourceUUID(v ResourceUUID) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9849,22 +10514,22 @@ func (t *ProcessorV1230Processor_UUID) MergeResourceUUID(v ResourceUUID) error {
 	return err
 }
 
-// AsProcessorV1230ProcessorUUID1 returns the union data inside the ProcessorV1230Processor_UUID as a ProcessorV1230ProcessorUUID1
-func (t ProcessorV1230Processor_UUID) AsProcessorV1230ProcessorUUID1() (ProcessorV1230ProcessorUUID1, error) {
-	var body ProcessorV1230ProcessorUUID1
+// AsProcessorV1240ProcessorUUID1 returns the union data inside the ProcessorV1240Processor_UUID as a ProcessorV1240ProcessorUUID1
+func (t ProcessorV1240Processor_UUID) AsProcessorV1240ProcessorUUID1() (ProcessorV1240ProcessorUUID1, error) {
+	var body ProcessorV1240ProcessorUUID1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorUUID1 overwrites any union data inside the ProcessorV1230Processor_UUID as the provided ProcessorV1230ProcessorUUID1
-func (t *ProcessorV1230Processor_UUID) FromProcessorV1230ProcessorUUID1(v ProcessorV1230ProcessorUUID1) error {
+// FromProcessorV1240ProcessorUUID1 overwrites any union data inside the ProcessorV1240Processor_UUID as the provided ProcessorV1240ProcessorUUID1
+func (t *ProcessorV1240Processor_UUID) FromProcessorV1240ProcessorUUID1(v ProcessorV1240ProcessorUUID1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorUUID1 performs a merge with any union data inside the ProcessorV1230Processor_UUID, using the provided ProcessorV1230ProcessorUUID1
-func (t *ProcessorV1230Processor_UUID) MergeProcessorV1230ProcessorUUID1(v ProcessorV1230ProcessorUUID1) error {
+// MergeProcessorV1240ProcessorUUID1 performs a merge with any union data inside the ProcessorV1240Processor_UUID, using the provided ProcessorV1240ProcessorUUID1
+func (t *ProcessorV1240Processor_UUID) MergeProcessorV1240ProcessorUUID1(v ProcessorV1240ProcessorUUID1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9875,32 +10540,32 @@ func (t *ProcessorV1230Processor_UUID) MergeProcessorV1230ProcessorUUID1(v Proce
 	return err
 }
 
-func (t ProcessorV1230Processor_UUID) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240Processor_UUID) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230Processor_UUID) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240Processor_UUID) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230SystemInterfaceType returns the union data inside the ProcessorV1230ProcessorInterface_InterfaceType as a ProcessorV1230SystemInterfaceType
-func (t ProcessorV1230ProcessorInterface_InterfaceType) AsProcessorV1230SystemInterfaceType() (ProcessorV1230SystemInterfaceType, error) {
-	var body ProcessorV1230SystemInterfaceType
+// AsProcessorV1240SystemInterfaceType returns the union data inside the ProcessorV1240ProcessorInterface_InterfaceType as a ProcessorV1240SystemInterfaceType
+func (t ProcessorV1240ProcessorInterface_InterfaceType) AsProcessorV1240SystemInterfaceType() (ProcessorV1240SystemInterfaceType, error) {
+	var body ProcessorV1240SystemInterfaceType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230SystemInterfaceType overwrites any union data inside the ProcessorV1230ProcessorInterface_InterfaceType as the provided ProcessorV1230SystemInterfaceType
-func (t *ProcessorV1230ProcessorInterface_InterfaceType) FromProcessorV1230SystemInterfaceType(v ProcessorV1230SystemInterfaceType) error {
+// FromProcessorV1240SystemInterfaceType overwrites any union data inside the ProcessorV1240ProcessorInterface_InterfaceType as the provided ProcessorV1240SystemInterfaceType
+func (t *ProcessorV1240ProcessorInterface_InterfaceType) FromProcessorV1240SystemInterfaceType(v ProcessorV1240SystemInterfaceType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230SystemInterfaceType performs a merge with any union data inside the ProcessorV1230ProcessorInterface_InterfaceType, using the provided ProcessorV1230SystemInterfaceType
-func (t *ProcessorV1230ProcessorInterface_InterfaceType) MergeProcessorV1230SystemInterfaceType(v ProcessorV1230SystemInterfaceType) error {
+// MergeProcessorV1240SystemInterfaceType performs a merge with any union data inside the ProcessorV1240ProcessorInterface_InterfaceType, using the provided ProcessorV1240SystemInterfaceType
+func (t *ProcessorV1240ProcessorInterface_InterfaceType) MergeProcessorV1240SystemInterfaceType(v ProcessorV1240SystemInterfaceType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9911,22 +10576,22 @@ func (t *ProcessorV1230ProcessorInterface_InterfaceType) MergeProcessorV1230Syst
 	return err
 }
 
-// AsProcessorV1230ProcessorInterfaceInterfaceType1 returns the union data inside the ProcessorV1230ProcessorInterface_InterfaceType as a ProcessorV1230ProcessorInterfaceInterfaceType1
-func (t ProcessorV1230ProcessorInterface_InterfaceType) AsProcessorV1230ProcessorInterfaceInterfaceType1() (ProcessorV1230ProcessorInterfaceInterfaceType1, error) {
-	var body ProcessorV1230ProcessorInterfaceInterfaceType1
+// AsProcessorV1240ProcessorInterfaceInterfaceType1 returns the union data inside the ProcessorV1240ProcessorInterface_InterfaceType as a ProcessorV1240ProcessorInterfaceInterfaceType1
+func (t ProcessorV1240ProcessorInterface_InterfaceType) AsProcessorV1240ProcessorInterfaceInterfaceType1() (ProcessorV1240ProcessorInterfaceInterfaceType1, error) {
+	var body ProcessorV1240ProcessorInterfaceInterfaceType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorInterfaceInterfaceType1 overwrites any union data inside the ProcessorV1230ProcessorInterface_InterfaceType as the provided ProcessorV1230ProcessorInterfaceInterfaceType1
-func (t *ProcessorV1230ProcessorInterface_InterfaceType) FromProcessorV1230ProcessorInterfaceInterfaceType1(v ProcessorV1230ProcessorInterfaceInterfaceType1) error {
+// FromProcessorV1240ProcessorInterfaceInterfaceType1 overwrites any union data inside the ProcessorV1240ProcessorInterface_InterfaceType as the provided ProcessorV1240ProcessorInterfaceInterfaceType1
+func (t *ProcessorV1240ProcessorInterface_InterfaceType) FromProcessorV1240ProcessorInterfaceInterfaceType1(v ProcessorV1240ProcessorInterfaceInterfaceType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorInterfaceInterfaceType1 performs a merge with any union data inside the ProcessorV1230ProcessorInterface_InterfaceType, using the provided ProcessorV1230ProcessorInterfaceInterfaceType1
-func (t *ProcessorV1230ProcessorInterface_InterfaceType) MergeProcessorV1230ProcessorInterfaceInterfaceType1(v ProcessorV1230ProcessorInterfaceInterfaceType1) error {
+// MergeProcessorV1240ProcessorInterfaceInterfaceType1 performs a merge with any union data inside the ProcessorV1240ProcessorInterface_InterfaceType, using the provided ProcessorV1240ProcessorInterfaceInterfaceType1
+func (t *ProcessorV1240ProcessorInterface_InterfaceType) MergeProcessorV1240ProcessorInterfaceInterfaceType1(v ProcessorV1240ProcessorInterfaceInterfaceType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9937,32 +10602,32 @@ func (t *ProcessorV1230ProcessorInterface_InterfaceType) MergeProcessorV1230Proc
 	return err
 }
 
-func (t ProcessorV1230ProcessorInterface_InterfaceType) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240ProcessorInterface_InterfaceType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230ProcessorInterface_InterfaceType) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240ProcessorInterface_InterfaceType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsProcessorV1230ProcessorMemoryType returns the union data inside the ProcessorV1230ProcessorMemory_MemoryType as a ProcessorV1230ProcessorMemoryType
-func (t ProcessorV1230ProcessorMemory_MemoryType) AsProcessorV1230ProcessorMemoryType() (ProcessorV1230ProcessorMemoryType, error) {
-	var body ProcessorV1230ProcessorMemoryType
+// AsProcessorV1240ProcessorMemoryType returns the union data inside the ProcessorV1240ProcessorMemory_MemoryType as a ProcessorV1240ProcessorMemoryType
+func (t ProcessorV1240ProcessorMemory_MemoryType) AsProcessorV1240ProcessorMemoryType() (ProcessorV1240ProcessorMemoryType, error) {
+	var body ProcessorV1240ProcessorMemoryType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorMemoryType overwrites any union data inside the ProcessorV1230ProcessorMemory_MemoryType as the provided ProcessorV1230ProcessorMemoryType
-func (t *ProcessorV1230ProcessorMemory_MemoryType) FromProcessorV1230ProcessorMemoryType(v ProcessorV1230ProcessorMemoryType) error {
+// FromProcessorV1240ProcessorMemoryType overwrites any union data inside the ProcessorV1240ProcessorMemory_MemoryType as the provided ProcessorV1240ProcessorMemoryType
+func (t *ProcessorV1240ProcessorMemory_MemoryType) FromProcessorV1240ProcessorMemoryType(v ProcessorV1240ProcessorMemoryType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorMemoryType performs a merge with any union data inside the ProcessorV1230ProcessorMemory_MemoryType, using the provided ProcessorV1230ProcessorMemoryType
-func (t *ProcessorV1230ProcessorMemory_MemoryType) MergeProcessorV1230ProcessorMemoryType(v ProcessorV1230ProcessorMemoryType) error {
+// MergeProcessorV1240ProcessorMemoryType performs a merge with any union data inside the ProcessorV1240ProcessorMemory_MemoryType, using the provided ProcessorV1240ProcessorMemoryType
+func (t *ProcessorV1240ProcessorMemory_MemoryType) MergeProcessorV1240ProcessorMemoryType(v ProcessorV1240ProcessorMemoryType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9973,22 +10638,22 @@ func (t *ProcessorV1230ProcessorMemory_MemoryType) MergeProcessorV1230ProcessorM
 	return err
 }
 
-// AsProcessorV1230ProcessorMemoryMemoryType1 returns the union data inside the ProcessorV1230ProcessorMemory_MemoryType as a ProcessorV1230ProcessorMemoryMemoryType1
-func (t ProcessorV1230ProcessorMemory_MemoryType) AsProcessorV1230ProcessorMemoryMemoryType1() (ProcessorV1230ProcessorMemoryMemoryType1, error) {
-	var body ProcessorV1230ProcessorMemoryMemoryType1
+// AsProcessorV1240ProcessorMemoryMemoryType1 returns the union data inside the ProcessorV1240ProcessorMemory_MemoryType as a ProcessorV1240ProcessorMemoryMemoryType1
+func (t ProcessorV1240ProcessorMemory_MemoryType) AsProcessorV1240ProcessorMemoryMemoryType1() (ProcessorV1240ProcessorMemoryMemoryType1, error) {
+	var body ProcessorV1240ProcessorMemoryMemoryType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromProcessorV1230ProcessorMemoryMemoryType1 overwrites any union data inside the ProcessorV1230ProcessorMemory_MemoryType as the provided ProcessorV1230ProcessorMemoryMemoryType1
-func (t *ProcessorV1230ProcessorMemory_MemoryType) FromProcessorV1230ProcessorMemoryMemoryType1(v ProcessorV1230ProcessorMemoryMemoryType1) error {
+// FromProcessorV1240ProcessorMemoryMemoryType1 overwrites any union data inside the ProcessorV1240ProcessorMemory_MemoryType as the provided ProcessorV1240ProcessorMemoryMemoryType1
+func (t *ProcessorV1240ProcessorMemory_MemoryType) FromProcessorV1240ProcessorMemoryMemoryType1(v ProcessorV1240ProcessorMemoryMemoryType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeProcessorV1230ProcessorMemoryMemoryType1 performs a merge with any union data inside the ProcessorV1230ProcessorMemory_MemoryType, using the provided ProcessorV1230ProcessorMemoryMemoryType1
-func (t *ProcessorV1230ProcessorMemory_MemoryType) MergeProcessorV1230ProcessorMemoryMemoryType1(v ProcessorV1230ProcessorMemoryMemoryType1) error {
+// MergeProcessorV1240ProcessorMemoryMemoryType1 performs a merge with any union data inside the ProcessorV1240ProcessorMemory_MemoryType, using the provided ProcessorV1240ProcessorMemoryMemoryType1
+func (t *ProcessorV1240ProcessorMemory_MemoryType) MergeProcessorV1240ProcessorMemoryMemoryType1(v ProcessorV1240ProcessorMemoryMemoryType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -9999,32 +10664,32 @@ func (t *ProcessorV1230ProcessorMemory_MemoryType) MergeProcessorV1230ProcessorM
 	return err
 }
 
-func (t ProcessorV1230ProcessorMemory_MemoryType) MarshalJSON() ([]byte, error) {
+func (t ProcessorV1240ProcessorMemory_MemoryType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ProcessorV1230ProcessorMemory_MemoryType) UnmarshalJSON(b []byte) error {
+func (t *ProcessorV1240ProcessorMemory_MemoryType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsRedundancyV170RedundancyMode returns the union data inside the RedundancyV170Redundancy_Mode as a RedundancyV170RedundancyMode
-func (t RedundancyV170Redundancy_Mode) AsRedundancyV170RedundancyMode() (RedundancyV170RedundancyMode, error) {
-	var body RedundancyV170RedundancyMode
+// AsRedundancyV171RedundancyMode returns the union data inside the RedundancyV171Redundancy_Mode as a RedundancyV171RedundancyMode
+func (t RedundancyV171Redundancy_Mode) AsRedundancyV171RedundancyMode() (RedundancyV171RedundancyMode, error) {
+	var body RedundancyV171RedundancyMode
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromRedundancyV170RedundancyMode overwrites any union data inside the RedundancyV170Redundancy_Mode as the provided RedundancyV170RedundancyMode
-func (t *RedundancyV170Redundancy_Mode) FromRedundancyV170RedundancyMode(v RedundancyV170RedundancyMode) error {
+// FromRedundancyV171RedundancyMode overwrites any union data inside the RedundancyV171Redundancy_Mode as the provided RedundancyV171RedundancyMode
+func (t *RedundancyV171Redundancy_Mode) FromRedundancyV171RedundancyMode(v RedundancyV171RedundancyMode) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeRedundancyV170RedundancyMode performs a merge with any union data inside the RedundancyV170Redundancy_Mode, using the provided RedundancyV170RedundancyMode
-func (t *RedundancyV170Redundancy_Mode) MergeRedundancyV170RedundancyMode(v RedundancyV170RedundancyMode) error {
+// MergeRedundancyV171RedundancyMode performs a merge with any union data inside the RedundancyV171Redundancy_Mode, using the provided RedundancyV171RedundancyMode
+func (t *RedundancyV171Redundancy_Mode) MergeRedundancyV171RedundancyMode(v RedundancyV171RedundancyMode) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10035,22 +10700,22 @@ func (t *RedundancyV170Redundancy_Mode) MergeRedundancyV170RedundancyMode(v Redu
 	return err
 }
 
-// AsRedundancyV170RedundancyMode1 returns the union data inside the RedundancyV170Redundancy_Mode as a RedundancyV170RedundancyMode1
-func (t RedundancyV170Redundancy_Mode) AsRedundancyV170RedundancyMode1() (RedundancyV170RedundancyMode1, error) {
-	var body RedundancyV170RedundancyMode1
+// AsRedundancyV171RedundancyMode1 returns the union data inside the RedundancyV171Redundancy_Mode as a RedundancyV171RedundancyMode1
+func (t RedundancyV171Redundancy_Mode) AsRedundancyV171RedundancyMode1() (RedundancyV171RedundancyMode1, error) {
+	var body RedundancyV171RedundancyMode1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromRedundancyV170RedundancyMode1 overwrites any union data inside the RedundancyV170Redundancy_Mode as the provided RedundancyV170RedundancyMode1
-func (t *RedundancyV170Redundancy_Mode) FromRedundancyV170RedundancyMode1(v RedundancyV170RedundancyMode1) error {
+// FromRedundancyV171RedundancyMode1 overwrites any union data inside the RedundancyV171Redundancy_Mode as the provided RedundancyV171RedundancyMode1
+func (t *RedundancyV171Redundancy_Mode) FromRedundancyV171RedundancyMode1(v RedundancyV171RedundancyMode1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeRedundancyV170RedundancyMode1 performs a merge with any union data inside the RedundancyV170Redundancy_Mode, using the provided RedundancyV170RedundancyMode1
-func (t *RedundancyV170Redundancy_Mode) MergeRedundancyV170RedundancyMode1(v RedundancyV170RedundancyMode1) error {
+// MergeRedundancyV171RedundancyMode1 performs a merge with any union data inside the RedundancyV171Redundancy_Mode, using the provided RedundancyV171RedundancyMode1
+func (t *RedundancyV171Redundancy_Mode) MergeRedundancyV171RedundancyMode1(v RedundancyV171RedundancyMode1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10061,12 +10726,12 @@ func (t *RedundancyV170Redundancy_Mode) MergeRedundancyV170RedundancyMode1(v Red
 	return err
 }
 
-func (t RedundancyV170Redundancy_Mode) MarshalJSON() ([]byte, error) {
+func (t RedundancyV171Redundancy_Mode) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *RedundancyV170Redundancy_Mode) UnmarshalJSON(b []byte) error {
+func (t *RedundancyV171Redundancy_Mode) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -10505,22 +11170,22 @@ func (t *ResourceStatus_State) UnmarshalJSON(b []byte) error {
 	return err
 }
 
-// AsResourceV1240ContactInfo returns the union data inside the ResourceV1240Location_Contacts_Item as a ResourceV1240ContactInfo
-func (t ResourceV1240Location_Contacts_Item) AsResourceV1240ContactInfo() (ResourceV1240ContactInfo, error) {
-	var body ResourceV1240ContactInfo
+// AsResourceV1250ContactInfo returns the union data inside the ResourceV1250Location_Contacts_Item as a ResourceV1250ContactInfo
+func (t ResourceV1250Location_Contacts_Item) AsResourceV1250ContactInfo() (ResourceV1250ContactInfo, error) {
+	var body ResourceV1250ContactInfo
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240ContactInfo overwrites any union data inside the ResourceV1240Location_Contacts_Item as the provided ResourceV1240ContactInfo
-func (t *ResourceV1240Location_Contacts_Item) FromResourceV1240ContactInfo(v ResourceV1240ContactInfo) error {
+// FromResourceV1250ContactInfo overwrites any union data inside the ResourceV1250Location_Contacts_Item as the provided ResourceV1250ContactInfo
+func (t *ResourceV1250Location_Contacts_Item) FromResourceV1250ContactInfo(v ResourceV1250ContactInfo) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240ContactInfo performs a merge with any union data inside the ResourceV1240Location_Contacts_Item, using the provided ResourceV1240ContactInfo
-func (t *ResourceV1240Location_Contacts_Item) MergeResourceV1240ContactInfo(v ResourceV1240ContactInfo) error {
+// MergeResourceV1250ContactInfo performs a merge with any union data inside the ResourceV1250Location_Contacts_Item, using the provided ResourceV1250ContactInfo
+func (t *ResourceV1250Location_Contacts_Item) MergeResourceV1250ContactInfo(v ResourceV1250ContactInfo) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10531,22 +11196,22 @@ func (t *ResourceV1240Location_Contacts_Item) MergeResourceV1240ContactInfo(v Re
 	return err
 }
 
-// AsResourceV1240LocationContacts1 returns the union data inside the ResourceV1240Location_Contacts_Item as a ResourceV1240LocationContacts1
-func (t ResourceV1240Location_Contacts_Item) AsResourceV1240LocationContacts1() (ResourceV1240LocationContacts1, error) {
-	var body ResourceV1240LocationContacts1
+// AsResourceV1250LocationContacts1 returns the union data inside the ResourceV1250Location_Contacts_Item as a ResourceV1250LocationContacts1
+func (t ResourceV1250Location_Contacts_Item) AsResourceV1250LocationContacts1() (ResourceV1250LocationContacts1, error) {
+	var body ResourceV1250LocationContacts1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240LocationContacts1 overwrites any union data inside the ResourceV1240Location_Contacts_Item as the provided ResourceV1240LocationContacts1
-func (t *ResourceV1240Location_Contacts_Item) FromResourceV1240LocationContacts1(v ResourceV1240LocationContacts1) error {
+// FromResourceV1250LocationContacts1 overwrites any union data inside the ResourceV1250Location_Contacts_Item as the provided ResourceV1250LocationContacts1
+func (t *ResourceV1250Location_Contacts_Item) FromResourceV1250LocationContacts1(v ResourceV1250LocationContacts1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240LocationContacts1 performs a merge with any union data inside the ResourceV1240Location_Contacts_Item, using the provided ResourceV1240LocationContacts1
-func (t *ResourceV1240Location_Contacts_Item) MergeResourceV1240LocationContacts1(v ResourceV1240LocationContacts1) error {
+// MergeResourceV1250LocationContacts1 performs a merge with any union data inside the ResourceV1250Location_Contacts_Item, using the provided ResourceV1250LocationContacts1
+func (t *ResourceV1250Location_Contacts_Item) MergeResourceV1250LocationContacts1(v ResourceV1250LocationContacts1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10557,32 +11222,32 @@ func (t *ResourceV1240Location_Contacts_Item) MergeResourceV1240LocationContacts
 	return err
 }
 
-func (t ResourceV1240Location_Contacts_Item) MarshalJSON() ([]byte, error) {
+func (t ResourceV1250Location_Contacts_Item) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ResourceV1240Location_Contacts_Item) UnmarshalJSON(b []byte) error {
+func (t *ResourceV1250Location_Contacts_Item) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceV1240LocationType returns the union data inside the ResourceV1240PartLocation_LocationType as a ResourceV1240LocationType
-func (t ResourceV1240PartLocation_LocationType) AsResourceV1240LocationType() (ResourceV1240LocationType, error) {
-	var body ResourceV1240LocationType
+// AsResourceV1250LocationType returns the union data inside the ResourceV1250PartLocation_LocationType as a ResourceV1250LocationType
+func (t ResourceV1250PartLocation_LocationType) AsResourceV1250LocationType() (ResourceV1250LocationType, error) {
+	var body ResourceV1250LocationType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240LocationType overwrites any union data inside the ResourceV1240PartLocation_LocationType as the provided ResourceV1240LocationType
-func (t *ResourceV1240PartLocation_LocationType) FromResourceV1240LocationType(v ResourceV1240LocationType) error {
+// FromResourceV1250LocationType overwrites any union data inside the ResourceV1250PartLocation_LocationType as the provided ResourceV1250LocationType
+func (t *ResourceV1250PartLocation_LocationType) FromResourceV1250LocationType(v ResourceV1250LocationType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240LocationType performs a merge with any union data inside the ResourceV1240PartLocation_LocationType, using the provided ResourceV1240LocationType
-func (t *ResourceV1240PartLocation_LocationType) MergeResourceV1240LocationType(v ResourceV1240LocationType) error {
+// MergeResourceV1250LocationType performs a merge with any union data inside the ResourceV1250PartLocation_LocationType, using the provided ResourceV1250LocationType
+func (t *ResourceV1250PartLocation_LocationType) MergeResourceV1250LocationType(v ResourceV1250LocationType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10593,22 +11258,22 @@ func (t *ResourceV1240PartLocation_LocationType) MergeResourceV1240LocationType(
 	return err
 }
 
-// AsResourceV1240PartLocationLocationType1 returns the union data inside the ResourceV1240PartLocation_LocationType as a ResourceV1240PartLocationLocationType1
-func (t ResourceV1240PartLocation_LocationType) AsResourceV1240PartLocationLocationType1() (ResourceV1240PartLocationLocationType1, error) {
-	var body ResourceV1240PartLocationLocationType1
+// AsResourceV1250PartLocationLocationType1 returns the union data inside the ResourceV1250PartLocation_LocationType as a ResourceV1250PartLocationLocationType1
+func (t ResourceV1250PartLocation_LocationType) AsResourceV1250PartLocationLocationType1() (ResourceV1250PartLocationLocationType1, error) {
+	var body ResourceV1250PartLocationLocationType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240PartLocationLocationType1 overwrites any union data inside the ResourceV1240PartLocation_LocationType as the provided ResourceV1240PartLocationLocationType1
-func (t *ResourceV1240PartLocation_LocationType) FromResourceV1240PartLocationLocationType1(v ResourceV1240PartLocationLocationType1) error {
+// FromResourceV1250PartLocationLocationType1 overwrites any union data inside the ResourceV1250PartLocation_LocationType as the provided ResourceV1250PartLocationLocationType1
+func (t *ResourceV1250PartLocation_LocationType) FromResourceV1250PartLocationLocationType1(v ResourceV1250PartLocationLocationType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240PartLocationLocationType1 performs a merge with any union data inside the ResourceV1240PartLocation_LocationType, using the provided ResourceV1240PartLocationLocationType1
-func (t *ResourceV1240PartLocation_LocationType) MergeResourceV1240PartLocationLocationType1(v ResourceV1240PartLocationLocationType1) error {
+// MergeResourceV1250PartLocationLocationType1 performs a merge with any union data inside the ResourceV1250PartLocation_LocationType, using the provided ResourceV1250PartLocationLocationType1
+func (t *ResourceV1250PartLocation_LocationType) MergeResourceV1250PartLocationLocationType1(v ResourceV1250PartLocationLocationType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10619,32 +11284,32 @@ func (t *ResourceV1240PartLocation_LocationType) MergeResourceV1240PartLocationL
 	return err
 }
 
-func (t ResourceV1240PartLocation_LocationType) MarshalJSON() ([]byte, error) {
+func (t ResourceV1250PartLocation_LocationType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ResourceV1240PartLocation_LocationType) UnmarshalJSON(b []byte) error {
+func (t *ResourceV1250PartLocation_LocationType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceV1240Orientation returns the union data inside the ResourceV1240PartLocation_Orientation as a ResourceV1240Orientation
-func (t ResourceV1240PartLocation_Orientation) AsResourceV1240Orientation() (ResourceV1240Orientation, error) {
-	var body ResourceV1240Orientation
+// AsResourceV1250Orientation returns the union data inside the ResourceV1250PartLocation_Orientation as a ResourceV1250Orientation
+func (t ResourceV1250PartLocation_Orientation) AsResourceV1250Orientation() (ResourceV1250Orientation, error) {
+	var body ResourceV1250Orientation
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240Orientation overwrites any union data inside the ResourceV1240PartLocation_Orientation as the provided ResourceV1240Orientation
-func (t *ResourceV1240PartLocation_Orientation) FromResourceV1240Orientation(v ResourceV1240Orientation) error {
+// FromResourceV1250Orientation overwrites any union data inside the ResourceV1250PartLocation_Orientation as the provided ResourceV1250Orientation
+func (t *ResourceV1250PartLocation_Orientation) FromResourceV1250Orientation(v ResourceV1250Orientation) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240Orientation performs a merge with any union data inside the ResourceV1240PartLocation_Orientation, using the provided ResourceV1240Orientation
-func (t *ResourceV1240PartLocation_Orientation) MergeResourceV1240Orientation(v ResourceV1240Orientation) error {
+// MergeResourceV1250Orientation performs a merge with any union data inside the ResourceV1250PartLocation_Orientation, using the provided ResourceV1250Orientation
+func (t *ResourceV1250PartLocation_Orientation) MergeResourceV1250Orientation(v ResourceV1250Orientation) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10655,22 +11320,22 @@ func (t *ResourceV1240PartLocation_Orientation) MergeResourceV1240Orientation(v 
 	return err
 }
 
-// AsResourceV1240PartLocationOrientation1 returns the union data inside the ResourceV1240PartLocation_Orientation as a ResourceV1240PartLocationOrientation1
-func (t ResourceV1240PartLocation_Orientation) AsResourceV1240PartLocationOrientation1() (ResourceV1240PartLocationOrientation1, error) {
-	var body ResourceV1240PartLocationOrientation1
+// AsResourceV1250PartLocationOrientation1 returns the union data inside the ResourceV1250PartLocation_Orientation as a ResourceV1250PartLocationOrientation1
+func (t ResourceV1250PartLocation_Orientation) AsResourceV1250PartLocationOrientation1() (ResourceV1250PartLocationOrientation1, error) {
+	var body ResourceV1250PartLocationOrientation1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240PartLocationOrientation1 overwrites any union data inside the ResourceV1240PartLocation_Orientation as the provided ResourceV1240PartLocationOrientation1
-func (t *ResourceV1240PartLocation_Orientation) FromResourceV1240PartLocationOrientation1(v ResourceV1240PartLocationOrientation1) error {
+// FromResourceV1250PartLocationOrientation1 overwrites any union data inside the ResourceV1250PartLocation_Orientation as the provided ResourceV1250PartLocationOrientation1
+func (t *ResourceV1250PartLocation_Orientation) FromResourceV1250PartLocationOrientation1(v ResourceV1250PartLocationOrientation1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240PartLocationOrientation1 performs a merge with any union data inside the ResourceV1240PartLocation_Orientation, using the provided ResourceV1240PartLocationOrientation1
-func (t *ResourceV1240PartLocation_Orientation) MergeResourceV1240PartLocationOrientation1(v ResourceV1240PartLocationOrientation1) error {
+// MergeResourceV1250PartLocationOrientation1 performs a merge with any union data inside the ResourceV1250PartLocation_Orientation, using the provided ResourceV1250PartLocationOrientation1
+func (t *ResourceV1250PartLocation_Orientation) MergeResourceV1250PartLocationOrientation1(v ResourceV1250PartLocationOrientation1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10681,32 +11346,32 @@ func (t *ResourceV1240PartLocation_Orientation) MergeResourceV1240PartLocationOr
 	return err
 }
 
-func (t ResourceV1240PartLocation_Orientation) MarshalJSON() ([]byte, error) {
+func (t ResourceV1250PartLocation_Orientation) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ResourceV1240PartLocation_Orientation) UnmarshalJSON(b []byte) error {
+func (t *ResourceV1250PartLocation_Orientation) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceV1240Reference returns the union data inside the ResourceV1240PartLocation_Reference as a ResourceV1240Reference
-func (t ResourceV1240PartLocation_Reference) AsResourceV1240Reference() (ResourceV1240Reference, error) {
-	var body ResourceV1240Reference
+// AsResourceV1250Reference returns the union data inside the ResourceV1250PartLocation_Reference as a ResourceV1250Reference
+func (t ResourceV1250PartLocation_Reference) AsResourceV1250Reference() (ResourceV1250Reference, error) {
+	var body ResourceV1250Reference
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240Reference overwrites any union data inside the ResourceV1240PartLocation_Reference as the provided ResourceV1240Reference
-func (t *ResourceV1240PartLocation_Reference) FromResourceV1240Reference(v ResourceV1240Reference) error {
+// FromResourceV1250Reference overwrites any union data inside the ResourceV1250PartLocation_Reference as the provided ResourceV1250Reference
+func (t *ResourceV1250PartLocation_Reference) FromResourceV1250Reference(v ResourceV1250Reference) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240Reference performs a merge with any union data inside the ResourceV1240PartLocation_Reference, using the provided ResourceV1240Reference
-func (t *ResourceV1240PartLocation_Reference) MergeResourceV1240Reference(v ResourceV1240Reference) error {
+// MergeResourceV1250Reference performs a merge with any union data inside the ResourceV1250PartLocation_Reference, using the provided ResourceV1250Reference
+func (t *ResourceV1250PartLocation_Reference) MergeResourceV1250Reference(v ResourceV1250Reference) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10717,22 +11382,22 @@ func (t *ResourceV1240PartLocation_Reference) MergeResourceV1240Reference(v Reso
 	return err
 }
 
-// AsResourceV1240PartLocationReference1 returns the union data inside the ResourceV1240PartLocation_Reference as a ResourceV1240PartLocationReference1
-func (t ResourceV1240PartLocation_Reference) AsResourceV1240PartLocationReference1() (ResourceV1240PartLocationReference1, error) {
-	var body ResourceV1240PartLocationReference1
+// AsResourceV1250PartLocationReference1 returns the union data inside the ResourceV1250PartLocation_Reference as a ResourceV1250PartLocationReference1
+func (t ResourceV1250PartLocation_Reference) AsResourceV1250PartLocationReference1() (ResourceV1250PartLocationReference1, error) {
+	var body ResourceV1250PartLocationReference1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240PartLocationReference1 overwrites any union data inside the ResourceV1240PartLocation_Reference as the provided ResourceV1240PartLocationReference1
-func (t *ResourceV1240PartLocation_Reference) FromResourceV1240PartLocationReference1(v ResourceV1240PartLocationReference1) error {
+// FromResourceV1250PartLocationReference1 overwrites any union data inside the ResourceV1250PartLocation_Reference as the provided ResourceV1250PartLocationReference1
+func (t *ResourceV1250PartLocation_Reference) FromResourceV1250PartLocationReference1(v ResourceV1250PartLocationReference1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240PartLocationReference1 performs a merge with any union data inside the ResourceV1240PartLocation_Reference, using the provided ResourceV1240PartLocationReference1
-func (t *ResourceV1240PartLocation_Reference) MergeResourceV1240PartLocationReference1(v ResourceV1240PartLocationReference1) error {
+// MergeResourceV1250PartLocationReference1 performs a merge with any union data inside the ResourceV1250PartLocation_Reference, using the provided ResourceV1250PartLocationReference1
+func (t *ResourceV1250PartLocation_Reference) MergeResourceV1250PartLocationReference1(v ResourceV1250PartLocationReference1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10743,32 +11408,32 @@ func (t *ResourceV1240PartLocation_Reference) MergeResourceV1240PartLocationRefe
 	return err
 }
 
-func (t ResourceV1240PartLocation_Reference) MarshalJSON() ([]byte, error) {
+func (t ResourceV1250PartLocation_Reference) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ResourceV1240PartLocation_Reference) UnmarshalJSON(b []byte) error {
+func (t *ResourceV1250PartLocation_Reference) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceV1240RackUnits returns the union data inside the ResourceV1240Placement_RackOffsetUnits as a ResourceV1240RackUnits
-func (t ResourceV1240Placement_RackOffsetUnits) AsResourceV1240RackUnits() (ResourceV1240RackUnits, error) {
-	var body ResourceV1240RackUnits
+// AsResourceV1250RackUnits returns the union data inside the ResourceV1250Placement_RackOffsetUnits as a ResourceV1250RackUnits
+func (t ResourceV1250Placement_RackOffsetUnits) AsResourceV1250RackUnits() (ResourceV1250RackUnits, error) {
+	var body ResourceV1250RackUnits
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240RackUnits overwrites any union data inside the ResourceV1240Placement_RackOffsetUnits as the provided ResourceV1240RackUnits
-func (t *ResourceV1240Placement_RackOffsetUnits) FromResourceV1240RackUnits(v ResourceV1240RackUnits) error {
+// FromResourceV1250RackUnits overwrites any union data inside the ResourceV1250Placement_RackOffsetUnits as the provided ResourceV1250RackUnits
+func (t *ResourceV1250Placement_RackOffsetUnits) FromResourceV1250RackUnits(v ResourceV1250RackUnits) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240RackUnits performs a merge with any union data inside the ResourceV1240Placement_RackOffsetUnits, using the provided ResourceV1240RackUnits
-func (t *ResourceV1240Placement_RackOffsetUnits) MergeResourceV1240RackUnits(v ResourceV1240RackUnits) error {
+// MergeResourceV1250RackUnits performs a merge with any union data inside the ResourceV1250Placement_RackOffsetUnits, using the provided ResourceV1250RackUnits
+func (t *ResourceV1250Placement_RackOffsetUnits) MergeResourceV1250RackUnits(v ResourceV1250RackUnits) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10779,22 +11444,22 @@ func (t *ResourceV1240Placement_RackOffsetUnits) MergeResourceV1240RackUnits(v R
 	return err
 }
 
-// AsResourceV1240PlacementRackOffsetUnits1 returns the union data inside the ResourceV1240Placement_RackOffsetUnits as a ResourceV1240PlacementRackOffsetUnits1
-func (t ResourceV1240Placement_RackOffsetUnits) AsResourceV1240PlacementRackOffsetUnits1() (ResourceV1240PlacementRackOffsetUnits1, error) {
-	var body ResourceV1240PlacementRackOffsetUnits1
+// AsResourceV1250PlacementRackOffsetUnits1 returns the union data inside the ResourceV1250Placement_RackOffsetUnits as a ResourceV1250PlacementRackOffsetUnits1
+func (t ResourceV1250Placement_RackOffsetUnits) AsResourceV1250PlacementRackOffsetUnits1() (ResourceV1250PlacementRackOffsetUnits1, error) {
+	var body ResourceV1250PlacementRackOffsetUnits1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceV1240PlacementRackOffsetUnits1 overwrites any union data inside the ResourceV1240Placement_RackOffsetUnits as the provided ResourceV1240PlacementRackOffsetUnits1
-func (t *ResourceV1240Placement_RackOffsetUnits) FromResourceV1240PlacementRackOffsetUnits1(v ResourceV1240PlacementRackOffsetUnits1) error {
+// FromResourceV1250PlacementRackOffsetUnits1 overwrites any union data inside the ResourceV1250Placement_RackOffsetUnits as the provided ResourceV1250PlacementRackOffsetUnits1
+func (t *ResourceV1250Placement_RackOffsetUnits) FromResourceV1250PlacementRackOffsetUnits1(v ResourceV1250PlacementRackOffsetUnits1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceV1240PlacementRackOffsetUnits1 performs a merge with any union data inside the ResourceV1240Placement_RackOffsetUnits, using the provided ResourceV1240PlacementRackOffsetUnits1
-func (t *ResourceV1240Placement_RackOffsetUnits) MergeResourceV1240PlacementRackOffsetUnits1(v ResourceV1240PlacementRackOffsetUnits1) error {
+// MergeResourceV1250PlacementRackOffsetUnits1 performs a merge with any union data inside the ResourceV1250Placement_RackOffsetUnits, using the provided ResourceV1250PlacementRackOffsetUnits1
+func (t *ResourceV1250Placement_RackOffsetUnits) MergeResourceV1250PlacementRackOffsetUnits1(v ResourceV1250PlacementRackOffsetUnits1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10805,12 +11470,12 @@ func (t *ResourceV1240Placement_RackOffsetUnits) MergeResourceV1240PlacementRack
 	return err
 }
 
-func (t ResourceV1240Placement_RackOffsetUnits) MarshalJSON() ([]byte, error) {
+func (t ResourceV1250Placement_RackOffsetUnits) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ResourceV1240Placement_RackOffsetUnits) UnmarshalJSON(b []byte) error {
+func (t *ResourceV1250Placement_RackOffsetUnits) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -10939,22 +11604,22 @@ func (t *SecureBootDatabaseV103SecureBootDatabase_Description) UnmarshalJSON(b [
 	return err
 }
 
-// AsResourceDescription returns the union data inside the SecureBootV120SecureBoot_Description as a ResourceDescription
-func (t SecureBootV120SecureBoot_Description) AsResourceDescription() (ResourceDescription, error) {
+// AsResourceDescription returns the union data inside the SecureBootV121SecureBoot_Description as a ResourceDescription
+func (t SecureBootV121SecureBoot_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceDescription overwrites any union data inside the SecureBootV120SecureBoot_Description as the provided ResourceDescription
-func (t *SecureBootV120SecureBoot_Description) FromResourceDescription(v ResourceDescription) error {
+// FromResourceDescription overwrites any union data inside the SecureBootV121SecureBoot_Description as the provided ResourceDescription
+func (t *SecureBootV121SecureBoot_Description) FromResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceDescription performs a merge with any union data inside the SecureBootV120SecureBoot_Description, using the provided ResourceDescription
-func (t *SecureBootV120SecureBoot_Description) MergeResourceDescription(v ResourceDescription) error {
+// MergeResourceDescription performs a merge with any union data inside the SecureBootV121SecureBoot_Description, using the provided ResourceDescription
+func (t *SecureBootV121SecureBoot_Description) MergeResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10965,22 +11630,22 @@ func (t *SecureBootV120SecureBoot_Description) MergeResourceDescription(v Resour
 	return err
 }
 
-// AsSecureBootV120SecureBootDescription1 returns the union data inside the SecureBootV120SecureBoot_Description as a SecureBootV120SecureBootDescription1
-func (t SecureBootV120SecureBoot_Description) AsSecureBootV120SecureBootDescription1() (SecureBootV120SecureBootDescription1, error) {
-	var body SecureBootV120SecureBootDescription1
+// AsSecureBootV121SecureBootDescription1 returns the union data inside the SecureBootV121SecureBoot_Description as a SecureBootV121SecureBootDescription1
+func (t SecureBootV121SecureBoot_Description) AsSecureBootV121SecureBootDescription1() (SecureBootV121SecureBootDescription1, error) {
+	var body SecureBootV121SecureBootDescription1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootDescription1 overwrites any union data inside the SecureBootV120SecureBoot_Description as the provided SecureBootV120SecureBootDescription1
-func (t *SecureBootV120SecureBoot_Description) FromSecureBootV120SecureBootDescription1(v SecureBootV120SecureBootDescription1) error {
+// FromSecureBootV121SecureBootDescription1 overwrites any union data inside the SecureBootV121SecureBoot_Description as the provided SecureBootV121SecureBootDescription1
+func (t *SecureBootV121SecureBoot_Description) FromSecureBootV121SecureBootDescription1(v SecureBootV121SecureBootDescription1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootDescription1 performs a merge with any union data inside the SecureBootV120SecureBoot_Description, using the provided SecureBootV120SecureBootDescription1
-func (t *SecureBootV120SecureBoot_Description) MergeSecureBootV120SecureBootDescription1(v SecureBootV120SecureBootDescription1) error {
+// MergeSecureBootV121SecureBootDescription1 performs a merge with any union data inside the SecureBootV121SecureBoot_Description, using the provided SecureBootV121SecureBootDescription1
+func (t *SecureBootV121SecureBoot_Description) MergeSecureBootV121SecureBootDescription1(v SecureBootV121SecureBootDescription1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -10991,32 +11656,32 @@ func (t *SecureBootV120SecureBoot_Description) MergeSecureBootV120SecureBootDesc
 	return err
 }
 
-func (t SecureBootV120SecureBoot_Description) MarshalJSON() ([]byte, error) {
+func (t SecureBootV121SecureBoot_Description) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *SecureBootV120SecureBoot_Description) UnmarshalJSON(b []byte) error {
+func (t *SecureBootV121SecureBoot_Description) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsSecureBootV120SecureBootCurrentBootType returns the union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as a SecureBootV120SecureBootCurrentBootType
-func (t SecureBootV120SecureBoot_SecureBootCurrentBoot) AsSecureBootV120SecureBootCurrentBootType() (SecureBootV120SecureBootCurrentBootType, error) {
-	var body SecureBootV120SecureBootCurrentBootType
+// AsSecureBootV121SecureBootCurrentBootType returns the union data inside the SecureBootV121SecureBoot_SecureBootCurrentBoot as a SecureBootV121SecureBootCurrentBootType
+func (t SecureBootV121SecureBoot_SecureBootCurrentBoot) AsSecureBootV121SecureBootCurrentBootType() (SecureBootV121SecureBootCurrentBootType, error) {
+	var body SecureBootV121SecureBootCurrentBootType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootCurrentBootType overwrites any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as the provided SecureBootV120SecureBootCurrentBootType
-func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) FromSecureBootV120SecureBootCurrentBootType(v SecureBootV120SecureBootCurrentBootType) error {
+// FromSecureBootV121SecureBootCurrentBootType overwrites any union data inside the SecureBootV121SecureBoot_SecureBootCurrentBoot as the provided SecureBootV121SecureBootCurrentBootType
+func (t *SecureBootV121SecureBoot_SecureBootCurrentBoot) FromSecureBootV121SecureBootCurrentBootType(v SecureBootV121SecureBootCurrentBootType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootCurrentBootType performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot, using the provided SecureBootV120SecureBootCurrentBootType
-func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) MergeSecureBootV120SecureBootCurrentBootType(v SecureBootV120SecureBootCurrentBootType) error {
+// MergeSecureBootV121SecureBootCurrentBootType performs a merge with any union data inside the SecureBootV121SecureBoot_SecureBootCurrentBoot, using the provided SecureBootV121SecureBootCurrentBootType
+func (t *SecureBootV121SecureBoot_SecureBootCurrentBoot) MergeSecureBootV121SecureBootCurrentBootType(v SecureBootV121SecureBootCurrentBootType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11027,22 +11692,22 @@ func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) MergeSecureBootV120Secu
 	return err
 }
 
-// AsSecureBootV120SecureBootSecureBootCurrentBoot1 returns the union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as a SecureBootV120SecureBootSecureBootCurrentBoot1
-func (t SecureBootV120SecureBoot_SecureBootCurrentBoot) AsSecureBootV120SecureBootSecureBootCurrentBoot1() (SecureBootV120SecureBootSecureBootCurrentBoot1, error) {
-	var body SecureBootV120SecureBootSecureBootCurrentBoot1
+// AsSecureBootV121SecureBootSecureBootCurrentBoot1 returns the union data inside the SecureBootV121SecureBoot_SecureBootCurrentBoot as a SecureBootV121SecureBootSecureBootCurrentBoot1
+func (t SecureBootV121SecureBoot_SecureBootCurrentBoot) AsSecureBootV121SecureBootSecureBootCurrentBoot1() (SecureBootV121SecureBootSecureBootCurrentBoot1, error) {
+	var body SecureBootV121SecureBootSecureBootCurrentBoot1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootSecureBootCurrentBoot1 overwrites any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot as the provided SecureBootV120SecureBootSecureBootCurrentBoot1
-func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) FromSecureBootV120SecureBootSecureBootCurrentBoot1(v SecureBootV120SecureBootSecureBootCurrentBoot1) error {
+// FromSecureBootV121SecureBootSecureBootCurrentBoot1 overwrites any union data inside the SecureBootV121SecureBoot_SecureBootCurrentBoot as the provided SecureBootV121SecureBootSecureBootCurrentBoot1
+func (t *SecureBootV121SecureBoot_SecureBootCurrentBoot) FromSecureBootV121SecureBootSecureBootCurrentBoot1(v SecureBootV121SecureBootSecureBootCurrentBoot1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootSecureBootCurrentBoot1 performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootCurrentBoot, using the provided SecureBootV120SecureBootSecureBootCurrentBoot1
-func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) MergeSecureBootV120SecureBootSecureBootCurrentBoot1(v SecureBootV120SecureBootSecureBootCurrentBoot1) error {
+// MergeSecureBootV121SecureBootSecureBootCurrentBoot1 performs a merge with any union data inside the SecureBootV121SecureBoot_SecureBootCurrentBoot, using the provided SecureBootV121SecureBootSecureBootCurrentBoot1
+func (t *SecureBootV121SecureBoot_SecureBootCurrentBoot) MergeSecureBootV121SecureBootSecureBootCurrentBoot1(v SecureBootV121SecureBootSecureBootCurrentBoot1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11053,32 +11718,32 @@ func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) MergeSecureBootV120Secu
 	return err
 }
 
-func (t SecureBootV120SecureBoot_SecureBootCurrentBoot) MarshalJSON() ([]byte, error) {
+func (t SecureBootV121SecureBoot_SecureBootCurrentBoot) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *SecureBootV120SecureBoot_SecureBootCurrentBoot) UnmarshalJSON(b []byte) error {
+func (t *SecureBootV121SecureBoot_SecureBootCurrentBoot) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsSecureBootV120SecureBootModeType returns the union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as a SecureBootV120SecureBootModeType
-func (t SecureBootV120SecureBoot_SecureBootDesiredMode) AsSecureBootV120SecureBootModeType() (SecureBootV120SecureBootModeType, error) {
-	var body SecureBootV120SecureBootModeType
+// AsSecureBootV121SecureBootModeType returns the union data inside the SecureBootV121SecureBoot_SecureBootDesiredMode as a SecureBootV121SecureBootModeType
+func (t SecureBootV121SecureBoot_SecureBootDesiredMode) AsSecureBootV121SecureBootModeType() (SecureBootV121SecureBootModeType, error) {
+	var body SecureBootV121SecureBootModeType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootModeType overwrites any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as the provided SecureBootV120SecureBootModeType
-func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) FromSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+// FromSecureBootV121SecureBootModeType overwrites any union data inside the SecureBootV121SecureBoot_SecureBootDesiredMode as the provided SecureBootV121SecureBootModeType
+func (t *SecureBootV121SecureBoot_SecureBootDesiredMode) FromSecureBootV121SecureBootModeType(v SecureBootV121SecureBootModeType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootModeType performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode, using the provided SecureBootV120SecureBootModeType
-func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) MergeSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+// MergeSecureBootV121SecureBootModeType performs a merge with any union data inside the SecureBootV121SecureBoot_SecureBootDesiredMode, using the provided SecureBootV121SecureBootModeType
+func (t *SecureBootV121SecureBoot_SecureBootDesiredMode) MergeSecureBootV121SecureBootModeType(v SecureBootV121SecureBootModeType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11089,22 +11754,22 @@ func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) MergeSecureBootV120Secu
 	return err
 }
 
-// AsSecureBootV120SecureBootSecureBootDesiredMode1 returns the union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as a SecureBootV120SecureBootSecureBootDesiredMode1
-func (t SecureBootV120SecureBoot_SecureBootDesiredMode) AsSecureBootV120SecureBootSecureBootDesiredMode1() (SecureBootV120SecureBootSecureBootDesiredMode1, error) {
-	var body SecureBootV120SecureBootSecureBootDesiredMode1
+// AsSecureBootV121SecureBootSecureBootDesiredMode1 returns the union data inside the SecureBootV121SecureBoot_SecureBootDesiredMode as a SecureBootV121SecureBootSecureBootDesiredMode1
+func (t SecureBootV121SecureBoot_SecureBootDesiredMode) AsSecureBootV121SecureBootSecureBootDesiredMode1() (SecureBootV121SecureBootSecureBootDesiredMode1, error) {
+	var body SecureBootV121SecureBootSecureBootDesiredMode1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootSecureBootDesiredMode1 overwrites any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode as the provided SecureBootV120SecureBootSecureBootDesiredMode1
-func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) FromSecureBootV120SecureBootSecureBootDesiredMode1(v SecureBootV120SecureBootSecureBootDesiredMode1) error {
+// FromSecureBootV121SecureBootSecureBootDesiredMode1 overwrites any union data inside the SecureBootV121SecureBoot_SecureBootDesiredMode as the provided SecureBootV121SecureBootSecureBootDesiredMode1
+func (t *SecureBootV121SecureBoot_SecureBootDesiredMode) FromSecureBootV121SecureBootSecureBootDesiredMode1(v SecureBootV121SecureBootSecureBootDesiredMode1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootSecureBootDesiredMode1 performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootDesiredMode, using the provided SecureBootV120SecureBootSecureBootDesiredMode1
-func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) MergeSecureBootV120SecureBootSecureBootDesiredMode1(v SecureBootV120SecureBootSecureBootDesiredMode1) error {
+// MergeSecureBootV121SecureBootSecureBootDesiredMode1 performs a merge with any union data inside the SecureBootV121SecureBoot_SecureBootDesiredMode, using the provided SecureBootV121SecureBootSecureBootDesiredMode1
+func (t *SecureBootV121SecureBoot_SecureBootDesiredMode) MergeSecureBootV121SecureBootSecureBootDesiredMode1(v SecureBootV121SecureBootSecureBootDesiredMode1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11115,32 +11780,32 @@ func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) MergeSecureBootV120Secu
 	return err
 }
 
-func (t SecureBootV120SecureBoot_SecureBootDesiredMode) MarshalJSON() ([]byte, error) {
+func (t SecureBootV121SecureBoot_SecureBootDesiredMode) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *SecureBootV120SecureBoot_SecureBootDesiredMode) UnmarshalJSON(b []byte) error {
+func (t *SecureBootV121SecureBoot_SecureBootDesiredMode) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsSecureBootV120SecureBootModeType returns the union data inside the SecureBootV120SecureBoot_SecureBootMode as a SecureBootV120SecureBootModeType
-func (t SecureBootV120SecureBoot_SecureBootMode) AsSecureBootV120SecureBootModeType() (SecureBootV120SecureBootModeType, error) {
-	var body SecureBootV120SecureBootModeType
+// AsSecureBootV121SecureBootModeType returns the union data inside the SecureBootV121SecureBoot_SecureBootMode as a SecureBootV121SecureBootModeType
+func (t SecureBootV121SecureBoot_SecureBootMode) AsSecureBootV121SecureBootModeType() (SecureBootV121SecureBootModeType, error) {
+	var body SecureBootV121SecureBootModeType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootModeType overwrites any union data inside the SecureBootV120SecureBoot_SecureBootMode as the provided SecureBootV120SecureBootModeType
-func (t *SecureBootV120SecureBoot_SecureBootMode) FromSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+// FromSecureBootV121SecureBootModeType overwrites any union data inside the SecureBootV121SecureBoot_SecureBootMode as the provided SecureBootV121SecureBootModeType
+func (t *SecureBootV121SecureBoot_SecureBootMode) FromSecureBootV121SecureBootModeType(v SecureBootV121SecureBootModeType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootModeType performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootMode, using the provided SecureBootV120SecureBootModeType
-func (t *SecureBootV120SecureBoot_SecureBootMode) MergeSecureBootV120SecureBootModeType(v SecureBootV120SecureBootModeType) error {
+// MergeSecureBootV121SecureBootModeType performs a merge with any union data inside the SecureBootV121SecureBoot_SecureBootMode, using the provided SecureBootV121SecureBootModeType
+func (t *SecureBootV121SecureBoot_SecureBootMode) MergeSecureBootV121SecureBootModeType(v SecureBootV121SecureBootModeType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11151,22 +11816,22 @@ func (t *SecureBootV120SecureBoot_SecureBootMode) MergeSecureBootV120SecureBootM
 	return err
 }
 
-// AsSecureBootV120SecureBootSecureBootMode1 returns the union data inside the SecureBootV120SecureBoot_SecureBootMode as a SecureBootV120SecureBootSecureBootMode1
-func (t SecureBootV120SecureBoot_SecureBootMode) AsSecureBootV120SecureBootSecureBootMode1() (SecureBootV120SecureBootSecureBootMode1, error) {
-	var body SecureBootV120SecureBootSecureBootMode1
+// AsSecureBootV121SecureBootSecureBootMode1 returns the union data inside the SecureBootV121SecureBoot_SecureBootMode as a SecureBootV121SecureBootSecureBootMode1
+func (t SecureBootV121SecureBoot_SecureBootMode) AsSecureBootV121SecureBootSecureBootMode1() (SecureBootV121SecureBootSecureBootMode1, error) {
+	var body SecureBootV121SecureBootSecureBootMode1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromSecureBootV120SecureBootSecureBootMode1 overwrites any union data inside the SecureBootV120SecureBoot_SecureBootMode as the provided SecureBootV120SecureBootSecureBootMode1
-func (t *SecureBootV120SecureBoot_SecureBootMode) FromSecureBootV120SecureBootSecureBootMode1(v SecureBootV120SecureBootSecureBootMode1) error {
+// FromSecureBootV121SecureBootSecureBootMode1 overwrites any union data inside the SecureBootV121SecureBoot_SecureBootMode as the provided SecureBootV121SecureBootSecureBootMode1
+func (t *SecureBootV121SecureBoot_SecureBootMode) FromSecureBootV121SecureBootSecureBootMode1(v SecureBootV121SecureBootSecureBootMode1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeSecureBootV120SecureBootSecureBootMode1 performs a merge with any union data inside the SecureBootV120SecureBoot_SecureBootMode, using the provided SecureBootV120SecureBootSecureBootMode1
-func (t *SecureBootV120SecureBoot_SecureBootMode) MergeSecureBootV120SecureBootSecureBootMode1(v SecureBootV120SecureBootSecureBootMode1) error {
+// MergeSecureBootV121SecureBootSecureBootMode1 performs a merge with any union data inside the SecureBootV121SecureBoot_SecureBootMode, using the provided SecureBootV121SecureBootSecureBootMode1
+func (t *SecureBootV121SecureBoot_SecureBootMode) MergeSecureBootV121SecureBootSecureBootMode1(v SecureBootV121SecureBootSecureBootMode1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11177,32 +11842,32 @@ func (t *SecureBootV120SecureBoot_SecureBootMode) MergeSecureBootV120SecureBootS
 	return err
 }
 
-func (t SecureBootV120SecureBoot_SecureBootMode) MarshalJSON() ([]byte, error) {
+func (t SecureBootV121SecureBoot_SecureBootMode) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *SecureBootV120SecureBoot_SecureBootMode) UnmarshalJSON(b []byte) error {
+func (t *SecureBootV121SecureBoot_SecureBootMode) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceDescription returns the union data inside the ServiceRootV1210ServiceRoot_Description as a ResourceDescription
-func (t ServiceRootV1210ServiceRoot_Description) AsResourceDescription() (ResourceDescription, error) {
+// AsResourceDescription returns the union data inside the ServiceRootV1220ServiceRoot_Description as a ResourceDescription
+func (t ServiceRootV1220ServiceRoot_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceDescription overwrites any union data inside the ServiceRootV1210ServiceRoot_Description as the provided ResourceDescription
-func (t *ServiceRootV1210ServiceRoot_Description) FromResourceDescription(v ResourceDescription) error {
+// FromResourceDescription overwrites any union data inside the ServiceRootV1220ServiceRoot_Description as the provided ResourceDescription
+func (t *ServiceRootV1220ServiceRoot_Description) FromResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceDescription performs a merge with any union data inside the ServiceRootV1210ServiceRoot_Description, using the provided ResourceDescription
-func (t *ServiceRootV1210ServiceRoot_Description) MergeResourceDescription(v ResourceDescription) error {
+// MergeResourceDescription performs a merge with any union data inside the ServiceRootV1220ServiceRoot_Description, using the provided ResourceDescription
+func (t *ServiceRootV1220ServiceRoot_Description) MergeResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11213,22 +11878,22 @@ func (t *ServiceRootV1210ServiceRoot_Description) MergeResourceDescription(v Res
 	return err
 }
 
-// AsServiceRootV1210ServiceRootDescription1 returns the union data inside the ServiceRootV1210ServiceRoot_Description as a ServiceRootV1210ServiceRootDescription1
-func (t ServiceRootV1210ServiceRoot_Description) AsServiceRootV1210ServiceRootDescription1() (ServiceRootV1210ServiceRootDescription1, error) {
-	var body ServiceRootV1210ServiceRootDescription1
+// AsServiceRootV1220ServiceRootDescription1 returns the union data inside the ServiceRootV1220ServiceRoot_Description as a ServiceRootV1220ServiceRootDescription1
+func (t ServiceRootV1220ServiceRoot_Description) AsServiceRootV1220ServiceRootDescription1() (ServiceRootV1220ServiceRootDescription1, error) {
+	var body ServiceRootV1220ServiceRootDescription1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromServiceRootV1210ServiceRootDescription1 overwrites any union data inside the ServiceRootV1210ServiceRoot_Description as the provided ServiceRootV1210ServiceRootDescription1
-func (t *ServiceRootV1210ServiceRoot_Description) FromServiceRootV1210ServiceRootDescription1(v ServiceRootV1210ServiceRootDescription1) error {
+// FromServiceRootV1220ServiceRootDescription1 overwrites any union data inside the ServiceRootV1220ServiceRoot_Description as the provided ServiceRootV1220ServiceRootDescription1
+func (t *ServiceRootV1220ServiceRoot_Description) FromServiceRootV1220ServiceRootDescription1(v ServiceRootV1220ServiceRootDescription1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeServiceRootV1210ServiceRootDescription1 performs a merge with any union data inside the ServiceRootV1210ServiceRoot_Description, using the provided ServiceRootV1210ServiceRootDescription1
-func (t *ServiceRootV1210ServiceRoot_Description) MergeServiceRootV1210ServiceRootDescription1(v ServiceRootV1210ServiceRootDescription1) error {
+// MergeServiceRootV1220ServiceRootDescription1 performs a merge with any union data inside the ServiceRootV1220ServiceRoot_Description, using the provided ServiceRootV1220ServiceRootDescription1
+func (t *ServiceRootV1220ServiceRoot_Description) MergeServiceRootV1220ServiceRootDescription1(v ServiceRootV1220ServiceRootDescription1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11239,12 +11904,12 @@ func (t *ServiceRootV1210ServiceRoot_Description) MergeServiceRootV1210ServiceRo
 	return err
 }
 
-func (t ServiceRootV1210ServiceRoot_Description) MarshalJSON() ([]byte, error) {
+func (t ServiceRootV1220ServiceRoot_Description) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *ServiceRootV1210ServiceRoot_Description) UnmarshalJSON(b []byte) error {
+func (t *ServiceRootV1220ServiceRoot_Description) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -11373,22 +12038,22 @@ func (t *VirtualMediaCollectionVirtualMediaCollection_Description) UnmarshalJSON
 	return err
 }
 
-// AsVirtualMediaV165ConnectedVia returns the union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as a VirtualMediaV165ConnectedVia
-func (t VirtualMediaV165VirtualMedia_ConnectedVia) AsVirtualMediaV165ConnectedVia() (VirtualMediaV165ConnectedVia, error) {
-	var body VirtualMediaV165ConnectedVia
+// AsVirtualMediaV170ConnectedVia returns the union data inside the VirtualMediaV170VirtualMedia_ConnectedVia as a VirtualMediaV170ConnectedVia
+func (t VirtualMediaV170VirtualMedia_ConnectedVia) AsVirtualMediaV170ConnectedVia() (VirtualMediaV170ConnectedVia, error) {
+	var body VirtualMediaV170ConnectedVia
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165ConnectedVia overwrites any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as the provided VirtualMediaV165ConnectedVia
-func (t *VirtualMediaV165VirtualMedia_ConnectedVia) FromVirtualMediaV165ConnectedVia(v VirtualMediaV165ConnectedVia) error {
+// FromVirtualMediaV170ConnectedVia overwrites any union data inside the VirtualMediaV170VirtualMedia_ConnectedVia as the provided VirtualMediaV170ConnectedVia
+func (t *VirtualMediaV170VirtualMedia_ConnectedVia) FromVirtualMediaV170ConnectedVia(v VirtualMediaV170ConnectedVia) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165ConnectedVia performs a merge with any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia, using the provided VirtualMediaV165ConnectedVia
-func (t *VirtualMediaV165VirtualMedia_ConnectedVia) MergeVirtualMediaV165ConnectedVia(v VirtualMediaV165ConnectedVia) error {
+// MergeVirtualMediaV170ConnectedVia performs a merge with any union data inside the VirtualMediaV170VirtualMedia_ConnectedVia, using the provided VirtualMediaV170ConnectedVia
+func (t *VirtualMediaV170VirtualMedia_ConnectedVia) MergeVirtualMediaV170ConnectedVia(v VirtualMediaV170ConnectedVia) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11399,22 +12064,22 @@ func (t *VirtualMediaV165VirtualMedia_ConnectedVia) MergeVirtualMediaV165Connect
 	return err
 }
 
-// AsVirtualMediaV165VirtualMediaConnectedVia1 returns the union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as a VirtualMediaV165VirtualMediaConnectedVia1
-func (t VirtualMediaV165VirtualMedia_ConnectedVia) AsVirtualMediaV165VirtualMediaConnectedVia1() (VirtualMediaV165VirtualMediaConnectedVia1, error) {
-	var body VirtualMediaV165VirtualMediaConnectedVia1
+// AsVirtualMediaV170VirtualMediaConnectedVia1 returns the union data inside the VirtualMediaV170VirtualMedia_ConnectedVia as a VirtualMediaV170VirtualMediaConnectedVia1
+func (t VirtualMediaV170VirtualMedia_ConnectedVia) AsVirtualMediaV170VirtualMediaConnectedVia1() (VirtualMediaV170VirtualMediaConnectedVia1, error) {
+	var body VirtualMediaV170VirtualMediaConnectedVia1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165VirtualMediaConnectedVia1 overwrites any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia as the provided VirtualMediaV165VirtualMediaConnectedVia1
-func (t *VirtualMediaV165VirtualMedia_ConnectedVia) FromVirtualMediaV165VirtualMediaConnectedVia1(v VirtualMediaV165VirtualMediaConnectedVia1) error {
+// FromVirtualMediaV170VirtualMediaConnectedVia1 overwrites any union data inside the VirtualMediaV170VirtualMedia_ConnectedVia as the provided VirtualMediaV170VirtualMediaConnectedVia1
+func (t *VirtualMediaV170VirtualMedia_ConnectedVia) FromVirtualMediaV170VirtualMediaConnectedVia1(v VirtualMediaV170VirtualMediaConnectedVia1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165VirtualMediaConnectedVia1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_ConnectedVia, using the provided VirtualMediaV165VirtualMediaConnectedVia1
-func (t *VirtualMediaV165VirtualMedia_ConnectedVia) MergeVirtualMediaV165VirtualMediaConnectedVia1(v VirtualMediaV165VirtualMediaConnectedVia1) error {
+// MergeVirtualMediaV170VirtualMediaConnectedVia1 performs a merge with any union data inside the VirtualMediaV170VirtualMedia_ConnectedVia, using the provided VirtualMediaV170VirtualMediaConnectedVia1
+func (t *VirtualMediaV170VirtualMedia_ConnectedVia) MergeVirtualMediaV170VirtualMediaConnectedVia1(v VirtualMediaV170VirtualMediaConnectedVia1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11425,32 +12090,32 @@ func (t *VirtualMediaV165VirtualMedia_ConnectedVia) MergeVirtualMediaV165Virtual
 	return err
 }
 
-func (t VirtualMediaV165VirtualMedia_ConnectedVia) MarshalJSON() ([]byte, error) {
+func (t VirtualMediaV170VirtualMedia_ConnectedVia) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *VirtualMediaV165VirtualMedia_ConnectedVia) UnmarshalJSON(b []byte) error {
+func (t *VirtualMediaV170VirtualMedia_ConnectedVia) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsResourceDescription returns the union data inside the VirtualMediaV165VirtualMedia_Description as a ResourceDescription
-func (t VirtualMediaV165VirtualMedia_Description) AsResourceDescription() (ResourceDescription, error) {
+// AsResourceDescription returns the union data inside the VirtualMediaV170VirtualMedia_Description as a ResourceDescription
+func (t VirtualMediaV170VirtualMedia_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromResourceDescription overwrites any union data inside the VirtualMediaV165VirtualMedia_Description as the provided ResourceDescription
-func (t *VirtualMediaV165VirtualMedia_Description) FromResourceDescription(v ResourceDescription) error {
+// FromResourceDescription overwrites any union data inside the VirtualMediaV170VirtualMedia_Description as the provided ResourceDescription
+func (t *VirtualMediaV170VirtualMedia_Description) FromResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeResourceDescription performs a merge with any union data inside the VirtualMediaV165VirtualMedia_Description, using the provided ResourceDescription
-func (t *VirtualMediaV165VirtualMedia_Description) MergeResourceDescription(v ResourceDescription) error {
+// MergeResourceDescription performs a merge with any union data inside the VirtualMediaV170VirtualMedia_Description, using the provided ResourceDescription
+func (t *VirtualMediaV170VirtualMedia_Description) MergeResourceDescription(v ResourceDescription) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11461,22 +12126,22 @@ func (t *VirtualMediaV165VirtualMedia_Description) MergeResourceDescription(v Re
 	return err
 }
 
-// AsVirtualMediaV165VirtualMediaDescription1 returns the union data inside the VirtualMediaV165VirtualMedia_Description as a VirtualMediaV165VirtualMediaDescription1
-func (t VirtualMediaV165VirtualMedia_Description) AsVirtualMediaV165VirtualMediaDescription1() (VirtualMediaV165VirtualMediaDescription1, error) {
-	var body VirtualMediaV165VirtualMediaDescription1
+// AsVirtualMediaV170VirtualMediaDescription1 returns the union data inside the VirtualMediaV170VirtualMedia_Description as a VirtualMediaV170VirtualMediaDescription1
+func (t VirtualMediaV170VirtualMedia_Description) AsVirtualMediaV170VirtualMediaDescription1() (VirtualMediaV170VirtualMediaDescription1, error) {
+	var body VirtualMediaV170VirtualMediaDescription1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165VirtualMediaDescription1 overwrites any union data inside the VirtualMediaV165VirtualMedia_Description as the provided VirtualMediaV165VirtualMediaDescription1
-func (t *VirtualMediaV165VirtualMedia_Description) FromVirtualMediaV165VirtualMediaDescription1(v VirtualMediaV165VirtualMediaDescription1) error {
+// FromVirtualMediaV170VirtualMediaDescription1 overwrites any union data inside the VirtualMediaV170VirtualMedia_Description as the provided VirtualMediaV170VirtualMediaDescription1
+func (t *VirtualMediaV170VirtualMedia_Description) FromVirtualMediaV170VirtualMediaDescription1(v VirtualMediaV170VirtualMediaDescription1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165VirtualMediaDescription1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_Description, using the provided VirtualMediaV165VirtualMediaDescription1
-func (t *VirtualMediaV165VirtualMedia_Description) MergeVirtualMediaV165VirtualMediaDescription1(v VirtualMediaV165VirtualMediaDescription1) error {
+// MergeVirtualMediaV170VirtualMediaDescription1 performs a merge with any union data inside the VirtualMediaV170VirtualMedia_Description, using the provided VirtualMediaV170VirtualMediaDescription1
+func (t *VirtualMediaV170VirtualMedia_Description) MergeVirtualMediaV170VirtualMediaDescription1(v VirtualMediaV170VirtualMediaDescription1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11487,32 +12152,32 @@ func (t *VirtualMediaV165VirtualMedia_Description) MergeVirtualMediaV165VirtualM
 	return err
 }
 
-func (t VirtualMediaV165VirtualMedia_Description) MarshalJSON() ([]byte, error) {
+func (t VirtualMediaV170VirtualMedia_Description) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *VirtualMediaV165VirtualMedia_Description) UnmarshalJSON(b []byte) error {
+func (t *VirtualMediaV170VirtualMedia_Description) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsVirtualMediaV165EjectPolicy returns the union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as a VirtualMediaV165EjectPolicy
-func (t VirtualMediaV165VirtualMedia_EjectPolicy) AsVirtualMediaV165EjectPolicy() (VirtualMediaV165EjectPolicy, error) {
-	var body VirtualMediaV165EjectPolicy
+// AsVirtualMediaV170EjectPolicy returns the union data inside the VirtualMediaV170VirtualMedia_EjectPolicy as a VirtualMediaV170EjectPolicy
+func (t VirtualMediaV170VirtualMedia_EjectPolicy) AsVirtualMediaV170EjectPolicy() (VirtualMediaV170EjectPolicy, error) {
+	var body VirtualMediaV170EjectPolicy
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165EjectPolicy overwrites any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as the provided VirtualMediaV165EjectPolicy
-func (t *VirtualMediaV165VirtualMedia_EjectPolicy) FromVirtualMediaV165EjectPolicy(v VirtualMediaV165EjectPolicy) error {
+// FromVirtualMediaV170EjectPolicy overwrites any union data inside the VirtualMediaV170VirtualMedia_EjectPolicy as the provided VirtualMediaV170EjectPolicy
+func (t *VirtualMediaV170VirtualMedia_EjectPolicy) FromVirtualMediaV170EjectPolicy(v VirtualMediaV170EjectPolicy) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165EjectPolicy performs a merge with any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy, using the provided VirtualMediaV165EjectPolicy
-func (t *VirtualMediaV165VirtualMedia_EjectPolicy) MergeVirtualMediaV165EjectPolicy(v VirtualMediaV165EjectPolicy) error {
+// MergeVirtualMediaV170EjectPolicy performs a merge with any union data inside the VirtualMediaV170VirtualMedia_EjectPolicy, using the provided VirtualMediaV170EjectPolicy
+func (t *VirtualMediaV170VirtualMedia_EjectPolicy) MergeVirtualMediaV170EjectPolicy(v VirtualMediaV170EjectPolicy) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11523,22 +12188,22 @@ func (t *VirtualMediaV165VirtualMedia_EjectPolicy) MergeVirtualMediaV165EjectPol
 	return err
 }
 
-// AsVirtualMediaV165VirtualMediaEjectPolicy1 returns the union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as a VirtualMediaV165VirtualMediaEjectPolicy1
-func (t VirtualMediaV165VirtualMedia_EjectPolicy) AsVirtualMediaV165VirtualMediaEjectPolicy1() (VirtualMediaV165VirtualMediaEjectPolicy1, error) {
-	var body VirtualMediaV165VirtualMediaEjectPolicy1
+// AsVirtualMediaV170VirtualMediaEjectPolicy1 returns the union data inside the VirtualMediaV170VirtualMedia_EjectPolicy as a VirtualMediaV170VirtualMediaEjectPolicy1
+func (t VirtualMediaV170VirtualMedia_EjectPolicy) AsVirtualMediaV170VirtualMediaEjectPolicy1() (VirtualMediaV170VirtualMediaEjectPolicy1, error) {
+	var body VirtualMediaV170VirtualMediaEjectPolicy1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165VirtualMediaEjectPolicy1 overwrites any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy as the provided VirtualMediaV165VirtualMediaEjectPolicy1
-func (t *VirtualMediaV165VirtualMedia_EjectPolicy) FromVirtualMediaV165VirtualMediaEjectPolicy1(v VirtualMediaV165VirtualMediaEjectPolicy1) error {
+// FromVirtualMediaV170VirtualMediaEjectPolicy1 overwrites any union data inside the VirtualMediaV170VirtualMedia_EjectPolicy as the provided VirtualMediaV170VirtualMediaEjectPolicy1
+func (t *VirtualMediaV170VirtualMedia_EjectPolicy) FromVirtualMediaV170VirtualMediaEjectPolicy1(v VirtualMediaV170VirtualMediaEjectPolicy1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165VirtualMediaEjectPolicy1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_EjectPolicy, using the provided VirtualMediaV165VirtualMediaEjectPolicy1
-func (t *VirtualMediaV165VirtualMedia_EjectPolicy) MergeVirtualMediaV165VirtualMediaEjectPolicy1(v VirtualMediaV165VirtualMediaEjectPolicy1) error {
+// MergeVirtualMediaV170VirtualMediaEjectPolicy1 performs a merge with any union data inside the VirtualMediaV170VirtualMedia_EjectPolicy, using the provided VirtualMediaV170VirtualMediaEjectPolicy1
+func (t *VirtualMediaV170VirtualMedia_EjectPolicy) MergeVirtualMediaV170VirtualMediaEjectPolicy1(v VirtualMediaV170VirtualMediaEjectPolicy1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11549,32 +12214,32 @@ func (t *VirtualMediaV165VirtualMedia_EjectPolicy) MergeVirtualMediaV165VirtualM
 	return err
 }
 
-func (t VirtualMediaV165VirtualMedia_EjectPolicy) MarshalJSON() ([]byte, error) {
+func (t VirtualMediaV170VirtualMedia_EjectPolicy) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *VirtualMediaV165VirtualMedia_EjectPolicy) UnmarshalJSON(b []byte) error {
+func (t *VirtualMediaV170VirtualMedia_EjectPolicy) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsVirtualMediaV165TransferMethod returns the union data inside the VirtualMediaV165VirtualMedia_TransferMethod as a VirtualMediaV165TransferMethod
-func (t VirtualMediaV165VirtualMedia_TransferMethod) AsVirtualMediaV165TransferMethod() (VirtualMediaV165TransferMethod, error) {
-	var body VirtualMediaV165TransferMethod
+// AsVirtualMediaV170TransferMethod returns the union data inside the VirtualMediaV170VirtualMedia_TransferMethod as a VirtualMediaV170TransferMethod
+func (t VirtualMediaV170VirtualMedia_TransferMethod) AsVirtualMediaV170TransferMethod() (VirtualMediaV170TransferMethod, error) {
+	var body VirtualMediaV170TransferMethod
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165TransferMethod overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferMethod as the provided VirtualMediaV165TransferMethod
-func (t *VirtualMediaV165VirtualMedia_TransferMethod) FromVirtualMediaV165TransferMethod(v VirtualMediaV165TransferMethod) error {
+// FromVirtualMediaV170TransferMethod overwrites any union data inside the VirtualMediaV170VirtualMedia_TransferMethod as the provided VirtualMediaV170TransferMethod
+func (t *VirtualMediaV170VirtualMedia_TransferMethod) FromVirtualMediaV170TransferMethod(v VirtualMediaV170TransferMethod) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165TransferMethod performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferMethod, using the provided VirtualMediaV165TransferMethod
-func (t *VirtualMediaV165VirtualMedia_TransferMethod) MergeVirtualMediaV165TransferMethod(v VirtualMediaV165TransferMethod) error {
+// MergeVirtualMediaV170TransferMethod performs a merge with any union data inside the VirtualMediaV170VirtualMedia_TransferMethod, using the provided VirtualMediaV170TransferMethod
+func (t *VirtualMediaV170VirtualMedia_TransferMethod) MergeVirtualMediaV170TransferMethod(v VirtualMediaV170TransferMethod) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11585,22 +12250,22 @@ func (t *VirtualMediaV165VirtualMedia_TransferMethod) MergeVirtualMediaV165Trans
 	return err
 }
 
-// AsVirtualMediaV165VirtualMediaTransferMethod1 returns the union data inside the VirtualMediaV165VirtualMedia_TransferMethod as a VirtualMediaV165VirtualMediaTransferMethod1
-func (t VirtualMediaV165VirtualMedia_TransferMethod) AsVirtualMediaV165VirtualMediaTransferMethod1() (VirtualMediaV165VirtualMediaTransferMethod1, error) {
-	var body VirtualMediaV165VirtualMediaTransferMethod1
+// AsVirtualMediaV170VirtualMediaTransferMethod1 returns the union data inside the VirtualMediaV170VirtualMedia_TransferMethod as a VirtualMediaV170VirtualMediaTransferMethod1
+func (t VirtualMediaV170VirtualMedia_TransferMethod) AsVirtualMediaV170VirtualMediaTransferMethod1() (VirtualMediaV170VirtualMediaTransferMethod1, error) {
+	var body VirtualMediaV170VirtualMediaTransferMethod1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165VirtualMediaTransferMethod1 overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferMethod as the provided VirtualMediaV165VirtualMediaTransferMethod1
-func (t *VirtualMediaV165VirtualMedia_TransferMethod) FromVirtualMediaV165VirtualMediaTransferMethod1(v VirtualMediaV165VirtualMediaTransferMethod1) error {
+// FromVirtualMediaV170VirtualMediaTransferMethod1 overwrites any union data inside the VirtualMediaV170VirtualMedia_TransferMethod as the provided VirtualMediaV170VirtualMediaTransferMethod1
+func (t *VirtualMediaV170VirtualMedia_TransferMethod) FromVirtualMediaV170VirtualMediaTransferMethod1(v VirtualMediaV170VirtualMediaTransferMethod1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165VirtualMediaTransferMethod1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferMethod, using the provided VirtualMediaV165VirtualMediaTransferMethod1
-func (t *VirtualMediaV165VirtualMedia_TransferMethod) MergeVirtualMediaV165VirtualMediaTransferMethod1(v VirtualMediaV165VirtualMediaTransferMethod1) error {
+// MergeVirtualMediaV170VirtualMediaTransferMethod1 performs a merge with any union data inside the VirtualMediaV170VirtualMedia_TransferMethod, using the provided VirtualMediaV170VirtualMediaTransferMethod1
+func (t *VirtualMediaV170VirtualMedia_TransferMethod) MergeVirtualMediaV170VirtualMediaTransferMethod1(v VirtualMediaV170VirtualMediaTransferMethod1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11611,32 +12276,32 @@ func (t *VirtualMediaV165VirtualMedia_TransferMethod) MergeVirtualMediaV165Virtu
 	return err
 }
 
-func (t VirtualMediaV165VirtualMedia_TransferMethod) MarshalJSON() ([]byte, error) {
+func (t VirtualMediaV170VirtualMedia_TransferMethod) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *VirtualMediaV165VirtualMedia_TransferMethod) UnmarshalJSON(b []byte) error {
+func (t *VirtualMediaV170VirtualMedia_TransferMethod) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
 
-// AsVirtualMediaV165TransferProtocolType returns the union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as a VirtualMediaV165TransferProtocolType
-func (t VirtualMediaV165VirtualMedia_TransferProtocolType) AsVirtualMediaV165TransferProtocolType() (VirtualMediaV165TransferProtocolType, error) {
-	var body VirtualMediaV165TransferProtocolType
+// AsVirtualMediaV170TransferProtocolType returns the union data inside the VirtualMediaV170VirtualMedia_TransferProtocolType as a VirtualMediaV170TransferProtocolType
+func (t VirtualMediaV170VirtualMedia_TransferProtocolType) AsVirtualMediaV170TransferProtocolType() (VirtualMediaV170TransferProtocolType, error) {
+	var body VirtualMediaV170TransferProtocolType
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165TransferProtocolType overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as the provided VirtualMediaV165TransferProtocolType
-func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) FromVirtualMediaV165TransferProtocolType(v VirtualMediaV165TransferProtocolType) error {
+// FromVirtualMediaV170TransferProtocolType overwrites any union data inside the VirtualMediaV170VirtualMedia_TransferProtocolType as the provided VirtualMediaV170TransferProtocolType
+func (t *VirtualMediaV170VirtualMedia_TransferProtocolType) FromVirtualMediaV170TransferProtocolType(v VirtualMediaV170TransferProtocolType) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165TransferProtocolType performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType, using the provided VirtualMediaV165TransferProtocolType
-func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) MergeVirtualMediaV165TransferProtocolType(v VirtualMediaV165TransferProtocolType) error {
+// MergeVirtualMediaV170TransferProtocolType performs a merge with any union data inside the VirtualMediaV170VirtualMedia_TransferProtocolType, using the provided VirtualMediaV170TransferProtocolType
+func (t *VirtualMediaV170VirtualMedia_TransferProtocolType) MergeVirtualMediaV170TransferProtocolType(v VirtualMediaV170TransferProtocolType) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11647,22 +12312,22 @@ func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) MergeVirtualMediaV16
 	return err
 }
 
-// AsVirtualMediaV165VirtualMediaTransferProtocolType1 returns the union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as a VirtualMediaV165VirtualMediaTransferProtocolType1
-func (t VirtualMediaV165VirtualMedia_TransferProtocolType) AsVirtualMediaV165VirtualMediaTransferProtocolType1() (VirtualMediaV165VirtualMediaTransferProtocolType1, error) {
-	var body VirtualMediaV165VirtualMediaTransferProtocolType1
+// AsVirtualMediaV170VirtualMediaTransferProtocolType1 returns the union data inside the VirtualMediaV170VirtualMedia_TransferProtocolType as a VirtualMediaV170VirtualMediaTransferProtocolType1
+func (t VirtualMediaV170VirtualMedia_TransferProtocolType) AsVirtualMediaV170VirtualMediaTransferProtocolType1() (VirtualMediaV170VirtualMediaTransferProtocolType1, error) {
+	var body VirtualMediaV170VirtualMediaTransferProtocolType1
 	err := json.Unmarshal(t.union, &body)
 	return body, err
 }
 
-// FromVirtualMediaV165VirtualMediaTransferProtocolType1 overwrites any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType as the provided VirtualMediaV165VirtualMediaTransferProtocolType1
-func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) FromVirtualMediaV165VirtualMediaTransferProtocolType1(v VirtualMediaV165VirtualMediaTransferProtocolType1) error {
+// FromVirtualMediaV170VirtualMediaTransferProtocolType1 overwrites any union data inside the VirtualMediaV170VirtualMedia_TransferProtocolType as the provided VirtualMediaV170VirtualMediaTransferProtocolType1
+func (t *VirtualMediaV170VirtualMedia_TransferProtocolType) FromVirtualMediaV170VirtualMediaTransferProtocolType1(v VirtualMediaV170VirtualMediaTransferProtocolType1) error {
 	b, err := json.Marshal(v)
 	t.union = b
 	return err
 }
 
-// MergeVirtualMediaV165VirtualMediaTransferProtocolType1 performs a merge with any union data inside the VirtualMediaV165VirtualMedia_TransferProtocolType, using the provided VirtualMediaV165VirtualMediaTransferProtocolType1
-func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) MergeVirtualMediaV165VirtualMediaTransferProtocolType1(v VirtualMediaV165VirtualMediaTransferProtocolType1) error {
+// MergeVirtualMediaV170VirtualMediaTransferProtocolType1 performs a merge with any union data inside the VirtualMediaV170VirtualMedia_TransferProtocolType, using the provided VirtualMediaV170VirtualMediaTransferProtocolType1
+func (t *VirtualMediaV170VirtualMedia_TransferProtocolType) MergeVirtualMediaV170VirtualMediaTransferProtocolType1(v VirtualMediaV170VirtualMediaTransferProtocolType1) error {
 	b, err := json.Marshal(v)
 	if err != nil {
 		return err
@@ -11673,12 +12338,12 @@ func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) MergeVirtualMediaV16
 	return err
 }
 
-func (t VirtualMediaV165VirtualMedia_TransferProtocolType) MarshalJSON() ([]byte, error) {
+func (t VirtualMediaV170VirtualMedia_TransferProtocolType) MarshalJSON() ([]byte, error) {
 	b, err := t.union.MarshalJSON()
 	return b, err
 }
 
-func (t *VirtualMediaV165VirtualMedia_TransferProtocolType) UnmarshalJSON(b []byte) error {
+func (t *VirtualMediaV170VirtualMedia_TransferProtocolType) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }

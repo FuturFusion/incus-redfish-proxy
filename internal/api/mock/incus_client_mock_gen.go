@@ -32,6 +32,9 @@ var _ api0.IncusClient = &IncusClientMock{}
 //			GetInstanceFunc: func(name string) (*api.Instance, string, error) {
 //				panic("mock out the GetInstance method")
 //			},
+//			GetServerFunc: func() (*api.Server, string, error) {
+//				panic("mock out the GetServer method")
+//			},
 //			UpdateInstanceFunc: func(name string, instance api.InstancePut, ETag string) (incus.Operation, error) {
 //				panic("mock out the UpdateInstance method")
 //			},
@@ -53,6 +56,9 @@ type IncusClientMock struct {
 
 	// GetInstanceFunc mocks the GetInstance method.
 	GetInstanceFunc func(name string) (*api.Instance, string, error)
+
+	// GetServerFunc mocks the GetServer method.
+	GetServerFunc func() (*api.Server, string, error)
 
 	// UpdateInstanceFunc mocks the UpdateInstance method.
 	UpdateInstanceFunc func(name string, instance api.InstancePut, ETag string) (incus.Operation, error)
@@ -83,6 +89,9 @@ type IncusClientMock struct {
 			// Name is the name argument value.
 			Name string
 		}
+		// GetServer holds details about calls to the GetServer method.
+		GetServer []struct {
+		}
 		// UpdateInstance holds details about calls to the UpdateInstance method.
 		UpdateInstance []struct {
 			// Name is the name argument value.
@@ -105,6 +114,7 @@ type IncusClientMock struct {
 	lockCreateStoragePoolVolumeFromISO sync.RWMutex
 	lockDeleteStoragePoolVolume        sync.RWMutex
 	lockGetInstance                    sync.RWMutex
+	lockGetServer                      sync.RWMutex
 	lockUpdateInstance                 sync.RWMutex
 	lockUpdateInstanceState            sync.RWMutex
 }
@@ -214,6 +224,33 @@ func (mock *IncusClientMock) GetInstanceCalls() []struct {
 	mock.lockGetInstance.RLock()
 	calls = mock.calls.GetInstance
 	mock.lockGetInstance.RUnlock()
+	return calls
+}
+
+// GetServer calls GetServerFunc.
+func (mock *IncusClientMock) GetServer() (*api.Server, string, error) {
+	if mock.GetServerFunc == nil {
+		panic("IncusClientMock.GetServerFunc: method is nil but IncusClient.GetServer was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockGetServer.Lock()
+	mock.calls.GetServer = append(mock.calls.GetServer, callInfo)
+	mock.lockGetServer.Unlock()
+	return mock.GetServerFunc()
+}
+
+// GetServerCalls gets all the calls that were made to GetServer.
+// Check the length with:
+//
+//	len(mockedIncusClient.GetServerCalls())
+func (mock *IncusClientMock) GetServerCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockGetServer.RLock()
+	calls = mock.calls.GetServer
+	mock.lockGetServer.RUnlock()
 	return calls
 }
 

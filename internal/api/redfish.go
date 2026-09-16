@@ -14,6 +14,7 @@ import (
 )
 
 type IncusClient interface {
+	GetServer() (server *incusapi.Server, ETag string, err error)
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
@@ -92,14 +93,14 @@ func validateCertificateID(w http.ResponseWriter, databaseID string, certificate
 }
 
 func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
-	response(w, ServiceRootV1210ServiceRoot{
+	response(w, ServiceRootV1220ServiceRoot{
 		OdataID:   ref("/redfish/v1/"),
-		OdataType: ref("#ServiceRoot.v1_21_0.ServiceRoot"),
+		OdataType: ref("#ServiceRoot.v1_22_0.ServiceRoot"),
 		// EventService: &OdataV4IdRef{
 		// 	OdataID: ref("/redfish/v1/EventService"),
 		// },
 		ID: "RootService",
-		// Links: ServiceRootV1210Links{
+		// Links: ServiceRootV1220Links{
 		// 	Sessions: OdataV4IdRef{
 		// 		OdataID: ref("/redfish/v1/SessionService/Sessions"),
 		// 	},
@@ -201,17 +202,17 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 
 	_, inserted := instance.Devices["boot-media"]
 
-	connectedViaURI := VirtualMediaV165VirtualMedia_ConnectedVia{}
-	_ = connectedViaURI.FromVirtualMediaV165ConnectedVia(URI)
+	connectedViaURI := VirtualMediaV170VirtualMedia_ConnectedVia{}
+	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(URI)
 
 	base := fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)
 
 	response(w, virtualMediaGetResponse{
-		VirtualMediaV165VirtualMedia: VirtualMediaV165VirtualMedia{
+		VirtualMediaV170VirtualMedia: VirtualMediaV170VirtualMedia{
 			OdataID:   ref(base),
-			OdataType: ref("#VirtualMedia.v1_6_5.VirtualMedia"),
+			OdataType: ref("#VirtualMedia.v1_7_0.VirtualMedia"),
 			Name:      ResourceName(virtualMediaName),
-			MediaTypes: &[]VirtualMediaV165MediaType{
+			MediaTypes: &[]VirtualMediaV170MediaType{
 				CD,
 				DVD,
 			},
@@ -234,9 +235,9 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 }
 
 // virtualMediaGetResponse overrides the Actions field of the generated
-// VirtualMediaV165VirtualMedia type.
+// VirtualMediaV170VirtualMedia type.
 type virtualMediaGetResponse struct {
-	VirtualMediaV165VirtualMedia
+	VirtualMediaV170VirtualMedia
 	Actions *virtualMediaActions `json:"Actions,omitempty"`
 }
 
@@ -255,7 +256,7 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		return
 	}
 
-	request := VirtualMediaV165VirtualMedia{}
+	request := VirtualMediaV170VirtualMedia{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
@@ -439,7 +440,7 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 		return
 	}
 
-	request := VirtualMediaV165InsertMediaRequestBody{}
+	request := VirtualMediaV170InsertMediaRequestBody{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
@@ -507,6 +508,55 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDIn
 			{Name: "WriteProtected", Required: false, DataType: "Boolean"},
 		},
 	})
+}
+
+// instanceConfig returns the effective configuration of the instance,
+// preferring the expanded configuration so that keys coming from a profile are
+// taken into account.
+func instanceConfig(instance *incusapi.Instance) map[string]string {
+	if len(instance.ExpandedConfig) > 0 {
+		return instance.ExpandedConfig
+	}
+
+	return instance.Config
+}
+
+// instanceDevices returns the effective devices of the instance, preferring
+// the expanded devices so that devices coming from a profile are taken into
+// account.
+func instanceDevices(instance *incusapi.Instance) incusapi.DevicesMap {
+	if len(instance.ExpandedDevices) > 0 {
+		return instance.ExpandedDevices
+	}
+
+	return instance.Devices
+}
+
+// instanceCPUCount returns the number of vCPUs configured for the instance,
+// defaulting to one if limits.cpu is absent or is not a plain count.
+func instanceCPUCount(instance *incusapi.Instance) int64 {
+	cfgLimitCPU, ok := instanceConfig(instance)["limits.cpu"]
+	if !ok {
+		return 1
+	}
+
+	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
+	if err != nil {
+		return 1
+	}
+
+	return cpuNo
+}
+
+// instanceHasTPM reports whether the instance has a TPM device attached.
+func instanceHasTPM(instance *incusapi.Instance) bool {
+	for _, deviceConfig := range instanceDevices(instance) {
+		if deviceConfig["type"] == "tpm" {
+			return true
+		}
+	}
+
+	return false
 }
 
 func cloneStringMap(source map[string]string) map[string]string {
@@ -589,7 +639,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		return
 	}
 
-	powerState := ComputerSystemV1280ComputerSystem_PowerState{}
+	powerState := ComputerSystemV1290ComputerSystem_PowerState{}
 	switch instance.Status {
 	case "Running":
 		_ = powerState.FromResourcePowerState(On)
@@ -601,17 +651,45 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		_ = powerState.FromResourcePowerState(Off)
 	}
 
-	response(w, ComputerSystemV1280ComputerSystem{
+	server, _, err := s.client.GetServer()
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	cpuNo := instanceCPUCount(instance)
+
+	var trustedModules *[]ComputerSystemV1290TrustedModules
+
+	if instanceHasTPM(instance) {
+		interfaceType := ComputerSystemV1290TrustedModules_InterfaceType{}
+		_ = interfaceType.FromComputerSystemV1290InterfaceType(TPM20)
+
+		state := ResourceStatus_State{}
+		_ = state.FromResourceState(ResourceStateEnabled)
+
+		trustedModules = &[]ComputerSystemV1290TrustedModules{
+			{
+				InterfaceType: &interfaceType,
+				Status:        &ResourceStatus{State: &state},
+			},
+		}
+	}
+
+	response(w, ComputerSystemV1290ComputerSystem{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName)),
-		OdataType: ref("#ComputerSystem.v1_28_0.ComputerSystem"),
-		Actions: &ComputerSystemV1280Actions{
-			HashComputerSystemReset: &ComputerSystemV1280Reset{
+		OdataType: ref("#ComputerSystem.v1_29_0.ComputerSystem"),
+		Actions: &ComputerSystemV1290Actions{
+			HashComputerSystemReset: &ComputerSystemV1290Reset{
 				Target: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Actions/ComputerSystem.Reset", s.instanceName)),
 			},
 		},
 		Bios: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
 		},
+		// The Incus version is what determines the firmware the instance boots
+		// with, so it stands in for the BIOS version.
+		BiosVersion: ref(server.Environment.ServerVersion),
 		Processors: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors", s.instanceName)),
 		},
@@ -619,18 +697,22 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		ID:           s.instanceName,
 		Manufacturer: ref("linuxcontainers.org"),
 		// TODO: add memory summary
-		// MemorySummary: &ComputerSystemV1280MemorySummary{},
+		// MemorySummary: &ComputerSystemV1290MemorySummary{},
 		Model:      ref("Incus"),
 		Name:       s.instanceName,
 		PowerState: &powerState,
-		// TODO: add processor summary
-		ProcessorSummary: &ComputerSystemV1280ProcessorSummary{},
+		// Every vCPU is exposed as its own processor, so the number of vCPUs is
+		// both the socket and the logical processor count.
+		ProcessorSummary: &ComputerSystemV1290ProcessorSummary{
+			Count:                 ref(cpuNo),
+			CoreCount:             ref(cpuNo),
+			LogicalProcessorCount: ref(cpuNo),
+		},
 		SecureBoot: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
 		},
-		SerialNumber: ref(s.instanceName),
-		// TODO: add trusted modules info if vtpm is present
-		// TrustedModules: &[]ComputerSystemV1280TrustedModules{},
+		SerialNumber:   ref(s.instanceName),
+		TrustedModules: trustedModules,
 		// TODO: add virtual media for system
 		// VirtualMedia: &OdataV4IdRef{
 		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
@@ -659,7 +741,7 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		return
 	}
 
-	request := ComputerSystemV1280ResetRequestBody{}
+	request := ComputerSystemV1290ResetRequestBody{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
@@ -890,15 +972,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessors(w http.Resp
 		return
 	}
 
-	cfgLimitCPU, ok := instance.Config["limits.cpu"]
-	if !ok {
-		cfgLimitCPU = "1"
-	}
-
-	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
-	if err != nil {
-		cpuNo = 1
-	}
+	cpuNo := instanceCPUCount(instance)
 
 	cpuMembers := make([]OdataV4IdRef, 0, cpuNo)
 	for i := range cpuNo {
@@ -922,24 +996,31 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 		return
 	}
 
-	processorArchitecture := &ProcessorV1230Processor_ProcessorArchitecture{}
-	instructionSet := &ProcessorV1230Processor_InstructionSet{}
+	processorArchitecture := &ProcessorV1240Processor_ProcessorArchitecture{}
+	instructionSet := &ProcessorV1240Processor_InstructionSet{}
 	switch instance.Architecture {
 	case "x86_64":
-		_ = processorArchitecture.FromProcessorV1230ProcessorArchitecture(ProcessorV1230ProcessorArchitectureX86)
-		_ = instructionSet.FromProcessorV1230InstructionSet(ProcessorV1230InstructionSetX8664)
+		_ = processorArchitecture.FromProcessorV1240ProcessorArchitecture(ProcessorV1240ProcessorArchitectureX86)
+		_ = instructionSet.FromProcessorV1240InstructionSet(ProcessorV1240InstructionSetX8664)
 
 	case "aarch64":
-		_ = processorArchitecture.FromProcessorV1230ProcessorArchitecture(ProcessorV1230ProcessorArchitectureARM)
-		_ = instructionSet.FromProcessorV1230InstructionSet(ProcessorV1230InstructionSetARMA64)
+		_ = processorArchitecture.FromProcessorV1240ProcessorArchitecture(ProcessorV1240ProcessorArchitectureARM)
+		_ = instructionSet.FromProcessorV1240InstructionSet(ProcessorV1240InstructionSetARMA64)
 	}
 
-	response(w, ProcessorV1230Processor{
-		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors/%s", s.instanceName, processorIDStr)),
-		OdataType: ref("#Processor.v1_23_0.Processor"),
+	processorType := ProcessorV1240Processor_ProcessorType{}
+	_ = processorType.FromProcessorV1240ProcessorType(ProcessorV1240ProcessorTypeCPU)
 
-		ID:                    processorIDStr,
-		Name:                  "Processor",
+	response(w, ProcessorV1240Processor{
+		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors/%s", s.instanceName, processorIDStr)),
+		OdataType: ref("#Processor.v1_24_0.Processor"),
+
+		ID:   processorIDStr,
+		Name: "Processor",
+		// Incus does not report the vCPU vendor.
+		Manufacturer:          ref("qemu"),
+		Model:                 ref("qemu64"),
+		ProcessorType:         &processorType,
 		ProcessorArchitecture: processorArchitecture,
 		InstructionSet:        instructionSet,
 	})
@@ -980,15 +1061,7 @@ func (s redfishServer) validateProcessorID(w http.ResponseWriter, computerSystem
 		return nil, false
 	}
 
-	cfgLimitCPU, ok := instance.Config["limits.cpu"]
-	if !ok {
-		cfgLimitCPU = "1"
-	}
-
-	cpuNo, err := strconv.ParseInt(cfgLimitCPU, 10, 64)
-	if err != nil {
-		cpuNo = 1
-	}
+	cpuNo := instanceCPUCount(instance)
 
 	if processorID < 0 || processorID >= cpuNo {
 		responseErr(w, http.StatusNotFound)
@@ -1003,15 +1076,15 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 		return
 	}
 
-	secureBootCurrentBootType := SecureBootV120SecureBoot_SecureBootCurrentBoot{}
-	_ = secureBootCurrentBootType.FromSecureBootV120SecureBootCurrentBootType(SecureBootV120SecureBootCurrentBootTypeDisabled)
+	secureBootCurrentBootType := SecureBootV121SecureBoot_SecureBootCurrentBoot{}
+	_ = secureBootCurrentBootType.FromSecureBootV121SecureBootCurrentBootType(SecureBootV121SecureBootCurrentBootTypeDisabled)
 
-	secureBootMode := SecureBootV120SecureBoot_SecureBootMode{}
-	_ = secureBootMode.FromSecureBootV120SecureBootModeType(UserMode)
+	secureBootMode := SecureBootV121SecureBoot_SecureBootMode{}
+	_ = secureBootMode.FromSecureBootV121SecureBootModeType(UserMode)
 
-	response(w, SecureBootV120SecureBoot{
+	response(w, SecureBootV121SecureBoot{
 		OdataID:               ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
-		OdataType:             ref("#SecureBoot.v1_2_0.SecureBoot"),
+		OdataType:             ref("#SecureBoot.v1_2_1.SecureBoot"),
 		ID:                    "SecureBoot",
 		Name:                  "UEFI Secure Boot",
 		SecureBootCurrentBoot: &secureBootCurrentBootType,
