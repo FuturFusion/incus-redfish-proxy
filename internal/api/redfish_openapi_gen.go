@@ -340,16 +340,16 @@ func (e ComputerSystemV1290BootSourceOverrideEnabled) Valid() bool {
 
 // Defines values for ComputerSystemV1290BootSourceOverrideMode.
 const (
-	Legacy ComputerSystemV1290BootSourceOverrideMode = "Legacy"
-	UEFI   ComputerSystemV1290BootSourceOverrideMode = "UEFI"
+	ComputerSystemV1290BootSourceOverrideModeLegacy ComputerSystemV1290BootSourceOverrideMode = "Legacy"
+	ComputerSystemV1290BootSourceOverrideModeUEFI   ComputerSystemV1290BootSourceOverrideMode = "UEFI"
 )
 
 // Valid indicates whether the value is a known member of the ComputerSystemV1290BootSourceOverrideMode enum.
 func (e ComputerSystemV1290BootSourceOverrideMode) Valid() bool {
 	switch e {
-	case Legacy:
+	case ComputerSystemV1290BootSourceOverrideModeLegacy:
 		return true
-	case UEFI:
+	case ComputerSystemV1290BootSourceOverrideModeUEFI:
 		return true
 	default:
 		return false
@@ -1784,6 +1784,21 @@ func (e SettingsV150ApplyTime) Valid() bool {
 	case InMaintenanceWindowOnReset:
 		return true
 	case OnReset:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for SignatureSignatureTypeRegistry.
+const (
+	SignatureSignatureTypeRegistryUEFI SignatureSignatureTypeRegistry = "UEFI"
+)
+
+// Valid indicates whether the value is a known member of the SignatureSignatureTypeRegistry enum.
+func (e SignatureSignatureTypeRegistry) Valid() bool {
+	switch e {
+	case SignatureSignatureTypeRegistryUEFI:
 		return true
 	default:
 		return false
@@ -5844,6 +5859,113 @@ type SettingsV150Settings struct {
 	Time *time.Time `json:"Time,omitempty"`
 }
 
+// SignatureCollectionSignatureCollection The collection of `Signature` resource instances.
+type SignatureCollectionSignatureCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                        `json:"@odata.type,omitempty"`
+	Description *SignatureCollectionSignatureCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// SignatureCollectionSignatureCollectionDescription1 defines model for .
+type SignatureCollectionSignatureCollectionDescription1 = interface{}
+
+// SignatureCollectionSignatureCollection_Description defines model for SignatureCollectionSignatureCollection.Description.
+type SignatureCollectionSignatureCollection_Description struct {
+	union json.RawMessage
+}
+
+// SignatureSignatureTypeRegistry defines model for Signature_SignatureTypeRegistry.
+type SignatureSignatureTypeRegistry string
+
+// SignatureV103Actions The available actions for this resource.
+type SignatureV103Actions struct {
+	// Oem The available OEM-specific actions for this resource.
+	Oem *SignatureV103OemActions `json:"Oem,omitempty"`
+}
+
+// SignatureV103OemActions The available OEM-specific actions for this resource.
+type SignatureV103OemActions map[string]interface{}
+
+// SignatureV103Signature The `Signature` schema describes a signature or a hash.
+type SignatureV103Signature struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions     *SignatureV103Actions               `json:"Actions,omitempty"`
+	Description *SignatureV103Signature_Description `json:"Description,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// SignatureString The string for the signature.
+	SignatureString *string `json:"SignatureString,omitempty"`
+
+	// SignatureType The format of the signature.
+	SignatureType *string `json:"SignatureType,omitempty"`
+
+	// SignatureTypeRegistry The type of the signature.
+	SignatureTypeRegistry *SignatureV103Signature_SignatureTypeRegistry `json:"SignatureTypeRegistry,omitempty"`
+
+	// UefiSignatureOwner The UEFI signature owner for this signature.
+	UefiSignatureOwner *string `json:"UefiSignatureOwner,omitempty"`
+}
+
+// SignatureV103SignatureDescription1 defines model for .
+type SignatureV103SignatureDescription1 = interface{}
+
+// SignatureV103Signature_Description defines model for SignatureV103Signature.Description.
+type SignatureV103Signature_Description struct {
+	union json.RawMessage
+}
+
+// SignatureV103SignatureSignatureTypeRegistry1 defines model for .
+type SignatureV103SignatureSignatureTypeRegistry1 = interface{}
+
+// SignatureV103Signature_SignatureTypeRegistry The type of the signature.
+type SignatureV103Signature_SignatureTypeRegistry struct {
+	union json.RawMessage
+}
+
 // SoftwareInventoryV1150AdditionalVersions Additional versions.
 type SoftwareInventoryV1150AdditionalVersions struct {
 	// BootParameters The version of the configuration file that contains the initial boot parameters of this software, such as parameters for U-Boot.
@@ -6395,6 +6517,9 @@ type PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseI
 
 // PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID for application/json ContentType.
 type PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateIDJSONRequestBody = CertificateV1110Certificate
+
+// PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesJSONRequestBody defines body for PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures for application/json ContentType.
+type PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesJSONRequestBody = SignatureV103Signature
 
 // AsActionInfoV160ParameterTypes returns the union data inside the ActionInfoV160Parameters_DataType as a ActionInfoV160ParameterTypes
 func (t ActionInfoV160Parameters_DataType) AsActionInfoV160ParameterTypes() (ActionInfoV160ParameterTypes, error) {
@@ -11914,6 +12039,192 @@ func (t *ServiceRootV1220ServiceRoot_Description) UnmarshalJSON(b []byte) error 
 	return err
 }
 
+// AsResourceDescription returns the union data inside the SignatureCollectionSignatureCollection_Description as a ResourceDescription
+func (t SignatureCollectionSignatureCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the SignatureCollectionSignatureCollection_Description as the provided ResourceDescription
+func (t *SignatureCollectionSignatureCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the SignatureCollectionSignatureCollection_Description, using the provided ResourceDescription
+func (t *SignatureCollectionSignatureCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSignatureCollectionSignatureCollectionDescription1 returns the union data inside the SignatureCollectionSignatureCollection_Description as a SignatureCollectionSignatureCollectionDescription1
+func (t SignatureCollectionSignatureCollection_Description) AsSignatureCollectionSignatureCollectionDescription1() (SignatureCollectionSignatureCollectionDescription1, error) {
+	var body SignatureCollectionSignatureCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSignatureCollectionSignatureCollectionDescription1 overwrites any union data inside the SignatureCollectionSignatureCollection_Description as the provided SignatureCollectionSignatureCollectionDescription1
+func (t *SignatureCollectionSignatureCollection_Description) FromSignatureCollectionSignatureCollectionDescription1(v SignatureCollectionSignatureCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSignatureCollectionSignatureCollectionDescription1 performs a merge with any union data inside the SignatureCollectionSignatureCollection_Description, using the provided SignatureCollectionSignatureCollectionDescription1
+func (t *SignatureCollectionSignatureCollection_Description) MergeSignatureCollectionSignatureCollectionDescription1(v SignatureCollectionSignatureCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SignatureCollectionSignatureCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SignatureCollectionSignatureCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the SignatureV103Signature_Description as a ResourceDescription
+func (t SignatureV103Signature_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the SignatureV103Signature_Description as the provided ResourceDescription
+func (t *SignatureV103Signature_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the SignatureV103Signature_Description, using the provided ResourceDescription
+func (t *SignatureV103Signature_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSignatureV103SignatureDescription1 returns the union data inside the SignatureV103Signature_Description as a SignatureV103SignatureDescription1
+func (t SignatureV103Signature_Description) AsSignatureV103SignatureDescription1() (SignatureV103SignatureDescription1, error) {
+	var body SignatureV103SignatureDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSignatureV103SignatureDescription1 overwrites any union data inside the SignatureV103Signature_Description as the provided SignatureV103SignatureDescription1
+func (t *SignatureV103Signature_Description) FromSignatureV103SignatureDescription1(v SignatureV103SignatureDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSignatureV103SignatureDescription1 performs a merge with any union data inside the SignatureV103Signature_Description, using the provided SignatureV103SignatureDescription1
+func (t *SignatureV103Signature_Description) MergeSignatureV103SignatureDescription1(v SignatureV103SignatureDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SignatureV103Signature_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SignatureV103Signature_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsSignatureSignatureTypeRegistry returns the union data inside the SignatureV103Signature_SignatureTypeRegistry as a SignatureSignatureTypeRegistry
+func (t SignatureV103Signature_SignatureTypeRegistry) AsSignatureSignatureTypeRegistry() (SignatureSignatureTypeRegistry, error) {
+	var body SignatureSignatureTypeRegistry
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSignatureSignatureTypeRegistry overwrites any union data inside the SignatureV103Signature_SignatureTypeRegistry as the provided SignatureSignatureTypeRegistry
+func (t *SignatureV103Signature_SignatureTypeRegistry) FromSignatureSignatureTypeRegistry(v SignatureSignatureTypeRegistry) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSignatureSignatureTypeRegistry performs a merge with any union data inside the SignatureV103Signature_SignatureTypeRegistry, using the provided SignatureSignatureTypeRegistry
+func (t *SignatureV103Signature_SignatureTypeRegistry) MergeSignatureSignatureTypeRegistry(v SignatureSignatureTypeRegistry) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsSignatureV103SignatureSignatureTypeRegistry1 returns the union data inside the SignatureV103Signature_SignatureTypeRegistry as a SignatureV103SignatureSignatureTypeRegistry1
+func (t SignatureV103Signature_SignatureTypeRegistry) AsSignatureV103SignatureSignatureTypeRegistry1() (SignatureV103SignatureSignatureTypeRegistry1, error) {
+	var body SignatureV103SignatureSignatureTypeRegistry1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromSignatureV103SignatureSignatureTypeRegistry1 overwrites any union data inside the SignatureV103Signature_SignatureTypeRegistry as the provided SignatureV103SignatureSignatureTypeRegistry1
+func (t *SignatureV103Signature_SignatureTypeRegistry) FromSignatureV103SignatureSignatureTypeRegistry1(v SignatureV103SignatureSignatureTypeRegistry1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeSignatureV103SignatureSignatureTypeRegistry1 performs a merge with any union data inside the SignatureV103Signature_SignatureTypeRegistry, using the provided SignatureV103SignatureSignatureTypeRegistry1
+func (t *SignatureV103Signature_SignatureTypeRegistry) MergeSignatureV103SignatureSignatureTypeRegistry1(v SignatureV103SignatureSignatureTypeRegistry1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t SignatureV103Signature_SignatureTypeRegistry) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *SignatureV103Signature_SignatureTypeRegistry) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
 // AsResourceDescription returns the union data inside the TaskV174Task_Description as a ResourceDescription
 func (t TaskV174Task_Description) AsResourceDescription() (ResourceDescription, error) {
 	var body ResourceDescription
@@ -12591,6 +12902,18 @@ type ServerInterface interface {
 
 	// (PUT /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId})
 	PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures)
+	GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string)
+
+	// (POST /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures)
+	PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string)
+
+	// (DELETE /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures/{SignatureId})
+	DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, signatureID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures/{SignatureId})
+	GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, signatureID string)
 }
 
 // ServerInterfaceWrapper converts contexts to parameters.
@@ -13739,6 +14062,164 @@ func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDSecureBoot
 	handler.ServeHTTP(w, r)
 }
 
+// GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w, r, computerSystemID, databaseID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures operation middleware
+func (siw *ServerInterfaceWrapper) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w, r, computerSystemID, databaseID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "SignatureId" -------------
+	var signatureID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "SignatureId", r.PathValue("SignatureId"), &signatureID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "SignatureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w, r, computerSystemID, databaseID, signatureID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "DatabaseId" -------------
+	var databaseID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "DatabaseId", r.PathValue("DatabaseId"), &databaseID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "DatabaseId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "SignatureId" -------------
+	var signatureID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "SignatureId", r.PathValue("SignatureId"), &signatureID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "SignatureId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w, r, computerSystemID, databaseID, signatureID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
 type UnescapedCookieParamError struct {
 	ParamName string
 	Err       error
@@ -13898,6 +14379,10 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.PatchRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Certificates/{CertificateId}", wrapper.PutRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures", wrapper.PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures/{SignatureId}", wrapper.DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/SecureBoot/SecureBootDatabases/{DatabaseId}/Signatures/{SignatureId}", wrapper.GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID)
 
 	return m
 }

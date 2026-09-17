@@ -26,17 +26,32 @@ var _ api0.IncusClient = &IncusClientMock{}
 //			CreateStoragePoolVolumeFromISOFunc: func(pool string, args incus.StorageVolumeBackupArgs) (incus.Operation, error) {
 //				panic("mock out the CreateStoragePoolVolumeFromISO method")
 //			},
+//			DeleteInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) error {
+//				panic("mock out the DeleteInstanceNVRAMGUIDVar method")
+//			},
 //			DeleteStoragePoolVolumeFunc: func(pool string, volType string, name string) error {
 //				panic("mock out the DeleteStoragePoolVolume method")
 //			},
 //			GetInstanceFunc: func(name string) (*api.Instance, string, error) {
 //				panic("mock out the GetInstance method")
 //			},
+//			GetInstanceNVRAMGUIDFunc: func(name string, guid string) (map[string]*api.InstanceNVRAMVariable, error) {
+//				panic("mock out the GetInstanceNVRAMGUID method")
+//			},
+//			GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*api.InstanceNVRAMVariable, string, error) {
+//				panic("mock out the GetInstanceNVRAMGUIDVar method")
+//			},
 //			GetServerFunc: func() (*api.Server, string, error) {
 //				panic("mock out the GetServer method")
 //			},
+//			HasExtensionFunc: func(extension string) bool {
+//				panic("mock out the HasExtension method")
+//			},
 //			UpdateInstanceFunc: func(name string, instance api.InstancePut, ETag string) (incus.Operation, error) {
 //				panic("mock out the UpdateInstance method")
+//			},
+//			UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data api.InstanceNVRAMVariablePut, ETag string) error {
+//				panic("mock out the UpdateInstanceNVRAMGUIDVar method")
 //			},
 //			UpdateInstanceStateFunc: func(name string, state api.InstanceStatePut, ETag string) (incus.Operation, error) {
 //				panic("mock out the UpdateInstanceState method")
@@ -51,17 +66,32 @@ type IncusClientMock struct {
 	// CreateStoragePoolVolumeFromISOFunc mocks the CreateStoragePoolVolumeFromISO method.
 	CreateStoragePoolVolumeFromISOFunc func(pool string, args incus.StorageVolumeBackupArgs) (incus.Operation, error)
 
+	// DeleteInstanceNVRAMGUIDVarFunc mocks the DeleteInstanceNVRAMGUIDVar method.
+	DeleteInstanceNVRAMGUIDVarFunc func(name string, guid string, varName string) error
+
 	// DeleteStoragePoolVolumeFunc mocks the DeleteStoragePoolVolume method.
 	DeleteStoragePoolVolumeFunc func(pool string, volType string, name string) error
 
 	// GetInstanceFunc mocks the GetInstance method.
 	GetInstanceFunc func(name string) (*api.Instance, string, error)
 
+	// GetInstanceNVRAMGUIDFunc mocks the GetInstanceNVRAMGUID method.
+	GetInstanceNVRAMGUIDFunc func(name string, guid string) (map[string]*api.InstanceNVRAMVariable, error)
+
+	// GetInstanceNVRAMGUIDVarFunc mocks the GetInstanceNVRAMGUIDVar method.
+	GetInstanceNVRAMGUIDVarFunc func(name string, guid string, varName string) (*api.InstanceNVRAMVariable, string, error)
+
 	// GetServerFunc mocks the GetServer method.
 	GetServerFunc func() (*api.Server, string, error)
 
+	// HasExtensionFunc mocks the HasExtension method.
+	HasExtensionFunc func(extension string) bool
+
 	// UpdateInstanceFunc mocks the UpdateInstance method.
 	UpdateInstanceFunc func(name string, instance api.InstancePut, ETag string) (incus.Operation, error)
+
+	// UpdateInstanceNVRAMGUIDVarFunc mocks the UpdateInstanceNVRAMGUIDVar method.
+	UpdateInstanceNVRAMGUIDVarFunc func(name string, guid string, varName string, data api.InstanceNVRAMVariablePut, ETag string) error
 
 	// UpdateInstanceStateFunc mocks the UpdateInstanceState method.
 	UpdateInstanceStateFunc func(name string, state api.InstanceStatePut, ETag string) (incus.Operation, error)
@@ -74,6 +104,15 @@ type IncusClientMock struct {
 			Pool string
 			// Args is the args argument value.
 			Args incus.StorageVolumeBackupArgs
+		}
+		// DeleteInstanceNVRAMGUIDVar holds details about calls to the DeleteInstanceNVRAMGUIDVar method.
+		DeleteInstanceNVRAMGUIDVar []struct {
+			// Name is the name argument value.
+			Name string
+			// GUID is the guid argument value.
+			GUID string
+			// VarName is the varName argument value.
+			VarName string
 		}
 		// DeleteStoragePoolVolume holds details about calls to the DeleteStoragePoolVolume method.
 		DeleteStoragePoolVolume []struct {
@@ -89,8 +128,29 @@ type IncusClientMock struct {
 			// Name is the name argument value.
 			Name string
 		}
+		// GetInstanceNVRAMGUID holds details about calls to the GetInstanceNVRAMGUID method.
+		GetInstanceNVRAMGUID []struct {
+			// Name is the name argument value.
+			Name string
+			// GUID is the guid argument value.
+			GUID string
+		}
+		// GetInstanceNVRAMGUIDVar holds details about calls to the GetInstanceNVRAMGUIDVar method.
+		GetInstanceNVRAMGUIDVar []struct {
+			// Name is the name argument value.
+			Name string
+			// GUID is the guid argument value.
+			GUID string
+			// VarName is the varName argument value.
+			VarName string
+		}
 		// GetServer holds details about calls to the GetServer method.
 		GetServer []struct {
+		}
+		// HasExtension holds details about calls to the HasExtension method.
+		HasExtension []struct {
+			// Extension is the extension argument value.
+			Extension string
 		}
 		// UpdateInstance holds details about calls to the UpdateInstance method.
 		UpdateInstance []struct {
@@ -98,6 +158,19 @@ type IncusClientMock struct {
 			Name string
 			// Instance is the instance argument value.
 			Instance api.InstancePut
+			// ETag is the ETag argument value.
+			ETag string
+		}
+		// UpdateInstanceNVRAMGUIDVar holds details about calls to the UpdateInstanceNVRAMGUIDVar method.
+		UpdateInstanceNVRAMGUIDVar []struct {
+			// Name is the name argument value.
+			Name string
+			// GUID is the guid argument value.
+			GUID string
+			// VarName is the varName argument value.
+			VarName string
+			// Data is the data argument value.
+			Data api.InstanceNVRAMVariablePut
 			// ETag is the ETag argument value.
 			ETag string
 		}
@@ -112,10 +185,15 @@ type IncusClientMock struct {
 		}
 	}
 	lockCreateStoragePoolVolumeFromISO sync.RWMutex
+	lockDeleteInstanceNVRAMGUIDVar     sync.RWMutex
 	lockDeleteStoragePoolVolume        sync.RWMutex
 	lockGetInstance                    sync.RWMutex
+	lockGetInstanceNVRAMGUID           sync.RWMutex
+	lockGetInstanceNVRAMGUIDVar        sync.RWMutex
 	lockGetServer                      sync.RWMutex
+	lockHasExtension                   sync.RWMutex
 	lockUpdateInstance                 sync.RWMutex
+	lockUpdateInstanceNVRAMGUIDVar     sync.RWMutex
 	lockUpdateInstanceState            sync.RWMutex
 }
 
@@ -152,6 +230,46 @@ func (mock *IncusClientMock) CreateStoragePoolVolumeFromISOCalls() []struct {
 	mock.lockCreateStoragePoolVolumeFromISO.RLock()
 	calls = mock.calls.CreateStoragePoolVolumeFromISO
 	mock.lockCreateStoragePoolVolumeFromISO.RUnlock()
+	return calls
+}
+
+// DeleteInstanceNVRAMGUIDVar calls DeleteInstanceNVRAMGUIDVarFunc.
+func (mock *IncusClientMock) DeleteInstanceNVRAMGUIDVar(name string, guid string, varName string) error {
+	if mock.DeleteInstanceNVRAMGUIDVarFunc == nil {
+		panic("IncusClientMock.DeleteInstanceNVRAMGUIDVarFunc: method is nil but IncusClient.DeleteInstanceNVRAMGUIDVar was just called")
+	}
+	callInfo := struct {
+		Name    string
+		GUID    string
+		VarName string
+	}{
+		Name:    name,
+		GUID:    guid,
+		VarName: varName,
+	}
+	mock.lockDeleteInstanceNVRAMGUIDVar.Lock()
+	mock.calls.DeleteInstanceNVRAMGUIDVar = append(mock.calls.DeleteInstanceNVRAMGUIDVar, callInfo)
+	mock.lockDeleteInstanceNVRAMGUIDVar.Unlock()
+	return mock.DeleteInstanceNVRAMGUIDVarFunc(name, guid, varName)
+}
+
+// DeleteInstanceNVRAMGUIDVarCalls gets all the calls that were made to DeleteInstanceNVRAMGUIDVar.
+// Check the length with:
+//
+//	len(mockedIncusClient.DeleteInstanceNVRAMGUIDVarCalls())
+func (mock *IncusClientMock) DeleteInstanceNVRAMGUIDVarCalls() []struct {
+	Name    string
+	GUID    string
+	VarName string
+} {
+	var calls []struct {
+		Name    string
+		GUID    string
+		VarName string
+	}
+	mock.lockDeleteInstanceNVRAMGUIDVar.RLock()
+	calls = mock.calls.DeleteInstanceNVRAMGUIDVar
+	mock.lockDeleteInstanceNVRAMGUIDVar.RUnlock()
 	return calls
 }
 
@@ -227,6 +345,82 @@ func (mock *IncusClientMock) GetInstanceCalls() []struct {
 	return calls
 }
 
+// GetInstanceNVRAMGUID calls GetInstanceNVRAMGUIDFunc.
+func (mock *IncusClientMock) GetInstanceNVRAMGUID(name string, guid string) (map[string]*api.InstanceNVRAMVariable, error) {
+	if mock.GetInstanceNVRAMGUIDFunc == nil {
+		panic("IncusClientMock.GetInstanceNVRAMGUIDFunc: method is nil but IncusClient.GetInstanceNVRAMGUID was just called")
+	}
+	callInfo := struct {
+		Name string
+		GUID string
+	}{
+		Name: name,
+		GUID: guid,
+	}
+	mock.lockGetInstanceNVRAMGUID.Lock()
+	mock.calls.GetInstanceNVRAMGUID = append(mock.calls.GetInstanceNVRAMGUID, callInfo)
+	mock.lockGetInstanceNVRAMGUID.Unlock()
+	return mock.GetInstanceNVRAMGUIDFunc(name, guid)
+}
+
+// GetInstanceNVRAMGUIDCalls gets all the calls that were made to GetInstanceNVRAMGUID.
+// Check the length with:
+//
+//	len(mockedIncusClient.GetInstanceNVRAMGUIDCalls())
+func (mock *IncusClientMock) GetInstanceNVRAMGUIDCalls() []struct {
+	Name string
+	GUID string
+} {
+	var calls []struct {
+		Name string
+		GUID string
+	}
+	mock.lockGetInstanceNVRAMGUID.RLock()
+	calls = mock.calls.GetInstanceNVRAMGUID
+	mock.lockGetInstanceNVRAMGUID.RUnlock()
+	return calls
+}
+
+// GetInstanceNVRAMGUIDVar calls GetInstanceNVRAMGUIDVarFunc.
+func (mock *IncusClientMock) GetInstanceNVRAMGUIDVar(name string, guid string, varName string) (*api.InstanceNVRAMVariable, string, error) {
+	if mock.GetInstanceNVRAMGUIDVarFunc == nil {
+		panic("IncusClientMock.GetInstanceNVRAMGUIDVarFunc: method is nil but IncusClient.GetInstanceNVRAMGUIDVar was just called")
+	}
+	callInfo := struct {
+		Name    string
+		GUID    string
+		VarName string
+	}{
+		Name:    name,
+		GUID:    guid,
+		VarName: varName,
+	}
+	mock.lockGetInstanceNVRAMGUIDVar.Lock()
+	mock.calls.GetInstanceNVRAMGUIDVar = append(mock.calls.GetInstanceNVRAMGUIDVar, callInfo)
+	mock.lockGetInstanceNVRAMGUIDVar.Unlock()
+	return mock.GetInstanceNVRAMGUIDVarFunc(name, guid, varName)
+}
+
+// GetInstanceNVRAMGUIDVarCalls gets all the calls that were made to GetInstanceNVRAMGUIDVar.
+// Check the length with:
+//
+//	len(mockedIncusClient.GetInstanceNVRAMGUIDVarCalls())
+func (mock *IncusClientMock) GetInstanceNVRAMGUIDVarCalls() []struct {
+	Name    string
+	GUID    string
+	VarName string
+} {
+	var calls []struct {
+		Name    string
+		GUID    string
+		VarName string
+	}
+	mock.lockGetInstanceNVRAMGUIDVar.RLock()
+	calls = mock.calls.GetInstanceNVRAMGUIDVar
+	mock.lockGetInstanceNVRAMGUIDVar.RUnlock()
+	return calls
+}
+
 // GetServer calls GetServerFunc.
 func (mock *IncusClientMock) GetServer() (*api.Server, string, error) {
 	if mock.GetServerFunc == nil {
@@ -251,6 +445,38 @@ func (mock *IncusClientMock) GetServerCalls() []struct {
 	mock.lockGetServer.RLock()
 	calls = mock.calls.GetServer
 	mock.lockGetServer.RUnlock()
+	return calls
+}
+
+// HasExtension calls HasExtensionFunc.
+func (mock *IncusClientMock) HasExtension(extension string) bool {
+	if mock.HasExtensionFunc == nil {
+		panic("IncusClientMock.HasExtensionFunc: method is nil but IncusClient.HasExtension was just called")
+	}
+	callInfo := struct {
+		Extension string
+	}{
+		Extension: extension,
+	}
+	mock.lockHasExtension.Lock()
+	mock.calls.HasExtension = append(mock.calls.HasExtension, callInfo)
+	mock.lockHasExtension.Unlock()
+	return mock.HasExtensionFunc(extension)
+}
+
+// HasExtensionCalls gets all the calls that were made to HasExtension.
+// Check the length with:
+//
+//	len(mockedIncusClient.HasExtensionCalls())
+func (mock *IncusClientMock) HasExtensionCalls() []struct {
+	Extension string
+} {
+	var calls []struct {
+		Extension string
+	}
+	mock.lockHasExtension.RLock()
+	calls = mock.calls.HasExtension
+	mock.lockHasExtension.RUnlock()
 	return calls
 }
 
@@ -291,6 +517,54 @@ func (mock *IncusClientMock) UpdateInstanceCalls() []struct {
 	mock.lockUpdateInstance.RLock()
 	calls = mock.calls.UpdateInstance
 	mock.lockUpdateInstance.RUnlock()
+	return calls
+}
+
+// UpdateInstanceNVRAMGUIDVar calls UpdateInstanceNVRAMGUIDVarFunc.
+func (mock *IncusClientMock) UpdateInstanceNVRAMGUIDVar(name string, guid string, varName string, data api.InstanceNVRAMVariablePut, ETag string) error {
+	if mock.UpdateInstanceNVRAMGUIDVarFunc == nil {
+		panic("IncusClientMock.UpdateInstanceNVRAMGUIDVarFunc: method is nil but IncusClient.UpdateInstanceNVRAMGUIDVar was just called")
+	}
+	callInfo := struct {
+		Name    string
+		GUID    string
+		VarName string
+		Data    api.InstanceNVRAMVariablePut
+		ETag    string
+	}{
+		Name:    name,
+		GUID:    guid,
+		VarName: varName,
+		Data:    data,
+		ETag:    ETag,
+	}
+	mock.lockUpdateInstanceNVRAMGUIDVar.Lock()
+	mock.calls.UpdateInstanceNVRAMGUIDVar = append(mock.calls.UpdateInstanceNVRAMGUIDVar, callInfo)
+	mock.lockUpdateInstanceNVRAMGUIDVar.Unlock()
+	return mock.UpdateInstanceNVRAMGUIDVarFunc(name, guid, varName, data, ETag)
+}
+
+// UpdateInstanceNVRAMGUIDVarCalls gets all the calls that were made to UpdateInstanceNVRAMGUIDVar.
+// Check the length with:
+//
+//	len(mockedIncusClient.UpdateInstanceNVRAMGUIDVarCalls())
+func (mock *IncusClientMock) UpdateInstanceNVRAMGUIDVarCalls() []struct {
+	Name    string
+	GUID    string
+	VarName string
+	Data    api.InstanceNVRAMVariablePut
+	ETag    string
+} {
+	var calls []struct {
+		Name    string
+		GUID    string
+		VarName string
+		Data    api.InstanceNVRAMVariablePut
+		ETag    string
+	}
+	mock.lockUpdateInstanceNVRAMGUIDVar.RLock()
+	calls = mock.calls.UpdateInstanceNVRAMGUIDVar
+	mock.lockUpdateInstanceNVRAMGUIDVar.RUnlock()
 	return calls
 }
 
