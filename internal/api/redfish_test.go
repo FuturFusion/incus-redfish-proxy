@@ -818,25 +818,53 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 	tests := []struct {
 		name         string
 		architecture string
+		sockets      []incusapi.ResourcesCPUSocket
 
 		wantArchitecture   schemas.ProcessorArchitecture
 		wantInstructionSet schemas.InstructionSet
+		wantManufacturer   string
+		wantModel          string
 	}{
 		{
-			name:               "x86_64",
-			architecture:       "x86_64",
+			name:         "x86_64",
+			architecture: "x86_64",
+			sockets: []incusapi.ResourcesCPUSocket{
+				{
+					Vendor: "GenuineIntel",
+					Name:   "Intel(R) Core(TM) i5-7300U CPU @ 2.60GHz",
+				},
+			},
+
 			wantArchitecture:   schemas.X86ProcessorArchitecture,
 			wantInstructionSet: schemas.X8664InstructionSet,
+			wantManufacturer:   "GenuineIntel",
+			wantModel:          "Intel(R) Core(TM) i5-7300U CPU @ 2.60GHz",
 		},
 		{
-			name:               "aarch64",
-			architecture:       "aarch64",
+			name:         "aarch64",
+			architecture: "aarch64",
+			sockets: []incusapi.ResourcesCPUSocket{
+				{
+					Vendor: "ARM",
+					Name:   "Neoverse-N1",
+				},
+			},
+
 			wantArchitecture:   schemas.ARMProcessorArchitecture,
 			wantInstructionSet: schemas.ARMA64InstructionSet,
+			wantManufacturer:   "ARM",
+			wantModel:          "Neoverse-N1",
 		},
 		{
 			name:         "unknown architecture",
 			architecture: "riscv64",
+		},
+		{
+			name:         "no CPU information reported",
+			architecture: "x86_64",
+
+			wantArchitecture:   schemas.X86ProcessorArchitecture,
+			wantInstructionSet: schemas.X8664InstructionSet,
 		},
 	}
 
@@ -849,6 +877,13 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 							Architecture: tc.architecture,
 						},
 					}, "", nil
+				},
+				GetServerResourcesFunc: func() (*incusapi.Resources, error) {
+					return &incusapi.Resources{
+						CPU: incusapi.ResourcesCPU{
+							Sockets: tc.sockets,
+						},
+					}, nil
 				},
 			}
 
@@ -866,8 +901,8 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 			require.Equal(t, "0", processor.ID)
 			require.Equal(t, tc.wantArchitecture, processor.ProcessorArchitecture)
 			require.Equal(t, tc.wantInstructionSet, processor.InstructionSet)
-			require.Equal(t, "qemu", processor.Manufacturer)
-			require.Equal(t, "qemu64", processor.Model)
+			require.Equal(t, tc.wantManufacturer, processor.Manufacturer)
+			require.Equal(t, tc.wantModel, processor.Model)
 			require.Equal(t, schemas.CPUProcessorType, processor.ProcessorType)
 		})
 	}
@@ -901,6 +936,18 @@ func TestRedfishServer_BIOSProfileProperties(t *testing.T) {
 				},
 			}, "", nil
 		},
+		GetServerResourcesFunc: func() (*incusapi.Resources, error) {
+			return &incusapi.Resources{
+				CPU: incusapi.ResourcesCPU{
+					Sockets: []incusapi.ResourcesCPUSocket{
+						{
+							Vendor: "GenuineIntel",
+							Name:   "Intel(R) Core(TM) i5-7300U CPU @ 2.60GHz",
+						},
+					},
+				},
+			}, nil
+		},
 	}
 
 	client := setup(t, incusClient)
@@ -926,7 +973,7 @@ func TestRedfishServer_BIOSProfileProperties(t *testing.T) {
 
 	// BIOSProfileMatch.ProcessorManufacturer / .ProcessorArchitecture /
 	// .ProcessorInstructionSet
-	require.Equal(t, "qemu", processor.Manufacturer)
+	require.Equal(t, "GenuineIntel", processor.Manufacturer)
 	require.Equal(t, schemas.X86ProcessorArchitecture, processor.ProcessorArchitecture)
 	require.Equal(t, schemas.X8664InstructionSet, processor.InstructionSet)
 
@@ -941,8 +988,10 @@ func TestRedfishServer_BIOSProfileProperties(t *testing.T) {
 
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID_Errors(t *testing.T) {
 	tests := []struct {
-		name       string
-		url        string
+		name                        string
+		url                         string
+		clientGetServerResourcesErr error
+
 		wantErrMsg string
 	}{
 		{
@@ -955,6 +1004,13 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID_
 			url:        "/redfish/v1/Systems/test-instance/Processors/1",
 			wantErrMsg: "Not Found",
 		},
+		{
+			name:                        "error - client.GetServerResources",
+			url:                         "/redfish/v1/Systems/test-instance/Processors/0",
+			clientGetServerResourcesErr: boom.Error,
+
+			wantErrMsg: boom.Error.Error(),
+		},
 	}
 
 	for _, tc := range tests {
@@ -962,6 +1018,9 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID_
 			incusClient := &mock.IncusClientMock{
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return &incusapi.Instance{}, "", nil
+				},
+				GetServerResourcesFunc: func() (*incusapi.Resources, error) {
+					return &incusapi.Resources{}, tc.clientGetServerResourcesErr
 				},
 			}
 
@@ -2749,6 +2808,14 @@ func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
 	if ok && incusClient.GetServerFunc == nil {
 		incusClient.GetServerFunc = func() (*incusapi.Server, string, error) {
 			return &incusapi.Server{}, "", nil
+		}
+	}
+
+	// Fetching a processor reads the server resources for the CPU vendor and
+	// model, which most test cases do not care about.
+	if ok && incusClient.GetServerResourcesFunc == nil {
+		incusClient.GetServerResourcesFunc = func() (*incusapi.Resources, error) {
+			return &incusapi.Resources{}, nil
 		}
 	}
 

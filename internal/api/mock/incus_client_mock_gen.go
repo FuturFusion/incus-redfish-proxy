@@ -44,6 +44,9 @@ var _ api0.IncusClient = &IncusClientMock{}
 //			GetServerFunc: func() (*api.Server, string, error) {
 //				panic("mock out the GetServer method")
 //			},
+//			GetServerResourcesFunc: func() (*api.Resources, error) {
+//				panic("mock out the GetServerResources method")
+//			},
 //			HasExtensionFunc: func(extension string) bool {
 //				panic("mock out the HasExtension method")
 //			},
@@ -55,6 +58,9 @@ var _ api0.IncusClient = &IncusClientMock{}
 //			},
 //			UpdateInstanceStateFunc: func(name string, state api.InstanceStatePut, ETag string) (incus.Operation, error) {
 //				panic("mock out the UpdateInstanceState method")
+//			},
+//			UseTargetFunc: func(name string) incus.InstanceServer {
+//				panic("mock out the UseTarget method")
 //			},
 //		}
 //
@@ -84,6 +90,9 @@ type IncusClientMock struct {
 	// GetServerFunc mocks the GetServer method.
 	GetServerFunc func() (*api.Server, string, error)
 
+	// GetServerResourcesFunc mocks the GetServerResources method.
+	GetServerResourcesFunc func() (*api.Resources, error)
+
 	// HasExtensionFunc mocks the HasExtension method.
 	HasExtensionFunc func(extension string) bool
 
@@ -95,6 +104,9 @@ type IncusClientMock struct {
 
 	// UpdateInstanceStateFunc mocks the UpdateInstanceState method.
 	UpdateInstanceStateFunc func(name string, state api.InstanceStatePut, ETag string) (incus.Operation, error)
+
+	// UseTargetFunc mocks the UseTarget method.
+	UseTargetFunc func(name string) incus.InstanceServer
 
 	// calls tracks calls to the methods.
 	calls struct {
@@ -147,6 +159,9 @@ type IncusClientMock struct {
 		// GetServer holds details about calls to the GetServer method.
 		GetServer []struct {
 		}
+		// GetServerResources holds details about calls to the GetServerResources method.
+		GetServerResources []struct {
+		}
 		// HasExtension holds details about calls to the HasExtension method.
 		HasExtension []struct {
 			// Extension is the extension argument value.
@@ -183,6 +198,11 @@ type IncusClientMock struct {
 			// ETag is the ETag argument value.
 			ETag string
 		}
+		// UseTarget holds details about calls to the UseTarget method.
+		UseTarget []struct {
+			// Name is the name argument value.
+			Name string
+		}
 	}
 	lockCreateStoragePoolVolumeFromISO sync.RWMutex
 	lockDeleteInstanceNVRAMGUIDVar     sync.RWMutex
@@ -191,10 +211,12 @@ type IncusClientMock struct {
 	lockGetInstanceNVRAMGUID           sync.RWMutex
 	lockGetInstanceNVRAMGUIDVar        sync.RWMutex
 	lockGetServer                      sync.RWMutex
+	lockGetServerResources             sync.RWMutex
 	lockHasExtension                   sync.RWMutex
 	lockUpdateInstance                 sync.RWMutex
 	lockUpdateInstanceNVRAMGUIDVar     sync.RWMutex
 	lockUpdateInstanceState            sync.RWMutex
+	lockUseTarget                      sync.RWMutex
 }
 
 // CreateStoragePoolVolumeFromISO calls CreateStoragePoolVolumeFromISOFunc.
@@ -448,6 +470,33 @@ func (mock *IncusClientMock) GetServerCalls() []struct {
 	return calls
 }
 
+// GetServerResources calls GetServerResourcesFunc.
+func (mock *IncusClientMock) GetServerResources() (*api.Resources, error) {
+	if mock.GetServerResourcesFunc == nil {
+		panic("IncusClientMock.GetServerResourcesFunc: method is nil but IncusClient.GetServerResources was just called")
+	}
+	callInfo := struct {
+	}{}
+	mock.lockGetServerResources.Lock()
+	mock.calls.GetServerResources = append(mock.calls.GetServerResources, callInfo)
+	mock.lockGetServerResources.Unlock()
+	return mock.GetServerResourcesFunc()
+}
+
+// GetServerResourcesCalls gets all the calls that were made to GetServerResources.
+// Check the length with:
+//
+//	len(mockedIncusClient.GetServerResourcesCalls())
+func (mock *IncusClientMock) GetServerResourcesCalls() []struct {
+} {
+	var calls []struct {
+	}
+	mock.lockGetServerResources.RLock()
+	calls = mock.calls.GetServerResources
+	mock.lockGetServerResources.RUnlock()
+	return calls
+}
+
 // HasExtension calls HasExtensionFunc.
 func (mock *IncusClientMock) HasExtension(extension string) bool {
 	if mock.HasExtensionFunc == nil {
@@ -605,5 +654,37 @@ func (mock *IncusClientMock) UpdateInstanceStateCalls() []struct {
 	mock.lockUpdateInstanceState.RLock()
 	calls = mock.calls.UpdateInstanceState
 	mock.lockUpdateInstanceState.RUnlock()
+	return calls
+}
+
+// UseTarget calls UseTargetFunc.
+func (mock *IncusClientMock) UseTarget(name string) incus.InstanceServer {
+	if mock.UseTargetFunc == nil {
+		panic("IncusClientMock.UseTargetFunc: method is nil but IncusClient.UseTarget was just called")
+	}
+	callInfo := struct {
+		Name string
+	}{
+		Name: name,
+	}
+	mock.lockUseTarget.Lock()
+	mock.calls.UseTarget = append(mock.calls.UseTarget, callInfo)
+	mock.lockUseTarget.Unlock()
+	return mock.UseTargetFunc(name)
+}
+
+// UseTargetCalls gets all the calls that were made to UseTarget.
+// Check the length with:
+//
+//	len(mockedIncusClient.UseTargetCalls())
+func (mock *IncusClientMock) UseTargetCalls() []struct {
+	Name string
+} {
+	var calls []struct {
+		Name string
+	}
+	mock.lockUseTarget.RLock()
+	calls = mock.calls.UseTarget
+	mock.lockUseTarget.RUnlock()
 	return calls
 }
