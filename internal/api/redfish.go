@@ -21,7 +21,9 @@ import (
 
 type IncusClient interface {
 	GetServer() (server *incusapi.Server, ETag string, err error)
+	GetServerResources() (resources *incusapi.Resources, err error)
 	HasExtension(extension string) (exists bool)
+	UseTarget(name string) (client incusclient.InstanceServer)
 
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
@@ -1025,19 +1027,45 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 	processorType := ProcessorV1240Processor_ProcessorType{}
 	_ = processorType.FromProcessorV1240ProcessorType(ProcessorV1240ProcessorTypeCPU)
 
+	// Incus does not report the vCPU vendor, so use the host CPU instead.
+	socket, err := s.serverCPUSocket(instance)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	response(w, ProcessorV1240Processor{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors/%s", s.instanceName, processorIDStr)),
 		OdataType: ref("#Processor.v1_24_0.Processor"),
 
-		ID:   processorIDStr,
-		Name: "Processor",
-		// Incus does not report the vCPU vendor.
-		Manufacturer:          ref("qemu"),
-		Model:                 ref("qemu64"),
+		ID:                    processorIDStr,
+		Name:                  "Processor",
+		Manufacturer:          refNonZero(socket.Vendor),
+		Model:                 refNonZero(socket.Name),
 		ProcessorType:         &processorType,
 		ProcessorArchitecture: processorArchitecture,
 		InstructionSet:        instructionSet,
 	})
+}
+
+// serverCPUSocket returns the first CPU socket of the instance's Incus server.
+func (s redfishServer) serverCPUSocket(instance *incusapi.Instance) (incusapi.ResourcesCPUSocket, error) {
+	client := s.client
+
+	if instance.Location != "" && instance.Location != "none" {
+		client = s.client.UseTarget(instance.Location)
+	}
+
+	resources, err := client.GetServerResources()
+	if err != nil {
+		return incusapi.ResourcesCPUSocket{}, err
+	}
+
+	if len(resources.CPU.Sockets) == 0 {
+		return incusapi.ResourcesCPUSocket{}, nil
+	}
+
+	return resources.CPU.Sockets[0], nil
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID(w http.ResponseWriter, r *http.Request, computerSystemID string, processorID string) {
