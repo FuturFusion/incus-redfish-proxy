@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/hex"
@@ -9,8 +10,10 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	incusclient "github.com/lxc/incus/v7/client"
@@ -27,6 +30,7 @@ type IncusClient interface {
 
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
+	GetInstanceState(name string) (*incusapi.InstanceState, string, error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
 
 	GetInstanceNVRAMGUID(name string, guid string) (vars map[string]*incusapi.InstanceNVRAMVariable, err error)
@@ -43,15 +47,62 @@ type IncusOperation = incusclient.Operation
 type redfishServer struct {
 	instanceName string
 	client       IncusClient
+	httpClient   *http.Client
+	ctx          context.Context
+	events       EventSource
+	resets       *resetTracker
+	tasks        *taskRegistry
+}
+
+// Option customizes the Redfish server.
+type Option func(*redfishServer)
+
+// WithHTTPClient sets the HTTP client used to download virtual media images.
+func WithHTTPClient(client *http.Client) Option {
+	return func(s *redfishServer) {
+		if client != nil {
+			s.httpClient = client
+		}
+	}
+}
+
+// WithEventSource sets the Incus event stream, which must not be the client used for requests, watched in the background until the context of WithContext is done.
+func WithEventSource(source EventSource) Option {
+	return func(s *redfishServer) {
+		s.events = source
+	}
+}
+
+// WithContext sets the context stopping the event stream watcher, which otherwise runs for the lifetime of the process.
+func WithContext(ctx context.Context) Option {
+	return func(s *redfishServer) {
+		if ctx != nil {
+			s.ctx = ctx
+		}
+	}
 }
 
 var _ ServerInterface = (*redfishServer)(nil)
 
-func NewRedfishServer(instanceName string, client IncusClient) *redfishServer {
-	return &redfishServer{
+func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *redfishServer {
+	s := &redfishServer{
 		instanceName: instanceName,
 		client:       client,
+		httpClient:   http.DefaultClient,
+		ctx:          context.Background(),
+		resets:       &resetTracker{instanceName: instanceName},
+		tasks:        &taskRegistry{},
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	if s.events != nil {
+		go s.resets.watch(s.ctx, s.events)
+	}
+
+	return s
 }
 
 func validateManagerID(w http.ResponseWriter, managerID string) bool {
@@ -165,6 +216,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 		VirtualMedia: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
 		},
+		ID:   managerName,
 		Name: managerName,
 	})
 }
@@ -186,6 +238,11 @@ func (s redfishServer) PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 }
 
 const virtualMediaName = "CD"
+
+const (
+	bootMediaDeviceName = "boot-media"
+	bootMediaImageKey   = "user.redfish.image"
+)
 
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request, managerID string) {
 	if !validateManagerID(w, managerID) {
@@ -216,7 +273,14 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 		return
 	}
 
-	_, inserted := instance.Devices["boot-media"]
+	device, inserted := instance.Devices[bootMediaDeviceName]
+
+	var image *string
+
+	imageURL := device[bootMediaImageKey]
+	if inserted && imageURL != "" {
+		image = ref(imageURL)
+	}
 
 	connectedViaURI := VirtualMediaV170VirtualMedia_ConnectedVia{}
 	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(URI)
@@ -227,12 +291,13 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 		VirtualMediaV170VirtualMedia: VirtualMediaV170VirtualMedia{
 			OdataID:   ref(base),
 			OdataType: ref("#VirtualMedia.v1_7_0.VirtualMedia"),
+			ID:        virtualMediaName,
 			Name:      ResourceName(virtualMediaName),
 			MediaTypes: &[]VirtualMediaV170MediaType{
 				CD,
 				DVD,
 			},
-			Image:             ref(fmt.Sprintf("%s-boot-media.iso", s.instanceName)),
+			Image:             image,
 			ConnectedVia:      ref(connectedViaURI),
 			Inserted:          ref(inserted),
 			WriteProtected:    ref(true),
@@ -384,7 +449,7 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 		return statusErrorf(http.StatusConflict, "virtual media is already inserted")
 	}
 
-	resp, err := http.Get(image)
+	resp, err := s.httpClient.Get(image)
 	if err != nil {
 		return statusErrorf(http.StatusBadRequest, "%s", err.Error())
 	}
@@ -392,6 +457,10 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 	defer func() {
 		_ = resp.Body.Close()
 	}()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return statusErrorf(http.StatusBadRequest, "fetch image %q: unexpected status %s", image, resp.Status)
+	}
 
 	op, err := s.client.CreateStoragePoolVolumeFromISO("default", incusclient.StorageVolumeBackupArgs{
 		Name:       fmt.Sprintf("%s-boot-media.iso", s.instanceName),
@@ -407,11 +476,11 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 		return combineRollbackError(err, rollbackErr)
 	}
 
-	instance.Devices["boot-media"] = map[string]string{
-		"boot.priority": "10",
-		"pool":          "default",
-		"source":        fmt.Sprintf("%s-boot-media.iso", s.instanceName),
-		"type":          "disk",
+	instance.Devices[bootMediaDeviceName] = map[string]string{
+		"pool":            "default",
+		"source":          fmt.Sprintf("%s-boot-media.iso", s.instanceName),
+		"type":            "disk",
+		bootMediaImageKey: image,
 	}
 
 	op, err = s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
@@ -427,6 +496,42 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 	}
 
 	return nil
+}
+
+func bootMediaOverride(instance *incusapi.Instance) bool {
+	return instance.Devices["boot-media"]["boot.priority"] != ""
+}
+
+func (s redfishServer) setBootMediaOverride(enabled bool) error {
+	instance, etag, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	if bootMediaOverride(instance) == enabled {
+		return nil
+	}
+
+	device, inserted := instance.Devices["boot-media"]
+	if !inserted {
+		return statusErrorf(http.StatusConflict, "no virtual media is inserted")
+	}
+
+	device = cloneStringMap(device)
+	if enabled {
+		device["boot.priority"] = "10"
+	} else {
+		delete(device, "boot.priority")
+	}
+
+	instance.Devices["boot-media"] = device
+
+	op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait()
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -564,6 +669,19 @@ func instanceCPUCount(instance *incusapi.Instance) int64 {
 	return cpuNo
 }
 
+// instanceUUID returns the SMBIOS UUID of the instance, or nil if it has none yet.
+func instanceUUID(instance *incusapi.Instance) *ComputerSystemV1290ComputerSystem_UUID {
+	cfgUUID := instanceConfig(instance)["volatile.uuid"]
+	if cfgUUID == "" {
+		return nil
+	}
+
+	systemUUID := ComputerSystemV1290ComputerSystem_UUID{}
+	_ = systemUUID.FromResourceUUID(cfgUUID)
+
+	return &systemUUID
+}
+
 // instanceHasTPM reports whether the instance has a TPM device attached.
 func instanceHasTPM(instance *incusapi.Instance) bool {
 	for _, deviceConfig := range instanceDevices(instance) {
@@ -667,6 +785,12 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		_ = powerState.FromResourcePowerState(Off)
 	}
 
+	lastResetTime, err := s.lastResetTime(instance)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	server, _, err := s.client.GetServer()
 	if err != nil {
 		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
@@ -692,7 +816,19 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		}
 	}
 
-	response(w, ComputerSystemV1290ComputerSystem{
+	boot := systemBoot{
+		BootSourceOverrideEnabled:                ComputerSystemV1290BootSourceOverrideEnabledDisabled,
+		BootSourceOverrideEnabledAllowableValues: bootSourceOverrideEnabledValues,
+		BootSourceOverrideTarget:                 ComputerSystemBootSourceNone,
+		BootSourceOverrideTargetAllowableValues:  bootSourceOverrideTargetValues,
+	}
+
+	if bootMediaOverride(instance) {
+		boot.BootSourceOverrideEnabled = ComputerSystemV1290BootSourceOverrideEnabledContinuous
+		boot.BootSourceOverrideTarget = ComputerSystemBootSourceCd
+	}
+
+	response(w, computerSystemGetResponse{Boot: boot, ComputerSystemV1290ComputerSystem: ComputerSystemV1290ComputerSystem{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName)),
 		OdataType: ref("#ComputerSystem.v1_29_0.ComputerSystem"),
 		Actions: &ComputerSystemV1290Actions{
@@ -705,13 +841,15 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		},
 		// The Incus version is what determines the firmware the instance boots
 		// with, so it stands in for the BIOS version.
-		BiosVersion: ref(server.Environment.ServerVersion),
+		BiosVersion:  ref(server.Environment.ServerVersion),
+		BootProgress: bootProgress(lastResetTime),
 		Processors: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors", s.instanceName)),
 		},
 
-		ID:           s.instanceName,
-		Manufacturer: ref("linuxcontainers.org"),
+		ID:            s.instanceName,
+		LastResetTime: lastResetTime,
+		Manufacturer:  ref("linuxcontainers.org"),
 		// TODO: add memory summary
 		// MemorySummary: &ComputerSystemV1290MemorySummary{},
 		Model:      ref("Incus"),
@@ -729,11 +867,87 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		},
 		SerialNumber:   ref(s.instanceName),
 		TrustedModules: trustedModules,
+		UUID:           instanceUUID(instance),
 		// TODO: add virtual media for system
 		// VirtualMedia: &OdataV4IdRef{
 		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
 		// },
+	}})
+}
+
+// lastResetTime returns when the instance last booted, nil if it is not running or the time is unknown.
+func (s redfishServer) lastResetTime(instance *incusapi.Instance) (*time.Time, error) {
+	if instance.Status != "Running" {
+		return nil, nil
+	}
+
+	state, _, err := s.client.GetInstanceState(s.instanceName)
+	if err != nil {
+		return nil, err
+	}
+
+	// A guest reset handled in place by QEMU leaves StartedAt unchanged, so it only shows up as an event.
+	resetTime := state.StartedAt
+
+	restartedAt := s.resets.last()
+	if restartedAt.After(resetTime) {
+		resetTime = restartedAt
+	}
+
+	if resetTime.IsZero() {
+		return nil, nil
+	}
+
+	return ref(resetTime.UTC()), nil
+}
+
+// bootProgress reports the boot started at the given time as handed over to the operating system.
+func bootProgress(since *time.Time) *ComputerSystemV1290ComputerSystem_BootProgress {
+	if since == nil {
+		return nil
+	}
+
+	// The firmware phase of a VM is negligible and the guest does not report back.
+	lastState := ComputerSystemV1290BootProgress_LastState{}
+	_ = lastState.FromComputerSystemV1290BootProgressTypes(ComputerSystemV1290BootProgressTypesOSBootStarted)
+
+	progress := ComputerSystemV1290ComputerSystem_BootProgress{}
+	_ = progress.FromComputerSystemV1290BootProgress(ComputerSystemV1290BootProgress{
+		LastState:     &lastState,
+		LastStateTime: since,
 	})
+
+	return &progress
+}
+
+type computerSystemGetResponse struct {
+	ComputerSystemV1290ComputerSystem
+	Boot systemBoot `json:"Boot"`
+}
+
+type systemBoot struct {
+	BootSourceOverrideEnabled                ComputerSystemV1290BootSourceOverrideEnabled   `json:"BootSourceOverrideEnabled"`
+	BootSourceOverrideEnabledAllowableValues []ComputerSystemV1290BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled@Redfish.AllowableValues"`
+	BootSourceOverrideTarget                 ComputerSystemBootSource                       `json:"BootSourceOverrideTarget"`
+	BootSourceOverrideTargetAllowableValues  []ComputerSystemBootSource                     `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
+}
+
+// A one time override is not offered, Incus can not drop it while the instance is running.
+var bootSourceOverrideEnabledValues = []ComputerSystemV1290BootSourceOverrideEnabled{
+	ComputerSystemV1290BootSourceOverrideEnabledDisabled,
+	ComputerSystemV1290BootSourceOverrideEnabledContinuous,
+}
+
+var bootSourceOverrideTargetValues = []ComputerSystemBootSource{
+	ComputerSystemBootSourceNone,
+	ComputerSystemBootSourceCd,
+}
+
+type computerSystemPatchRequest struct {
+	Boot *struct {
+		BootSourceOverrideEnabled *ComputerSystemV1290BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled"`
+		BootSourceOverrideTarget  *ComputerSystemBootSource                     `json:"BootSourceOverrideTarget"`
+	} `json:"Boot"`
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -741,7 +955,63 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 		return
 	}
 
-	responseNotImplemented(w)
+	request := computerSystemPatchRequest{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.Boot == nil || (request.Boot.BootSourceOverrideEnabled == nil && request.Boot.BootSourceOverrideTarget == nil) {
+		responseNoContent(w)
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	enabled := ComputerSystemV1290BootSourceOverrideEnabledDisabled
+	target := ComputerSystemBootSourceNone
+	if bootMediaOverride(instance) {
+		enabled = ComputerSystemV1290BootSourceOverrideEnabledContinuous
+		target = ComputerSystemBootSourceCd
+	}
+
+	if request.Boot.BootSourceOverrideEnabled != nil {
+		enabled = *request.Boot.BootSourceOverrideEnabled
+	}
+
+	if request.Boot.BootSourceOverrideTarget != nil {
+		target = *request.Boot.BootSourceOverrideTarget
+	}
+
+	if !slices.Contains(bootSourceOverrideEnabledValues, enabled) {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideEnabled value %q is not supported", enabled))
+		return
+	}
+
+	if !slices.Contains(bootSourceOverrideTargetValues, target) {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideTarget value %q is not supported", target))
+		return
+	}
+
+	// A disabled override ignores the target, an enabled one needs it.
+	override := enabled == ComputerSystemV1290BootSourceOverrideEnabledContinuous
+	if override && target != ComputerSystemBootSourceCd {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideEnabled %q requires BootSourceOverrideTarget %q", enabled, ComputerSystemBootSourceCd))
+		return
+	}
+
+	err = s.setBootMediaOverride(override)
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseNoContent(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -771,20 +1041,25 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 	var action string
 	var force bool
+	var noopStatus string
 	switch *request.ResetType {
 	case ResourceResetTypeOn:
 		action = "start"
+		noopStatus = "Running"
 
 	case ResourceResetTypeForceOn:
 		action = "start"
 		force = true
+		noopStatus = "Running"
 
 	case ResourceResetTypeGracefulShutdown:
 		action = "stop"
+		noopStatus = "Stopped"
 
 	case ResourceResetTypeForceOff:
 		action = "stop"
 		force = true
+		noopStatus = "Stopped"
 
 	case ResourceResetTypeGracefulRestart:
 		action = "restart"
@@ -796,6 +1071,19 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	default:
 		responseErrWithMessage(w, http.StatusBadRequest, "reset type not supported")
 		return
+	}
+
+	if noopStatus != "" {
+		instance, _, err := s.client.GetInstance(computerSystemID)
+		if err != nil {
+			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if instance.Status == noopStatus {
+			responseNoContent(w)
+			return
+		}
 	}
 
 	op, err := s.client.UpdateInstanceState(computerSystemID, incusapi.InstanceStatePut{
@@ -950,7 +1238,19 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		return
 	}
 
-	responseNoContent(w)
+	// The change is already applied, the task monitor only serves clients expecting an asynchronous answer.
+	responseAccepted(w, fmt.Sprintf("/redfish/v1/TaskMonitors/%s", s.tasks.add()))
+}
+
+// GetRedfishV1TaskMonitorsTaskID serves the task monitor of a BIOS change, which is not part of the generated routes.
+func (s redfishServer) GetRedfishV1TaskMonitorsTaskID(w http.ResponseWriter, r *http.Request, taskID string) {
+	if !s.tasks.has(taskID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	// A completed task monitor answers with the resulting Bios resource.
+	s.GetRedfishV1SystemsComputerSystemIDBios(w, r, s.instanceName)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -1703,25 +2003,23 @@ func (s redfishServer) addSignature(db secureBootDatabase, list signatureList, c
 		return "", err
 	}
 
-	added := collectSignatures(lists, certificate)
-
-	return added[len(added)-1].id, nil
+	return signatureID(list.Type, list.Entries[0].Data), nil
 }
 
-// deleteSignature removes an entry from a signature database. Removing the last entry of
-// the platform key returns the firmware to setup mode, which is the expected UEFI behaviour.
+// deleteSignature removes the entries with the given ID from a signature database. Removing
+// the last entry of the platform key returns the firmware to setup mode, which is the expected UEFI behaviour.
 func (s redfishServer) deleteSignature(db secureBootDatabase, id string, certificate bool) error {
 	lists, variable, etag, err := s.getSignatureDatabaseForUpdate(db)
 	if err != nil {
 		return err
 	}
 
-	entry, ok := lookupSignature(collectSignatures(lists, certificate), id)
+	_, ok := lookupSignature(collectSignatures(lists, certificate), id)
 	if !ok {
 		return statusErrorf(http.StatusNotFound, "%s", http.StatusText(http.StatusNotFound))
 	}
 
-	return s.putSignatureDatabase(db, removeSignature(lists, entry), variable, etag)
+	return s.putSignatureDatabase(db, removeSignature(lists, id, certificate), variable, etag)
 }
 
 // getSignatureDatabaseForUpdate fetches a signature database for modification. Incus only

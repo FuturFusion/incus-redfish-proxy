@@ -17,7 +17,6 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -37,11 +36,13 @@ import (
 
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 	tests := []struct {
-		name                 string
-		clientGetInstance    *incusapi.Instance
-		clientGetInstanceErr error
-		clientGetServer      *incusapi.Server
-		clientGetServerErr   error
+		name                      string
+		clientGetInstance         *incusapi.Instance
+		clientGetInstanceErr      error
+		clientGetInstanceState    *incusapi.InstanceState
+		clientGetInstanceStateErr error
+		clientGetServer           *incusapi.Server
+		clientGetServerErr        error
 
 		assertErr require.ErrorAssertionFunc
 		assert    func(t *testing.T, cs []*schemas.ComputerSystem)
@@ -50,6 +51,9 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 			name: "success - running",
 			clientGetInstance: &incusapi.Instance{
 				Status: "Running",
+			},
+			clientGetInstanceState: &incusapi.InstanceState{
+				StartedAt: time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC),
 			},
 
 			assertErr: require.NoError,
@@ -60,6 +64,37 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				c := cs[0]
 
 				require.Equal(t, schemas.OnPowerState, c.PowerState)
+				require.Equal(t, "2026-10-06T12:00:00Z", c.LastResetTime)
+				require.Equal(t, schemas.OSBootStartedBootProgressTypes, c.BootProgress.LastState)
+				require.Equal(t, "2026-10-06T12:00:00Z", c.BootProgress.LastStateTime)
+				require.Equal(t, schemas.NoneBootSource, c.Boot.BootSourceOverrideTarget)
+				require.Equal(t, schemas.DisabledBootSourceOverrideEnabled, c.Boot.BootSourceOverrideEnabled)
+				require.Equal(t, []schemas.BootSource{schemas.NoneBootSource, schemas.CdBootSource}, c.Boot.AllowableBootSourceOverrideTargetValues)
+				require.Contains(t, string(c.RawData), `"BootSourceOverrideEnabled@Redfish.AllowableValues": [
+      "Disabled",
+      "Continuous"
+    ]`)
+			},
+		},
+		{
+			name: "success - boot from virtual media",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"boot-media": map[string]string{"boot.priority": "10"},
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				c := cs[0]
+
+				require.Equal(t, schemas.CdBootSource, c.Boot.BootSourceOverrideTarget)
+				require.Equal(t, schemas.ContinuousBootSourceOverrideEnabled, c.Boot.BootSourceOverrideEnabled)
 			},
 		},
 		{
@@ -87,7 +122,8 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				Status: "Stopped",
 				InstancePut: incusapi.InstancePut{
 					Config: map[string]string{
-						"limits.cpu": "4",
+						"limits.cpu":    "4",
+						"volatile.uuid": "8f2c1f0e-5d3a-4b7c-9e61-2a4d6c8b0f13",
 					},
 				},
 			},
@@ -102,6 +138,7 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				require.Equal(t, uint(4), *c.ProcessorSummary.Count)
 				require.Equal(t, uint(4), *c.ProcessorSummary.CoreCount)
 				require.Equal(t, uint(4), *c.ProcessorSummary.LogicalProcessorCount)
+				require.Equal(t, "8f2c1f0e-5d3a-4b7c-9e61-2a4d6c8b0f13", c.UUID)
 			},
 		},
 		{
@@ -119,6 +156,7 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 
 				require.Len(t, cs, 1)
 				require.Equal(t, uint(8), *cs[0].ProcessorSummary.Count)
+				require.Empty(t, cs[0].UUID)
 			},
 		},
 		{
@@ -224,6 +262,22 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				c := cs[0]
 
 				require.Equal(t, schemas.OffPowerState, c.PowerState)
+				require.Empty(t, c.LastResetTime)
+				require.NotContains(t, string(c.RawData), "BootProgress")
+			},
+		},
+		{
+			name: "error - client.GetInstanceState",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Running",
+			},
+			clientGetInstanceStateErr: boom.Error,
+
+			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Nil(t, cs)
 			},
 		},
 		{
@@ -245,6 +299,9 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return tc.clientGetInstance, "", tc.clientGetInstanceErr
 				},
+				GetInstanceStateFunc: func(name string) (*incusapi.InstanceState, string, error) {
+					return tc.clientGetInstanceState, "", tc.clientGetInstanceStateErr
+				},
 				GetServerFunc: func() (*incusapi.Server, string, error) {
 					if tc.clientGetServer == nil {
 						return &incusapi.Server{}, "", tc.clientGetServerErr
@@ -259,6 +316,10 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 			systems, err := client.Service.Systems()
 			tc.assertErr(t, err)
 			tc.assert(t, systems)
+
+			if tc.clientGetInstance == nil || tc.clientGetInstance.Status != "Running" {
+				require.Empty(t, incusClient.GetInstanceStateCalls())
+			}
 		})
 	}
 }
@@ -271,9 +332,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		clientUpdateInstanceState    incusclient.Operation
 		clientUpdateInstanceStateErr error
 
-		wantAction string
-		wantForce  bool
-		assertErr  require.ErrorAssertionFunc
+		wantAction                   string
+		wantForce                    bool
+		wantUpdateInstanceStateCalls int
+		assertErr                    require.ErrorAssertionFunc
 	}{
 		{
 			name:      "success - on",
@@ -287,9 +349,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "start",
-			wantForce:  false,
-			assertErr:  require.NoError,
+			wantAction:                   "start",
+			wantForce:                    false,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - force on",
@@ -303,9 +366,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "start",
-			wantForce:  true,
-			assertErr:  require.NoError,
+			wantAction:                   "start",
+			wantForce:                    true,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - shutdown",
@@ -319,9 +383,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "stop",
-			wantForce:  false,
-			assertErr:  require.NoError,
+			wantAction:                   "stop",
+			wantForce:                    false,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - force off",
@@ -335,9 +400,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "stop",
-			wantForce:  true,
-			assertErr:  require.NoError,
+			wantAction:                   "stop",
+			wantForce:                    true,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - graceful restart",
@@ -351,9 +417,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "restart",
-			wantForce:  false,
-			assertErr:  require.NoError,
+			wantAction:                   "restart",
+			wantForce:                    false,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - force restart",
@@ -367,9 +434,30 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "restart",
-			wantForce:  true,
-			assertErr:  require.NoError,
+			wantAction:                   "restart",
+			wantForce:                    true,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
+		},
+		{
+			name:      "success - on - already running",
+			resetType: schemas.OnResetType,
+			clientGetInstance: &incusapi.Instance{
+				Status: "Running",
+			},
+
+			wantUpdateInstanceStateCalls: 0,
+			assertErr:                    require.NoError,
+		},
+		{
+			name:      "success - force off - already stopped",
+			resetType: schemas.ForceOffResetType,
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+			},
+
+			wantUpdateInstanceStateCalls: 0,
+			assertErr:                    require.NoError,
 		},
 
 		{
@@ -395,7 +483,8 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 			},
 			clientUpdateInstanceStateErr: boom.Error,
 
-			assertErr: boom.ErrorContains,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    boom.ErrorContains,
 		},
 		{
 			name:      "error - client.UpdateInstanceState - Operation.Wait",
@@ -408,7 +497,9 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 					return boom.Error
 				},
 			},
-			assertErr: boom.ErrorContains,
+
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    boom.ErrorContains,
 		},
 	}
 
@@ -438,6 +529,8 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 			_, err = system.Reset(tc.resetType)
 			tc.assertErr(t, err)
+
+			require.Len(t, incusClient.UpdateInstanceStateCalls(), tc.wantUpdateInstanceStateCalls)
 		})
 	}
 }
@@ -731,6 +824,126 @@ func TestRedfishServer_GetAndPatchBiosSettings(t *testing.T) {
 			// Assert
 			tc.assertErr(t, err)
 			require.Empty(t, tc.clientGetInstance)
+		})
+	}
+}
+
+func TestRedfishServer_PatchBoot(t *testing.T) {
+	inserted := map[string]string{"type": "disk"}
+	booting := map[string]string{"type": "disk", "boot.priority": "10"}
+
+	tests := []struct {
+		name   string
+		device map[string]string
+		boot   schemas.Boot
+
+		wantErr    bool
+		wantDevice map[string]string
+	}{
+		{
+			name:       "enable",
+			device:     inserted,
+			boot:       schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantDevice: booting,
+		},
+		{
+			name:       "disable",
+			device:     booting,
+			boot:       schemas.Boot{BootSourceOverrideTarget: schemas.NoneBootSource, BootSourceOverrideEnabled: schemas.DisabledBootSourceOverrideEnabled},
+			wantDevice: inserted,
+		},
+		{
+			name:       "disable - enabled only",
+			device:     booting,
+			boot:       schemas.Boot{BootSourceOverrideEnabled: schemas.DisabledBootSourceOverrideEnabled},
+			wantDevice: inserted,
+		},
+		{
+			name:   "no op - already enabled",
+			device: booting,
+			boot:   schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+		},
+		{
+			name: "no op - disable without virtual media",
+			boot: schemas.Boot{BootSourceOverrideTarget: schemas.NoneBootSource, BootSourceOverrideEnabled: schemas.DisabledBootSourceOverrideEnabled},
+		},
+		{
+			name:   "no op - target only",
+			device: inserted,
+			boot:   schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource},
+		},
+		{
+			name: "no op - empty",
+		},
+		{
+			name:    "error - enabled only",
+			device:  inserted,
+			boot:    schemas.Boot{BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+		{
+			name:    "error - enable without virtual media",
+			boot:    schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+		{
+			name:    "error - once is not supported",
+			device:  inserted,
+			boot:    schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.OnceBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+		{
+			name:    "error - target is not supported",
+			device:  inserted,
+			boot:    schemas.Boot{BootSourceOverrideTarget: schemas.PxeBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					instance := &incusapi.Instance{InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}
+					if tc.device != nil {
+						instance.Devices["boot-media"] = tc.device
+					}
+
+					return instance, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{
+						WaitFunc: func() error {
+							return nil
+						},
+					}, nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			systems, err := client.Service.Systems()
+			require.NoError(t, err)
+			require.Len(t, systems, 1)
+
+			err = systems[0].SetBoot(&tc.boot)
+			if tc.wantErr {
+				require.Error(t, err)
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+
+				return
+			}
+
+			require.NoError(t, err)
+
+			if tc.wantDevice == nil {
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+
+				return
+			}
+
+			require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			require.Equal(t, tc.wantDevice, incusClient.UpdateInstanceCalls()[0].Instance.Devices["boot-media"])
 		})
 	}
 }
@@ -1071,6 +1284,12 @@ func nvramSignatureDatabase(t *testing.T, entryType string, datas ...[]byte) *in
 	}
 }
 
+func hexSHA256(data ...[]byte) string {
+	sum := sha256.Sum256(bytes.Join(data, nil))
+
+	return hex.EncodeToString(sum[:])
+}
+
 // testCertificate returns a throwaway self signed certificate.
 func testCertificate(t *testing.T, commonName string) ([]byte, string) {
 	t.Helper()
@@ -1351,17 +1570,22 @@ func TestRedfishServer_SecureBootCertificates(t *testing.T) {
 	require.Len(t, certificates, 2)
 
 	// The Redfish client does not preserve the order of the collection members.
-	sort.Slice(certificates, func(i, j int) bool { return certificates[i].ID < certificates[j].ID })
+	byID := map[string]*schemas.Certificate{}
+	for _, certificate := range certificates {
+		byID[certificate.ID] = certificate
+	}
 
-	cert := certificates[0]
-	require.Equal(t, "1", cert.ID)
+	// The ID of a certificate is its fingerprint.
+	cert := byID[hexSHA256(firstDER)]
+	require.NotNil(t, cert)
 	require.Equal(t, schemas.PEMCertificateType, cert.CertificateType)
 	require.Equal(t, "first", cert.Subject.CommonName)
 	require.Equal(t, "Incus", cert.Subject.Organization)
 	require.Equal(t, "77fa9abd-0359-4d32-bd60-28f4e78f784b", cert.UefiSignatureOwner)
 	require.Contains(t, cert.CertificateString, "-----BEGIN CERTIFICATE-----")
 
-	require.Equal(t, "second", certificates[1].Subject.CommonName)
+	require.NotNil(t, byID[hexSHA256(secondDER)])
+	require.Equal(t, "second", byID[hexSHA256(secondDER)].Subject.CommonName)
 }
 
 func TestRedfishServer_SecureBootCertificates_Errors(t *testing.T) {
@@ -1422,7 +1646,7 @@ func TestRedfishServer_SecureBootCertificates_Errors(t *testing.T) {
 
 func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 	existingDER, existingPEM := testCertificate(t, "existing")
-	_, addedPEM := testCertificate(t, "added")
+	addedDER, addedPEM := testCertificate(t, "added")
 
 	tests := []struct {
 		name           string
@@ -1511,6 +1735,7 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 			}
 
 			require.NoError(t, err)
+			require.Equal(t, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates/"+hexSHA256(addedDER), resp.Header.Get("Location"))
 			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), 1)
 
 			call := incusClient.UpdateInstanceNVRAMGUIDVarCalls()[0]
@@ -1547,32 +1772,47 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 	firstDER, _ := testCertificate(t, "first")
 	secondDER, _ := testCertificate(t, "second")
+	hash := sha256.Sum256([]byte("forbidden binary"))
 
 	tests := []struct {
 		name          string
 		certificates  [][]byte
+		hashes        [][]byte
 		certificateID string
 
-		wantErrMsg string
-		wantDelete bool
-		wantUpdate int
+		wantErrMsg    string
+		wantDelete    bool
+		wantRemaining [][]byte
 	}{
 		{
-			name:          "remove one of two certificates",
+			name:          "remove first of two certificates",
 			certificates:  [][]byte{firstDER, secondDER},
-			certificateID: "1",
-			wantUpdate:    1,
+			certificateID: hexSHA256(firstDER),
+			wantRemaining: [][]byte{secondDER},
+		},
+		{
+			name:          "remove second of two certificates",
+			certificates:  [][]byte{firstDER, secondDER},
+			certificateID: hexSHA256(secondDER),
+			wantRemaining: [][]byte{firstDER},
 		},
 		{
 			name:          "removing the last certificate deletes the variable",
 			certificates:  [][]byte{firstDER},
-			certificateID: "1",
+			certificateID: hexSHA256(firstDER),
 			wantDelete:    true,
+		},
+		{
+			name:          "removing the last certificate keeps the signatures",
+			certificates:  [][]byte{firstDER},
+			hashes:        [][]byte{hash[:]},
+			certificateID: hexSHA256(firstDER),
+			wantRemaining: [][]byte{hash[:]},
 		},
 		{
 			name:          "error - unknown certificate",
 			certificates:  [][]byte{firstDER},
-			certificateID: "2",
+			certificateID: hexSHA256(secondDER),
 			wantErrMsg:    "404",
 		},
 	}
@@ -1587,7 +1827,11 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 					return true
 				},
 				GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
-					return nvramSignatureDatabase(t, "x509", tc.certificates...), "etag", nil
+					variable := nvramSignatureDatabase(t, "x509", tc.certificates...)
+					hashes := nvramSignatureDatabase(t, "sha256", tc.hashes...)
+					variable.Data = append(variable.Data.([]any), hashes.Data.([]any)...)
+
+					return variable, "etag", nil
 				},
 				UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
 					return nil
@@ -1613,8 +1857,36 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), tc.wantUpdate)
 			require.Equal(t, tc.wantDelete, len(incusClient.DeleteInstanceNVRAMGUIDVarCalls()) == 1)
+
+			if tc.wantDelete {
+				require.Empty(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls())
+
+				return
+			}
+
+			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), 1)
+
+			raw, err := json.Marshal(incusClient.UpdateInstanceNVRAMGUIDVarCalls()[0].Data.Data)
+			require.NoError(t, err)
+
+			lists := []struct {
+				Entries []struct {
+					Data []byte `json:"data"`
+				} `json:"entries"`
+			}{}
+
+			err = json.Unmarshal(raw, &lists)
+			require.NoError(t, err)
+
+			remaining := [][]byte{}
+			for _, list := range lists {
+				for _, entry := range list.Entries {
+					remaining = append(remaining, entry.Data)
+				}
+			}
+
+			require.Equal(t, tc.wantRemaining, remaining)
 		})
 	}
 }
@@ -1623,6 +1895,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	hash := sha256.Sum256([]byte("forbidden binary"))
 
 	variable := nvramSignatureDatabase(t, "sha256", hash[:])
+	signatureURL := "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/" + hexSHA256([]byte("sha256\x00"), hash[:])
 
 	incusClient := &mock.IncusClientMock{
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
@@ -1642,7 +1915,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	client := setup(t, incusClient)
 
 	// The hash is reported as a signature and not as a certificate.
-	resp, err := client.RunRawRequestWithHeaders(http.MethodGet, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/1", nil, "", nil)
+	resp, err := client.RunRawRequestWithHeaders(http.MethodGet, signatureURL, nil, "", nil)
 	require.NoError(t, err)
 
 	signature := struct {
@@ -1656,7 +1929,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	resp.Body.Close()
 	require.NoError(t, err)
 
-	require.Equal(t, "1", signature.ID)
+	require.Equal(t, hexSHA256([]byte("sha256\x00"), hash[:]), signature.ID)
 	require.Equal(t, strings.ToUpper(hex.EncodeToString(hash[:])), signature.SignatureString)
 	require.Equal(t, "EFI_CERT_SHA256_GUID", signature.SignatureType)
 	require.Equal(t, "UEFI", signature.SignatureTypeRegistry)
@@ -1675,7 +1948,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	require.Equal(t, 0, collection.Count)
 
 	// Deleting the only signature removes the whole variable.
-	resp, err = client.RunRawRequestWithHeaders(http.MethodDelete, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/1", nil, "", nil)
+	resp, err = client.RunRawRequestWithHeaders(http.MethodDelete, signatureURL, nil, "", nil)
 	if resp != nil {
 		resp.Body.Close()
 	}
@@ -1689,6 +1962,10 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		method string
 		url    string
 	}{
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/TaskMonitors/invalid",
+		},
 		{
 			method: http.MethodGet,
 			url:    "/redfish/v1/Systems/invalid",
@@ -1920,6 +2197,10 @@ func TestRedfishServer_InvalidRequest_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodPatch,
+			url:    "/redfish/v1/Systems/test-instance",
+		},
+		{
+			method: http.MethodPatch,
 			url:    "/redfish/v1/Systems/test-instance/Bios/Settings",
 		},
 		{
@@ -2017,8 +2298,24 @@ func TestRedfishServer_PatchBiosAttributes(t *testing.T) {
 	body := `{"Attributes":{"incus.config.foo":"bar","incus.devices.vtpm":"{\"type\":\"tpm\"}"}}`
 	resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/Bios/Settings", strings.NewReader(body), "", nil)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusNoContent, resp.StatusCode)
+	require.Equal(t, http.StatusAccepted, resp.StatusCode)
 	resp.Body.Close()
+
+	// The task monitor reports the change as completed, however often it is polled.
+	taskMonitor := resp.Header.Get("Location")
+	require.NotEmpty(t, taskMonitor)
+
+	for range 2 {
+		resp, err = client.Get(taskMonitor)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+
+		bios := schemas.Bios{}
+		err = json.NewDecoder(resp.Body).Decode(&bios)
+		resp.Body.Close()
+		require.NoError(t, err)
+		require.Equal(t, "/redfish/v1/Systems/test-instance/Bios", bios.ODataID)
+	}
 
 	updateCalls := incusClient.UpdateInstanceCalls()
 	require.Len(t, updateCalls, 1)
@@ -2090,10 +2387,12 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMedia(t *testing.T) {
 	managers, err := client.Service.Managers()
 	require.NoError(t, err)
 	require.Len(t, managers, 1)
+	require.Equal(t, "bmc1", managers[0].ID)
 
 	vms, err := managers[0].VirtualMedia()
 	require.NoError(t, err)
 	require.Len(t, vms, 1)
+	require.Equal(t, "CD", vms[0].ID)
 	require.Equal(t, "CD", vms[0].Name)
 }
 
@@ -2123,7 +2422,7 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 
 				require.NotNil(t, vm.Inserted)
 				require.False(t, *vm.Inserted)
-				require.Equal(t, "test-instance-boot-media.iso", vm.Image)
+				require.Empty(t, vm.Image)
 				require.Equal(t, schemas.URIConnectedVia, vm.ConnectedVia)
 				require.NotNil(t, vm.WriteProtected)
 				require.True(t, *vm.WriteProtected)
@@ -2139,6 +2438,8 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 							"pool":          "default",
 							"source":        "test-instance-boot-media.iso",
 							"type":          "disk",
+
+							"user.redfish.image": "https://example.com/boot.iso",
 						},
 					},
 				},
@@ -2153,6 +2454,7 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 
 				require.NotNil(t, vm.Inserted)
 				require.True(t, *vm.Inserted)
+				require.Equal(t, "https://example.com/boot.iso", vm.Image)
 			},
 		},
 		{
@@ -2355,12 +2657,12 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 
 				updateCalls := incusClient.UpdateInstanceCalls()
 				require.Len(t, updateCalls, 1)
-				require.Equal(t, map[string]string{
-					"boot.priority": "10",
-					"pool":          "default",
-					"source":        "test-instance-boot-media.iso",
-					"type":          "disk",
-				}, updateCalls[0].Instance.Devices["boot-media"])
+
+				device := updateCalls[0].Instance.Devices["boot-media"]
+				require.Equal(t, "default", device["pool"])
+				require.Equal(t, "test-instance-boot-media.iso", device["source"])
+				require.Equal(t, "disk", device["type"])
+				require.Contains(t, device["user.redfish.image"], "http://127.0.0.1:")
 			},
 		},
 		{
@@ -2697,6 +2999,9 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 
 		clientGetInstance *incusapi.Instance
 
+		imageStatus int
+		imageTLS    bool
+
 		// Placeholder {{IMAGE_URL}} is substituted before sending.
 		body string
 
@@ -2717,7 +3022,44 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 				t.Helper()
 
 				require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), 1)
+
+				updateCalls := incusClient.UpdateInstanceCalls()
+				require.Len(t, updateCalls, 1)
+				require.Contains(t, updateCalls[0].Instance.Devices["boot-media"]["user.redfish.image"], "http://127.0.0.1:")
+			},
+		},
+		{
+			name: "success - https with custom client",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			imageTLS:   true,
+			body:       `{"Image":"{{IMAGE_URL}}","TransferProtocolType":"HTTPS"}`,
+			wantStatus: http.StatusNoContent,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), 1)
 				require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			},
+		},
+		{
+			name: "image not found - rejected",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			imageStatus: http.StatusNotFound,
+			body:        `{"Image":"{{IMAGE_URL}}"}`,
+			wantErr:     "unexpected status 404",
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Empty(t, incusClient.CreateStoragePoolVolumeFromISOCalls())
+				require.Empty(t, incusClient.UpdateInstanceCalls())
 			},
 		},
 		{
@@ -2752,9 +3094,19 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			imageServer := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if tc.imageStatus != 0 {
+					w.WriteHeader(tc.imageStatus)
+				}
+
 				_, _ = w.Write([]byte("fake-iso-data"))
 			}))
+			if tc.imageTLS {
+				imageServer.StartTLS()
+			} else {
+				imageServer.Start()
+			}
+
 			t.Cleanup(imageServer.Close)
 
 			incusClient := &mock.IncusClientMock{
@@ -2769,7 +3121,7 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 				},
 			}
 
-			client := setup(t, incusClient)
+			client := setup(t, incusClient, api.WithHTTPClient(imageServer.Client()))
 
 			body := strings.ReplaceAll(tc.body, "{{IMAGE_URL}}", imageServer.URL)
 
@@ -2799,7 +3151,7 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 	}
 }
 
-func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
+func setup(t *testing.T, client api.IncusClient, opts ...api.Option) *gofish.APIClient {
 	t.Helper()
 
 	// Fetching the computer system reads the Incus server version for the BIOS
@@ -2811,6 +3163,13 @@ func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
 		}
 	}
 
+	// Most test cases do not care about the instance state read for the last reset time.
+	if ok && incusClient.GetInstanceStateFunc == nil {
+		incusClient.GetInstanceStateFunc = func(name string) (*incusapi.InstanceState, string, error) {
+			return &incusapi.InstanceState{}, "", nil
+		}
+	}
+
 	// Fetching a processor reads the server resources for the CPU vendor and
 	// model, which most test cases do not care about.
 	if ok && incusClient.GetServerResourcesFunc == nil {
@@ -2819,7 +3178,7 @@ func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
 		}
 	}
 
-	h := api.NewHandler("test-instance", client)
+	h := api.NewHandler("test-instance", client, opts...)
 
 	httpserver := httptest.NewServer(h)
 	t.Cleanup(func() {

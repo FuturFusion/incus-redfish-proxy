@@ -67,13 +67,24 @@ type signatureList struct {
 	Entries []signatureEntry `json:"entries"`
 }
 
-// signatureRef locates a single entry within a set of signature lists.
+// signatureRef is a signature list entry together with its Redfish ID.
 type signatureRef struct {
-	id         string
-	entry      signatureEntry
-	entryType  string
-	listIndex  int
-	entryIndex int
+	id        string
+	entry     signatureEntry
+	entryType string
+}
+
+// signatureID derives a content based Redfish ID, the fingerprint for certificates.
+func signatureID(entryType string, data []byte) string {
+	hash := sha256.New()
+
+	if entryType != "x509" {
+		_, _ = hash.Write([]byte(entryType + "\x00"))
+	}
+
+	_, _ = hash.Write(data)
+
+	return hex.EncodeToString(hash.Sum(nil))
 }
 
 // signatureTypeGUIDs maps the Incus signature type names to the corresponding UEFI GUIDs.
@@ -133,23 +144,28 @@ func decodeSignatureLists(data any) ([]signatureList, error) {
 	return lists, nil
 }
 
-// collectSignatures returns the entries of the given signature lists, either the X.509
-// certificates or everything else. The two views are disjoint and together cover all entries.
+// collectSignatures returns the deduplicated entries, either the X.509 certificates or everything else.
 func collectSignatures(lists []signatureList, certificates bool) []signatureRef {
 	refs := []signatureRef{}
+	seen := map[string]bool{}
 
-	for listIndex, list := range lists {
+	for _, list := range lists {
 		if (list.Type == "x509") != certificates {
 			continue
 		}
 
-		for entryIndex, entry := range list.Entries {
+		for _, entry := range list.Entries {
+			id := signatureID(list.Type, entry.Data)
+			if seen[id] {
+				continue
+			}
+
+			seen[id] = true
+
 			refs = append(refs, signatureRef{
-				id:         fmt.Sprintf("%d", len(refs)+1),
-				entry:      entry,
-				entryType:  list.Type,
-				listIndex:  listIndex,
-				entryIndex: entryIndex,
+				id:        id,
+				entry:     entry,
+				entryType: list.Type,
 			})
 		}
 	}
@@ -168,18 +184,33 @@ func lookupSignature(refs []signatureRef, id string) (signatureRef, bool) {
 	return signatureRef{}, false
 }
 
-// removeSignature drops an entry from the signature lists, dropping the list once it is empty.
-func removeSignature(lists []signatureList, ref signatureRef) []signatureList {
-	list := lists[ref.listIndex]
-	list.Entries = slices.Delete(list.Entries, ref.entryIndex, ref.entryIndex+1)
+// removeSignature drops all entries with the given Redfish ID, and lists left empty.
+func removeSignature(lists []signatureList, id string, certificates bool) []signatureList {
+	remaining := make([]signatureList, 0, len(lists))
 
-	if len(list.Entries) == 0 {
-		return slices.Delete(lists, ref.listIndex, ref.listIndex+1)
+	for _, list := range lists {
+		if (list.Type == "x509") != certificates {
+			remaining = append(remaining, list)
+			continue
+		}
+
+		entries := make([]signatureEntry, 0, len(list.Entries))
+
+		for _, entry := range list.Entries {
+			if signatureID(list.Type, entry.Data) != id {
+				entries = append(entries, entry)
+			}
+		}
+
+		if len(entries) == 0 {
+			continue
+		}
+
+		list.Entries = entries
+		remaining = append(remaining, list)
 	}
 
-	lists[ref.listIndex] = list
-
-	return lists
+	return remaining
 }
 
 // derToPEM encodes a DER certificate as PEM.

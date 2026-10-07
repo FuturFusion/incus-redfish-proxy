@@ -20,6 +20,11 @@ func responseCreated(w http.ResponseWriter, location string, resp any) {
 	_ = enc.Encode(resp)
 }
 
+func responseAccepted(w http.ResponseWriter, location string) {
+	w.Header().Set("Location", location)
+	w.WriteHeader(http.StatusAccepted)
+}
+
 func responseNoContent(w http.ResponseWriter) {
 	w.WriteHeader(http.StatusNoContent)
 }
