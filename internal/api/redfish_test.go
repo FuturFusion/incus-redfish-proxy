@@ -36,11 +36,13 @@ import (
 
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 	tests := []struct {
-		name                 string
-		clientGetInstance    *incusapi.Instance
-		clientGetInstanceErr error
-		clientGetServer      *incusapi.Server
-		clientGetServerErr   error
+		name                      string
+		clientGetInstance         *incusapi.Instance
+		clientGetInstanceErr      error
+		clientGetInstanceState    *incusapi.InstanceState
+		clientGetInstanceStateErr error
+		clientGetServer           *incusapi.Server
+		clientGetServerErr        error
 
 		assertErr require.ErrorAssertionFunc
 		assert    func(t *testing.T, cs []*schemas.ComputerSystem)
@@ -49,6 +51,9 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 			name: "success - running",
 			clientGetInstance: &incusapi.Instance{
 				Status: "Running",
+			},
+			clientGetInstanceState: &incusapi.InstanceState{
+				StartedAt: time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC),
 			},
 
 			assertErr: require.NoError,
@@ -59,6 +64,9 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				c := cs[0]
 
 				require.Equal(t, schemas.OnPowerState, c.PowerState)
+				require.Equal(t, "2026-10-06T12:00:00Z", c.LastResetTime)
+				require.Equal(t, schemas.OSBootStartedBootProgressTypes, c.BootProgress.LastState)
+				require.Equal(t, "2026-10-06T12:00:00Z", c.BootProgress.LastStateTime)
 				require.Equal(t, schemas.NoneBootSource, c.Boot.BootSourceOverrideTarget)
 				require.Equal(t, schemas.DisabledBootSourceOverrideEnabled, c.Boot.BootSourceOverrideEnabled)
 				require.Equal(t, []schemas.BootSource{schemas.NoneBootSource, schemas.CdBootSource}, c.Boot.AllowableBootSourceOverrideTargetValues)
@@ -254,6 +262,22 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				c := cs[0]
 
 				require.Equal(t, schemas.OffPowerState, c.PowerState)
+				require.Empty(t, c.LastResetTime)
+				require.NotContains(t, string(c.RawData), "BootProgress")
+			},
+		},
+		{
+			name: "error - client.GetInstanceState",
+			clientGetInstance: &incusapi.Instance{
+				Status: "Running",
+			},
+			clientGetInstanceStateErr: boom.Error,
+
+			assertErr: boom.ErrorContains,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Nil(t, cs)
 			},
 		},
 		{
@@ -275,6 +299,9 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return tc.clientGetInstance, "", tc.clientGetInstanceErr
 				},
+				GetInstanceStateFunc: func(name string) (*incusapi.InstanceState, string, error) {
+					return tc.clientGetInstanceState, "", tc.clientGetInstanceStateErr
+				},
 				GetServerFunc: func() (*incusapi.Server, string, error) {
 					if tc.clientGetServer == nil {
 						return &incusapi.Server{}, "", tc.clientGetServerErr
@@ -289,6 +316,10 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 			systems, err := client.Service.Systems()
 			tc.assertErr(t, err)
 			tc.assert(t, systems)
+
+			if tc.clientGetInstance == nil || tc.clientGetInstance.Status != "Running" {
+				require.Empty(t, incusClient.GetInstanceStateCalls())
+			}
 		})
 	}
 }
@@ -3100,6 +3131,13 @@ func setup(t *testing.T, client api.IncusClient, opts ...api.Option) *gofish.API
 	if ok && incusClient.GetServerFunc == nil {
 		incusClient.GetServerFunc = func() (*incusapi.Server, string, error) {
 			return &incusapi.Server{}, "", nil
+		}
+	}
+
+	// Most test cases do not care about the instance state read for the last reset time.
+	if ok && incusClient.GetInstanceStateFunc == nil {
+		incusClient.GetInstanceStateFunc = func(name string) (*incusapi.InstanceState, string, error) {
+			return &incusapi.InstanceState{}, "", nil
 		}
 	}
 

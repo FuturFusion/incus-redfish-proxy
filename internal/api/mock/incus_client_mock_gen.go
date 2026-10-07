@@ -41,6 +41,9 @@ var _ api0.IncusClient = &IncusClientMock{}
 //			GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*api.InstanceNVRAMVariable, string, error) {
 //				panic("mock out the GetInstanceNVRAMGUIDVar method")
 //			},
+//			GetInstanceStateFunc: func(name string) (*api.InstanceState, string, error) {
+//				panic("mock out the GetInstanceState method")
+//			},
 //			GetServerFunc: func() (*api.Server, string, error) {
 //				panic("mock out the GetServer method")
 //			},
@@ -86,6 +89,9 @@ type IncusClientMock struct {
 
 	// GetInstanceNVRAMGUIDVarFunc mocks the GetInstanceNVRAMGUIDVar method.
 	GetInstanceNVRAMGUIDVarFunc func(name string, guid string, varName string) (*api.InstanceNVRAMVariable, string, error)
+
+	// GetInstanceStateFunc mocks the GetInstanceState method.
+	GetInstanceStateFunc func(name string) (*api.InstanceState, string, error)
 
 	// GetServerFunc mocks the GetServer method.
 	GetServerFunc func() (*api.Server, string, error)
@@ -156,6 +162,11 @@ type IncusClientMock struct {
 			// VarName is the varName argument value.
 			VarName string
 		}
+		// GetInstanceState holds details about calls to the GetInstanceState method.
+		GetInstanceState []struct {
+			// Name is the name argument value.
+			Name string
+		}
 		// GetServer holds details about calls to the GetServer method.
 		GetServer []struct {
 		}
@@ -210,6 +221,7 @@ type IncusClientMock struct {
 	lockGetInstance                    sync.RWMutex
 	lockGetInstanceNVRAMGUID           sync.RWMutex
 	lockGetInstanceNVRAMGUIDVar        sync.RWMutex
+	lockGetInstanceState               sync.RWMutex
 	lockGetServer                      sync.RWMutex
 	lockGetServerResources             sync.RWMutex
 	lockHasExtension                   sync.RWMutex
@@ -440,6 +452,38 @@ func (mock *IncusClientMock) GetInstanceNVRAMGUIDVarCalls() []struct {
 	mock.lockGetInstanceNVRAMGUIDVar.RLock()
 	calls = mock.calls.GetInstanceNVRAMGUIDVar
 	mock.lockGetInstanceNVRAMGUIDVar.RUnlock()
+	return calls
+}
+
+// GetInstanceState calls GetInstanceStateFunc.
+func (mock *IncusClientMock) GetInstanceState(name string) (*api.InstanceState, string, error) {
+	if mock.GetInstanceStateFunc == nil {
+		panic("IncusClientMock.GetInstanceStateFunc: method is nil but IncusClient.GetInstanceState was just called")
+	}
+	callInfo := struct {
+		Name string
+	}{
+		Name: name,
+	}
+	mock.lockGetInstanceState.Lock()
+	mock.calls.GetInstanceState = append(mock.calls.GetInstanceState, callInfo)
+	mock.lockGetInstanceState.Unlock()
+	return mock.GetInstanceStateFunc(name)
+}
+
+// GetInstanceStateCalls gets all the calls that were made to GetInstanceState.
+// Check the length with:
+//
+//	len(mockedIncusClient.GetInstanceStateCalls())
+func (mock *IncusClientMock) GetInstanceStateCalls() []struct {
+	Name string
+} {
+	var calls []struct {
+		Name string
+	}
+	mock.lockGetInstanceState.RLock()
+	calls = mock.calls.GetInstanceState
+	mock.lockGetInstanceState.RUnlock()
 	return calls
 }
 

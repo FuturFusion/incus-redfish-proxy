@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/hex"
@@ -12,6 +13,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	incusclient "github.com/lxc/incus/v7/client"
@@ -28,6 +30,7 @@ type IncusClient interface {
 
 	GetInstance(name string) (*incusapi.Instance, string, error)
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
+	GetInstanceState(name string) (*incusapi.InstanceState, string, error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
 
 	GetInstanceNVRAMGUID(name string, guid string) (vars map[string]*incusapi.InstanceNVRAMVariable, err error)
@@ -45,6 +48,9 @@ type redfishServer struct {
 	instanceName string
 	client       IncusClient
 	httpClient   *http.Client
+	ctx          context.Context
+	events       EventSource
+	resets       *resetTracker
 }
 
 // Option customizes the Redfish server.
@@ -59,6 +65,22 @@ func WithHTTPClient(client *http.Client) Option {
 	}
 }
 
+// WithEventSource sets the Incus event stream, which must not be the client used for requests, watched in the background until the context of WithContext is done.
+func WithEventSource(source EventSource) Option {
+	return func(s *redfishServer) {
+		s.events = source
+	}
+}
+
+// WithContext sets the context stopping the event stream watcher, which otherwise runs for the lifetime of the process.
+func WithContext(ctx context.Context) Option {
+	return func(s *redfishServer) {
+		if ctx != nil {
+			s.ctx = ctx
+		}
+	}
+}
+
 var _ ServerInterface = (*redfishServer)(nil)
 
 func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *redfishServer {
@@ -66,10 +88,16 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		instanceName: instanceName,
 		client:       client,
 		httpClient:   http.DefaultClient,
+		ctx:          context.Background(),
+		resets:       &resetTracker{instanceName: instanceName},
 	}
 
 	for _, opt := range opts {
 		opt(s)
+	}
+
+	if s.events != nil {
+		go s.resets.watch(s.ctx, s.events)
 	}
 
 	return s
@@ -740,6 +768,12 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		_ = powerState.FromResourcePowerState(Off)
 	}
 
+	lastResetTime, err := s.lastResetTime(instance)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	server, _, err := s.client.GetServer()
 	if err != nil {
 		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
@@ -790,13 +824,15 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		},
 		// The Incus version is what determines the firmware the instance boots
 		// with, so it stands in for the BIOS version.
-		BiosVersion: ref(server.Environment.ServerVersion),
+		BiosVersion:  ref(server.Environment.ServerVersion),
+		BootProgress: bootProgress(lastResetTime),
 		Processors: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Processors", s.instanceName)),
 		},
 
-		ID:           s.instanceName,
-		Manufacturer: ref("linuxcontainers.org"),
+		ID:            s.instanceName,
+		LastResetTime: lastResetTime,
+		Manufacturer:  ref("linuxcontainers.org"),
 		// TODO: add memory summary
 		// MemorySummary: &ComputerSystemV1290MemorySummary{},
 		Model:      ref("Incus"),
@@ -820,6 +856,51 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
 		// },
 	}})
+}
+
+// lastResetTime returns when the instance last booted, nil if it is not running or the time is unknown.
+func (s redfishServer) lastResetTime(instance *incusapi.Instance) (*time.Time, error) {
+	if instance.Status != "Running" {
+		return nil, nil
+	}
+
+	state, _, err := s.client.GetInstanceState(s.instanceName)
+	if err != nil {
+		return nil, err
+	}
+
+	// A guest reset handled in place by QEMU leaves StartedAt unchanged, so it only shows up as an event.
+	resetTime := state.StartedAt
+
+	restartedAt := s.resets.last()
+	if restartedAt.After(resetTime) {
+		resetTime = restartedAt
+	}
+
+	if resetTime.IsZero() {
+		return nil, nil
+	}
+
+	return ref(resetTime.UTC()), nil
+}
+
+// bootProgress reports the boot started at the given time as handed over to the operating system.
+func bootProgress(since *time.Time) *ComputerSystemV1290ComputerSystem_BootProgress {
+	if since == nil {
+		return nil
+	}
+
+	// The firmware phase of a VM is negligible and the guest does not report back.
+	lastState := ComputerSystemV1290BootProgress_LastState{}
+	_ = lastState.FromComputerSystemV1290BootProgressTypes(ComputerSystemV1290BootProgressTypesOSBootStarted)
+
+	progress := ComputerSystemV1290ComputerSystem_BootProgress{}
+	_ = progress.FromComputerSystemV1290BootProgress(ComputerSystemV1290BootProgress{
+		LastState:     &lastState,
+		LastStateTime: since,
+	})
+
+	return &progress
 }
 
 type computerSystemGetResponse struct {
