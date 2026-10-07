@@ -6,8 +6,8 @@ import "net/http"
 // generated from the DMTF Redfish OpenAPI schema, plus routes for resources
 // the schema does not enumerate because their URI is service-defined rather
 // than fixed.
-func NewHandler(instanceName string, client IncusClient) http.Handler {
-	server := NewRedfishServer(instanceName, client)
+func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Handler {
+	server := NewRedfishServer(instanceName, client, opts...)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/InsertMediaActionInfo", func(w http.ResponseWriter, r *http.Request) {

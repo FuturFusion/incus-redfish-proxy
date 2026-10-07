@@ -44,15 +44,35 @@ type IncusOperation = incusclient.Operation
 type redfishServer struct {
 	instanceName string
 	client       IncusClient
+	httpClient   *http.Client
+}
+
+// Option customizes the Redfish server.
+type Option func(*redfishServer)
+
+// WithHTTPClient sets the HTTP client used to download virtual media images.
+func WithHTTPClient(client *http.Client) Option {
+	return func(s *redfishServer) {
+		if client != nil {
+			s.httpClient = client
+		}
+	}
 }
 
 var _ ServerInterface = (*redfishServer)(nil)
 
-func NewRedfishServer(instanceName string, client IncusClient) *redfishServer {
-	return &redfishServer{
+func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *redfishServer {
+	s := &redfishServer{
 		instanceName: instanceName,
 		client:       client,
+		httpClient:   http.DefaultClient,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func validateManagerID(w http.ResponseWriter, managerID string) bool {
@@ -385,7 +405,7 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 		return statusErrorf(http.StatusConflict, "virtual media is already inserted")
 	}
 
-	resp, err := http.Get(image)
+	resp, err := s.httpClient.Get(image)
 	if err != nil {
 		return statusErrorf(http.StatusBadRequest, "%s", err.Error())
 	}
@@ -393,6 +413,10 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 	defer func() {
 		_ = resp.Body.Close()
 	}()
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		return statusErrorf(http.StatusBadRequest, "fetch image %q: unexpected status %s", image, resp.Status)
+	}
 
 	op, err := s.client.CreateStoragePoolVolumeFromISO("default", incusclient.StorageVolumeBackupArgs{
 		Name:       fmt.Sprintf("%s-boot-media.iso", s.instanceName),

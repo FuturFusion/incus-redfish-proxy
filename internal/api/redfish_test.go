@@ -2851,6 +2851,9 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 
 		clientGetInstance *incusapi.Instance
 
+		imageStatus int
+		imageTLS    bool
+
 		// Placeholder {{IMAGE_URL}} is substituted before sending.
 		body string
 
@@ -2872,6 +2875,40 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 
 				require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), 1)
 				require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			},
+		},
+		{
+			name: "success - https with custom client",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			imageTLS:   true,
+			body:       `{"Image":"{{IMAGE_URL}}","TransferProtocolType":"HTTPS"}`,
+			wantStatus: http.StatusNoContent,
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), 1)
+				require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			},
+		},
+		{
+			name: "image not found - rejected",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{},
+				},
+			},
+			imageStatus: http.StatusNotFound,
+			body:        `{"Image":"{{IMAGE_URL}}"}`,
+			wantErr:     "unexpected status 404",
+			assert: func(t *testing.T, incusClient *mock.IncusClientMock) {
+				t.Helper()
+
+				require.Empty(t, incusClient.CreateStoragePoolVolumeFromISOCalls())
+				require.Empty(t, incusClient.UpdateInstanceCalls())
 			},
 		},
 		{
@@ -2906,9 +2943,19 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			imageServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			imageServer := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if tc.imageStatus != 0 {
+					w.WriteHeader(tc.imageStatus)
+				}
+
 				_, _ = w.Write([]byte("fake-iso-data"))
 			}))
+			if tc.imageTLS {
+				imageServer.StartTLS()
+			} else {
+				imageServer.Start()
+			}
+
 			t.Cleanup(imageServer.Close)
 
 			incusClient := &mock.IncusClientMock{
@@ -2923,7 +2970,7 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 				},
 			}
 
-			client := setup(t, incusClient)
+			client := setup(t, incusClient, api.WithHTTPClient(imageServer.Client()))
 
 			body := strings.ReplaceAll(tc.body, "{{IMAGE_URL}}", imageServer.URL)
 
@@ -2953,7 +3000,7 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 	}
 }
 
-func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
+func setup(t *testing.T, client api.IncusClient, opts ...api.Option) *gofish.APIClient {
 	t.Helper()
 
 	// Fetching the computer system reads the Incus server version for the BIOS
@@ -2973,7 +3020,7 @@ func setup(t *testing.T, client api.IncusClient) *gofish.APIClient {
 		}
 	}
 
-	h := api.NewHandler("test-instance", client)
+	h := api.NewHandler("test-instance", client, opts...)
 
 	httpserver := httptest.NewServer(h)
 	t.Cleanup(func() {
