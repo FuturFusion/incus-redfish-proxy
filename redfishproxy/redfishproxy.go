@@ -3,6 +3,7 @@
 package redfishproxy
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -27,6 +28,9 @@ type Config struct {
 
 	// HTTPClient downloads virtual media images, defaults to http.DefaultClient.
 	HTTPClient *http.Client
+
+	// Context stops the Incus event watcher goroutine once done, short lived callers (e.g. tests) should set it.
+	Context context.Context
 }
 
 // NewHandler builds a ready to use http.Handler serving the Redfish API for
@@ -59,5 +63,8 @@ func NewHandler(cfg Config) (http.Handler, error) {
 
 	client = client.UseProject(project)
 
-	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient)), nil
+	// The event source needs its own client, as the Incus client shares one event connection, including its type filter, per client.
+	events := client.UseProject(project)
+
+	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events)), nil
 }
