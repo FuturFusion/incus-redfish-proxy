@@ -24,6 +24,9 @@ type Config struct {
 	// Project is the Incus project the instance belongs to. If empty,
 	// "default" is used.
 	Project string
+
+	// HTTPClient downloads virtual media images, defaults to http.DefaultClient.
+	HTTPClient *http.Client
 }
 
 // NewHandler builds a ready to use http.Handler serving the Redfish API for
@@ -56,5 +59,5 @@ func NewHandler(cfg Config) (http.Handler, error) {
 
 	client = client.UseProject(project)
 
-	return api.NewHandler(cfg.InstanceName, client), nil
+	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient)), nil
 }
