@@ -14,5 +14,9 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Ha
 		server.GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDInsertMediaActionInfo(w, r, r.PathValue("ManagerId"), r.PathValue("VirtualMediaId"))
 	})
 
+	mux.HandleFunc("GET /redfish/v1/TaskMonitors/{TaskId}", func(w http.ResponseWriter, r *http.Request) {
+		server.GetRedfishV1TaskMonitorsTaskID(w, r, r.PathValue("TaskId"))
+	})
+
 	return HandlerFromMux(server, mux)
 }

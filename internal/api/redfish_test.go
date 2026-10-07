@@ -1964,6 +1964,10 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 	}{
 		{
 			method: http.MethodGet,
+			url:    "/redfish/v1/TaskMonitors/invalid",
+		},
+		{
+			method: http.MethodGet,
 			url:    "/redfish/v1/Systems/invalid",
 		},
 		{
@@ -2294,8 +2298,24 @@ func TestRedfishServer_PatchBiosAttributes(t *testing.T) {
 	body := `{"Attributes":{"incus.config.foo":"bar","incus.devices.vtpm":"{\"type\":\"tpm\"}"}}`
 	resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/Bios/Settings", strings.NewReader(body), "", nil)
 	require.NoError(t, err)
-	require.Equal(t, http.StatusNoContent, resp.StatusCode)
+	require.Equal(t, http.StatusAccepted, resp.StatusCode)
 	resp.Body.Close()
+
+	// The task monitor reports the change as completed, however often it is polled.
+	taskMonitor := resp.Header.Get("Location")
+	require.NotEmpty(t, taskMonitor)
+
+	for range 2 {
+		resp, err = client.Get(taskMonitor)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+
+		bios := schemas.Bios{}
+		err = json.NewDecoder(resp.Body).Decode(&bios)
+		resp.Body.Close()
+		require.NoError(t, err)
+		require.Equal(t, "/redfish/v1/Systems/test-instance/Bios", bios.ODataID)
+	}
 
 	updateCalls := incusClient.UpdateInstanceCalls()
 	require.Len(t, updateCalls, 1)

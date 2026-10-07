@@ -51,6 +51,7 @@ type redfishServer struct {
 	ctx          context.Context
 	events       EventSource
 	resets       *resetTracker
+	tasks        *taskRegistry
 }
 
 // Option customizes the Redfish server.
@@ -90,6 +91,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		httpClient:   http.DefaultClient,
 		ctx:          context.Background(),
 		resets:       &resetTracker{instanceName: instanceName},
+		tasks:        &taskRegistry{},
 	}
 
 	for _, opt := range opts {
@@ -1221,7 +1223,19 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		return
 	}
 
-	responseNoContent(w)
+	// The change is already applied, the task monitor only serves clients expecting an asynchronous answer.
+	responseAccepted(w, fmt.Sprintf("/redfish/v1/TaskMonitors/%s", s.tasks.add()))
+}
+
+// GetRedfishV1TaskMonitorsTaskID serves the task monitor of a BIOS change, which is not part of the generated routes.
+func (s redfishServer) GetRedfishV1TaskMonitorsTaskID(w http.ResponseWriter, r *http.Request, taskID string) {
+	if !s.tasks.has(taskID) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	// A completed task monitor answers with the resulting Bios resource.
+	s.GetRedfishV1SystemsComputerSystemIDBios(w, r, s.instanceName)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
