@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -408,10 +409,9 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 	}
 
 	instance.Devices["boot-media"] = map[string]string{
-		"boot.priority": "10",
-		"pool":          "default",
-		"source":        fmt.Sprintf("%s-boot-media.iso", s.instanceName),
-		"type":          "disk",
+		"pool":   "default",
+		"source": fmt.Sprintf("%s-boot-media.iso", s.instanceName),
+		"type":   "disk",
 	}
 
 	op, err = s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
@@ -427,6 +427,42 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 	}
 
 	return nil
+}
+
+func bootMediaOverride(instance *incusapi.Instance) bool {
+	return instance.Devices["boot-media"]["boot.priority"] != ""
+}
+
+func (s redfishServer) setBootMediaOverride(enabled bool) error {
+	instance, etag, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	if bootMediaOverride(instance) == enabled {
+		return nil
+	}
+
+	device, inserted := instance.Devices["boot-media"]
+	if !inserted {
+		return statusErrorf(http.StatusConflict, "no virtual media is inserted")
+	}
+
+	device = cloneStringMap(device)
+	if enabled {
+		device["boot.priority"] = "10"
+	} else {
+		delete(device, "boot.priority")
+	}
+
+	instance.Devices["boot-media"] = device
+
+	op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
+	if err != nil {
+		return err
+	}
+
+	return op.Wait()
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -692,7 +728,19 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		}
 	}
 
-	response(w, ComputerSystemV1290ComputerSystem{
+	boot := systemBoot{
+		BootSourceOverrideEnabled:                ComputerSystemV1290BootSourceOverrideEnabledDisabled,
+		BootSourceOverrideEnabledAllowableValues: bootSourceOverrideEnabledValues,
+		BootSourceOverrideTarget:                 ComputerSystemBootSourceNone,
+		BootSourceOverrideTargetAllowableValues:  bootSourceOverrideTargetValues,
+	}
+
+	if bootMediaOverride(instance) {
+		boot.BootSourceOverrideEnabled = ComputerSystemV1290BootSourceOverrideEnabledContinuous
+		boot.BootSourceOverrideTarget = ComputerSystemBootSourceCd
+	}
+
+	response(w, computerSystemGetResponse{Boot: boot, ComputerSystemV1290ComputerSystem: ComputerSystemV1290ComputerSystem{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName)),
 		OdataType: ref("#ComputerSystem.v1_29_0.ComputerSystem"),
 		Actions: &ComputerSystemV1290Actions{
@@ -733,7 +781,37 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		// VirtualMedia: &OdataV4IdRef{
 		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
 		// },
-	})
+	}})
+}
+
+type computerSystemGetResponse struct {
+	ComputerSystemV1290ComputerSystem
+	Boot systemBoot `json:"Boot"`
+}
+
+type systemBoot struct {
+	BootSourceOverrideEnabled                ComputerSystemV1290BootSourceOverrideEnabled   `json:"BootSourceOverrideEnabled"`
+	BootSourceOverrideEnabledAllowableValues []ComputerSystemV1290BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled@Redfish.AllowableValues"`
+	BootSourceOverrideTarget                 ComputerSystemBootSource                       `json:"BootSourceOverrideTarget"`
+	BootSourceOverrideTargetAllowableValues  []ComputerSystemBootSource                     `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
+}
+
+// A one time override is not offered, Incus can not drop it while the instance is running.
+var bootSourceOverrideEnabledValues = []ComputerSystemV1290BootSourceOverrideEnabled{
+	ComputerSystemV1290BootSourceOverrideEnabledDisabled,
+	ComputerSystemV1290BootSourceOverrideEnabledContinuous,
+}
+
+var bootSourceOverrideTargetValues = []ComputerSystemBootSource{
+	ComputerSystemBootSourceNone,
+	ComputerSystemBootSourceCd,
+}
+
+type computerSystemPatchRequest struct {
+	Boot *struct {
+		BootSourceOverrideEnabled *ComputerSystemV1290BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled"`
+		BootSourceOverrideTarget  *ComputerSystemBootSource                     `json:"BootSourceOverrideTarget"`
+	} `json:"Boot"`
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -741,7 +819,63 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 		return
 	}
 
-	responseNotImplemented(w)
+	request := computerSystemPatchRequest{}
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.Boot == nil || (request.Boot.BootSourceOverrideEnabled == nil && request.Boot.BootSourceOverrideTarget == nil) {
+		responseNoContent(w)
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	enabled := ComputerSystemV1290BootSourceOverrideEnabledDisabled
+	target := ComputerSystemBootSourceNone
+	if bootMediaOverride(instance) {
+		enabled = ComputerSystemV1290BootSourceOverrideEnabledContinuous
+		target = ComputerSystemBootSourceCd
+	}
+
+	if request.Boot.BootSourceOverrideEnabled != nil {
+		enabled = *request.Boot.BootSourceOverrideEnabled
+	}
+
+	if request.Boot.BootSourceOverrideTarget != nil {
+		target = *request.Boot.BootSourceOverrideTarget
+	}
+
+	if !slices.Contains(bootSourceOverrideEnabledValues, enabled) {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideEnabled value %q is not supported", enabled))
+		return
+	}
+
+	if !slices.Contains(bootSourceOverrideTargetValues, target) {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideTarget value %q is not supported", target))
+		return
+	}
+
+	// A disabled override ignores the target, an enabled one needs it.
+	override := enabled == ComputerSystemV1290BootSourceOverrideEnabledContinuous
+	if override && target != ComputerSystemBootSourceCd {
+		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideEnabled %q requires BootSourceOverrideTarget %q", enabled, ComputerSystemBootSourceCd))
+		return
+	}
+
+	err = s.setBootMediaOverride(override)
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseNoContent(w)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {

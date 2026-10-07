@@ -60,6 +60,34 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				c := cs[0]
 
 				require.Equal(t, schemas.OnPowerState, c.PowerState)
+				require.Equal(t, schemas.NoneBootSource, c.Boot.BootSourceOverrideTarget)
+				require.Equal(t, schemas.DisabledBootSourceOverrideEnabled, c.Boot.BootSourceOverrideEnabled)
+				require.Equal(t, []schemas.BootSource{schemas.NoneBootSource, schemas.CdBootSource}, c.Boot.AllowableBootSourceOverrideTargetValues)
+				require.Contains(t, string(c.RawData), `"BootSourceOverrideEnabled@Redfish.AllowableValues": [
+      "Disabled",
+      "Continuous"
+    ]`)
+			},
+		},
+		{
+			name: "success - boot from virtual media",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"boot-media": map[string]string{"boot.priority": "10"},
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, cs []*schemas.ComputerSystem) {
+				t.Helper()
+
+				require.Len(t, cs, 1)
+				c := cs[0]
+
+				require.Equal(t, schemas.CdBootSource, c.Boot.BootSourceOverrideTarget)
+				require.Equal(t, schemas.ContinuousBootSourceOverrideEnabled, c.Boot.BootSourceOverrideEnabled)
 			},
 		},
 		{
@@ -731,6 +759,126 @@ func TestRedfishServer_GetAndPatchBiosSettings(t *testing.T) {
 			// Assert
 			tc.assertErr(t, err)
 			require.Empty(t, tc.clientGetInstance)
+		})
+	}
+}
+
+func TestRedfishServer_PatchBoot(t *testing.T) {
+	inserted := map[string]string{"type": "disk"}
+	booting := map[string]string{"type": "disk", "boot.priority": "10"}
+
+	tests := []struct {
+		name   string
+		device map[string]string
+		boot   schemas.Boot
+
+		wantErr    bool
+		wantDevice map[string]string
+	}{
+		{
+			name:       "enable",
+			device:     inserted,
+			boot:       schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantDevice: booting,
+		},
+		{
+			name:       "disable",
+			device:     booting,
+			boot:       schemas.Boot{BootSourceOverrideTarget: schemas.NoneBootSource, BootSourceOverrideEnabled: schemas.DisabledBootSourceOverrideEnabled},
+			wantDevice: inserted,
+		},
+		{
+			name:       "disable - enabled only",
+			device:     booting,
+			boot:       schemas.Boot{BootSourceOverrideEnabled: schemas.DisabledBootSourceOverrideEnabled},
+			wantDevice: inserted,
+		},
+		{
+			name:   "no op - already enabled",
+			device: booting,
+			boot:   schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+		},
+		{
+			name: "no op - disable without virtual media",
+			boot: schemas.Boot{BootSourceOverrideTarget: schemas.NoneBootSource, BootSourceOverrideEnabled: schemas.DisabledBootSourceOverrideEnabled},
+		},
+		{
+			name:   "no op - target only",
+			device: inserted,
+			boot:   schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource},
+		},
+		{
+			name: "no op - empty",
+		},
+		{
+			name:    "error - enabled only",
+			device:  inserted,
+			boot:    schemas.Boot{BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+		{
+			name:    "error - enable without virtual media",
+			boot:    schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+		{
+			name:    "error - once is not supported",
+			device:  inserted,
+			boot:    schemas.Boot{BootSourceOverrideTarget: schemas.CdBootSource, BootSourceOverrideEnabled: schemas.OnceBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+		{
+			name:    "error - target is not supported",
+			device:  inserted,
+			boot:    schemas.Boot{BootSourceOverrideTarget: schemas.PxeBootSource, BootSourceOverrideEnabled: schemas.ContinuousBootSourceOverrideEnabled},
+			wantErr: true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					instance := &incusapi.Instance{InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}
+					if tc.device != nil {
+						instance.Devices["boot-media"] = tc.device
+					}
+
+					return instance, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{
+						WaitFunc: func() error {
+							return nil
+						},
+					}, nil
+				},
+			}
+
+			client := setup(t, incusClient)
+
+			systems, err := client.Service.Systems()
+			require.NoError(t, err)
+			require.Len(t, systems, 1)
+
+			err = systems[0].SetBoot(&tc.boot)
+			if tc.wantErr {
+				require.Error(t, err)
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+
+				return
+			}
+
+			require.NoError(t, err)
+
+			if tc.wantDevice == nil {
+				require.Empty(t, incusClient.UpdateInstanceCalls())
+
+				return
+			}
+
+			require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+			require.Equal(t, tc.wantDevice, incusClient.UpdateInstanceCalls()[0].Instance.Devices["boot-media"])
 		})
 	}
 }
@@ -1920,6 +2068,10 @@ func TestRedfishServer_InvalidRequest_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodPatch,
+			url:    "/redfish/v1/Systems/test-instance",
+		},
+		{
+			method: http.MethodPatch,
 			url:    "/redfish/v1/Systems/test-instance/Bios/Settings",
 		},
 		{
@@ -2356,10 +2508,9 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 				updateCalls := incusClient.UpdateInstanceCalls()
 				require.Len(t, updateCalls, 1)
 				require.Equal(t, map[string]string{
-					"boot.priority": "10",
-					"pool":          "default",
-					"source":        "test-instance-boot-media.iso",
-					"type":          "disk",
+					"pool":   "default",
+					"source": "test-instance-boot-media.iso",
+					"type":   "disk",
 				}, updateCalls[0].Instance.Devices["boot-media"])
 			},
 		},
