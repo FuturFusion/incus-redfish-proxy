@@ -1875,25 +1875,23 @@ func (s redfishServer) addSignature(db secureBootDatabase, list signatureList, c
 		return "", err
 	}
 
-	added := collectSignatures(lists, certificate)
-
-	return added[len(added)-1].id, nil
+	return signatureID(list.Type, list.Entries[0].Data), nil
 }
 
-// deleteSignature removes an entry from a signature database. Removing the last entry of
-// the platform key returns the firmware to setup mode, which is the expected UEFI behaviour.
+// deleteSignature removes the entries with the given ID from a signature database. Removing
+// the last entry of the platform key returns the firmware to setup mode, which is the expected UEFI behaviour.
 func (s redfishServer) deleteSignature(db secureBootDatabase, id string, certificate bool) error {
 	lists, variable, etag, err := s.getSignatureDatabaseForUpdate(db)
 	if err != nil {
 		return err
 	}
 
-	entry, ok := lookupSignature(collectSignatures(lists, certificate), id)
+	_, ok := lookupSignature(collectSignatures(lists, certificate), id)
 	if !ok {
 		return statusErrorf(http.StatusNotFound, "%s", http.StatusText(http.StatusNotFound))
 	}
 
-	return s.putSignatureDatabase(db, removeSignature(lists, entry), variable, etag)
+	return s.putSignatureDatabase(db, removeSignature(lists, id, certificate), variable, etag)
 }
 
 // getSignatureDatabaseForUpdate fetches a signature database for modification. Incus only

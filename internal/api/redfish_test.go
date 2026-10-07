@@ -17,7 +17,6 @@ import (
 	"math/big"
 	"net/http"
 	"net/http/httptest"
-	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -1222,6 +1221,12 @@ func nvramSignatureDatabase(t *testing.T, entryType string, datas ...[]byte) *in
 	}
 }
 
+func hexSHA256(data ...[]byte) string {
+	sum := sha256.Sum256(bytes.Join(data, nil))
+
+	return hex.EncodeToString(sum[:])
+}
+
 // testCertificate returns a throwaway self signed certificate.
 func testCertificate(t *testing.T, commonName string) ([]byte, string) {
 	t.Helper()
@@ -1502,17 +1507,22 @@ func TestRedfishServer_SecureBootCertificates(t *testing.T) {
 	require.Len(t, certificates, 2)
 
 	// The Redfish client does not preserve the order of the collection members.
-	sort.Slice(certificates, func(i, j int) bool { return certificates[i].ID < certificates[j].ID })
+	byID := map[string]*schemas.Certificate{}
+	for _, certificate := range certificates {
+		byID[certificate.ID] = certificate
+	}
 
-	cert := certificates[0]
-	require.Equal(t, "1", cert.ID)
+	// The ID of a certificate is its fingerprint.
+	cert := byID[hexSHA256(firstDER)]
+	require.NotNil(t, cert)
 	require.Equal(t, schemas.PEMCertificateType, cert.CertificateType)
 	require.Equal(t, "first", cert.Subject.CommonName)
 	require.Equal(t, "Incus", cert.Subject.Organization)
 	require.Equal(t, "77fa9abd-0359-4d32-bd60-28f4e78f784b", cert.UefiSignatureOwner)
 	require.Contains(t, cert.CertificateString, "-----BEGIN CERTIFICATE-----")
 
-	require.Equal(t, "second", certificates[1].Subject.CommonName)
+	require.NotNil(t, byID[hexSHA256(secondDER)])
+	require.Equal(t, "second", byID[hexSHA256(secondDER)].Subject.CommonName)
 }
 
 func TestRedfishServer_SecureBootCertificates_Errors(t *testing.T) {
@@ -1573,7 +1583,7 @@ func TestRedfishServer_SecureBootCertificates_Errors(t *testing.T) {
 
 func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 	existingDER, existingPEM := testCertificate(t, "existing")
-	_, addedPEM := testCertificate(t, "added")
+	addedDER, addedPEM := testCertificate(t, "added")
 
 	tests := []struct {
 		name           string
@@ -1662,6 +1672,7 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 			}
 
 			require.NoError(t, err)
+			require.Equal(t, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates/"+hexSHA256(addedDER), resp.Header.Get("Location"))
 			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), 1)
 
 			call := incusClient.UpdateInstanceNVRAMGUIDVarCalls()[0]
@@ -1698,32 +1709,47 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 	firstDER, _ := testCertificate(t, "first")
 	secondDER, _ := testCertificate(t, "second")
+	hash := sha256.Sum256([]byte("forbidden binary"))
 
 	tests := []struct {
 		name          string
 		certificates  [][]byte
+		hashes        [][]byte
 		certificateID string
 
-		wantErrMsg string
-		wantDelete bool
-		wantUpdate int
+		wantErrMsg    string
+		wantDelete    bool
+		wantRemaining [][]byte
 	}{
 		{
-			name:          "remove one of two certificates",
+			name:          "remove first of two certificates",
 			certificates:  [][]byte{firstDER, secondDER},
-			certificateID: "1",
-			wantUpdate:    1,
+			certificateID: hexSHA256(firstDER),
+			wantRemaining: [][]byte{secondDER},
+		},
+		{
+			name:          "remove second of two certificates",
+			certificates:  [][]byte{firstDER, secondDER},
+			certificateID: hexSHA256(secondDER),
+			wantRemaining: [][]byte{firstDER},
 		},
 		{
 			name:          "removing the last certificate deletes the variable",
 			certificates:  [][]byte{firstDER},
-			certificateID: "1",
+			certificateID: hexSHA256(firstDER),
 			wantDelete:    true,
+		},
+		{
+			name:          "removing the last certificate keeps the signatures",
+			certificates:  [][]byte{firstDER},
+			hashes:        [][]byte{hash[:]},
+			certificateID: hexSHA256(firstDER),
+			wantRemaining: [][]byte{hash[:]},
 		},
 		{
 			name:          "error - unknown certificate",
 			certificates:  [][]byte{firstDER},
-			certificateID: "2",
+			certificateID: hexSHA256(secondDER),
 			wantErrMsg:    "404",
 		},
 	}
@@ -1738,7 +1764,11 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 					return true
 				},
 				GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
-					return nvramSignatureDatabase(t, "x509", tc.certificates...), "etag", nil
+					variable := nvramSignatureDatabase(t, "x509", tc.certificates...)
+					hashes := nvramSignatureDatabase(t, "sha256", tc.hashes...)
+					variable.Data = append(variable.Data.([]any), hashes.Data.([]any)...)
+
+					return variable, "etag", nil
 				},
 				UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
 					return nil
@@ -1764,8 +1794,36 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), tc.wantUpdate)
 			require.Equal(t, tc.wantDelete, len(incusClient.DeleteInstanceNVRAMGUIDVarCalls()) == 1)
+
+			if tc.wantDelete {
+				require.Empty(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls())
+
+				return
+			}
+
+			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), 1)
+
+			raw, err := json.Marshal(incusClient.UpdateInstanceNVRAMGUIDVarCalls()[0].Data.Data)
+			require.NoError(t, err)
+
+			lists := []struct {
+				Entries []struct {
+					Data []byte `json:"data"`
+				} `json:"entries"`
+			}{}
+
+			err = json.Unmarshal(raw, &lists)
+			require.NoError(t, err)
+
+			remaining := [][]byte{}
+			for _, list := range lists {
+				for _, entry := range list.Entries {
+					remaining = append(remaining, entry.Data)
+				}
+			}
+
+			require.Equal(t, tc.wantRemaining, remaining)
 		})
 	}
 }
@@ -1774,6 +1832,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	hash := sha256.Sum256([]byte("forbidden binary"))
 
 	variable := nvramSignatureDatabase(t, "sha256", hash[:])
+	signatureURL := "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/" + hexSHA256([]byte("sha256\x00"), hash[:])
 
 	incusClient := &mock.IncusClientMock{
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
@@ -1793,7 +1852,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	client := setup(t, incusClient)
 
 	// The hash is reported as a signature and not as a certificate.
-	resp, err := client.RunRawRequestWithHeaders(http.MethodGet, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/1", nil, "", nil)
+	resp, err := client.RunRawRequestWithHeaders(http.MethodGet, signatureURL, nil, "", nil)
 	require.NoError(t, err)
 
 	signature := struct {
@@ -1807,7 +1866,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	resp.Body.Close()
 	require.NoError(t, err)
 
-	require.Equal(t, "1", signature.ID)
+	require.Equal(t, hexSHA256([]byte("sha256\x00"), hash[:]), signature.ID)
 	require.Equal(t, strings.ToUpper(hex.EncodeToString(hash[:])), signature.SignatureString)
 	require.Equal(t, "EFI_CERT_SHA256_GUID", signature.SignatureType)
 	require.Equal(t, "UEFI", signature.SignatureTypeRegistry)
@@ -1826,7 +1885,7 @@ func TestRedfishServer_SecureBootSignatures(t *testing.T) {
 	require.Equal(t, 0, collection.Count)
 
 	// Deleting the only signature removes the whole variable.
-	resp, err = client.RunRawRequestWithHeaders(http.MethodDelete, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/dbx/Signatures/1", nil, "", nil)
+	resp, err = client.RunRawRequestWithHeaders(http.MethodDelete, signatureURL, nil, "", nil)
 	if resp != nil {
 		resp.Body.Close()
 	}
