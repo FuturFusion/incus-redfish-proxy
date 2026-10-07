@@ -2420,7 +2420,7 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 
 				require.NotNil(t, vm.Inserted)
 				require.False(t, *vm.Inserted)
-				require.Equal(t, "test-instance-boot-media.iso", vm.Image)
+				require.Empty(t, vm.Image)
 				require.Equal(t, schemas.URIConnectedVia, vm.ConnectedVia)
 				require.NotNil(t, vm.WriteProtected)
 				require.True(t, *vm.WriteProtected)
@@ -2436,6 +2436,8 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 							"pool":          "default",
 							"source":        "test-instance-boot-media.iso",
 							"type":          "disk",
+
+							"user.redfish.image": "https://example.com/boot.iso",
 						},
 					},
 				},
@@ -2450,6 +2452,7 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 
 				require.NotNil(t, vm.Inserted)
 				require.True(t, *vm.Inserted)
+				require.Equal(t, "https://example.com/boot.iso", vm.Image)
 			},
 		},
 		{
@@ -2652,11 +2655,12 @@ func TestRedfishServer_PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 
 				updateCalls := incusClient.UpdateInstanceCalls()
 				require.Len(t, updateCalls, 1)
-				require.Equal(t, map[string]string{
-					"pool":   "default",
-					"source": "test-instance-boot-media.iso",
-					"type":   "disk",
-				}, updateCalls[0].Instance.Devices["boot-media"])
+
+				device := updateCalls[0].Instance.Devices["boot-media"]
+				require.Equal(t, "default", device["pool"])
+				require.Equal(t, "test-instance-boot-media.iso", device["source"])
+				require.Equal(t, "disk", device["type"])
+				require.Contains(t, device["user.redfish.image"], "http://127.0.0.1:")
 			},
 		},
 		{
@@ -3016,7 +3020,10 @@ func TestRedfishServer_PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 				t.Helper()
 
 				require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), 1)
-				require.Len(t, incusClient.UpdateInstanceCalls(), 1)
+
+				updateCalls := incusClient.UpdateInstanceCalls()
+				require.Len(t, updateCalls, 1)
+				require.Contains(t, updateCalls[0].Instance.Devices["boot-media"]["user.redfish.image"], "http://127.0.0.1:")
 			},
 		},
 		{

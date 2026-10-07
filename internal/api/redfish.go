@@ -238,6 +238,11 @@ func (s redfishServer) PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 
 const virtualMediaName = "CD"
 
+const (
+	bootMediaDeviceName = "boot-media"
+	bootMediaImageKey   = "user.redfish.image"
+)
+
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request, managerID string) {
 	if !validateManagerID(w, managerID) {
 		return
@@ -267,7 +272,14 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 		return
 	}
 
-	_, inserted := instance.Devices["boot-media"]
+	device, inserted := instance.Devices[bootMediaDeviceName]
+
+	var image *string
+
+	imageURL := device[bootMediaImageKey]
+	if inserted && imageURL != "" {
+		image = ref(imageURL)
+	}
 
 	connectedViaURI := VirtualMediaV170VirtualMedia_ConnectedVia{}
 	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(URI)
@@ -283,7 +295,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 				CD,
 				DVD,
 			},
-			Image:             ref(fmt.Sprintf("%s-boot-media.iso", s.instanceName)),
+			Image:             image,
 			ConnectedVia:      ref(connectedViaURI),
 			Inserted:          ref(inserted),
 			WriteProtected:    ref(true),
@@ -462,10 +474,11 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 		return combineRollbackError(err, rollbackErr)
 	}
 
-	instance.Devices["boot-media"] = map[string]string{
-		"pool":   "default",
-		"source": fmt.Sprintf("%s-boot-media.iso", s.instanceName),
-		"type":   "disk",
+	instance.Devices[bootMediaDeviceName] = map[string]string{
+		"pool":            "default",
+		"source":          fmt.Sprintf("%s-boot-media.iso", s.instanceName),
+		"type":            "disk",
+		bootMediaImageKey: image,
 	}
 
 	op, err = s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
