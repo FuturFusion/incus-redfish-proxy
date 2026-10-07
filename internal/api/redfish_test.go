@@ -2387,10 +2387,12 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMedia(t *testing.T) {
 	managers, err := client.Service.Managers()
 	require.NoError(t, err)
 	require.Len(t, managers, 1)
+	require.Equal(t, "bmc1", managers[0].ID)
 
 	vms, err := managers[0].VirtualMedia()
 	require.NoError(t, err)
 	require.Len(t, vms, 1)
+	require.Equal(t, "CD", vms[0].ID)
 	require.Equal(t, "CD", vms[0].Name)
 }
 

@@ -216,6 +216,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 		VirtualMedia: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
 		},
+		ID:   managerName,
 		Name: managerName,
 	})
 }
@@ -290,6 +291,7 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 		VirtualMediaV170VirtualMedia: VirtualMediaV170VirtualMedia{
 			OdataID:   ref(base),
 			OdataType: ref("#VirtualMedia.v1_7_0.VirtualMedia"),
+			ID:        virtualMediaName,
 			Name:      ResourceName(virtualMediaName),
 			MediaTypes: &[]VirtualMediaV170MediaType{
 				CD,
