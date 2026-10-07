@@ -600,6 +600,19 @@ func instanceCPUCount(instance *incusapi.Instance) int64 {
 	return cpuNo
 }
 
+// instanceUUID returns the SMBIOS UUID of the instance, or nil if it has none yet.
+func instanceUUID(instance *incusapi.Instance) *ComputerSystemV1290ComputerSystem_UUID {
+	cfgUUID := instanceConfig(instance)["volatile.uuid"]
+	if cfgUUID == "" {
+		return nil
+	}
+
+	systemUUID := ComputerSystemV1290ComputerSystem_UUID{}
+	_ = systemUUID.FromResourceUUID(cfgUUID)
+
+	return &systemUUID
+}
+
 // instanceHasTPM reports whether the instance has a TPM device attached.
 func instanceHasTPM(instance *incusapi.Instance) bool {
 	for _, deviceConfig := range instanceDevices(instance) {
@@ -777,6 +790,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		},
 		SerialNumber:   ref(s.instanceName),
 		TrustedModules: trustedModules,
+		UUID:           instanceUUID(instance),
 		// TODO: add virtual media for system
 		// VirtualMedia: &OdataV4IdRef{
 		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),

@@ -115,7 +115,8 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				Status: "Stopped",
 				InstancePut: incusapi.InstancePut{
 					Config: map[string]string{
-						"limits.cpu": "4",
+						"limits.cpu":    "4",
+						"volatile.uuid": "8f2c1f0e-5d3a-4b7c-9e61-2a4d6c8b0f13",
 					},
 				},
 			},
@@ -130,6 +131,7 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 				require.Equal(t, uint(4), *c.ProcessorSummary.Count)
 				require.Equal(t, uint(4), *c.ProcessorSummary.CoreCount)
 				require.Equal(t, uint(4), *c.ProcessorSummary.LogicalProcessorCount)
+				require.Equal(t, "8f2c1f0e-5d3a-4b7c-9e61-2a4d6c8b0f13", c.UUID)
 			},
 		},
 		{
@@ -147,6 +149,7 @@ func TestRedfishServer_GetRedfishV1SystemsComputerSystemID(t *testing.T) {
 
 				require.Len(t, cs, 1)
 				require.Equal(t, uint(8), *cs[0].ProcessorSummary.Count)
+				require.Empty(t, cs[0].UUID)
 			},
 		},
 		{
