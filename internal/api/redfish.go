@@ -943,20 +943,25 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 	var action string
 	var force bool
+	var noopStatus string
 	switch *request.ResetType {
 	case ResourceResetTypeOn:
 		action = "start"
+		noopStatus = "Running"
 
 	case ResourceResetTypeForceOn:
 		action = "start"
 		force = true
+		noopStatus = "Running"
 
 	case ResourceResetTypeGracefulShutdown:
 		action = "stop"
+		noopStatus = "Stopped"
 
 	case ResourceResetTypeForceOff:
 		action = "stop"
 		force = true
+		noopStatus = "Stopped"
 
 	case ResourceResetTypeGracefulRestart:
 		action = "restart"
@@ -968,6 +973,19 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	default:
 		responseErrWithMessage(w, http.StatusBadRequest, "reset type not supported")
 		return
+	}
+
+	if noopStatus != "" {
+		instance, _, err := s.client.GetInstance(computerSystemID)
+		if err != nil {
+			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+			return
+		}
+
+		if instance.Status == noopStatus {
+			responseNoContent(w)
+			return
+		}
 	}
 
 	op, err := s.client.UpdateInstanceState(computerSystemID, incusapi.InstanceStatePut{

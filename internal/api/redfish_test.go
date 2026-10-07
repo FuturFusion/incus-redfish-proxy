@@ -301,9 +301,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		clientUpdateInstanceState    incusclient.Operation
 		clientUpdateInstanceStateErr error
 
-		wantAction string
-		wantForce  bool
-		assertErr  require.ErrorAssertionFunc
+		wantAction                   string
+		wantForce                    bool
+		wantUpdateInstanceStateCalls int
+		assertErr                    require.ErrorAssertionFunc
 	}{
 		{
 			name:      "success - on",
@@ -317,9 +318,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "start",
-			wantForce:  false,
-			assertErr:  require.NoError,
+			wantAction:                   "start",
+			wantForce:                    false,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - force on",
@@ -333,9 +335,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "start",
-			wantForce:  true,
-			assertErr:  require.NoError,
+			wantAction:                   "start",
+			wantForce:                    true,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - shutdown",
@@ -349,9 +352,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "stop",
-			wantForce:  false,
-			assertErr:  require.NoError,
+			wantAction:                   "stop",
+			wantForce:                    false,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - force off",
@@ -365,9 +369,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "stop",
-			wantForce:  true,
-			assertErr:  require.NoError,
+			wantAction:                   "stop",
+			wantForce:                    true,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - graceful restart",
@@ -381,9 +386,10 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "restart",
-			wantForce:  false,
-			assertErr:  require.NoError,
+			wantAction:                   "restart",
+			wantForce:                    false,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
 		},
 		{
 			name:      "success - force restart",
@@ -397,9 +403,30 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 				},
 			},
 
-			wantAction: "restart",
-			wantForce:  true,
-			assertErr:  require.NoError,
+			wantAction:                   "restart",
+			wantForce:                    true,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    require.NoError,
+		},
+		{
+			name:      "success - on - already running",
+			resetType: schemas.OnResetType,
+			clientGetInstance: &incusapi.Instance{
+				Status: "Running",
+			},
+
+			wantUpdateInstanceStateCalls: 0,
+			assertErr:                    require.NoError,
+		},
+		{
+			name:      "success - force off - already stopped",
+			resetType: schemas.ForceOffResetType,
+			clientGetInstance: &incusapi.Instance{
+				Status: "Stopped",
+			},
+
+			wantUpdateInstanceStateCalls: 0,
+			assertErr:                    require.NoError,
 		},
 
 		{
@@ -425,7 +452,8 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 			},
 			clientUpdateInstanceStateErr: boom.Error,
 
-			assertErr: boom.ErrorContains,
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    boom.ErrorContains,
 		},
 		{
 			name:      "error - client.UpdateInstanceState - Operation.Wait",
@@ -438,7 +466,9 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 					return boom.Error
 				},
 			},
-			assertErr: boom.ErrorContains,
+
+			wantUpdateInstanceStateCalls: 1,
+			assertErr:                    boom.ErrorContains,
 		},
 	}
 
@@ -468,6 +498,8 @@ func TestRedfishServer_PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 			_, err = system.Reset(tc.resetType)
 			tc.assertErr(t, err)
+
+			require.Len(t, incusClient.UpdateInstanceStateCalls(), tc.wantUpdateInstanceStateCalls)
 		})
 	}
 }
