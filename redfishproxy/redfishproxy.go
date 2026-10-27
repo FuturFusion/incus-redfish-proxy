@@ -10,6 +10,7 @@ import (
 	config "github.com/lxc/incus/v7/shared/cliconfig"
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
 
 // Config holds the settings required to build a Redfish proxy handler for a
@@ -31,6 +32,14 @@ type Config struct {
 
 	// Context stops the Incus event watcher goroutine once done, short lived callers (e.g. tests) should set it.
 	Context context.Context
+
+	// Profile is the name of an embedded profile or the path of a profile file. If empty, "generic" is used.
+	Profile string
+}
+
+// Profiles returns the names of the embedded profiles.
+func Profiles() []string {
+	return profile.List()
 }
 
 // NewHandler builds a ready to use http.Handler serving the Redfish API for
@@ -39,6 +48,11 @@ type Config struct {
 func NewHandler(cfg Config) (http.Handler, error) {
 	if cfg.InstanceName == "" {
 		return nil, fmt.Errorf("instance name must not be empty")
+	}
+
+	p, err := profile.Load(cfg.Profile)
+	if err != nil {
+		return nil, fmt.Errorf("load profile: %w", err)
 	}
 
 	incusCfg, err := config.LoadConfig("")
@@ -66,5 +80,5 @@ func NewHandler(cfg Config) (http.Handler, error) {
 	// The event source needs its own client, as the Incus client shares one event connection, including its type filter, per client.
 	events := client.UseProject(project)
 
-	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events)), nil
+	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events), api.WithProfile(p)), nil
 }
