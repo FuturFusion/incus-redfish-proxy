@@ -35,6 +35,7 @@ type Profile struct {
 	Version     int    `yaml:"version"`
 	Name        string `yaml:"name"`
 	Description string `yaml:"description"`
+	BIOS        BIOS   `yaml:"bios"`
 }
 
 // Default returns the generic profile, which reproduces the behavior of the proxy before profiles existed.
@@ -47,9 +48,18 @@ func Default() Profile {
 	return p
 }
 
-// defaults returns the values every profile starts from before its file is decoded.
+// defaults returns the values every profile starts from before Parse decodes its file.
 func defaults() Profile {
-	return Profile{}
+	return Profile{
+		BIOS: BIOS{
+			Registry: Registry{
+				Attributes: []Attribute{},
+			},
+			Errors: BIOSErrors{
+				UnknownAttribute: ErrorShape{Status: 400, MessageID: "Base.1.18.PropertyUnknown"},
+			},
+		},
+	}
 }
 
 // Load resolves an embedded profile by name, or reads the profile file at the given path.
@@ -152,5 +162,5 @@ func (p Profile) Validate() error {
 		return fmt.Errorf("invalid profile name %q, lower case letters, digits and dashes expected", p.Name)
 	}
 
-	return nil
+	return p.BIOS.validate()
 }

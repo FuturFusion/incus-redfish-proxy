@@ -1,3 +1,10 @@
 version: 1
 name: generic
 description: Behavior of the proxy without profiles. Every switch holds its default.
+
+bios:
+  registry:
+    id: ""
+    attributes: []
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown}
