@@ -18,5 +18,7 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Ha
 		server.GetRedfishV1TaskMonitorsTaskID(w, r, r.PathValue("TaskId"))
 	})
 
+	server.registerRegistryRoutes(mux)
+
 	return HandlerFromMux(server, mux)
 }
