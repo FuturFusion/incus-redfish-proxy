@@ -11,15 +11,15 @@ import (
 	"github.com/FuturFusion/incus-redfish-proxy/redfishproxy"
 )
 
-var listenAddr = "0.0.0.0:8080"
-
 func main() {
 	var remote string
 	var project string
+	var listenAddr string
 
 	pflag.Usage = usage
 	pflag.StringVar(&remote, "remote", "", "incus remote to connect to")
 	pflag.StringVar(&project, "project", "default", "incus project to connect to")
+	pflag.StringVar(&listenAddr, "listen", "0.0.0.0:8080", "address to listen on")
 
 	pflag.Parse()
 
