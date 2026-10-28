@@ -15,9 +15,12 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/boom"
 )
 
 func TestBiosStore_applyTime(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name      string
 		bios      profile.BIOS
@@ -69,8 +72,8 @@ func TestBiosStore_applyTime(t *testing.T) {
 
 			got, err := biosStore{bios: tc.bios}.applyTime(tc.requested)
 
-			tc.assertErr(t, err)
-			require.Equal(t, tc.want, got)
+			tc.assertErr(t, err, "the requested apply time must be supported")
+			require.Equal(t, tc.want, got, "the apply time used for staging")
 		})
 	}
 }
@@ -192,9 +195,11 @@ func TestRedfishServer_applyPendingBIOS(t *testing.T) {
 }
 
 func TestRedfishServer_stageBIOSConflict(t *testing.T) {
+	t.Parallel()
+
 	// Setup
 	p, err := profile.Load("testdata/profiles/pending.yaml")
-	require.NoError(t, err)
+	require.NoError(t, err, "load the profile")
 
 	client := &stateClient{instance: incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Config: map[string]string{}}}}
 	server := NewRedfishServer("test-instance", client, WithProfile(p))
@@ -202,7 +207,7 @@ func TestRedfishServer_stageBIOSConflict(t *testing.T) {
 	concurrentTaskID := server.tasks.create(server.biosPath(), TaskV174TaskStateRunning)
 	concurrent := incusapi.InstancePut{Config: map[string]string{}}
 	err = server.bios.setPending(&concurrent, &pendingBIOS{TaskID: concurrentTaskID, ApplyTime: profile.ApplyTimeOnReset, Attributes: map[string]any{"SecureBootControl": "Disabled"}})
-	require.NoError(t, err)
+	require.NoError(t, err, "stage the concurrent attributes")
 
 	conflicts := 1
 	client.updateErr = func(instance *incusapi.Instance) error {
@@ -220,11 +225,39 @@ func TestRedfishServer_stageBIOSConflict(t *testing.T) {
 	taskID, err := server.stageBIOS(map[string]any{"Mode": "Performance"}, profile.ApplyTimeOnReset)
 
 	// Assert
-	require.NoError(t, err)
+	require.NoError(t, err, "the retry after the conflict succeeds")
 	require.Equal(t, concurrentTaskID, taskID, "the retry joins the task of the concurrent PATCH")
 	require.Len(t, server.tasks.list(), 1, "the task of the lost attempt is dropped")
 
 	staged, err := server.bios.pending(&client.instance)
-	require.NoError(t, err)
+	require.NoError(t, err, "read the staged attributes")
 	require.Equal(t, map[string]any{"Mode": "Performance", "SecureBootControl": "Disabled"}, staged.Attributes, "the retry merges into the concurrent attributes")
+}
+
+func TestRedfishServer_applyPendingOnResetFailure(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p, err := profile.Load("testdata/profiles/pending.yaml")
+	require.NoError(t, err, "load the profile")
+
+	client := &stateClient{instance: incusapi.Instance{Status: "Running", InstancePut: incusapi.InstancePut{Config: map[string]string{"security.secureboot": "true"}}}}
+	server := NewRedfishServer("test-instance", client, WithProfile(p))
+
+	_, err = server.stageBIOS(map[string]any{"SecureBootControl": "Disabled"}, profile.ApplyTimeOnReset)
+	require.NoError(t, err, "stage the BIOS attributes")
+
+	client.updateErr = func(*incusapi.Instance) error {
+		return boom.Error
+	}
+
+	// Run test
+	rec := httptest.NewRecorder()
+	server.PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset(rec, httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{"ResetType":"ForceRestart"}`)), "test-instance")
+
+	// Assert
+	require.Equal(t, http.StatusInternalServerError, rec.Code, "the reset reports the failed apply")
+	require.Contains(t, rec.Body.String(), "the instance restarted without them", "the error tells that the attributes are not applied")
+	require.Equal(t, []string{"stop", "start"}, client.actions, "the restart does not leave the instance stopped")
+	require.Equal(t, "Running", client.instance.Status, "the instance runs after the reset")
 }

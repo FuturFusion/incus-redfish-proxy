@@ -12,6 +12,7 @@ import (
 
 	incusclient "github.com/lxc/incus/v7/client"
 	incusapi "github.com/lxc/incus/v7/shared/api"
+	"github.com/lxc/incus/v7/shared/uefi"
 	"github.com/stmcginnis/gofish"
 	"github.com/stmcginnis/gofish/schemas"
 	"github.com/stretchr/testify/require"
@@ -41,6 +42,13 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "bios-immediate", applies: appliesAtOnce, run: conformanceBIOSImmediate},
 	{name: "bios-stage-and-apply", applies: hasStagedAttribute, run: conformanceBIOSStageAndApply},
 	{name: "bios-requires", applies: hasRequirement, run: conformanceBIOSRequires},
+	{name: "secure-boot-write", applies: always, run: conformanceSecureBootWrite},
+	{name: "secure-boot-reset-keys", applies: resetKeysSupported, run: conformanceSecureBootResetKeys},
+	{name: "secure-boot-reset-keys-absent", applies: func(p profile.Profile) bool { return !resetKeysSupported(p) }, run: conformanceSecureBootResetKeysAbsent},
+}
+
+func resetKeysSupported(p profile.Profile) bool {
+	return p.SecureBoot.ResetKeys.Supported
 }
 
 func always(profile.Profile) bool {
@@ -128,9 +136,11 @@ func TestProfileConformance(t *testing.T) {
 	}
 }
 
-// fakeIncus returns an Incus client keeping the instance, so writes can be read back.
+// fakeIncus returns an Incus client keeping the instance and its UEFI (Unified Extensible Firmware Interface) variables, so the tests read writes back.
 func fakeIncus(instance incusapi.Instance) *mock.IncusClientMock {
 	var mu sync.Mutex
+
+	nvram := map[string]map[string]*incusapi.InstanceNVRAMVariable{}
 
 	clone := func(put incusapi.InstancePut) incusapi.InstancePut {
 		put.Config = maps.Clone(put.Config)
@@ -140,6 +150,52 @@ func fakeIncus(instance incusapi.Instance) *mock.IncusClientMock {
 	}
 
 	return &mock.IncusClientMock{
+		HasExtensionFunc: func(extension string) bool {
+			return extension == "instance_nvram"
+		},
+		GetInstanceNVRAMGUIDFunc: func(name string, guid string) (map[string]*incusapi.InstanceNVRAMVariable, error) {
+			mu.Lock()
+			defer mu.Unlock()
+
+			return maps.Clone(nvram[guid]), nil
+		},
+		GetInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) (*incusapi.InstanceNVRAMVariable, string, error) {
+			mu.Lock()
+			defer mu.Unlock()
+
+			variable, ok := nvram[guid][varName]
+			if !ok {
+				return nil, "", incusapi.StatusErrorf(http.StatusNotFound, "UEFI variable not found")
+			}
+
+			return variable, "", nil
+		},
+		UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
+			mu.Lock()
+			defer mu.Unlock()
+
+			if nvram[guid] == nil {
+				nvram[guid] = map[string]*incusapi.InstanceNVRAMVariable{}
+			}
+
+			// Incus reports the encoded variable as binary, only its presence matters here.
+			nvram[guid][varName] = &incusapi.InstanceNVRAMVariable{InstanceNVRAMVariablePut: data, Binary: []byte{1}}
+
+			return nil
+		},
+		DeleteInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) error {
+			mu.Lock()
+			defer mu.Unlock()
+
+			_, ok := nvram[guid][varName]
+			if !ok {
+				return incusapi.StatusErrorf(http.StatusNotFound, "UEFI variable not found")
+			}
+
+			delete(nvram[guid], varName)
+
+			return nil
+		},
 		UpdateInstanceStateFunc: func(name string, state incusapi.InstanceStatePut, ETag string) (incusclient.Operation, error) {
 			mu.Lock()
 			defer mu.Unlock()
@@ -392,6 +448,99 @@ func conformanceBIOSRequires(t *testing.T, p profile.Profile) {
 
 	writeAndApply(t, client, p, map[string]any{dependent.Name: value})
 	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]))
+}
+
+func conformanceSecureBootWrite(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	_, certificate := testCertificate(t, "conformance")
+
+	resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates", map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	if p.SecureBoot.DatabaseWrite {
+		require.NoError(t, err)
+		require.Equal(t, http.StatusCreated, resp.StatusCode)
+
+		return
+	}
+
+	redfishErr := &schemas.Error{}
+	require.ErrorAs(t, err, &redfishErr)
+	require.Equal(t, p.SecureBoot.DatabaseWriteError.Status, redfishErr.HTTPReturnedStatusCode)
+	require.Len(t, redfishErr.ExtendedInfos, 1)
+	require.Equal(t, p.SecureBoot.DatabaseWriteError.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+}
+
+func conformanceSecureBootResetKeys(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	// Enroll a platform key the way the guest does, not over Redfish.
+	err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", uefi.EfiGlobalVariableGuid, "PK", incusapi.InstanceNVRAMVariablePut{}, "")
+	require.NoError(t, err)
+
+	secureBoot := getSecureBoot(t, client)
+	require.Equal(t, schemas.UserModeSecureBootModeType, secureBoot.SecureBootMode)
+	require.Equal(t, p.SecureBoot.ResetKeys.Types, resetKeysAllowableValues(t, secureBoot))
+
+	// Reset the keys the way Operations Center does.
+	_, err = secureBoot.ResetKeys(schemas.ResetKeysType(p.SecureBoot.ResetKeys.Types[0]))
+	require.NoError(t, err)
+
+	require.Equal(t, schemas.SetupModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode)
+}
+
+func conformanceSecureBootResetKeysAbsent(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	require.Empty(t, resetKeysAllowableValues(t, getSecureBoot(t, client)))
+
+	resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/Actions/SecureBoot.ResetKeys", map[string]any{"ResetKeysType": "DeleteAllKeys"})
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	require.Error(t, err)
+}
+
+func getSecureBoot(t *testing.T, client *gofish.APIClient) *schemas.SecureBoot {
+	t.Helper()
+
+	systems, err := client.Service.Systems()
+	require.NoError(t, err)
+	require.Len(t, systems, 1)
+
+	secureBoot, err := systems[0].SecureBoot()
+	require.NoError(t, err)
+
+	return secureBoot
+}
+
+// resetKeysAllowableValues returns the reset keys types published on the SecureBoot resource, nil without the action.
+func resetKeysAllowableValues(t *testing.T, secureBoot *schemas.SecureBoot) []profile.ResetKeysType {
+	t.Helper()
+
+	var resource struct {
+		Actions struct {
+			ResetKeys struct {
+				AllowableValues []profile.ResetKeysType `json:"ResetKeysType@Redfish.AllowableValues"`
+			} `json:"#SecureBoot.ResetKeys"`
+		}
+	}
+
+	err := json.Unmarshal(secureBoot.RawData, &resource)
+	require.NoError(t, err)
+
+	return resource.Actions.ResetKeys.AllowableValues
 }
 
 // writeAndApply writes the attributes and resets the instance, if the profile stages them.
