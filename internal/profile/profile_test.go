@@ -211,6 +211,36 @@ func TestLoad_BIOSRegistry(t *testing.T) {
 
 			assertErr: require.Error,
 		},
+		{
+			name:     "success - requires",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M, value: B}}]\n",
+
+			assertErr: require.NoError,
+		},
+		{
+			name:     "error - requires unknown attribute",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: O, type: Boolean, requires: {attribute: M, value: B}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - chained requirement",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M, value: B}}, {name: P, type: String, requires: {attribute: O, value: true}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - requires without value",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - requires invalid value",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M, value: C}}]\n",
+
+			assertErr: require.Error,
+		},
 	}
 
 	for _, tc := range tests {
