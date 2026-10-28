@@ -297,6 +297,106 @@ func TestLoad_BIOS(t *testing.T) {
 	}
 }
 
+func TestLoad_ResolvesBIOS(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		bios string
+
+		wantApplyTime  profile.ApplyTime
+		wantAttributes []profile.Attribute
+	}{
+		{
+			name: "immediate without pending",
+			bios: "{}",
+
+			wantApplyTime:  profile.ApplyTimeImmediate,
+			wantAttributes: []profile.Attribute{},
+		},
+		{
+			name: "on reset with pending",
+			bios: "{settings_object: true, pending: true}",
+
+			wantApplyTime:  profile.ApplyTimeOnReset,
+			wantAttributes: []profile.Attribute{},
+		},
+		{
+			name: "explicit default stays",
+			bios: "{settings_object: true, pending: true, apply_time: {default: Immediate}}",
+
+			wantApplyTime:  profile.ApplyTimeImmediate,
+			wantAttributes: []profile.Attribute{},
+		},
+		{
+			name: "integer requirement",
+			bios: "{registry: {id: T.v1_0_0, attributes: [{name: N, type: Integer}, {name: O, type: Boolean, requires: {attribute: N, value: 3}}]}}",
+
+			wantApplyTime: profile.ApplyTimeImmediate,
+			wantAttributes: []profile.Attribute{
+				{Name: "N", Type: profile.AttributeTypeInteger},
+				{Name: "O", Type: profile.AttributeTypeBoolean, Requires: &profile.Requirement{Attribute: "N", Value: int64(3)}},
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\nbios: "+tc.bios+"\n"), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			// Run test
+			p, err := profile.Load(filename)
+
+			// Assert
+			require.NoError(t, err, "load the profile")
+			require.Equal(t, tc.wantApplyTime, p.BIOS.ApplyTime.Default, "the empty default apply time is resolved")
+			require.Equal(t, tc.wantAttributes, p.BIOS.Registry.Attributes, "a required value has the type of the stored values")
+		})
+	}
+}
+
+func TestLoad_SecureBoot(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		secureBoot string
+
+		assertErr require.ErrorAssertionFunc
+	}{
+		{name: "success - read only with reset keys", secureBoot: "{database_write: false, reset_keys: {supported: true, types: [DeletePK], response: 202-task}}", assertErr: require.NoError},
+		{name: "success - sequential with prefix", secureBoot: "{certificate_id_style: sequential, certificate_id_prefix: Certificate}", assertErr: require.NoError},
+		{name: "error - reset to default keys", secureBoot: "{reset_keys: {types: [ResetAllKeysToDefault]}}", assertErr: require.Error},
+		{name: "error - unknown reset keys type", secureBoot: "{reset_keys: {types: [DeleteKEK]}}", assertErr: require.Error},
+		{name: "error - reset keys without types", secureBoot: "{reset_keys: {supported: true, types: []}}", assertErr: require.Error},
+		{name: "error - unknown reset keys response", secureBoot: "{reset_keys: {response: \"200\"}}", assertErr: require.Error},
+		{name: "error - prefix with hash", secureBoot: "{certificate_id_prefix: Certificate}", assertErr: require.Error},
+		{name: "error - prefix not usable in a URI", secureBoot: "{certificate_id_style: sequential, certificate_id_prefix: a/b}", assertErr: require.Error},
+		{name: "error - unknown certificate id style", secureBoot: "{certificate_id_style: uuid}", assertErr: require.Error},
+		{name: "error - database write error not an error", secureBoot: "{database_write_error: {status: 200, message_id: Base.1.18.ActionNotSupported}}", assertErr: require.Error},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\nsecure_boot: "+tc.secureBoot+"\n"), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			_, err = profile.Load(filename)
+			tc.assertErr(t, err, "load the profile")
+		})
+	}
+}
+
 func TestErrorShape_Validate(t *testing.T) {
 	tests := []struct {
 		name  string
