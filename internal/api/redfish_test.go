@@ -2576,6 +2576,92 @@ func TestRedfishServer_PatchBiosAttributes_PatchResponse(t *testing.T) {
 	}
 }
 
+func TestRedfishServer_PatchBiosAttributes_Pending(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		path   string
+		body   string
+		status string
+
+		wantStatus    int
+		wantMessageID string
+		wantConfig    incusapi.ConfigMap
+	}{
+		{
+			name:   "error - current settings not writable",
+			path:   "/redfish/v1/Systems/test-instance/Bios",
+			body:   `{"Attributes":{"Mode":"Performance"}}`,
+			status: "Stopped",
+
+			wantStatus:    http.StatusMethodNotAllowed,
+			wantMessageID: "Base.1.18.PropertyNotWritable",
+			wantConfig:    incusapi.ConfigMap{},
+		},
+		{
+			name:   "error - apply time not supported",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"Mode":"Performance"},"@Redfish.SettingsApplyTime":{"ApplyTime":"AtMaintenanceWindowStart"}}`,
+			status: "Running",
+
+			wantStatus:    http.StatusBadRequest,
+			wantMessageID: "Base.1.18.PropertyValueNotInList",
+			wantConfig:    incusapi.ConfigMap{},
+		},
+		{
+			name:   "error - refused value is not staged",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"Mode":"Unknown"}}`,
+			status: "Running",
+
+			wantStatus:    http.StatusBadRequest,
+			wantMessageID: "Base.1.18.PropertyValueNotInList",
+			wantConfig:    incusapi.ConfigMap{},
+		},
+		{
+			name:   "error - immediate needs a stopped instance",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"SecureBootControl":"Disabled"},"@Redfish.SettingsApplyTime":{"ApplyTime":"Immediate"}}`,
+			status: "Running",
+
+			wantStatus: http.StatusPreconditionFailed,
+			wantConfig: incusapi.ConfigMap{},
+		},
+		{
+			name:   "success - immediate",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"Mode":"Performance"},"@Redfish.SettingsApplyTime":{"ApplyTime":"Immediate"}}`,
+			status: "Running",
+
+			wantStatus: http.StatusAccepted,
+			wantConfig: incusapi.ConfigMap{"user.redfish.bios.Mode": "Performance"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p, err := profile.Load("testdata/profiles/pending.yaml")
+			require.NoError(t, err, "load the profile")
+
+			incusClient := fakeIncus(incusapi.Instance{Status: tc.status, InstancePut: incusapi.InstancePut{Config: map[string]string{}}})
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, tc.path, strings.NewReader(tc.body), "application/json", nil)
+			answer := answerOf(t, resp, err)
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			require.Equal(t, tc.wantStatus, answer.status, "status of the PATCH")
+			require.Equal(t, tc.wantMessageID, answer.messageID, "message of a refused PATCH")
+			require.Equal(t, tc.wantConfig, instance.Config, "only an accepted PATCH writes the instance")
+		})
+	}
+}
+
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
 	client := setup(t, &mock.IncusClientMock{})
 
