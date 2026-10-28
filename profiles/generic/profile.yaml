@@ -45,3 +45,9 @@ power:
 
 timing:
   scale: 1.0                        # multiplies every duration of the profile, overridden by --timing-scale
+
+overlay: {}                         # path: JSON merge patch (RFC 7386) for the GET response, placeholders {system}, {manager}, {media}
+# Example:
+# overlay:
+#   "/redfish/v1/Systems/{system}":
+#     Oem: {Incus: {ServerPowerState: "On"}}

@@ -500,6 +500,52 @@ func TestLoad_Power(t *testing.T) {
 	}
 }
 
+func TestLoad_Overlay(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		overlay string
+
+		assertErr require.ErrorAssertionFunc
+		want      profile.Overlay
+	}{
+		{
+			name:    "success",
+			overlay: `{"/redfish/v1/Systems/{system}": {Oem: {Test: {Ready: true, Slots: [{Size: 1}]}}, AssetTag: null}}`,
+
+			assertErr: require.NoError,
+			want: profile.Overlay{"/redfish/v1/Systems/{system}": {
+				"Oem":      map[string]any{"Test": map[string]any{"Ready": true, "Slots": []any{map[string]any{"Size": 1}}}},
+				"AssetTag": nil,
+			}},
+		},
+		{name: "error - path outside of the service", overlay: `{"/redfish/v2": {AssetTag: x}}`, assertErr: require.Error},
+		{name: "error - unknown placeholder", overlay: `{"/redfish/v1/Chassis/{chassis}": {AssetTag: x}}`, assertErr: require.Error},
+		{name: "error - Id changed", overlay: `{"/redfish/v1/Systems/{system}": {Id: other}}`, assertErr: require.Error},
+		{name: "error - nested @odata.id changed", overlay: `{"/redfish/v1/Systems/{system}": {Bios: {"@odata.id": /other}}}`, assertErr: require.Error},
+		{name: "error - @odata.id in a list changed", overlay: `{"/redfish/v1/Systems/{system}": {Links: {Chassis: [{"@odata.id": /other}]}}}`, assertErr: require.Error},
+		{name: "error - paths differ only in a trailing slash", overlay: `{"/redfish/v1/Systems": {Name: a}, "/redfish/v1/Systems/": {Name: b}}`, assertErr: require.Error},
+		{name: "error - key not a string", overlay: `{"/redfish/v1/Systems/{system}": {Oem: {1: x}}}`, assertErr: require.Error},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\noverlay: "+tc.overlay+"\n"), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			p, err := profile.Load(filename)
+			tc.assertErr(t, err, "load the profile")
+
+			require.Equal(t, tc.want, p.Overlay, "the overlay is parsed")
+		})
+	}
+}
+
 func TestErrorShape_Validate(t *testing.T) {
 	tests := []struct {
 		name  string

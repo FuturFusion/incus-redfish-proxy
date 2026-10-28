@@ -40,6 +40,7 @@ type Profile struct {
 	VirtualMedia VirtualMedia `yaml:"virtual_media"`
 	Power        Power        `yaml:"power"`
 	Timing       Timing       `yaml:"timing"`
+	Overlay      Overlay      `yaml:"overlay"`
 }
 
 // Default returns the generic profile, which reproduces the behavior of the proxy before profiles existed.
@@ -93,6 +94,7 @@ func defaults() Profile {
 		Timing: Timing{
 			Scale: 1,
 		},
+		Overlay: Overlay{},
 	}
 }
 
@@ -159,6 +161,11 @@ func decode(data []byte) (Profile, error) {
 		return Profile{}, fmt.Errorf("decode: %w", err)
 	}
 
+	err = p.Overlay.normalize()
+	if err != nil {
+		return Profile{}, err
+	}
+
 	err = p.Validate()
 	if err != nil {
 		return Profile{}, err
@@ -218,5 +225,10 @@ func (p Profile) Validate() error {
 		return err
 	}
 
-	return p.Timing.validate()
+	err = p.Timing.validate()
+	if err != nil {
+		return err
+	}
+
+	return p.Overlay.validate()
 }
