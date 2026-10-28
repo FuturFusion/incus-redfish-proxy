@@ -33,8 +33,16 @@ const (
 	PatchResponseNoContent PatchResponse = "204"
 )
 
-// reservedConfigPrefix marks the instance config keys the proxy keeps its own state in.
-const reservedConfigPrefix = "user.redfish."
+// ApplyTime is when BIOS attributes written by a PATCH take effect, as named by the Redfish settings schema.
+type ApplyTime string
+
+const (
+	ApplyTimeImmediate ApplyTime = "Immediate"
+	ApplyTimeOnReset   ApplyTime = "OnReset"
+)
+
+// ReservedConfigPrefix marks the instance config and device keys the proxy keeps its own state in.
+const ReservedConfigPrefix = "user.redfish."
 
 // registryIDPattern matches a versioned registry ID like BiosAttributeRegistry.v1_0_0.
 var registryIDPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]*\.v[0-9]+_[0-9]+_[0-9]+$`)
@@ -49,8 +57,28 @@ type BIOS struct {
 	// TaskResource exposes /redfish/v1/TaskService and its collection. Single tasks are always served, as task bodies link to them.
 	TaskResource bool `yaml:"task_resource"`
 
+	// SettingsObject makes Bios/Settings a separate resource, which holds the pending attributes.
+	SettingsObject bool `yaml:"settings_object"`
+
+	// Pending stages the attributes of a PATCH until the next reset.
+	Pending bool `yaml:"pending"`
+
+	ApplyTime ApplyTimes `yaml:"apply_time"`
+
+	// PatchRequiresPowerOff refuses to stage attributes on a running instance, if they need a stopped one.
+	PatchRequiresPowerOff bool `yaml:"patch_requires_power_off"`
+
 	Registry Registry   `yaml:"registry"`
 	Errors   BIOSErrors `yaml:"errors"`
+}
+
+// ApplyTimes are the apply times a PATCH may ask for.
+type ApplyTimes struct {
+	// Supported appears on the Bios resource. While it is empty, the proxy ignores the apply time of a PATCH.
+	Supported []ApplyTime `yaml:"supported"`
+
+	// Default applies to a PATCH without an apply time. Parse turns empty into OnReset with pending and Immediate otherwise.
+	Default ApplyTime `yaml:"default"`
 }
 
 // Registry is the attribute registry of the synthetic BIOS attributes.
@@ -149,7 +177,16 @@ func (b BIOS) validate() error {
 		return fmt.Errorf("unknown bios.patch_response %q", b.PatchResponse)
 	}
 
-	err := b.Registry.validate()
+	if b.Pending && !b.SettingsObject {
+		return errors.New("bios.pending requires bios.settings_object")
+	}
+
+	err := b.ApplyTime.validate(b.Pending)
+	if err != nil {
+		return fmt.Errorf("bios.apply_time: %w", err)
+	}
+
+	err = b.Registry.validate()
 	if err != nil {
 		return fmt.Errorf("bios.registry: %w", err)
 	}
@@ -157,6 +194,45 @@ func (b BIOS) validate() error {
 	err = b.Errors.UnknownAttribute.Validate()
 	if err != nil {
 		return fmt.Errorf("bios.errors.unknown_attribute: %w", err)
+	}
+
+	return nil
+}
+
+// resolve fills in the values that depend on other settings, so the users of the profile do not repeat the rules.
+func (b *BIOS) resolve() {
+	if b.ApplyTime.Default == "" {
+		b.ApplyTime.Default = ApplyTimeImmediate
+		if b.Pending {
+			b.ApplyTime.Default = ApplyTimeOnReset
+		}
+	}
+}
+
+func (a ApplyTimes) validate(pending bool) error {
+	for _, applyTime := range append(slices.Clone(a.Supported), a.Default) {
+		switch applyTime {
+		case "", ApplyTimeImmediate:
+
+		case ApplyTimeOnReset:
+			if !pending {
+				return fmt.Errorf("%q requires bios.pending", applyTime)
+			}
+
+		case "AtMaintenanceWindowStart", "InMaintenanceWindowOnReset", "Deferred":
+			return fmt.Errorf("%q is not implemented, only %q and %q are", applyTime, ApplyTimeImmediate, ApplyTimeOnReset)
+
+		default:
+			return fmt.Errorf("unknown apply time %q", applyTime)
+		}
+	}
+
+	if slices.Contains(a.Supported, "") {
+		return errors.New("supported must not contain an empty apply time")
+	}
+
+	if a.Default != "" && len(a.Supported) > 0 && !slices.Contains(a.Supported, a.Default) {
+		return fmt.Errorf("default %q is not supported", a.Default)
 	}
 
 	return nil
@@ -211,7 +287,7 @@ func (a Attribute) validate() error {
 		return err
 	}
 
-	if strings.HasPrefix(a.MapsTo, reservedConfigPrefix) {
+	if strings.HasPrefix(a.MapsTo, ReservedConfigPrefix) {
 		return fmt.Errorf("maps_to %q is reserved for the proxy", a.MapsTo)
 	}
 

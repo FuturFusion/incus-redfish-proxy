@@ -228,7 +228,9 @@ func TestLoad_BIOSRegistry(t *testing.T) {
 	}
 }
 
-func TestLoad_BIOSPatchResponse(t *testing.T) {
+func TestLoad_BIOS(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name string
 		bios string
@@ -240,17 +242,27 @@ func TestLoad_BIOSPatchResponse(t *testing.T) {
 		{name: "success - no content", bios: "{patch_response: \"204\"}", assertErr: require.NoError},
 		{name: "error - task without task resource", bios: "{patch_response: 202-task}", assertErr: require.Error},
 		{name: "error - unknown", bios: "{patch_response: \"201\"}", assertErr: require.Error},
+		{name: "success - pending", bios: "{settings_object: true, pending: true, apply_time: {supported: [OnReset, Immediate], default: OnReset}}", assertErr: require.NoError},
+		{name: "success - default without supported", bios: "{apply_time: {default: Immediate}}", assertErr: require.NoError},
+		{name: "error - pending without settings object", bios: "{pending: true}", assertErr: require.Error},
+		{name: "error - on reset without pending", bios: "{settings_object: true, apply_time: {supported: [OnReset]}}", assertErr: require.Error},
+		{name: "error - default on reset without pending", bios: "{apply_time: {default: OnReset}}", assertErr: require.Error},
+		{name: "error - apply time not implemented", bios: "{apply_time: {supported: [AtMaintenanceWindowStart]}}", assertErr: require.Error},
+		{name: "error - unknown apply time", bios: "{apply_time: {supported: [Later]}}", assertErr: require.Error},
+		{name: "error - default not supported", bios: "{settings_object: true, pending: true, apply_time: {supported: [OnReset], default: Immediate}}", assertErr: require.Error},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			filename := filepath.Join(t.TempDir(), "profile.yaml")
 
 			err := os.WriteFile(filename, []byte("version: 1\nname: custom\nbios: "+tc.bios+"\n"), 0o600)
-			require.NoError(t, err)
+			require.NoError(t, err, "write the profile file")
 
 			_, err = profile.Load(filename)
-			tc.assertErr(t, err)
+			tc.assertErr(t, err, "load the profile")
 		})
 	}
 }
