@@ -56,6 +56,7 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "power-reset-type-refused", applies: hasUnlistedResetType, run: conformancePowerResetTypeRefused},
 	{name: "power-settle", applies: func(p profile.Profile) bool { return p.Power.NotSettledWindow > 0 }, run: conformancePowerSettle},
 	{name: "boot-override", applies: always, run: conformanceBootOverride},
+	{name: "overlay", applies: func(p profile.Profile) bool { return len(p.Overlay) > 0 }, run: conformanceOverlay},
 }
 
 func hasUnlistedResetType(p profile.Profile) bool {
@@ -1019,4 +1020,52 @@ func waitForTask(t *testing.T, client *gofish.APIClient, location string) {
 	}
 
 	require.Fail(t, "the task did not end", location)
+}
+
+func conformanceOverlay(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Running", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+	placeholders := strings.NewReplacer("{system}", "test-instance", "{manager}", "bmc1", "{media}", "CD")
+
+	for path, patch := range p.Overlay {
+		resp, err := client.Get(strings.TrimSuffix(placeholders.Replace(path), "/"))
+		require.NoError(t, err)
+
+		document := map[string]any{}
+		err = json.NewDecoder(resp.Body).Decode(&document)
+		resp.Body.Close()
+		require.NoError(t, err)
+
+		requirePatched(t, document, patch, path)
+	}
+}
+
+// requirePatched checks the document holds every value of the merge patch and none it deletes.
+func requirePatched(t *testing.T, document map[string]any, patch map[string]any, path string) {
+	t.Helper()
+
+	for name, value := range patch {
+		nested, isObject := value.(map[string]any)
+
+		switch {
+		case value == nil:
+			require.NotContains(t, document, name, "%s: the overlay deletes %s", path, name)
+
+		case isObject:
+			member, ok := document[name].(map[string]any)
+			require.True(t, ok, "%s: %s is an object", path, name)
+			requirePatched(t, member, nested, path+" "+name)
+
+		default:
+			want, err := json.Marshal(value)
+			require.NoError(t, err)
+
+			got, err := json.Marshal(document[name])
+			require.NoError(t, err)
+
+			require.JSONEq(t, string(want), string(got), "%s: the overlay sets %s", path, name)
+		}
+	}
 }

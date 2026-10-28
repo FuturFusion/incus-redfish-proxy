@@ -3163,6 +3163,51 @@ func TestRedfishServer_ResetTask(t *testing.T) {
 	}
 }
 
+func TestRedfishServer_Overlay(t *testing.T) {
+	t.Parallel()
+
+	p := profile.Default()
+	p.Overlay = profile.Overlay{
+		"/redfish/v1/Systems/{system}/":        {"Oem": map[string]any{"Test": "patched"}},
+		"/redfish/v1/Systems/{system}/Unknown": {"Oem": map[string]any{"Test": "patched"}},
+	}
+
+	tests := []struct {
+		name   string
+		method string
+		path   string
+
+		wantStatus int
+		wantOem    any
+	}{
+		{name: "success - patched", method: http.MethodGet, path: "/redfish/v1/Systems/test-instance", wantStatus: http.StatusOK, wantOem: map[string]any{"Test": "patched"}},
+		{name: "success - other path", method: http.MethodGet, path: "/redfish/v1/Managers/bmc1", wantStatus: http.StatusOK, wantOem: nil},
+		{name: "error - not found is not patched", method: http.MethodGet, path: "/redfish/v1/Systems/test-instance/Unknown", wantStatus: http.StatusNotFound, wantOem: nil},
+		{name: "error - other method is not patched", method: http.MethodPut, path: "/redfish/v1/Systems/test-instance", wantStatus: http.StatusNotImplemented, wantOem: nil},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			incusClient := fakeIncus(incusapi.Instance{Status: "Running"})
+			incusClient.GetServerFunc = func() (*incusapi.Server, string, error) {
+				return &incusapi.Server{}, "", nil
+			}
+
+			rec := httptest.NewRecorder()
+			api.NewHandler("test-instance", incusClient, api.WithProfile(p)).ServeHTTP(rec, httptest.NewRequest(tc.method, tc.path, strings.NewReader(`{}`)))
+
+			document := map[string]any{}
+			err := json.Unmarshal(rec.Body.Bytes(), &document)
+			require.NoError(t, err, "decode the answer")
+
+			require.Equal(t, tc.wantStatus, rec.Code, "status of the request")
+			require.Equal(t, tc.wantOem, document["Oem"], "only a successful GET of an overlay path is patched")
+		})
+	}
+}
+
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
 	client := setup(t, &mock.IncusClientMock{})
 
