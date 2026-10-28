@@ -45,7 +45,7 @@ func (s redfishServer) stageBIOS(attributes map[string]any, applyTime profile.Ap
 		// Check the values now, so a refused value fails the PATCH and not the reset.
 		scratch := clonePut(*put)
 
-		err = s.bios.apply(&scratch, staged.Attributes)
+		err = s.bios.apply(instance, &scratch, staged.Attributes)
 		if err != nil {
 			return false, err
 		}
@@ -107,7 +107,7 @@ func (s redfishServer) applyPendingBIOS(stopped bool) error {
 
 		applied := clonePut(*put)
 
-		applyErr = s.bios.apply(&applied, ready)
+		applyErr = s.bios.apply(instance, &applied, ready)
 		if applyErr != nil {
 			// Firmware drops the whole job on a refused value and boots anyway.
 			staged = nil

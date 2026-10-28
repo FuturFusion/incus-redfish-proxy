@@ -40,6 +40,7 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "task-service", applies: always, run: conformanceTaskService},
 	{name: "bios-immediate", applies: appliesAtOnce, run: conformanceBIOSImmediate},
 	{name: "bios-stage-and-apply", applies: hasStagedAttribute, run: conformanceBIOSStageAndApply},
+	{name: "bios-requires", applies: hasRequirement, run: conformanceBIOSRequires},
 }
 
 func always(profile.Profile) bool {
@@ -64,10 +65,26 @@ func hasStagedAttribute(p profile.Profile) bool {
 	return stages(p) && ok
 }
 
-// stagedAttribute returns a writable attribute kept in the proxy state, which can be staged on a running instance.
+func hasRequirement(p profile.Profile) bool {
+	_, ok := dependentAttribute(p)
+	return ok
+}
+
+// dependentAttribute returns a writable attribute with a requirement and the attribute it requires.
+func dependentAttribute(p profile.Profile) (profile.Attribute, bool) {
+	for _, attribute := range p.BIOS.Registry.Attributes {
+		if !attribute.ReadOnly && attribute.Requires != nil {
+			return attribute, true
+		}
+	}
+
+	return profile.Attribute{}, false
+}
+
+// stagedAttribute returns a writable attribute kept in the proxy state that a client can stage on a running instance.
 func stagedAttribute(p profile.Profile) (profile.Attribute, bool) {
 	for _, attribute := range p.BIOS.Registry.Attributes {
-		if !attribute.ReadOnly && attribute.MapsTo == "" {
+		if !attribute.ReadOnly && attribute.MapsTo == "" && attribute.Requires == nil {
 			return attribute, true
 		}
 	}
@@ -175,35 +192,21 @@ func conformanceBIOSRegistry(t *testing.T, p profile.Profile) {
 	bios := getBIOS(t, client)
 	require.Equal(t, p.BIOS.Registry.ID, bios.AttributeRegistry)
 
-	// Discover the registry the way Operations Center does.
-	files, err := client.Service.Registries()
-	require.NoError(t, err)
+	published := registryAttributes(t, client, bios.AttributeRegistry)
 
-	var registry *schemas.AttributeRegistry
+	// Attributes with a requirement are covered by bios-requires.
+	for _, attribute := range p.BIOS.Registry.Attributes {
+		require.True(t, published[attribute.Name], attribute.Name)
 
-	for _, file := range files {
-		if file.Registry != bios.AttributeRegistry || len(file.Location) == 0 {
+		if attribute.Requires != nil {
 			continue
 		}
 
-		registry, err = schemas.GetAttributeRegistry(client, file.Location[0].URI)
-		require.NoError(t, err)
-	}
-
-	require.NotNil(t, registry)
-
-	published := map[string]bool{}
-	for _, attribute := range registry.RegistryEntries.Attributes {
-		published[attribute.AttributeName] = true
-	}
-
-	for _, attribute := range p.BIOS.Registry.Attributes {
-		require.True(t, published[attribute.Name], attribute.Name)
 		require.Equal(t, fmt.Sprint(attribute.DefaultValue()), fmt.Sprint(bios.Attributes[attribute.Name]), attribute.Name)
 	}
 
 	for _, attribute := range p.BIOS.Registry.Attributes {
-		if attribute.ReadOnly {
+		if attribute.ReadOnly || attribute.Requires != nil {
 			continue
 		}
 
@@ -350,6 +353,90 @@ func conformanceBIOSStageAndApply(t *testing.T, p profile.Profile) {
 	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[attribute.Name]), "the reset applies the staged value")
 	require.Empty(t, getBIOSSettings(t, client), "nothing is staged after the reset")
 	require.False(t, taskRunning(t, client, location), "the reset completes the task")
+}
+
+func conformanceBIOSRequires(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	dependent, _ := dependentAttribute(p)
+	requirement := map[string]any{dependent.Requires.Attribute: dependent.Requires.Value}
+	value := otherValue(dependent)
+
+	// Staged attributes apply on a restart, others need a stopped instance.
+	status := "Stopped"
+	if stages(p) {
+		status = "Running"
+	}
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: status}), api.WithProfile(p))
+
+	bios := getBIOS(t, client)
+	require.NotContains(t, bios.Attributes, dependent.Name, "Bios hides the attribute until its requirement is in effect")
+	require.True(t, registryAttributes(t, client, bios.AttributeRegistry)[dependent.Name], "the registry lists the attribute")
+
+	// A requirement written in the same PATCH is not in effect yet, so nothing of the PATCH is taken.
+	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{dependent.Requires.Attribute: dependent.Requires.Value, dependent.Name: value}})
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	redfishErr := &schemas.Error{}
+	require.ErrorAs(t, err, &redfishErr)
+	require.Equal(t, p.BIOS.Errors.DeferredRejected.Status, redfishErr.HTTPReturnedStatusCode)
+	require.Len(t, redfishErr.ExtendedInfos, 1)
+	require.Equal(t, p.BIOS.Errors.DeferredRejected.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+	require.NotContains(t, getBIOSSettings(t, client), dependent.Requires.Attribute, "a refused PATCH stages nothing")
+
+	writeAndApply(t, client, p, requirement)
+	require.Equal(t, fmt.Sprint(dependent.DefaultValue()), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]), "Bios publishes the attribute once its requirement is in effect")
+
+	writeAndApply(t, client, p, map[string]any{dependent.Name: value})
+	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]))
+}
+
+// writeAndApply writes the attributes and resets the instance, if the profile stages them.
+func writeAndApply(t *testing.T, client *gofish.APIClient, p profile.Profile, attributes map[string]any) {
+	t.Helper()
+
+	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": attributes})
+	require.NoError(t, err)
+	resp.Body.Close()
+
+	if !stages(p) {
+		return
+	}
+
+	resp, err = client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": "ForceRestart"})
+	require.NoError(t, err)
+	resp.Body.Close()
+}
+
+// registryAttributes discovers the attribute registry the way Operations Center does and returns the names it lists.
+func registryAttributes(t *testing.T, client *gofish.APIClient, registryID string) map[string]bool {
+	t.Helper()
+
+	files, err := client.Service.Registries()
+	require.NoError(t, err)
+
+	var registry *schemas.AttributeRegistry
+
+	for _, file := range files {
+		if file.Registry != registryID || len(file.Location) == 0 {
+			continue
+		}
+
+		registry, err = schemas.GetAttributeRegistry(client, file.Location[0].URI)
+		require.NoError(t, err)
+	}
+
+	require.NotNil(t, registry)
+
+	published := map[string]bool{}
+	for _, attribute := range registry.RegistryEntries.Attributes {
+		published[attribute.AttributeName] = true
+	}
+
+	return published
 }
 
 // taskRunning follows the location of a PATCH answer, which has no location for the 200 and 204 answers.
