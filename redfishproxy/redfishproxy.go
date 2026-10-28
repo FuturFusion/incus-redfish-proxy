@@ -5,6 +5,7 @@ package redfishproxy
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 
 	config "github.com/lxc/incus/v7/shared/cliconfig"
@@ -35,6 +36,9 @@ type Config struct {
 
 	// Profile is the name of an embedded profile or the path of a profile file. If empty, "generic" is used.
 	Profile string
+
+	// TimingScale replaces timing.scale of the profile, if not zero.
+	TimingScale float64
 }
 
 // Profiles returns the names of the embedded profiles.
@@ -53,6 +57,19 @@ func NewHandler(cfg Config) (http.Handler, error) {
 	p, err := profile.Load(cfg.Profile)
 	if err != nil {
 		return nil, fmt.Errorf("load profile: %w", err)
+	}
+
+	if cfg.TimingScale != 0 {
+		p.Timing.Scale = cfg.TimingScale
+
+		err = p.Validate()
+		if err != nil {
+			return nil, fmt.Errorf("profile %q: %w", p.Name, err)
+		}
+	}
+
+	for _, warning := range p.Warnings() {
+		log.Printf("profile %q: %s", p.Name, warning)
 	}
 
 	incusCfg, err := config.LoadConfig("")
