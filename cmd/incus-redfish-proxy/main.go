@@ -18,6 +18,7 @@ func main() {
 	var listenAddr string
 	var profileName string
 	var listProfiles bool
+	var timingScale float64
 
 	pflag.Usage = usage
 	pflag.StringVar(&remote, "remote", "", "incus remote to connect to")
@@ -25,6 +26,7 @@ func main() {
 	pflag.StringVar(&listenAddr, "listen", "0.0.0.0:8080", "address to listen on")
 	pflag.StringVar(&profileName, "profile", profile.DefaultName, "name of an embedded profile or path of a profile file")
 	pflag.BoolVar(&listProfiles, "list-profiles", false, "list the embedded profiles and exit")
+	pflag.Float64Var(&timingScale, "timing-scale", 0, "multiply every duration of the profile, replaces timing.scale of the profile if set")
 
 	pflag.Parse()
 
@@ -46,6 +48,7 @@ func main() {
 		Remote:       remote,
 		Project:      project,
 		Profile:      profileName,
+		TimingScale:  timingScale,
 	})
 	die(err)
 
