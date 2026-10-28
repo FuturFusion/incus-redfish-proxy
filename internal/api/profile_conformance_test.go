@@ -1,14 +1,18 @@
 package api_test
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"maps"
 	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	incusclient "github.com/lxc/incus/v7/client"
 	incusapi "github.com/lxc/incus/v7/shared/api"
@@ -43,6 +47,8 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "bios-stage-and-apply", applies: hasStagedAttribute, run: conformanceBIOSStageAndApply},
 	{name: "bios-requires", applies: hasRequirement, run: conformanceBIOSRequires},
 	{name: "secure-boot-write", applies: always, run: conformanceSecureBootWrite},
+	{name: "virtual-media-insert", applies: always, run: conformanceVirtualMediaInsert},
+	{name: "virtual-media-hidden-paths", applies: always, run: conformanceVirtualMediaHiddenPaths},
 	{name: "secure-boot-reset-keys", applies: resetKeysSupported, run: conformanceSecureBootResetKeys},
 	{name: "secure-boot-reset-keys-absent", applies: func(p profile.Profile) bool { return !resetKeysSupported(p) }, run: conformanceSecureBootResetKeysAbsent},
 }
@@ -194,6 +200,17 @@ func fakeIncus(instance incusapi.Instance) *mock.IncusClientMock {
 
 			delete(nvram[guid], varName)
 
+			return nil
+		},
+		CreateStoragePoolVolumeFromISOFunc: func(pool string, args incusclient.StorageVolumeBackupArgs) (incusclient.Operation, error) {
+			_, err := io.Copy(io.Discard, args.BackupFile)
+			if err != nil {
+				return nil, err
+			}
+
+			return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+		},
+		DeleteStoragePoolVolumeFunc: func(pool string, volType string, name string) error {
 			return nil
 		},
 		UpdateInstanceStateFunc: func(name string, state incusapi.InstanceStatePut, ETag string) (incusclient.Operation, error) {
@@ -541,6 +558,157 @@ func resetKeysAllowableValues(t *testing.T, secureBoot *schemas.SecureBoot) []pr
 	require.NoError(t, err)
 
 	return resource.Actions.ResetKeys.AllowableValues
+}
+
+const virtualMediaPath = "/redfish/v1/Managers/bmc1/VirtualMedia/CD"
+
+func conformanceVirtualMediaInsert(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("image"))
+	}))
+	t.Cleanup(image.Close)
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+	method, target, body := insertRequest(t, client, image.URL)
+
+	payload, err := json.Marshal(body)
+	require.NoError(t, err)
+
+	resp, err := client.RunRawRequestWithHeaders(method, target, bytes.NewReader(payload), "application/json", nil)
+	require.NoError(t, err)
+	resp.Body.Close()
+
+	location := resp.Header.Get("Location")
+	for range 100 {
+		if location == "" {
+			break
+		}
+
+		resp, err = client.Get(location)
+		require.NoError(t, err)
+		resp.Body.Close()
+
+		if resp.StatusCode != http.StatusAccepted {
+			break
+		}
+
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	require.Equal(t, new(true), getVirtualMedia(t, client).Inserted, "virtual media is inserted through %s %s", method, target)
+}
+
+// insertRequest picks the insert request with the rules of Operations Center: the standard action, an OEM action or a PATCH.
+func insertRequest(t *testing.T, client *gofish.APIClient, image string) (string, string, map[string]any) {
+	t.Helper()
+
+	actions := virtualMediaActions(t, client)
+
+	standard := actions.InsertMedia.Target
+	if standard != "" {
+		return http.MethodPost, standard, map[string]any{"Image": image}
+	}
+
+	oem := findOEMInsertTarget(actions.Oem, 3)
+	if oem != "" {
+		return http.MethodPost, oem, map[string]any{"Image": image}
+	}
+
+	return http.MethodPatch, virtualMediaPath, map[string]any{"Image": image, "Inserted": true}
+}
+
+func conformanceVirtualMediaHiddenPaths(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+	actions := virtualMediaActions(t, client)
+
+	standard := p.VirtualMedia.Insert == profile.MediaInsertStandard
+	require.Equal(t, standard, actions.InsertMedia.Target != "", "the standard action is only published for standard")
+	require.Equal(t, p.VirtualMedia.Insert == profile.MediaInsertOEM, findOEMInsertTarget(actions.Oem, 3) != "", "the OEM action is only published for oem")
+
+	if standard {
+		return
+	}
+
+	for _, path := range []string{virtualMediaPath + "/InsertMediaActionInfo", virtualMediaPath + "/Actions/VirtualMedia.InsertMedia"} {
+		method := http.MethodGet
+		if strings.HasSuffix(path, "InsertMedia") {
+			method = http.MethodPost
+		}
+
+		resp, err := client.RunRawRequestWithHeaders(method, path, strings.NewReader(`{"Image":"http://localhost/image.iso"}`), "application/json", nil)
+		if resp != nil {
+			resp.Body.Close()
+		}
+
+		redfishErr := &schemas.Error{}
+		require.ErrorAs(t, err, &redfishErr, path)
+		require.Equal(t, http.StatusNotFound, redfishErr.HTTPReturnedStatusCode, path)
+	}
+}
+
+type virtualMediaActionsResource struct {
+	InsertMedia struct {
+		Target string `json:"target"`
+	} `json:"#VirtualMedia.InsertMedia"`
+	Oem map[string]any `json:"Oem"`
+}
+
+func virtualMediaActions(t *testing.T, client *gofish.APIClient) virtualMediaActionsResource {
+	t.Helper()
+
+	var resource struct {
+		Actions virtualMediaActionsResource `json:"Actions"`
+	}
+
+	err := json.Unmarshal(getVirtualMedia(t, client).RawData, &resource)
+	require.NoError(t, err)
+
+	return resource.Actions
+}
+
+// findOEMInsertTarget searches the OEM actions for one named InsertVirtualMedia, like Operations Center does.
+func findOEMInsertTarget(oem map[string]any, depth int) string {
+	if depth <= 0 {
+		return ""
+	}
+
+	for name, value := range oem {
+		member, ok := value.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if !strings.HasPrefix(name, "#") {
+			target := findOEMInsertTarget(member, depth-1)
+			if target != "" {
+				return target
+			}
+
+			continue
+		}
+
+		target, ok := member["target"].(string)
+		if strings.HasSuffix(name, ".InsertVirtualMedia") && ok {
+			return target
+		}
+	}
+
+	return ""
+}
+
+func getVirtualMedia(t *testing.T, client *gofish.APIClient) *schemas.VirtualMedia {
+	t.Helper()
+
+	virtualMedia, err := schemas.GetVirtualMedia(client, virtualMediaPath)
+	require.NoError(t, err)
+
+	return virtualMedia
 }
 
 // writeAndApply writes the attributes and resets the instance, if the profile stages them.

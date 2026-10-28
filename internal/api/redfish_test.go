@@ -2830,6 +2830,134 @@ func TestRedfishServer_PatchBiosAttributes_Pending(t *testing.T) {
 	}
 }
 
+func TestRedfishServer_VirtualMediaActions(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		insert profile.MediaInsert
+
+		wantActions string
+	}{
+		{
+			insert: profile.MediaInsertStandard,
+
+			wantActions: `{
+				"#VirtualMedia.EjectMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"},
+				"#VirtualMedia.InsertMedia": {
+					"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia",
+					"@Redfish.ActionInfo": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/InsertMediaActionInfo"
+				}
+			}`,
+		},
+		{
+			insert: profile.MediaInsertOEM,
+
+			wantActions: `{
+				"#VirtualMedia.EjectMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"},
+				"Oem": {"Incus": {"#IncusVirtualMedia.InsertVirtualMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/Oem/IncusVirtualMedia.InsertVirtualMedia"}}}
+			}`,
+		},
+		{
+			insert: profile.MediaInsertPatch,
+
+			wantActions: `{
+				"#VirtualMedia.EjectMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"}
+			}`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(string(tc.insert), func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.VirtualMedia.Insert = tc.insert
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+			virtualMedia, err := schemas.GetVirtualMedia(client, "/redfish/v1/Managers/bmc1/VirtualMedia/CD")
+			require.NoError(t, err, "get the virtual media")
+
+			var resource struct {
+				Actions json.RawMessage
+			}
+
+			err = json.Unmarshal(virtualMedia.RawData, &resource)
+			require.NoError(t, err, "decode the virtual media")
+
+			require.JSONEq(t, tc.wantActions, string(resource.Actions), "the actions match the insert style of the profile")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaInsertTask(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		imageStatus int
+
+		wantState    schemas.TaskState
+		wantInserted bool
+	}{
+		{name: "success", imageStatus: http.StatusOK, wantState: schemas.CompletedTaskState, wantInserted: true},
+		{name: "error - image not found", imageStatus: http.StatusNotFound, wantState: schemas.ExceptionTaskState, wantInserted: false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			release := make(chan struct{})
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				<-release
+				w.WriteHeader(tc.imageStatus)
+			}))
+			t.Cleanup(image.Close)
+
+			p, err := profile.Load("oem-media")
+			require.NoError(t, err, "load the profile")
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			const target = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/Oem/IncusVirtualMedia.InsertVirtualMedia"
+
+			resp, err := client.Post(target, map[string]any{"Image": image.URL})
+			require.NoError(t, err, "insert the media")
+			resp.Body.Close()
+			require.Equal(t, http.StatusAccepted, resp.StatusCode, "the insert answers with a task")
+
+			location := resp.Header.Get("Location")
+
+			resp, err = client.Post(target, map[string]any{"Image": image.URL})
+			closeBody(resp)
+
+			redfishErr := &schemas.Error{}
+			require.ErrorAs(t, err, &redfishErr, "the second insert fails with a Redfish error")
+			require.Equal(t, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "a second insert waits for the first")
+
+			close(release)
+
+			require.Eventually(t, func() bool {
+				resp, err := client.Get(location)
+				require.NoError(t, err, "poll the task monitor")
+				resp.Body.Close()
+
+				return resp.StatusCode == http.StatusOK
+			}, 5*time.Second, 10*time.Millisecond, "the insert task ends")
+
+			task, err := schemas.GetTask(client, location)
+			require.NoError(t, err, "get the task")
+
+			virtualMedia, err := schemas.GetVirtualMedia(client, "/redfish/v1/Managers/bmc1/VirtualMedia/CD")
+			require.NoError(t, err, "get the virtual media")
+
+			require.Equal(t, tc.wantState, task.TaskState, "state of the insert task")
+			require.Equal(t, new(tc.wantInserted), virtualMedia.Inserted, "the media is inserted only if the image is available")
+		})
+	}
+}
+
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
 	client := setup(t, &mock.IncusClientMock{})
 
