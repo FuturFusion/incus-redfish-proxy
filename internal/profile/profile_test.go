@@ -397,6 +397,38 @@ func TestLoad_SecureBoot(t *testing.T) {
 	}
 }
 
+func TestLoad_VirtualMedia(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		virtualMedia string
+
+		assertErr require.ErrorAssertionFunc
+	}{
+		{name: "success - oem with task", virtualMedia: "{insert: oem, oem_vendor: Test, oem_action: InsertVirtualMedia, insert_response: 202-task}", assertErr: require.NoError},
+		{name: "success - patch", virtualMedia: "{insert: patch}", assertErr: require.NoError},
+		{name: "error - unknown insert", virtualMedia: "{insert: upload}", assertErr: require.Error},
+		{name: "error - oem vendor not usable in a URI", virtualMedia: "{insert: oem, oem_vendor: a/b}", assertErr: require.Error},
+		{name: "error - empty oem action", virtualMedia: "{insert: oem, oem_action: \"\"}", assertErr: require.Error},
+		{name: "error - unknown insert response", virtualMedia: "{insert_response: \"200\"}", assertErr: require.Error},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\nvirtual_media: "+tc.virtualMedia+"\n"), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			_, err = profile.Load(filename)
+			tc.assertErr(t, err, "load the profile")
+		})
+	}
+}
+
 func TestErrorShape_Validate(t *testing.T) {
 	tests := []struct {
 		name  string
