@@ -1969,6 +1969,14 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
+			url:    "/redfish/v1/Unknown",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/TaskService/Tasks",
+		},
+		{
+			method: http.MethodGet,
 			url:    "/redfish/v1/Systems/invalid",
 		},
 		{
@@ -2519,6 +2527,51 @@ func TestRedfishServer_PatchSyntheticBiosAttributes(t *testing.T) {
 			require.Equal(t, tc.wantMessageID, answer.messageID, "message of a refused attribute")
 			require.Equal(t, tc.wantRelatedProperties, answer.relatedProperties, "the message names the refused attribute")
 			require.Equal(t, tc.wantConfigs, updatedConfigs(incusClient), "only an accepted PATCH writes the instance")
+		})
+	}
+}
+
+func TestRedfishServer_PatchBiosAttributes_PatchResponse(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		patchResponse profile.PatchResponse
+
+		wantStatus   int
+		wantLocation string
+	}{
+		{patchResponse: profile.PatchResponseTaskMonitor, wantStatus: http.StatusAccepted, wantLocation: "^/redfish/v1/TaskMonitors/"},
+		{patchResponse: profile.PatchResponseTask, wantStatus: http.StatusAccepted, wantLocation: "^/redfish/v1/TaskService/Tasks/"},
+		{patchResponse: profile.PatchResponseOK, wantStatus: http.StatusOK, wantLocation: "^$"},
+		{patchResponse: profile.PatchResponseNoContent, wantStatus: http.StatusNoContent, wantLocation: "^$"},
+	}
+
+	for _, tc := range tests {
+		t.Run(string(tc.patchResponse), func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.BIOS.PatchResponse = tc.patchResponse
+			p.BIOS.TaskResource = true
+
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{"incus.config.foo": "bar"}})
+			require.NoError(t, err, "patch the BIOS settings")
+			resp.Body.Close()
+
+			require.Equal(t, tc.wantStatus, resp.StatusCode, "status of the PATCH")
+			require.Len(t, incusClient.UpdateInstanceCalls(), 1, "the PATCH writes the instance once")
+			require.Regexp(t, tc.wantLocation, resp.Header.Get("Location"), "only a task answer has a location")
 		})
 	}
 }
