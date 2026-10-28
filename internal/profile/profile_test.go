@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -425,6 +426,76 @@ func TestLoad_VirtualMedia(t *testing.T) {
 
 			_, err = profile.Load(filename)
 			tc.assertErr(t, err, "load the profile")
+		})
+	}
+}
+
+func TestLoad_Power(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		sections string
+
+		assertErr      require.ErrorAssertionFunc
+		wantWindow     time.Duration
+		wantScaled     time.Duration
+		wantResetTypes []profile.ResetType
+		wantWarnings   int
+	}{
+		{
+			name:     "success - defaults",
+			sections: "",
+
+			assertErr:      require.NoError,
+			wantResetTypes: []profile.ResetType{},
+		},
+		{
+			name:     "success - window scaled",
+			sections: "power: {reset_types: [On, ForceOff], response: 202-task, not_settled_window: 20s, delay: 1m}\ntiming: {scale: 0.1}",
+
+			assertErr:      require.NoError,
+			wantWindow:     20 * time.Second,
+			wantScaled:     2 * time.Second,
+			wantResetTypes: []profile.ResetType{profile.ResetTypeOn, profile.ResetTypeForceOff},
+		},
+		{
+			name:     "success - error OC does not recognize",
+			sections: "power: {not_settled_window: 5s, not_settled_error: {status: 409, message_id: Base.1.18.ResourceInUse}}",
+
+			assertErr:      require.NoError,
+			wantWindow:     5 * time.Second,
+			wantScaled:     5 * time.Second,
+			wantResetTypes: []profile.ResetType{},
+			wantWarnings:   1,
+		},
+		{name: "error - unknown reset type", sections: "power: {reset_types: [Nmi]}", assertErr: require.Error},
+		{name: "error - unknown response", sections: "power: {response: \"200\"}", assertErr: require.Error},
+		{name: "error - duration without unit", sections: "power: {delay: 5}", assertErr: require.Error},
+		{name: "error - negative window", sections: "power: {not_settled_window: -1s}", assertErr: require.Error},
+		{name: "error - negative delay", sections: "power: {delay: -1s}", assertErr: require.Error},
+		{name: "error - malformed error", sections: "power: {not_settled_error: {status: 200, message_id: Base.1.18.ResourceInStandby}}", assertErr: require.Error},
+		{name: "error - zero scale", sections: "timing: {scale: 0}", assertErr: require.Error},
+		{name: "error - NaN scale", sections: "timing: {scale: .nan}", assertErr: require.Error},
+		{name: "error - infinite scale", sections: "timing: {scale: .inf}", assertErr: require.Error},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\n"+tc.sections+"\n"), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			p, err := profile.Load(filename)
+			tc.assertErr(t, err, "load the profile")
+
+			require.Equal(t, tc.wantWindow, p.Power.NotSettledWindow, "the not settled window")
+			require.Equal(t, tc.wantScaled, p.Scaled(p.Power.NotSettledWindow), "the window is multiplied by timing.scale")
+			require.Equal(t, tc.wantResetTypes, p.Power.ResetTypes, "the supported reset types")
+			require.Len(t, p.Warnings(), tc.wantWarnings, "the number of warnings")
 		})
 	}
 }

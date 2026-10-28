@@ -38,6 +38,8 @@ type Profile struct {
 	BIOS         BIOS         `yaml:"bios"`
 	SecureBoot   SecureBoot   `yaml:"secure_boot"`
 	VirtualMedia VirtualMedia `yaml:"virtual_media"`
+	Power        Power        `yaml:"power"`
+	Timing       Timing       `yaml:"timing"`
 }
 
 // Default returns the generic profile, which reproduces the behavior of the proxy before profiles existed.
@@ -82,6 +84,14 @@ func defaults() Profile {
 			OEMVendor:      "Incus",
 			OEMAction:      "InsertVirtualMedia",
 			InsertResponse: InsertResponseNoContent,
+		},
+		Power: Power{
+			ResetTypes:      []ResetType{},
+			Response:        PowerResponseNoContent,
+			NotSettledError: ErrorShape{Status: 400, MessageID: "Base.1.18.ResourceInStandby"},
+		},
+		Timing: Timing{
+			Scale: 1,
 		},
 	}
 }
@@ -198,5 +208,15 @@ func (p Profile) Validate() error {
 		return err
 	}
 
-	return p.VirtualMedia.validate()
+	err = p.VirtualMedia.validate()
+	if err != nil {
+		return err
+	}
+
+	err = p.Power.validate()
+	if err != nil {
+		return err
+	}
+
+	return p.Timing.validate()
 }

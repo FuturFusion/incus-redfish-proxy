@@ -45,6 +45,9 @@ type VirtualMedia struct {
 
 	// InsertResponse applies to the insert actions. A PATCH always answers 204.
 	InsertResponse InsertResponse `yaml:"insert_response"`
+
+	// BootOverrideOnce offers BootSourceOverrideEnabled Once. Without, only Continuous is offered, as before profiles existed.
+	BootOverrideOnce bool `yaml:"boot_override_once"`
 }
 
 func (v VirtualMedia) validate() error {
