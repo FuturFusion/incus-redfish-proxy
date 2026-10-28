@@ -18,6 +18,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -2954,6 +2955,210 @@ func TestRedfishServer_VirtualMediaInsertTask(t *testing.T) {
 
 			require.Equal(t, tc.wantState, task.TaskState, "state of the insert task")
 			require.Equal(t, new(tc.wantInserted), virtualMedia.Inserted, "the media is inserted only if the image is available")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaLock(t *testing.T) {
+	t.Parallel()
+
+	const virtualMediaPath = "/redfish/v1/Managers/bmc1/VirtualMedia/CD"
+
+	tests := []struct {
+		name string
+		send func(client *gofish.APIClient, image string) (*http.Response, error)
+	}{
+		{
+			name: "error - insert action",
+			send: func(client *gofish.APIClient, image string) (*http.Response, error) {
+				return client.Post(virtualMediaPath+"/Actions/VirtualMedia.InsertMedia", map[string]any{"Image": image})
+			},
+		},
+		{
+			name: "error - insert by PATCH",
+			send: func(client *gofish.APIClient, image string) (*http.Response, error) {
+				return client.Patch(virtualMediaPath, map[string]any{"Inserted": true, "Image": image})
+			},
+		},
+		{
+			name: "error - eject by PATCH",
+			send: func(client *gofish.APIClient, _ string) (*http.Response, error) {
+				return client.Patch(virtualMediaPath, map[string]any{"Inserted": false})
+			},
+		},
+		{
+			name: "error - eject action",
+			send: func(client *gofish.APIClient, _ string) (*http.Response, error) {
+				return client.Post(virtualMediaPath+"/Actions/VirtualMedia.EjectMedia", map[string]any{})
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			release := make(chan struct{})
+			var requested atomic.Bool
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Only the insert in the background waits, a request without the lock fails and does not block the test.
+				if !requested.Swap(true) {
+					<-release
+				}
+
+				w.WriteHeader(http.StatusNotFound)
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.InsertResponse = profile.InsertResponseTask
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			resp, err := client.Post(virtualMediaPath+"/Actions/VirtualMedia.InsertMedia", map[string]any{"Image": image.URL})
+			require.NoError(t, err, "insert the media")
+			resp.Body.Close()
+			require.Equal(t, http.StatusAccepted, resp.StatusCode, "the insert runs in the background")
+
+			location := resp.Header.Get("Location")
+
+			// Run test
+			resp, err = tc.send(client, image.URL)
+			closeBody(resp)
+
+			close(release)
+
+			// Assert
+			redfishErr := &schemas.Error{}
+			require.ErrorAs(t, err, &redfishErr, "the request fails with a Redfish error")
+			require.Equal(t, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "the request waits for the insert in the background")
+			require.ErrorContains(t, err, "being inserted or ejected", "the error names the reason")
+
+			require.Eventually(t, func() bool {
+				resp, err := client.Get(location)
+				require.NoError(t, err, "poll the task monitor")
+				resp.Body.Close()
+
+				return resp.StatusCode == http.StatusOK
+			}, 5*time.Second, 10*time.Millisecond, "the insert in the background ends")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaPatchInsert(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		insert profile.MediaInsert
+
+		wantStatus int
+	}{
+		{name: "success - standard", insert: profile.MediaInsertStandard, wantStatus: http.StatusNoContent},
+		{name: "success - patch", insert: profile.MediaInsertPatch, wantStatus: http.StatusNoContent},
+		{name: "error - oem", insert: profile.MediaInsertOEM, wantStatus: http.StatusBadRequest},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("image"))
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.Insert = tc.insert
+			p.VirtualMedia.OEMVendor = "Incus"
+			p.VirtualMedia.OEMAction = "InsertVirtualMedia"
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			// Run test
+			resp, err := client.Patch("/redfish/v1/Managers/bmc1/VirtualMedia/CD", map[string]any{"Inserted": true, "Image": image.URL})
+			status := responseStatus(t, resp, err)
+
+			// Assert
+			require.Equal(t, tc.wantStatus, status, "a PATCH only inserts, where the profile offers it")
+		})
+	}
+}
+
+func TestRedfishServer_ResetTask(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		stateErr error
+
+		wantState  schemas.TaskState
+		wantStatus string
+	}{
+		{name: "success", stateErr: nil, wantState: schemas.CompletedTaskState, wantStatus: "Running"},
+		{name: "error - start fails", stateErr: boom.Error, wantState: schemas.ExceptionTaskState, wantStatus: "Stopped"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.Power.Response = profile.PowerResponseTask
+
+			release := make(chan struct{})
+
+			incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+			updateInstanceState := incusClient.UpdateInstanceStateFunc
+			incusClient.UpdateInstanceStateFunc = func(name string, state incusapi.InstanceStatePut, ETag string) (incusclient.Operation, error) {
+				<-release
+
+				if tc.stateErr != nil {
+					return nil, tc.stateErr
+				}
+
+				return updateInstanceState(name, state, ETag)
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			const target = "/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset"
+
+			resp, err := client.Post(target, map[string]any{"ResetType": "On"})
+			require.NoError(t, err, "reset the system")
+			resp.Body.Close()
+			require.Equal(t, http.StatusAccepted, resp.StatusCode, "the reset answers with a task")
+
+			location := resp.Header.Get("Location")
+
+			resp, err = client.Post(target, map[string]any{"ResetType": "On"})
+			closeBody(resp)
+
+			redfishErr := &schemas.Error{}
+			require.ErrorAs(t, err, &redfishErr, "the second reset fails with a Redfish error")
+			require.Equal(t, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "a second reset waits for the first")
+			require.Equal(t, "Base.1.18.ResourceInUse", redfishErr.ExtendedInfos[0].MessageID, "the message tells that the system is in use")
+
+			close(release)
+
+			require.Eventually(t, func() bool {
+				resp, err := client.Get(location)
+				require.NoError(t, err, "poll the task monitor")
+				resp.Body.Close()
+
+				return resp.StatusCode == http.StatusOK
+			}, 5*time.Second, 10*time.Millisecond, "the reset task ends")
+
+			task, err := schemas.GetTask(client, location)
+			require.NoError(t, err, "get the task")
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			require.Equal(t, tc.wantState, task.TaskState, "state of the reset task")
+			require.Equal(t, tc.wantStatus, instance.Status, "the instance runs only if the start succeeds")
 		})
 	}
 }

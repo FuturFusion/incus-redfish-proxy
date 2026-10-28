@@ -61,8 +61,13 @@ type redfishServer struct {
 	// powerMu serializes the resets and the power hooks, which apply the staged BIOS attributes.
 	powerMu *sync.Mutex
 
-	// insertMu is held while virtual media is inserted in the background.
-	insertMu *sync.Mutex
+	// mediaMu serializes the inserts and ejects of the virtual media, they share the mount point and the volume.
+	mediaMu *sync.Mutex
+
+	// resetMu is held while a reset runs in the background.
+	resetMu *sync.Mutex
+
+	now func() time.Time
 }
 
 // Option customizes the Redfish server.
@@ -100,6 +105,15 @@ func WithProfile(p profile.Profile) Option {
 	}
 }
 
+// WithClock sets the clock of the server, defaults to time.Now.
+func WithClock(now func() time.Time) Option {
+	return func(s *redfishServer) {
+		if now != nil {
+			s.now = now
+		}
+	}
+}
+
 var _ ServerInterface = (*redfishServer)(nil)
 
 func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *redfishServer {
@@ -112,7 +126,9 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		tasks:        &taskRegistry{},
 		profile:      profile.Default(),
 		powerMu:      &sync.Mutex{},
-		insertMu:     &sync.Mutex{},
+		mediaMu:      &sync.Mutex{},
+		resetMu:      &sync.Mutex{},
+		now:          time.Now,
 	}
 
 	for _, opt := range opts {
@@ -123,6 +139,10 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 
 	if s.profile.BIOS.Pending {
 		s.resets.onPowerOn(s.applyPendingOnPowerOn)
+	}
+
+	if s.profile.VirtualMedia.BootOverrideOnce {
+		s.resets.onPowerOn(func(context.Context, powerEvent) error { return s.consumeBootOnce() })
 	}
 
 	if s.events != nil {
@@ -404,7 +424,13 @@ func (s redfishServer) registerVirtualMediaRoutes(mux *http.ServeMux) {
 
 // insertAndRespond inserts the image of an insert action and answers the way the profile asks for.
 func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, image string) {
+	if !s.lockMedia(w) {
+		return
+	}
+
 	if s.profile.VirtualMedia.InsertResponse != profile.InsertResponseTask {
+		defer s.mediaMu.Unlock()
+
 		err := s.insertVirtualMedia(r.Context(), image)
 		if err != nil {
 			respondStatusError(w, err)
@@ -416,16 +442,11 @@ func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, 
 		return
 	}
 
-	if !s.insertMu.TryLock() {
-		responseErrWithMessage(w, http.StatusConflict, "virtual media is being inserted")
-		return
-	}
-
 	taskID := s.tasks.create(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName), TaskV174TaskStateRunning)
 
 	// The insert outlives the request, so it stops with the server context.
 	go func() {
-		defer s.insertMu.Unlock()
+		defer s.mediaMu.Unlock()
 
 		err := s.insertVirtualMedia(s.ctx, image)
 		if err != nil {
@@ -437,6 +458,16 @@ func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, 
 	}()
 
 	responseAccepted(w, taskMonitorPath(taskID))
+}
+
+// lockMedia locks the virtual media. It answers 409, if another insert or eject runs.
+func (s redfishServer) lockMedia(w http.ResponseWriter) bool {
+	if !s.mediaMu.TryLock() {
+		responseErrWithMessage(w, http.StatusConflict, "virtual media is being inserted or ejected")
+		return false
+	}
+
+	return true
 }
 
 // virtualMediaGetResponse overrides the Actions field of the generated
@@ -478,6 +509,17 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		responseErrWithMessage(w, http.StatusBadRequest, "virtual media image is required")
 		return
 	}
+
+	if *request.Inserted && s.profile.VirtualMedia.Insert == profile.MediaInsertOEM {
+		responseErrWithMessage(w, http.StatusBadRequest, "virtual media is only inserted through the OEM action")
+		return
+	}
+
+	if !s.lockMedia(w) {
+		return
+	}
+
+	defer s.mediaMu.Unlock()
 
 	if !*request.Inserted {
 		err = s.ejectVirtualMedia()
@@ -631,40 +673,79 @@ func (s redfishServer) insertVirtualMedia(ctx context.Context, image string) err
 	return nil
 }
 
-func bootMediaOverride(instance *incusapi.Instance) bool {
-	return instance.Devices["boot-media"]["boot.priority"] != ""
+// bootOnceKey marks a boot override that the next power on drops.
+const bootOnceKey = redfishConfigPrefix + "boot.once"
+
+// bootOverride returns the boot override in effect. The one time marker tells Once from Continuous.
+func bootOverride(instance *incusapi.Instance) ComputerSystemV1290BootSourceOverrideEnabled {
+	if instance.Devices["boot-media"]["boot.priority"] == "" {
+		return ComputerSystemV1290BootSourceOverrideEnabledDisabled
+	}
+
+	_, once := instance.Config[bootOnceKey]
+	if once {
+		return ComputerSystemV1290BootSourceOverrideEnabledOnce
+	}
+
+	return ComputerSystemV1290BootSourceOverrideEnabledContinuous
 }
 
-func (s redfishServer) setBootMediaOverride(enabled bool) error {
-	instance, etag, err := s.client.GetInstance(s.instanceName)
-	if err != nil {
-		return err
-	}
+func (s redfishServer) setBootOverride(enabled ComputerSystemV1290BootSourceOverrideEnabled) error {
+	return s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		if bootOverride(instance) == enabled {
+			return false, nil
+		}
 
-	if bootMediaOverride(instance) == enabled {
-		return nil
-	}
+		device, inserted := put.Devices["boot-media"]
+		if !inserted {
+			return false, statusErrorf(http.StatusConflict, "no virtual media is inserted")
+		}
 
-	device, inserted := instance.Devices["boot-media"]
-	if !inserted {
-		return statusErrorf(http.StatusConflict, "no virtual media is inserted")
-	}
+		*put = clonePut(*put)
+		if put.Config == nil {
+			put.Config = map[string]string{}
+		}
 
-	device = cloneStringMap(device)
-	if enabled {
-		device["boot.priority"] = "10"
-	} else {
+		device = cloneStringMap(device)
 		delete(device, "boot.priority")
-	}
+		delete(put.Config, bootOnceKey)
 
-	instance.Devices["boot-media"] = device
+		switch enabled {
+		case ComputerSystemV1290BootSourceOverrideEnabledOnce:
+			device["boot.priority"] = "10"
+			put.Config[bootOnceKey] = "pending"
 
-	op, err := s.client.UpdateInstance(s.instanceName, instance.Writable(), etag)
-	if err != nil {
-		return err
-	}
+		case ComputerSystemV1290BootSourceOverrideEnabledContinuous:
+			device["boot.priority"] = "10"
+		}
 
-	return op.Wait()
+		put.Devices["boot-media"] = device
+
+		return true, nil
+	})
+}
+
+// consumeBootOnce drops a one time boot override after the power on it was set for.
+// QEMU keeps the boot order of the running VM, but the config change makes the next guest reboot a full restart, which no longer boots the media.
+func (s redfishServer) consumeBootOnce() error {
+	return s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		_, once := put.Config[bootOnceKey]
+		if !once {
+			return false, nil
+		}
+
+		*put = clonePut(*put)
+		delete(put.Config, bootOnceKey)
+
+		device, inserted := put.Devices["boot-media"]
+		if inserted {
+			device = cloneStringMap(device)
+			delete(device, "boot.priority")
+			put.Devices["boot-media"] = device
+		}
+
+		return true, nil
+	})
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -679,6 +760,12 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
 		return
 	}
+
+	if !s.lockMedia(w) {
+		return
+	}
+
+	defer s.mediaMu.Unlock()
 
 	err := s.ejectVirtualMedia()
 	if err != nil {
@@ -955,25 +1042,26 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 	}
 
 	boot := systemBoot{
-		BootSourceOverrideEnabled:                ComputerSystemV1290BootSourceOverrideEnabledDisabled,
-		BootSourceOverrideEnabledAllowableValues: bootSourceOverrideEnabledValues,
+		BootSourceOverrideEnabled:                bootOverride(instance),
+		BootSourceOverrideEnabledAllowableValues: s.bootSourceOverrideEnabledValues(),
 		BootSourceOverrideTarget:                 ComputerSystemBootSourceNone,
 		BootSourceOverrideTargetAllowableValues:  bootSourceOverrideTargetValues,
 	}
 
-	if bootMediaOverride(instance) {
-		boot.BootSourceOverrideEnabled = ComputerSystemV1290BootSourceOverrideEnabledContinuous
+	if boot.BootSourceOverrideEnabled != ComputerSystemV1290BootSourceOverrideEnabledDisabled {
 		boot.BootSourceOverrideTarget = ComputerSystemBootSourceCd
 	}
 
-	response(w, computerSystemGetResponse{Boot: boot, ComputerSystemV1290ComputerSystem: ComputerSystemV1290ComputerSystem{
+	actions := &computerSystemActions{
+		Reset: resetAction{
+			Target:          fmt.Sprintf("/redfish/v1/Systems/%s/Actions/ComputerSystem.Reset", s.instanceName),
+			AllowableValues: s.profile.Power.ResetTypes,
+		},
+	}
+
+	response(w, computerSystemGetResponse{Boot: boot, Actions: actions, ComputerSystemV1290ComputerSystem: ComputerSystemV1290ComputerSystem{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName)),
 		OdataType: ref("#ComputerSystem.v1_29_0.ComputerSystem"),
-		Actions: &ComputerSystemV1290Actions{
-			HashComputerSystemReset: &ComputerSystemV1290Reset{
-				Target: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Actions/ComputerSystem.Reset", s.instanceName)),
-			},
-		},
 		Bios: &OdataV4IdRef{
 			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
 		},
@@ -1060,7 +1148,18 @@ func bootProgress(since *time.Time) *ComputerSystemV1290ComputerSystem_BootProgr
 
 type computerSystemGetResponse struct {
 	ComputerSystemV1290ComputerSystem
-	Boot systemBoot `json:"Boot"`
+	Boot    systemBoot             `json:"Boot"`
+	Actions *computerSystemActions `json:"Actions,omitempty"`
+}
+
+// computerSystemActions replaces ComputerSystemV1290Actions, which has no allowable values for the reset action.
+type computerSystemActions struct {
+	Reset resetAction `json:"#ComputerSystem.Reset"`
+}
+
+type resetAction struct {
+	Target          string              `json:"target"`
+	AllowableValues []profile.ResetType `json:"ResetType@Redfish.AllowableValues,omitempty"`
 }
 
 type systemBoot struct {
@@ -1070,10 +1169,19 @@ type systemBoot struct {
 	BootSourceOverrideTargetAllowableValues  []ComputerSystemBootSource                     `json:"BootSourceOverrideTarget@Redfish.AllowableValues"`
 }
 
-// A one time override is not offered, Incus can not drop it while the instance is running.
-var bootSourceOverrideEnabledValues = []ComputerSystemV1290BootSourceOverrideEnabled{
-	ComputerSystemV1290BootSourceOverrideEnabledDisabled,
-	ComputerSystemV1290BootSourceOverrideEnabledContinuous,
+func (s redfishServer) bootSourceOverrideEnabledValues() []ComputerSystemV1290BootSourceOverrideEnabled {
+	if s.profile.VirtualMedia.BootOverrideOnce {
+		return []ComputerSystemV1290BootSourceOverrideEnabled{
+			ComputerSystemV1290BootSourceOverrideEnabledDisabled,
+			ComputerSystemV1290BootSourceOverrideEnabledOnce,
+			ComputerSystemV1290BootSourceOverrideEnabledContinuous,
+		}
+	}
+
+	return []ComputerSystemV1290BootSourceOverrideEnabled{
+		ComputerSystemV1290BootSourceOverrideEnabledDisabled,
+		ComputerSystemV1290BootSourceOverrideEnabledContinuous,
+	}
 }
 
 var bootSourceOverrideTargetValues = []ComputerSystemBootSource{
@@ -1111,10 +1219,9 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 		return
 	}
 
-	enabled := ComputerSystemV1290BootSourceOverrideEnabledDisabled
+	enabled := bootOverride(instance)
 	target := ComputerSystemBootSourceNone
-	if bootMediaOverride(instance) {
-		enabled = ComputerSystemV1290BootSourceOverrideEnabledContinuous
+	if enabled != ComputerSystemV1290BootSourceOverrideEnabledDisabled {
 		target = ComputerSystemBootSourceCd
 	}
 
@@ -1126,7 +1233,7 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 		target = *request.Boot.BootSourceOverrideTarget
 	}
 
-	if !slices.Contains(bootSourceOverrideEnabledValues, enabled) {
+	if !slices.Contains(s.bootSourceOverrideEnabledValues(), enabled) {
 		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideEnabled value %q is not supported", enabled))
 		return
 	}
@@ -1137,13 +1244,13 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 	}
 
 	// A disabled override ignores the target, an enabled one needs it.
-	override := enabled == ComputerSystemV1290BootSourceOverrideEnabledContinuous
+	override := enabled != ComputerSystemV1290BootSourceOverrideEnabledDisabled
 	if override && target != ComputerSystemBootSourceCd {
 		responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("BootSourceOverrideEnabled %q requires BootSourceOverrideTarget %q", enabled, ComputerSystemBootSourceCd))
 		return
 	}
 
-	err = s.setBootMediaOverride(override)
+	err = s.setBootOverride(enabled)
 	if err != nil {
 		respondStatusError(w, err)
 		return
@@ -1174,6 +1281,18 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 	if request.ResetType == nil {
 		responseErrWithMessage(w, http.StatusBadRequest, "reset type is required")
+		return
+	}
+
+	if len(s.profile.Power.ResetTypes) > 0 && !slices.Contains(s.profile.Power.ResetTypes, profile.ResetType(*request.ResetType)) {
+		message := fmt.Sprintf("reset type %q is not supported", *request.ResetType)
+		responseRedfishError(w, http.StatusBadRequest, message, redfishMessage{
+			MessageID:         baseRegistry + "ActionParameterValueNotInList",
+			Message:           message,
+			MessageArgs:       []string{string(*request.ResetType), "ResetType", "ComputerSystem.Reset"},
+			RelatedProperties: []string{"#/ResetType"},
+		})
+
 		return
 	}
 
@@ -1211,40 +1330,107 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		return
 	}
 
+	if s.profile.Power.Response != profile.PowerResponseTask {
+		err = s.reset(r.Context(), action, force, noopStatus)
+		if err != nil {
+			respondStatusError(w, err)
+			return
+		}
+
+		responseNoContent(w)
+
+		return
+	}
+
+	if !s.resetMu.TryLock() {
+		message := "a reset is in progress"
+		responseRedfishError(w, http.StatusConflict, message, redfishMessage{MessageID: baseRegistry + "ResourceInUse", Message: message})
+
+		return
+	}
+
+	taskID := s.tasks.create(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName), TaskV174TaskStateRunning)
+
+	// The reset outlives the request, so it stops with the server context.
+	go func() {
+		defer s.resetMu.Unlock()
+
+		err := s.reset(s.ctx, action, force, noopStatus)
+		if err != nil {
+			s.tasks.fail(taskID, errorMessages(err)...)
+			return
+		}
+
+		s.tasks.complete(taskID)
+	}()
+
+	responseAccepted(w, taskMonitorPath(taskID))
+}
+
+// reset waits the delay of the profile and changes the power state, unless the instance is in noopStatus already.
+func (s redfishServer) reset(ctx context.Context, action string, force bool, noopStatus string) error {
+	err := s.wait(ctx, s.profile.Scaled(s.profile.Power.Delay))
+	if err != nil {
+		return err
+	}
+
 	s.powerMu.Lock()
 	defer s.powerMu.Unlock()
 
 	applyOnReset := s.profile.BIOS.Pending || !s.profile.SecureBoot.EnableRequiresPowerOff
 
 	if noopStatus != "" || applyOnReset {
-		instance, _, err := s.client.GetInstance(computerSystemID)
+		instance, _, err := s.client.GetInstance(s.instanceName)
 		if err != nil {
-			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-			return
+			return err
 		}
 
 		if instance.Status == noopStatus {
-			responseNoContent(w)
-			return
+			return nil
 		}
 
 		// Firmware applies staged settings on the next boot, so a power off leaves them staged.
 		if applyOnReset && action != "stop" {
 			action, err = s.applyPendingOnReset(instance, action, force)
 			if err != nil {
-				responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-				return
+				return err
 			}
 		}
 	}
 
 	err = s.changeInstanceState(action, force)
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
+	if err != nil || action == "stop" {
+		return err
 	}
 
-	responseNoContent(w)
+	s.resets.poweredOn(s.now())
+
+	if s.profile.VirtualMedia.BootOverrideOnce {
+		return s.consumeBootOnce()
+	}
+
+	return nil
+}
+
+// wait blocks for the duration, unless the context or the server context is done first.
+func (s redfishServer) wait(ctx context.Context, d time.Duration) error {
+	if d <= 0 {
+		return nil
+	}
+
+	timer := time.NewTimer(d)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+
+	case <-s.ctx.Done():
+		return s.ctx.Err()
+
+	case <-timer.C:
+		return nil
+	}
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -1394,7 +1580,7 @@ func (s redfishServer) GetRedfishV1TaskMonitorsTaskID(w http.ResponseWriter, r *
 
 	switch {
 	case !taskEnded(t.state):
-		responseTaskRunning(w, t)
+		responseTaskRunning(w, t, s.profile.Scaled(taskRetryAfter))
 
 	case t.state == TaskV174TaskStateCompleted && t.target == s.biosPath():
 		// A completed task monitor answers with the resulting resource.

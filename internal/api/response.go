@@ -2,7 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 func response(w http.ResponseWriter, resp any) {
@@ -89,4 +92,9 @@ func responseRedfishError(w http.ResponseWriter, statusCode int, message string,
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	_ = enc.Encode(e)
+}
+
+// retryAfterSeconds formats a duration for the Retry-After header, rounded up to whole seconds.
+func retryAfterSeconds(d time.Duration) string {
+	return strconv.Itoa(int(math.Ceil(d.Seconds())))
 }

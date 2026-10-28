@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
-	"strconv"
 	"sync"
 	"time"
 
@@ -183,10 +182,10 @@ func taskResource(t task) TaskV174Task {
 	return resource
 }
 
-// responseTaskRunning answers a task monitor of a task, which has not ended yet.
-func responseTaskRunning(w http.ResponseWriter, t task) {
+// responseTaskRunning answers the task monitor of a task that has not ended yet.
+func responseTaskRunning(w http.ResponseWriter, t task, retryAfter time.Duration) {
 	w.Header().Set("Location", taskMonitorPath(t.id))
-	w.Header().Set("Retry-After", strconv.Itoa(int(taskRetryAfter.Seconds())))
+	w.Header().Set("Retry-After", retryAfterSeconds(retryAfter))
 	w.WriteHeader(http.StatusAccepted)
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")

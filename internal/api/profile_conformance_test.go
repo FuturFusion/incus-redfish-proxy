@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
+	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -51,6 +52,30 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "virtual-media-hidden-paths", applies: always, run: conformanceVirtualMediaHiddenPaths},
 	{name: "secure-boot-reset-keys", applies: resetKeysSupported, run: conformanceSecureBootResetKeys},
 	{name: "secure-boot-reset-keys-absent", applies: func(p profile.Profile) bool { return !resetKeysSupported(p) }, run: conformanceSecureBootResetKeysAbsent},
+	{name: "power-reset-types", applies: always, run: conformancePowerResetTypes},
+	{name: "power-reset-type-refused", applies: hasUnlistedResetType, run: conformancePowerResetTypeRefused},
+	{name: "power-settle", applies: func(p profile.Profile) bool { return p.Power.NotSettledWindow > 0 }, run: conformancePowerSettle},
+	{name: "boot-override", applies: always, run: conformanceBootOverride},
+}
+
+func hasUnlistedResetType(p profile.Profile) bool {
+	_, ok := unlistedResetType(p)
+	return ok
+}
+
+// unlistedResetType returns a reset type the handler implements, but the profile does not list.
+func unlistedResetType(p profile.Profile) (profile.ResetType, bool) {
+	if len(p.Power.ResetTypes) == 0 {
+		return "", false
+	}
+
+	for _, resetType := range []profile.ResetType{profile.ResetTypeOn, profile.ResetTypeForceOn, profile.ResetTypeGracefulShutdown, profile.ResetTypeForceOff, profile.ResetTypeGracefulRestart, profile.ResetTypeForceRestart} {
+		if !slices.Contains(p.Power.ResetTypes, resetType) {
+			return resetType, true
+		}
+	}
+
+	return "", false
 }
 
 func resetKeysSupported(p profile.Profile) bool {
@@ -223,6 +248,12 @@ func fakeIncus(instance incusapi.Instance) *mock.IncusClientMock {
 			}
 
 			return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+		},
+		GetInstanceStateFunc: func(name string) (*incusapi.InstanceState, string, error) {
+			mu.Lock()
+			defer mu.Unlock()
+
+			return &incusapi.InstanceState{Status: instance.Status}, "", nil
 		},
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 			mu.Lock()
@@ -419,9 +450,7 @@ func conformanceBIOSStageAndApply(t *testing.T, p profile.Profile) {
 	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOSSettings(t, client)[attribute.Name]), "Bios/Settings holds the staged value")
 	require.True(t, taskRunning(t, client, location), "the task runs until the reset")
 
-	resp, err = client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": "ForceRestart"})
-	require.NoError(t, err)
-	resp.Body.Close()
+	resetSystem(t, client, profile.ResetTypeForceRestart)
 
 	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[attribute.Name]), "the reset applies the staged value")
 	require.Empty(t, getBIOSSettings(t, client), "nothing is staged after the reset")
@@ -581,22 +610,7 @@ func conformanceVirtualMediaInsert(t *testing.T, p profile.Profile) {
 	require.NoError(t, err)
 	resp.Body.Close()
 
-	location := resp.Header.Get("Location")
-	for range 100 {
-		if location == "" {
-			break
-		}
-
-		resp, err = client.Get(location)
-		require.NoError(t, err)
-		resp.Body.Close()
-
-		if resp.StatusCode != http.StatusAccepted {
-			break
-		}
-
-		time.Sleep(10 * time.Millisecond)
-	}
+	waitForTask(t, client, resp.Header.Get("Location"))
 
 	require.Equal(t, new(true), getVirtualMedia(t, client).Inserted, "virtual media is inserted through %s %s", method, target)
 }
@@ -723,9 +737,7 @@ func writeAndApply(t *testing.T, client *gofish.APIClient, p profile.Profile, at
 		return
 	}
 
-	resp, err = client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": "ForceRestart"})
-	require.NoError(t, err)
-	resp.Body.Close()
+	resetSystem(t, client, profile.ResetTypeForceRestart)
 }
 
 // registryAttributes discovers the attribute registry the way Operations Center does and returns the names it lists.
@@ -842,4 +854,169 @@ func otherValue(attribute profile.Attribute) any {
 	}
 
 	return "conformance"
+}
+
+const systemPath = "/redfish/v1/Systems/test-instance"
+
+func conformancePowerResetTypes(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	var resource struct {
+		Actions struct {
+			Reset struct {
+				AllowableValues []profile.ResetType `json:"ResetType@Redfish.AllowableValues"`
+			} `json:"#ComputerSystem.Reset"`
+		} `json:"Actions"`
+	}
+
+	err := json.Unmarshal(getSystem(t, client).RawData, &resource)
+	require.NoError(t, err)
+
+	require.ElementsMatch(t, p.Power.ResetTypes, resource.Actions.Reset.AllowableValues, "the reset action publishes the reset types of the profile")
+}
+
+func conformancePowerResetTypeRefused(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	resetType, _ := unlistedResetType(p)
+
+	incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	resp, err := client.Post(systemPath+"/Actions/ComputerSystem.Reset", map[string]any{"ResetType": resetType})
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	redfishErr := &schemas.Error{}
+	require.ErrorAs(t, err, &redfishErr)
+	require.Equal(t, http.StatusBadRequest, redfishErr.HTTPReturnedStatusCode)
+	require.Len(t, redfishErr.ExtendedInfos, 1)
+	require.Equal(t, "Base.1.18.ActionParameterValueNotInList", redfishErr.ExtendedInfos[0].MessageID)
+	require.Equal(t, []string{"#/ResetType"}, redfishErr.ExtendedInfos[0].RelatedProperties)
+	require.Empty(t, incusClient.UpdateInstanceStateCalls(), "a refused reset type leaves the instance")
+}
+
+func conformancePowerSettle(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	var mu sync.Mutex
+	now := time.Now()
+
+	clock := func() time.Time {
+		mu.Lock()
+		defer mu.Unlock()
+
+		return now
+	}
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p), api.WithClock(clock))
+
+	resetSystem(t, client, profile.ResetTypeOn)
+
+	err := patchBoot(client, schemas.DisabledBootSourceOverrideEnabled)
+
+	redfishErr := &schemas.Error{}
+	require.ErrorAs(t, err, &redfishErr, "a write right after the power on is refused")
+	require.Equal(t, p.Power.NotSettledError.Status, redfishErr.HTTPReturnedStatusCode)
+	require.Len(t, redfishErr.ExtendedInfos, 1)
+	require.Equal(t, p.Power.NotSettledError.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+	require.Equal(t, "On", string(getSystem(t, client).PowerState), "reads pass in the window")
+
+	mu.Lock()
+	now = now.Add(p.Scaled(p.Power.NotSettledWindow))
+	mu.Unlock()
+
+	require.NoError(t, patchBoot(client, schemas.DisabledBootSourceOverrideEnabled), "a write after the window passes")
+}
+
+func conformanceBootOverride(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{
+		Devices: incusapi.DevicesMap{"boot-media": {"type": "disk", "source": "boot-media"}},
+	}}), api.WithProfile(p))
+
+	var resource struct {
+		Boot struct {
+			AllowableValues []schemas.BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled@Redfish.AllowableValues"`
+		} `json:"Boot"`
+	}
+
+	err := json.Unmarshal(getSystem(t, client).RawData, &resource)
+	require.NoError(t, err)
+
+	once := slices.Contains(resource.Boot.AllowableValues, schemas.OnceBootSourceOverrideEnabled)
+	require.Equal(t, p.VirtualMedia.BootOverrideOnce, once, "Once is offered exactly with boot_override_once")
+
+	enabled := schemas.ContinuousBootSourceOverrideEnabled
+	if once {
+		enabled = schemas.OnceBootSourceOverrideEnabled
+	}
+
+	require.NoError(t, patchBoot(client, enabled))
+	require.Equal(t, enabled, getSystem(t, client).Boot.BootSourceOverrideEnabled)
+
+	resetSystem(t, client, profile.ResetTypeOn)
+
+	want := schemas.ContinuousBootSourceOverrideEnabled
+	if once {
+		want = schemas.DisabledBootSourceOverrideEnabled
+	}
+
+	require.Equal(t, want, getSystem(t, client).Boot.BootSourceOverrideEnabled, "the power on drops a one time override only")
+}
+
+func getSystem(t *testing.T, client *gofish.APIClient) *schemas.ComputerSystem {
+	t.Helper()
+
+	system, err := schemas.GetComputerSystem(client, systemPath)
+	require.NoError(t, err)
+
+	return system
+}
+
+func patchBoot(client *gofish.APIClient, enabled schemas.BootSourceOverrideEnabled) error {
+	resp, err := client.Patch(systemPath, map[string]any{"Boot": map[string]any{"BootSourceOverrideEnabled": enabled, "BootSourceOverrideTarget": schemas.CdBootSource}})
+	if resp != nil {
+		resp.Body.Close()
+	}
+
+	return err
+}
+
+// resetSystem resets the system and waits for the task, if the reset answers with one.
+func resetSystem(t *testing.T, client *gofish.APIClient, resetType profile.ResetType) {
+	t.Helper()
+
+	resp, err := client.Post(systemPath+"/Actions/ComputerSystem.Reset", map[string]any{"ResetType": resetType})
+	require.NoError(t, err)
+	resp.Body.Close()
+
+	waitForTask(t, client, resp.Header.Get("Location"))
+}
+
+// waitForTask polls a task monitor until it no longer answers 202, an empty location is not polled.
+func waitForTask(t *testing.T, client *gofish.APIClient, location string) {
+	t.Helper()
+
+	for range 100 {
+		if location == "" {
+			return
+		}
+
+		resp, err := client.Get(location)
+		require.NoError(t, err)
+		resp.Body.Close()
+
+		if resp.StatusCode != http.StatusAccepted {
+			return
+		}
+
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	require.Fail(t, "the task did not end", location)
 }
