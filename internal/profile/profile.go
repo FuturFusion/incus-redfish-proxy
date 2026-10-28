@@ -52,6 +52,7 @@ func Default() Profile {
 func defaults() Profile {
 	return Profile{
 		BIOS: BIOS{
+			PatchResponse: PatchResponseTaskMonitor,
 			Registry: Registry{
 				Attributes: []Attribute{},
 			},

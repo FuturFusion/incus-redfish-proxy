@@ -19,6 +19,20 @@ const (
 	AttributeTypeBoolean     AttributeType = "Boolean"
 )
 
+// PatchResponse is the answer to a BIOS settings PATCH.
+type PatchResponse string
+
+const (
+	// PatchResponseTaskMonitor answers 202 with a task monitor in the location.
+	PatchResponseTaskMonitor PatchResponse = "202-taskmonitor"
+	// PatchResponseTask answers 202 with a task resource in the location and the body.
+	PatchResponseTask PatchResponse = "202-task"
+	// PatchResponseOK answers 200 with the Bios resource.
+	PatchResponseOK PatchResponse = "200"
+	// PatchResponseNoContent answers 204.
+	PatchResponseNoContent PatchResponse = "204"
+)
+
 // reservedConfigPrefix marks the instance config keys the proxy keeps its own state in.
 const reservedConfigPrefix = "user.redfish."
 
@@ -28,8 +42,13 @@ var registryIDPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9]*\.v[0-9]+_[0-9]
 // attributeNamePattern keeps synthetic attributes apart from the incus.* attributes.
 var attributeNamePattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*$`)
 
-// BIOS describes the BIOS attributes and how writes to them are answered.
+// BIOS describes the BIOS attributes and how the proxy answers writes to them.
 type BIOS struct {
+	PatchResponse PatchResponse `yaml:"patch_response"`
+
+	// TaskResource exposes /redfish/v1/TaskService and its collection. Single tasks are always served, as task bodies link to them.
+	TaskResource bool `yaml:"task_resource"`
+
 	Registry Registry   `yaml:"registry"`
 	Errors   BIOSErrors `yaml:"errors"`
 }
@@ -118,6 +137,18 @@ func integerValue(value any) (int64, bool) {
 }
 
 func (b BIOS) validate() error {
+	switch b.PatchResponse {
+	case PatchResponseTaskMonitor, PatchResponseOK, PatchResponseNoContent:
+
+	case PatchResponseTask:
+		if !b.TaskResource {
+			return fmt.Errorf("bios.patch_response %q requires bios.task_resource", b.PatchResponse)
+		}
+
+	default:
+		return fmt.Errorf("unknown bios.patch_response %q", b.PatchResponse)
+	}
+
 	err := b.Registry.validate()
 	if err != nil {
 		return fmt.Errorf("bios.registry: %w", err)
