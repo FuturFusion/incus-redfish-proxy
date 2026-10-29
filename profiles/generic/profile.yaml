@@ -1,0 +1,58 @@
+version: 1
+name: generic
+description: Behavior of the proxy without profiles. Every switch holds its default.
+
+bios:
+  patch_response: 202-taskmonitor   # 202-task | 202-taskmonitor | 200 | 204
+  task_resource: false              # expose /redfish/v1/TaskService and its collection
+  settings_object: false            # true: Bios/Settings is a separate resource holding the pending attributes
+  pending: false                    # true: a PATCH stages the attributes, the next reset applies them
+  apply_time:
+    supported: []                   # Immediate | OnReset, published as @Redfish.Settings.SupportedApplyTimes
+    default: ""                     # empty: OnReset with pending, Immediate otherwise
+  patch_requires_power_off: true    # false: stage attributes on a running instance
+  registry:
+    id: ""
+    attributes: []                  # an attribute with requires: {attribute, value} is hidden and refused until that value is in effect
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown}
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown}  # write to an attribute, whose requirement is not in effect
+
+secure_boot:
+  database_write: true              # false: certificates and signatures are read only over Redfish
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported}
+  reset_keys:
+    supported: false                # true: publish the #SecureBoot.ResetKeys action
+    types: [DeleteAllKeys, DeletePK]
+    response: "204"                 # 204 | 202-task
+  certificate_id_style: hash        # hash | sequential
+  certificate_id_prefix: ""         # sequential only, "Certificate" gives Certificate1
+  enable_requires_power_off: true   # false: SecureBootEnable on a running instance applies on the next reset
+
+virtual_media:
+  insert: standard                  # standard | oem | patch
+  oem_vendor: Incus                 # oem only, key below Actions.Oem, never a real vendor
+  oem_action: InsertVirtualMedia    # oem only
+  insert_response: "204"            # 204 | 202-task, a PATCH always answers 204
+  boot_override_once: false         # true: offer BootSourceOverrideEnabled Once, the next power on drops it
+  delivery: full-fetch              # full-fetch | stream | prefetch, stream and prefetch mount the image through FUSE
+  stream:
+    read_ahead: 4MiB                # size of every range request, plain bytes or KiB, MiB, GiB
+    cache: 64MiB                    # bytes kept in memory
+    fallback: full-fetch            # full-fetch | error, if the server has no range requests
+
+power:
+  reset_types: []                   # published as ResetType@Redfish.AllowableValues, empty: not published, all accepted
+  response: "204"                   # 204 | 202-task
+  not_settled_window: 0s            # writes below Systems and Managers are refused for this long after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby}  # OC waits only for IDs ending in ResourceInStandby or UnableToModifyDuringSystemPOST
+  delay: 0s                         # a reset waits this long before it changes the power state
+
+timing:
+  scale: 1.0                        # multiplies every duration of the profile, overridden by --timing-scale
+
+overlay: {}                         # path: JSON merge patch (RFC 7386) for the GET response, placeholders {system}, {manager}, {media}
+# Example:
+# overlay:
+#   "/redfish/v1/Systems/{system}":
+#     Oem: {Incus: {ServerPowerState: "On"}}

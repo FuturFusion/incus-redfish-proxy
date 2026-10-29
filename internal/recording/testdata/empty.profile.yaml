@@ -1,0 +1,55 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261027T081500Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1."
+
+bios:
+  patch_response: 202-taskmonitor   # no evidence
+  task_resource: false              # no evidence
+  settings_object: false            # no evidence
+  pending: false                    # no evidence
+  apply_time:
+    supported: []                   # no evidence
+    default: ""                     # no evidence
+  patch_requires_power_off: true    # no evidence
+  registry:
+    id: ""                          # no evidence
+    attributes: []
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence
+
+secure_boot:
+  database_write: true              # no evidence
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence
+  reset_keys:
+    supported: false                # no evidence
+    types: [DeleteAllKeys, DeletePK] # no evidence
+    response: "204"                 # no evidence
+  certificate_id_style: hash        # no evidence
+  certificate_id_prefix: ""         # no evidence
+  enable_requires_power_off: true   # no evidence
+
+virtual_media:
+  insert: standard                  # no evidence
+  oem_vendor: Incus                 # no evidence; never a real vendor
+  oem_action: InsertVirtualMedia    # no evidence
+  insert_response: "204"            # no evidence
+  boot_override_once: false         # no evidence
+  delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
+  stream:
+    read_ahead: 4MiB                # no evidence
+    cache: 64MiB                    # no evidence
+    fallback: full-fetch            # no evidence
+
+power:
+  reset_types: []                   # no evidence
+  response: "204"                   # no evidence
+  not_settled_window: 0s            # no evidence
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence
+  delay: 0s                         # no evidence
+
+timing:
+  scale: 1.0                        # no evidence

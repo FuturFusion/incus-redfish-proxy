@@ -16,3 +16,6 @@ go.mod              linguist-generated
 .gitattributes      export-ignore
 .gitignore          export-ignore
 /.goreleaser.yml    export-ignore
+
+# Archived BMC recordings
+profiles/**/recording.jsonl.gz binary

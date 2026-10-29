@@ -37,3 +37,7 @@ dist/
 
 .envrc
 /tmp
+
+# End to end test output
+/e2e_tests/logs/
+/e2e_tests/e2e.cover

@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -18,6 +19,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -30,6 +32,8 @@ import (
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api/mock"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/media"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/boom"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/queue"
 )
@@ -1179,7 +1183,7 @@ func TestRedfishServer_BIOSProfileProperties(t *testing.T) {
 
 	// BIOSProfileMatch.Manufacturer / .Model
 	require.Equal(t, "linuxcontainers.org", system.Manufacturer)
-	require.Equal(t, "Incus", system.Model)
+	require.Equal(t, "Incus (generic)", system.Model)
 
 	// BIOSProfileMatch.BIOSVersion, a semver constraint.
 	require.Equal(t, "7.3.0", system.BiosVersion)
@@ -1308,6 +1312,174 @@ func testCertificate(t *testing.T, commonName string) ([]byte, string) {
 	require.NoError(t, err)
 
 	return der, string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}))
+}
+
+func TestRedfishServer_SecureBootResetKeys(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		types         []profile.ResetKeysType
+		response      profile.ResetKeysResponse
+		status        string
+		resetKeysType string
+
+		wantStatus   int
+		wantLocation string
+		wantKept     []string
+	}{
+		{
+			name:          "success - delete platform key",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeletePK},
+			response:      profile.ResetKeysResponseNoContent,
+			status:        "Stopped",
+			resetKeysType: "DeletePK",
+
+			wantStatus: http.StatusNoContent,
+			wantKept:   []string{"KEK", "db"},
+		},
+		{
+			name:          "success - delete all keys with a task",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeleteAllKeys},
+			response:      profile.ResetKeysResponseTask,
+			status:        "Stopped",
+			resetKeysType: "DeleteAllKeys",
+
+			wantStatus:   http.StatusAccepted,
+			wantLocation: "/redfish/v1/TaskMonitors/",
+			wantKept:     []string{},
+		},
+		{
+			name:          "error - type not published",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeletePK},
+			response:      profile.ResetKeysResponseNoContent,
+			status:        "Stopped",
+			resetKeysType: "DeleteAllKeys",
+
+			wantStatus: http.StatusBadRequest,
+			wantKept:   []string{"PK", "KEK", "db"},
+		},
+		{
+			name:          "error - running instance",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeleteAllKeys},
+			response:      profile.ResetKeysResponseNoContent,
+			status:        "Running",
+			resetKeysType: "DeleteAllKeys",
+
+			wantStatus: http.StatusPreconditionFailed,
+			wantKept:   []string{"PK", "KEK", "db"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.SecureBoot.ResetKeys = profile.ResetKeys{Supported: true, Types: tc.types, Response: tc.response}
+
+			incusClient := fakeIncus(incusapi.Instance{Status: tc.status})
+			for _, db := range []struct{ guid, name string }{{uefi.EfiGlobalVariableGuid, "PK"}, {uefi.EfiGlobalVariableGuid, "KEK"}, {uefi.EfiImageSecurityDatabaseGuid, "db"}} {
+				err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", db.guid, db.name, incusapi.InstanceNVRAMVariablePut{}, "")
+				require.NoError(t, err, "store the UEFI variable")
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPost, "/redfish/v1/Systems/test-instance/SecureBoot/Actions/SecureBoot.ResetKeys", strings.NewReader(`{"ResetKeysType":"`+tc.resetKeysType+`"}`), "application/json", nil)
+			answer := answerOf(t, resp, err)
+
+			kept := nvramNames(incusClient, []struct{ guid, name string }{{uefi.EfiGlobalVariableGuid, "PK"}, {uefi.EfiGlobalVariableGuid, "KEK"}, {uefi.EfiImageSecurityDatabaseGuid, "db"}, {uefi.EfiImageSecurityDatabaseGuid, "dbx"}})
+
+			require.Equal(t, tc.wantStatus, answer.status, "status of the reset keys action")
+			require.True(t, strings.HasPrefix(answer.location, tc.wantLocation), "location of the task monitor")
+			require.Equal(t, tc.wantKept, kept, "UEFI variables left")
+		})
+	}
+}
+
+func TestRedfishServer_SecureBootSequentialIDs(t *testing.T) {
+	t.Parallel()
+
+	p := profile.Default()
+	p.SecureBoot.CertificateIDStyle = profile.CertificateIDStyleSequential
+	p.SecureBoot.CertificateIDPrefix = "Certificate"
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	const certificates = "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates"
+
+	locations := make([]string, 0, 2)
+	for _, commonName := range []string{"first", "second"} {
+		_, certificate := testCertificate(t, commonName)
+
+		resp, err := client.Post(certificates, map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
+		require.NoError(t, err, "add the certificate")
+		resp.Body.Close()
+
+		locations = append(locations, resp.Header.Get("Location"))
+	}
+
+	require.Equal(t, []string{certificates + "/Certificate1", certificates + "/Certificate2"}, locations, "the IDs are numbered in order")
+
+	second, err := schemas.GetCertificate(client, certificates+"/Certificate2")
+	require.NoError(t, err, "get the second certificate")
+	require.Equal(t, "second", second.Subject.CommonName, "the second ID has the second certificate")
+
+	resp, err := client.Delete(certificates + "/Certificate1")
+	require.NoError(t, err, "delete the first certificate")
+	resp.Body.Close()
+
+	// The IDs shift when an entry is deleted, like on real BMCs.
+	left, err := schemas.ListReferencedCertificates(client, certificates)
+	require.NoError(t, err, "list the certificates")
+	require.Len(t, left, 1, "one certificate is left")
+	require.Equal(t, "Certificate1", left[0].ID, "the left certificate has the first ID")
+	require.Equal(t, "second", left[0].Subject.CommonName, "the left certificate is the second one")
+}
+
+func TestRedfishServer_SecureBootEnableOnReset(t *testing.T) {
+	t.Parallel()
+
+	p := profile.Default()
+	p.SecureBoot.EnableRequiresPowerOff = false
+
+	incusClient := fakeIncus(incusapi.Instance{
+		Status:         "Running",
+		InstancePut:    incusapi.InstancePut{Config: map[string]string{"security.secureboot": "false"}},
+		ExpandedConfig: map[string]string{"security.secureboot": "false"},
+	})
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	resp, err := client.Patch("/redfish/v1/Systems/test-instance/SecureBoot", map[string]any{"SecureBootEnable": true})
+	require.NoError(t, err, "enable secure boot")
+	resp.Body.Close()
+
+	instance, _, err := incusClient.GetInstance("test-instance")
+	require.NoError(t, err, "read the instance")
+	require.Equal(t, "false", instance.Config["security.secureboot"], "a running instance keeps its setting")
+
+	secureBoot := getSecureBoot(t, client)
+	require.True(t, secureBoot.SecureBootEnable, "SecureBootEnable reports the requested setting")
+	require.Equal(t, schemas.DisabledSecureBootCurrentBootType, secureBoot.SecureBootCurrentBoot, "the current boot reports the setting in effect")
+
+	resp, err = client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": "ForceRestart"})
+	require.NoError(t, err, "reset the system")
+	resp.Body.Close()
+
+	instance, _, err = incusClient.GetInstance("test-instance")
+	require.NoError(t, err, "read the instance")
+	require.Equal(t, "true", instance.Config["security.secureboot"], "the reset applies the setting")
+	require.NotContains(t, instance.Config, "user.redfish.secureboot.enable", "the reset removes the pending setting")
+
+	calls := incusClient.UpdateInstanceStateCalls()
+
+	actions := make([]string, 0, len(calls))
+	for _, call := range calls {
+		actions = append(actions, call.State.Action)
+	}
+
+	require.Equal(t, []string{"stop", "start"}, actions, "secure boot changes on a stopped instance only")
 }
 
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDSecureBoot(t *testing.T) {
@@ -1968,6 +2140,14 @@ func TestRedfishServer_NotFound_Error(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
+			url:    "/redfish/v1/Unknown",
+		},
+		{
+			method: http.MethodGet,
+			url:    "/redfish/v1/TaskService/Tasks",
+		},
+		{
+			method: http.MethodGet,
 			url:    "/redfish/v1/Systems/invalid",
 		},
 		{
@@ -2329,6 +2509,899 @@ func TestRedfishServer_PatchBiosAttributes(t *testing.T) {
 	require.NotContains(t, updateCalls[0].Instance.Devices, "incus.devices.")
 }
 
+func TestRedfishServer_GetBiosAttributes_HidesProxyState(t *testing.T) {
+	t.Parallel()
+
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"limits.cpu":        "2",
+						"user.redfish.bios": "{}",
+					},
+				},
+			}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios")
+	require.NoError(t, err, "get the BIOS")
+
+	bios := schemas.Bios{}
+	err = json.NewDecoder(resp.Body).Decode(&bios)
+	resp.Body.Close()
+	require.NoError(t, err, "decode the BIOS")
+
+	require.Equal(t, schemas.SettingsAttributes{"incus.config.limits.cpu": "2"}, bios.Attributes, "the user.redfish keys are hidden")
+}
+
+func TestRedfishServer_GetSyntheticBiosAttributes(t *testing.T) {
+	t.Parallel()
+
+	p, err := profile.Load("testdata/profiles/registry.yaml")
+	require.NoError(t, err, "load the profile")
+
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"user.redfish.bios.Threshold": "80",
+						"user.redfish.bios.Label":     "rack-1",
+						"security.secureboot":         "false",
+					},
+				},
+			}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios")
+	require.NoError(t, err, "get the BIOS")
+
+	bios := struct {
+		AttributeRegistry string
+		Attributes        map[string]any
+	}{}
+
+	err = json.NewDecoder(resp.Body).Decode(&bios)
+	resp.Body.Close()
+	require.NoError(t, err, "decode the BIOS")
+
+	require.Equal(t, "TestBiosAttributeRegistry.v1_0_0", bios.AttributeRegistry, "the BIOS names the registry of the profile")
+	require.Equal(t, map[string]any{
+		"Mode":                             "Standard",
+		"Revision":                         "1.0",
+		"Label":                            "rack-1",
+		"Threshold":                        float64(80),
+		"Turbo":                            true,
+		"SecureBootControl":                "Disabled",
+		"incus.config.security.secureboot": "false",
+	}, bios.Attributes, "stored values and defaults of the registry attributes")
+}
+
+func TestRedfishServer_PatchSyntheticBiosAttributes(t *testing.T) {
+	t.Parallel()
+
+	p, err := profile.Load("testdata/profiles/registry.yaml")
+	require.NoError(t, err, "load the profile")
+
+	tests := []struct {
+		name       string
+		attributes map[string]any
+
+		wantStatus            int
+		wantMessageID         string
+		wantRelatedProperties []string
+		wantConfigs           []incusapi.ConfigMap
+	}{
+		{
+			name:       "success - stored by the proxy",
+			attributes: map[string]any{"Mode": "Performance", "Threshold": 80, "Turbo": false, "Label": "rack-1"},
+
+			wantStatus: http.StatusAccepted,
+			wantConfigs: []incusapi.ConfigMap{{
+				"user.redfish.bios.Mode":      "Performance",
+				"user.redfish.bios.Threshold": "80",
+				"user.redfish.bios.Turbo":     "false",
+				"user.redfish.bios.Label":     "rack-1",
+			}},
+		},
+		{
+			name:       "success - maps to an Incus key",
+			attributes: map[string]any{"SecureBootControl": "Disabled"},
+
+			wantStatus:  http.StatusAccepted,
+			wantConfigs: []incusapi.ConfigMap{{"security.secureboot": "false"}},
+		},
+		{
+			name:       "error - unknown attribute",
+			attributes: map[string]any{"NoSuchAttribute": "value"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Test.1.0.AttributeUnknown",
+			wantRelatedProperties: []string{"#/Attributes/NoSuchAttribute"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - read only",
+			attributes: map[string]any{"Revision": "2.0"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyNotWritable",
+			wantRelatedProperties: []string{"#/Attributes/Revision"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - not in list",
+			attributes: map[string]any{"Mode": "Turbo"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueNotInList",
+			wantRelatedProperties: []string{"#/Attributes/Mode"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - out of range",
+			attributes: map[string]any{"Threshold": 101},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueOutOfRange",
+			wantRelatedProperties: []string{"#/Attributes/Threshold"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - not an integer",
+			attributes: map[string]any{"Threshold": 1.5},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueTypeError",
+			wantRelatedProperties: []string{"#/Attributes/Threshold"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - not a boolean",
+			attributes: map[string]any{"Turbo": "false"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueTypeError",
+			wantRelatedProperties: []string{"#/Attributes/Turbo"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": tc.attributes})
+			answer := answerOf(t, resp, err)
+
+			require.Equal(t, tc.wantStatus, answer.status, "status of the PATCH")
+			require.Equal(t, tc.wantMessageID, answer.messageID, "message of a refused attribute")
+			require.Equal(t, tc.wantRelatedProperties, answer.relatedProperties, "the message names the refused attribute")
+			require.Equal(t, tc.wantConfigs, updatedConfigs(incusClient), "only an accepted PATCH writes the instance")
+		})
+	}
+}
+
+func TestRedfishServer_PatchBiosAttributes_PatchResponse(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		patchResponse profile.PatchResponse
+
+		wantStatus   int
+		wantLocation string
+	}{
+		{patchResponse: profile.PatchResponseTaskMonitor, wantStatus: http.StatusAccepted, wantLocation: "^/redfish/v1/TaskMonitors/"},
+		{patchResponse: profile.PatchResponseTask, wantStatus: http.StatusAccepted, wantLocation: "^/redfish/v1/TaskService/Tasks/"},
+		{patchResponse: profile.PatchResponseOK, wantStatus: http.StatusOK, wantLocation: "^$"},
+		{patchResponse: profile.PatchResponseNoContent, wantStatus: http.StatusNoContent, wantLocation: "^$"},
+	}
+
+	for _, tc := range tests {
+		t.Run(string(tc.patchResponse), func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.BIOS.PatchResponse = tc.patchResponse
+			p.BIOS.TaskResource = true
+
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{"incus.config.foo": "bar"}})
+			require.NoError(t, err, "patch the BIOS settings")
+			resp.Body.Close()
+
+			require.Equal(t, tc.wantStatus, resp.StatusCode, "status of the PATCH")
+			require.Len(t, incusClient.UpdateInstanceCalls(), 1, "the PATCH writes the instance once")
+			require.Regexp(t, tc.wantLocation, resp.Header.Get("Location"), "only a task answer has a location")
+		})
+	}
+}
+
+func TestRedfishServer_PatchBiosAttributes_Pending(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		path   string
+		body   string
+		status string
+
+		wantStatus    int
+		wantMessageID string
+		wantConfig    incusapi.ConfigMap
+	}{
+		{
+			name:   "error - current settings not writable",
+			path:   "/redfish/v1/Systems/test-instance/Bios",
+			body:   `{"Attributes":{"Mode":"Performance"}}`,
+			status: "Stopped",
+
+			wantStatus:    http.StatusMethodNotAllowed,
+			wantMessageID: "Base.1.18.PropertyNotWritable",
+			wantConfig:    incusapi.ConfigMap{},
+		},
+		{
+			name:   "error - apply time not supported",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"Mode":"Performance"},"@Redfish.SettingsApplyTime":{"ApplyTime":"AtMaintenanceWindowStart"}}`,
+			status: "Running",
+
+			wantStatus:    http.StatusBadRequest,
+			wantMessageID: "Base.1.18.PropertyValueNotInList",
+			wantConfig:    incusapi.ConfigMap{},
+		},
+		{
+			name:   "error - refused value is not staged",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"Mode":"Unknown"}}`,
+			status: "Running",
+
+			wantStatus:    http.StatusBadRequest,
+			wantMessageID: "Base.1.18.PropertyValueNotInList",
+			wantConfig:    incusapi.ConfigMap{},
+		},
+		{
+			name:   "error - immediate needs a stopped instance",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"SecureBootControl":"Disabled"},"@Redfish.SettingsApplyTime":{"ApplyTime":"Immediate"}}`,
+			status: "Running",
+
+			wantStatus: http.StatusPreconditionFailed,
+			wantConfig: incusapi.ConfigMap{},
+		},
+		{
+			name:   "success - immediate",
+			path:   "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:   `{"Attributes":{"Mode":"Performance"},"@Redfish.SettingsApplyTime":{"ApplyTime":"Immediate"}}`,
+			status: "Running",
+
+			wantStatus: http.StatusAccepted,
+			wantConfig: incusapi.ConfigMap{"user.redfish.bios.Mode": "Performance"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p, err := profile.Load("testdata/profiles/pending.yaml")
+			require.NoError(t, err, "load the profile")
+
+			incusClient := fakeIncus(incusapi.Instance{Status: tc.status, InstancePut: incusapi.InstancePut{Config: map[string]string{}}})
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, tc.path, strings.NewReader(tc.body), "application/json", nil)
+			answer := answerOf(t, resp, err)
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			require.Equal(t, tc.wantStatus, answer.status, "status of the PATCH")
+			require.Equal(t, tc.wantMessageID, answer.messageID, "message of a refused PATCH")
+			require.Equal(t, tc.wantConfig, instance.Config, "only an accepted PATCH writes the instance")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaActions(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		insert profile.MediaInsert
+
+		wantActions string
+	}{
+		{
+			insert: profile.MediaInsertStandard,
+
+			wantActions: `{
+				"#VirtualMedia.EjectMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"},
+				"#VirtualMedia.InsertMedia": {
+					"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia",
+					"@Redfish.ActionInfo": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/InsertMediaActionInfo"
+				}
+			}`,
+		},
+		{
+			insert: profile.MediaInsertOEM,
+
+			wantActions: `{
+				"#VirtualMedia.EjectMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"},
+				"Oem": {"Incus": {"#IncusVirtualMedia.InsertVirtualMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/Oem/IncusVirtualMedia.InsertVirtualMedia"}}}
+			}`,
+		},
+		{
+			insert: profile.MediaInsertPatch,
+
+			wantActions: `{
+				"#VirtualMedia.EjectMedia": {"target": "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.EjectMedia"}
+			}`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(string(tc.insert), func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.VirtualMedia.Insert = tc.insert
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+			virtualMedia, err := schemas.GetVirtualMedia(client, "/redfish/v1/Managers/bmc1/VirtualMedia/CD")
+			require.NoError(t, err, "get the virtual media")
+
+			var resource struct {
+				Actions json.RawMessage
+			}
+
+			err = json.Unmarshal(virtualMedia.RawData, &resource)
+			require.NoError(t, err, "decode the virtual media")
+
+			require.JSONEq(t, tc.wantActions, string(resource.Actions), "the actions match the insert style of the profile")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaInsertTask(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name        string
+		imageStatus int
+
+		wantState    schemas.TaskState
+		wantInserted bool
+	}{
+		{name: "success", imageStatus: http.StatusOK, wantState: schemas.CompletedTaskState, wantInserted: true},
+		{name: "error - image not found", imageStatus: http.StatusNotFound, wantState: schemas.ExceptionTaskState, wantInserted: false},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			release := make(chan struct{})
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				<-release
+				w.WriteHeader(tc.imageStatus)
+			}))
+			t.Cleanup(image.Close)
+
+			p, err := profile.Load("oem-media")
+			require.NoError(t, err, "load the profile")
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			const target = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/Oem/IncusVirtualMedia.InsertVirtualMedia"
+
+			resp, err := client.Post(target, map[string]any{"Image": image.URL})
+			require.NoError(t, err, "insert the media")
+			resp.Body.Close()
+			require.Equal(t, http.StatusAccepted, resp.StatusCode, "the insert answers with a task")
+
+			location := resp.Header.Get("Location")
+
+			resp, err = client.Post(target, map[string]any{"Image": image.URL})
+			closeBody(resp)
+
+			redfishErr := &schemas.Error{}
+			require.ErrorAs(t, err, &redfishErr, "the second insert fails with a Redfish error")
+			require.Equal(t, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "a second insert waits for the first")
+
+			close(release)
+
+			require.Eventually(t, func() bool {
+				resp, err := client.Get(location)
+				require.NoError(t, err, "poll the task monitor")
+				resp.Body.Close()
+
+				return resp.StatusCode == http.StatusOK
+			}, 5*time.Second, 10*time.Millisecond, "the insert task ends")
+
+			task, err := schemas.GetTask(client, location)
+			require.NoError(t, err, "get the task")
+
+			virtualMedia, err := schemas.GetVirtualMedia(client, "/redfish/v1/Managers/bmc1/VirtualMedia/CD")
+			require.NoError(t, err, "get the virtual media")
+
+			require.Equal(t, tc.wantState, task.TaskState, "state of the insert task")
+			require.Equal(t, new(tc.wantInserted), virtualMedia.Inserted, "the media is inserted only if the image is available")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaLock(t *testing.T) {
+	t.Parallel()
+
+	const virtualMediaPath = "/redfish/v1/Managers/bmc1/VirtualMedia/CD"
+
+	tests := []struct {
+		name string
+		send func(client *gofish.APIClient, image string) (*http.Response, error)
+	}{
+		{
+			name: "error - insert action",
+			send: func(client *gofish.APIClient, image string) (*http.Response, error) {
+				return client.Post(virtualMediaPath+"/Actions/VirtualMedia.InsertMedia", map[string]any{"Image": image})
+			},
+		},
+		{
+			name: "error - insert by PATCH",
+			send: func(client *gofish.APIClient, image string) (*http.Response, error) {
+				return client.Patch(virtualMediaPath, map[string]any{"Inserted": true, "Image": image})
+			},
+		},
+		{
+			name: "error - eject by PATCH",
+			send: func(client *gofish.APIClient, _ string) (*http.Response, error) {
+				return client.Patch(virtualMediaPath, map[string]any{"Inserted": false})
+			},
+		},
+		{
+			name: "error - eject action",
+			send: func(client *gofish.APIClient, _ string) (*http.Response, error) {
+				return client.Post(virtualMediaPath+"/Actions/VirtualMedia.EjectMedia", map[string]any{})
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			release := make(chan struct{})
+			var requested atomic.Bool
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				// Only the insert in the background waits, a request without the lock fails and does not block the test.
+				if !requested.Swap(true) {
+					<-release
+				}
+
+				w.WriteHeader(http.StatusNotFound)
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.InsertResponse = profile.InsertResponseTask
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			resp, err := client.Post(virtualMediaPath+"/Actions/VirtualMedia.InsertMedia", map[string]any{"Image": image.URL})
+			require.NoError(t, err, "insert the media")
+			resp.Body.Close()
+			require.Equal(t, http.StatusAccepted, resp.StatusCode, "the insert runs in the background")
+
+			location := resp.Header.Get("Location")
+
+			// Run test
+			resp, err = tc.send(client, image.URL)
+			closeBody(resp)
+
+			close(release)
+
+			// Assert
+			redfishErr := &schemas.Error{}
+			require.ErrorAs(t, err, &redfishErr, "the request fails with a Redfish error")
+			require.Equal(t, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "the request waits for the insert in the background")
+			require.ErrorContains(t, err, "being inserted or ejected", "the error names the reason")
+
+			require.Eventually(t, func() bool {
+				resp, err := client.Get(location)
+				require.NoError(t, err, "poll the task monitor")
+				resp.Body.Close()
+
+				return resp.StatusCode == http.StatusOK
+			}, 5*time.Second, 10*time.Millisecond, "the insert in the background ends")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaPatchInsert(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name   string
+		insert profile.MediaInsert
+
+		wantStatus int
+	}{
+		{name: "success - standard", insert: profile.MediaInsertStandard, wantStatus: http.StatusNoContent},
+		{name: "success - patch", insert: profile.MediaInsertPatch, wantStatus: http.StatusNoContent},
+		{name: "error - oem", insert: profile.MediaInsertOEM, wantStatus: http.StatusBadRequest},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("image"))
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.Insert = tc.insert
+			p.VirtualMedia.OEMVendor = "Incus"
+			p.VirtualMedia.OEMAction = "InsertVirtualMedia"
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			// Run test
+			resp, err := client.Patch("/redfish/v1/Managers/bmc1/VirtualMedia/CD", map[string]any{"Inserted": true, "Image": image.URL})
+			status := responseStatus(t, resp, err)
+
+			// Assert
+			require.Equal(t, tc.wantStatus, status, "a PATCH only inserts, where the profile offers it")
+		})
+	}
+}
+
+func TestRedfishServer_ResetTask(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		stateErr error
+
+		wantState  schemas.TaskState
+		wantStatus string
+	}{
+		{name: "success", stateErr: nil, wantState: schemas.CompletedTaskState, wantStatus: "Running"},
+		{name: "error - start fails", stateErr: boom.Error, wantState: schemas.ExceptionTaskState, wantStatus: "Stopped"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.Power.Response = profile.PowerResponseTask
+
+			release := make(chan struct{})
+
+			incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+			updateInstanceState := incusClient.UpdateInstanceStateFunc
+			incusClient.UpdateInstanceStateFunc = func(name string, state incusapi.InstanceStatePut, ETag string) (incusclient.Operation, error) {
+				<-release
+
+				if tc.stateErr != nil {
+					return nil, tc.stateErr
+				}
+
+				return updateInstanceState(name, state, ETag)
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			const target = "/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset"
+
+			resp, err := client.Post(target, map[string]any{"ResetType": "On"})
+			require.NoError(t, err, "reset the system")
+			resp.Body.Close()
+			require.Equal(t, http.StatusAccepted, resp.StatusCode, "the reset answers with a task")
+
+			location := resp.Header.Get("Location")
+
+			resp, err = client.Post(target, map[string]any{"ResetType": "On"})
+			closeBody(resp)
+
+			redfishErr := &schemas.Error{}
+			require.ErrorAs(t, err, &redfishErr, "the second reset fails with a Redfish error")
+			require.Equal(t, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "a second reset waits for the first")
+			require.Equal(t, "Base.1.18.ResourceInUse", redfishErr.ExtendedInfos[0].MessageID, "the message tells that the system is in use")
+
+			close(release)
+
+			require.Eventually(t, func() bool {
+				resp, err := client.Get(location)
+				require.NoError(t, err, "poll the task monitor")
+				resp.Body.Close()
+
+				return resp.StatusCode == http.StatusOK
+			}, 5*time.Second, 10*time.Millisecond, "the reset task ends")
+
+			task, err := schemas.GetTask(client, location)
+			require.NoError(t, err, "get the task")
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			require.Equal(t, tc.wantState, task.TaskState, "state of the reset task")
+			require.Equal(t, tc.wantStatus, instance.Status, "the instance runs only if the start succeeds")
+		})
+	}
+}
+
+func TestRedfishServer_Overlay(t *testing.T) {
+	t.Parallel()
+
+	p := profile.Default()
+	p.Overlay = profile.Overlay{
+		"/redfish/v1/Systems/{system}/":        {"Oem": map[string]any{"Test": "patched"}},
+		"/redfish/v1/Systems/{system}/Unknown": {"Oem": map[string]any{"Test": "patched"}},
+	}
+
+	tests := []struct {
+		name   string
+		method string
+		path   string
+
+		wantStatus int
+		wantOem    any
+	}{
+		{name: "success - patched", method: http.MethodGet, path: "/redfish/v1/Systems/test-instance", wantStatus: http.StatusOK, wantOem: map[string]any{"Test": "patched"}},
+		{name: "success - other path", method: http.MethodGet, path: "/redfish/v1/Managers/bmc1", wantStatus: http.StatusOK, wantOem: nil},
+		{name: "error - not found is not patched", method: http.MethodGet, path: "/redfish/v1/Systems/test-instance/Unknown", wantStatus: http.StatusNotFound, wantOem: nil},
+		{name: "error - other method is not patched", method: http.MethodPut, path: "/redfish/v1/Systems/test-instance", wantStatus: http.StatusNotImplemented, wantOem: nil},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			incusClient := fakeIncus(incusapi.Instance{Status: "Running"})
+			incusClient.GetServerFunc = func() (*incusapi.Server, string, error) {
+				return &incusapi.Server{}, "", nil
+			}
+
+			rec := httptest.NewRecorder()
+			api.NewHandler("test-instance", incusClient, api.WithProfile(p)).ServeHTTP(rec, httptest.NewRequest(tc.method, tc.path, strings.NewReader(`{}`)))
+
+			document := map[string]any{}
+			err := json.Unmarshal(rec.Body.Bytes(), &document)
+			require.NoError(t, err, "decode the answer")
+
+			require.Equal(t, tc.wantStatus, rec.Code, "status of the request")
+			require.Equal(t, tc.wantOem, document["Oem"], "only a successful GET of an overlay path is patched")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaDelivery(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		delivery profile.Delivery
+		fallback profile.StreamFallback
+		mountErr error
+
+		assertErr      require.ErrorAssertionFunc
+		wantDevice     func(image string) map[string]string
+		wantVolumes    int
+		wantMounts     []media.Options
+		wantEjectClose int
+	}{
+		{
+			name:     "success - stream",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackError,
+
+			assertErr: require.NoError,
+			wantDevice: func(image string) map[string]string {
+				return map[string]string{"type": "disk", "source": fakeMediaPath, "readonly": "true", "user.redfish.image": image, "user.redfish.delivery": "stream"}
+			},
+			wantMounts:     []media.Options{{ReadAhead: 4 << 20, CacheSize: 64 << 20}},
+			wantEjectClose: 1,
+		},
+		{
+			name:     "success - prefetch",
+			delivery: profile.DeliveryPrefetch,
+			fallback: profile.StreamFallbackError,
+
+			assertErr: require.NoError,
+			wantDevice: func(image string) map[string]string {
+				return map[string]string{"type": "disk", "source": fakeMediaPath, "readonly": "true", "user.redfish.image": image, "user.redfish.delivery": "prefetch"}
+			},
+			wantMounts:     []media.Options{{ReadAhead: 4 << 20, CacheSize: 64 << 20, Prefetch: true}},
+			wantEjectClose: 1,
+		},
+		{
+			name:     "success - fallback to a full fetch",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackFullFetch,
+			mountErr: fmt.Errorf("%w: %w", media.ErrImage, media.ErrRangeNotSupported),
+
+			assertErr: require.NoError,
+			wantDevice: func(image string) map[string]string {
+				return map[string]string{"type": "disk", "pool": "default", "source": "test-instance-boot-media.iso", "user.redfish.image": image}
+			},
+			wantVolumes: 1,
+		},
+		{
+			name:     "error - fallback refused",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackError,
+			mountErr: fmt.Errorf("%w: %w", media.ErrImage, media.ErrRangeNotSupported),
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				requireStatusError(tt, err, http.StatusBadRequest, a...)
+				require.ErrorContains(tt, err, "server does not support range requests", a...)
+			},
+			wantDevice: func(string) map[string]string { return nil },
+		},
+		{
+			name:     "error - unavailable image is not fetched in full",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackFullFetch,
+			mountErr: fmt.Errorf("%w: probe: 404 Not Found", media.ErrImage),
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				requireStatusError(tt, err, http.StatusBadRequest, a...)
+			},
+			wantDevice: func(string) map[string]string { return nil },
+		},
+		{
+			name:     "error - broken mount is not fetched in full",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackFullFetch,
+			mountErr: boom.Error,
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				requireStatusError(tt, err, http.StatusInternalServerError, a...)
+			},
+			wantDevice: func(string) map[string]string { return nil },
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("image"))
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.Delivery = tc.delivery
+			p.VirtualMedia.Stream.Fallback = tc.fallback
+
+			mounter := &fakeMounter{err: tc.mountErr}
+			incusClient := fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}})
+			client := setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(mounter))
+
+			const actions = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions"
+
+			resp, err := client.Post(actions+"/VirtualMedia.InsertMedia", map[string]any{"Image": image.URL})
+			closeBody(resp)
+
+			tc.assertErr(t, err, "insert the media")
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			require.Equal(t, tc.wantDevice(image.URL), instance.Devices["boot-media"], "the device matches the delivery")
+			require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), tc.wantVolumes, "only a full fetch creates a volume")
+			require.Equal(t, tc.wantMounts, mounter.opts, "options of the mounts")
+
+			// Without inserted media the eject fails, only its effects matter here.
+			resp, _ = client.Post(actions+"/VirtualMedia.EjectMedia", map[string]any{})
+			closeBody(resp)
+
+			require.Equal(t, tc.wantEjectClose, mounter.closeCount(), "eject removes the mount")
+			require.Len(t, incusClient.DeleteStoragePoolVolumeCalls(), tc.wantVolumes, "eject deletes only a volume it created")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaStaleMount(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p := profile.Default()
+	p.VirtualMedia.Delivery = profile.DeliveryStream
+
+	mounter := &fakeMounter{}
+	incusClient := fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}})
+	client := setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(mounter))
+
+	const insert = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia"
+
+	resp, err := client.Post(insert, map[string]any{"Image": "http://localhost/first.iso"})
+	require.NoError(t, err, "insert the first media")
+	resp.Body.Close()
+
+	instance, etag, err := incusClient.GetInstance("test-instance")
+	require.NoError(t, err, "read the instance")
+
+	delete(instance.Devices, "boot-media")
+
+	op, err := incusClient.UpdateInstance("test-instance", instance.Writable(), etag)
+	require.NoError(t, err, "remove the device outside of the proxy")
+	require.NoError(t, op.Wait(), "the media is ejected outside of the proxy")
+
+	// Run test
+	resp, err = client.Post(insert, map[string]any{"Image": "http://localhost/second.iso"})
+	require.NoError(t, err, "insert the second media")
+	resp.Body.Close()
+
+	// Assert
+	require.Equal(t, []string{"http://localhost/first.iso", "http://localhost/second.iso"}, mounter.images, "both images are mounted")
+	require.Equal(t, 1, mounter.closeCount(), "the insert removes the mount that the outside eject left behind")
+}
+
+func requireStatusError(t require.TestingT, err error, status int, msgAndArgs ...any) {
+	redfishErr := &schemas.Error{}
+	require.ErrorAs(t, err, &redfishErr, msgAndArgs...)
+	require.Equal(t, status, redfishErr.HTTPReturnedStatusCode, msgAndArgs...)
+}
+
+func TestRedfishServer_RestoreMedia(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(t.Context())
+
+	p, err := profile.Load("stream-media")
+	require.NoError(t, err, "load the profile")
+
+	mounter := &fakeMounter{}
+	incusClient := fakeIncus(incusapi.Instance{Status: "Running", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{
+		"boot-media": {"type": "disk", "source": fakeMediaPath, "user.redfish.image": "http://images/boot.iso", "user.redfish.delivery": "stream"},
+	}}})
+
+	_ = setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(mounter), api.WithContext(ctx))
+
+	require.Equal(t, []string{"http://images/boot.iso"}, mounter.images, "a streamed device is mounted again")
+
+	cancel()
+
+	require.Eventually(t, func() bool { return mounter.closeCount() == 1 }, time.Second, time.Millisecond, "the end of the context removes the mount")
+}
+
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
 	client := setup(t, &mock.IncusClientMock{})
 
@@ -2349,6 +3422,7 @@ func TestRedfishServer_PatchBiosAttributes_Invalid(t *testing.T) {
 		{name: "empty device name", body: `{"Attributes":{"incus.devices.":"value"}}`, wantErr: "empty device name"},
 		{name: "invalid device JSON", body: `{"Attributes":{"incus.devices.vtpm":"{"}}`, wantErr: "JSON string expected"},
 		{name: "non-string value", body: `{"Attributes":{"incus.config.foo":1}}`, wantErr: "string expected"},
+		{name: "reserved config key", body: `{"Attributes":{"incus.config.user.redfish.x":"value"}}`, wantErr: "is reserved"},
 	}
 
 	for _, tc := range tests {
@@ -3190,9 +4264,11 @@ func setup(t *testing.T, client api.IncusClient, opts ...api.Option) *gofish.API
 			AutoExpand: false,
 			Endpoint:   httpserver.URL,
 			DumpWriter: t.Output(),
+			// Parallel tests race on the shared default transport, which gofish otherwise copies.
+			HTTPClient: httpserver.Client(),
 		},
 	)
-	require.NoError(t, err)
+	require.NoError(t, err, "connect to the proxy")
 
 	return c
 }

@@ -1,0 +1,6 @@
+version: 1
+name: e2e-once
+description: The boot override may be Once, the next power on drops it.
+
+virtual_media:
+  boot_override_once: true

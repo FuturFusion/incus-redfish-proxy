@@ -2,7 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 func response(w http.ResponseWriter, resp any) {
@@ -53,4 +56,45 @@ func responseErrWithMessage(w http.ResponseWriter, statusCode int, message strin
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	_ = enc.Encode(e)
+}
+
+// redfishMessage is one entry of @Message.ExtendedInfo.
+type redfishMessage struct {
+	MessageID         string
+	Message           string
+	MessageArgs       []string
+	RelatedProperties []string
+}
+
+// responseRedfishError writes a Redfish error with extended info, its code is the message ID of the first message.
+func responseRedfishError(w http.ResponseWriter, statusCode int, message string, messages ...redfishMessage) {
+	extendedInfo := make([]MessageV130Message, 0, len(messages))
+	for _, m := range messages {
+		extendedInfo = append(extendedInfo, MessageV130Message{
+			MessageID:         ref(m.MessageID),
+			Message:           refNonZero(m.Message),
+			MessageArgs:       refNonEmpty(m.MessageArgs),
+			RelatedProperties: refNonEmpty(m.RelatedProperties),
+		})
+	}
+
+	code := "error"
+	if len(messages) > 0 {
+		code = messages[0].MessageID
+	}
+
+	e := RedfishError{}
+	e.Error.Code = ref(code)
+	e.Error.Message = ref(message)
+	e.Error.MessageExtendedInfo = refNonEmpty(extendedInfo)
+
+	w.WriteHeader(statusCode)
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "  ")
+	_ = enc.Encode(e)
+}
+
+// retryAfterSeconds formats a duration for the Retry-After header, rounded up to whole seconds.
+func retryAfterSeconds(d time.Duration) string {
+	return strconv.Itoa(int(math.Ceil(d.Seconds())))
 }
