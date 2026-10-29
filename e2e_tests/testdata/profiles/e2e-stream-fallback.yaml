@@ -1,0 +1,8 @@
+version: 1
+name: e2e-stream-fallback
+description: Virtual media is streamed, an image without range support is downloaded in full instead.
+
+virtual_media:
+  delivery: stream
+  stream:
+    fallback: full-fetch
