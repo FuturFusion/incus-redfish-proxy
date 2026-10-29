@@ -1,0 +1,81 @@
+---
+
+name: End to end tests
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "**.md"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e-tests:
+    name: E2E
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      IRP_E2E_LOG_DIR: ${{ github.workspace }}/e2e_tests/logs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: stable
+
+      # Incus runs QEMU with KVM. Hosted runners have the device, but only root may open it.
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+          ls -l /dev/kvm
+
+      # Ubuntu 24.04 ships Incus 6.0, which lacks the API extension instance_nvram.
+      - name: Install Incus
+        run: |
+          curl -fsSL https://pkgs.zabbly.com/get/incus-stable | sudo sh
+          # The group incus-admin only applies to a new login session. The runner is disposable, so the socket is opened instead.
+          sudo chmod 666 /var/lib/incus/unix.socket
+          # Not with sudo: sudo keeps HOME on the runner, so the client would create ~/.config/incus owned by root.
+          incus admin init --auto --storage-backend=dir
+          incus info | grep -E 'server_version|instance_nvram|custom_volume_iso'
+
+      # The proxy mounts streamed media through FUSE. incusd and QEMU run as other users than the runner.
+      - name: Set up FUSE
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y fuse3 make
+          echo user_allow_other | sudo tee -a /etc/fuse.conf
+
+      - name: Download go dependencies
+        run: |
+          go mod download
+
+      - name: Run end to end tests
+        run: |
+          make e2e-test
+
+      - name: Collect Incus logs
+        if: failure()
+        run: |
+          sudo journalctl -u incus --no-pager > "$IRP_E2E_LOG_DIR/incus.log" || true
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-logs
+          path: e2e_tests/logs/
+          if-no-files-found: ignore
