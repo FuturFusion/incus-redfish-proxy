@@ -16,14 +16,17 @@ import (
 	"time"
 )
 
-// ErrImage wraps the errors of Open, which the image or its server causes.
+// ErrImage wraps the errors of Open that the image or its server causes.
 var ErrImage = errors.New("image cannot be streamed")
 
 // ErrStalled ends a request, if the server sends no data within the stall timeout.
 var ErrStalled = errors.New("image server sent no data within the stall timeout")
 
-// ErrRangeNotSupported is returned by Open, if the server does not answer range requests.
+// ErrRangeNotSupported is the error Open returns, if the server does not answer range requests.
 var ErrRangeNotSupported = errors.New("server does not support range requests")
+
+// ErrNotSupported is the error NewMount returns on platforms without FUSE (Filesystem in Userspace) support.
+var ErrNotSupported = errors.New("media mounts are only supported on Linux")
 
 const (
 	defaultReadAhead = 4 << 20
