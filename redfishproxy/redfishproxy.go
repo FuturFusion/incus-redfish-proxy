@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	config "github.com/lxc/incus/v7/shared/cliconfig"
 
@@ -34,12 +35,18 @@ type Config struct {
 	// Context stops the Incus event watcher goroutine once done, short lived callers (e.g. tests) should set it.
 	Context context.Context
 
-	// Profile is the name of an embedded profile or the path of a profile file. If empty, "generic" is used.
+	// Profile is the name of an embedded profile or the path of a profile file. If empty, the proxy uses "generic".
 	Profile string
 
 	// TimingScale replaces timing.scale of the profile, if not zero.
 	TimingScale float64
+
+	// MediaDir holds the streamed media, if empty the proxy uses DefaultMediaDir. The proxy must run on the Incus host, as incusd reads the media from there.
+	MediaDir string
 }
+
+// DefaultMediaDir is the directory for streamed media, if Config.MediaDir is empty.
+const DefaultMediaDir = "/var/lib/incus-redfish-proxy/media"
 
 // Profiles returns the names of the embedded profiles.
 func Profiles() []string {
@@ -97,5 +104,13 @@ func NewHandler(cfg Config) (http.Handler, error) {
 	// The event source needs its own client, as the Incus client shares one event connection, including its type filter, per client.
 	events := client.UseProject(project)
 
-	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events), api.WithProfile(p)), nil
+	mediaDir := cfg.MediaDir
+	if mediaDir == "" {
+		mediaDir = DefaultMediaDir
+	}
+
+	// The project is part of the name, so equally named instances of different projects do not share a directory.
+	mediaDir = filepath.Join(mediaDir, filepath.Base(project)+"_"+filepath.Base(cfg.InstanceName))
+
+	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events), api.WithProfile(p), api.WithMediaDir(mediaDir)), nil
 }
