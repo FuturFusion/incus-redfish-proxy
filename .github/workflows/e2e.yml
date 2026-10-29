@@ -25,6 +25,9 @@ jobs:
     timeout-minutes: 30
     env:
       IRP_E2E_LOG_DIR: ${{ github.workspace }}/e2e_tests/logs
+      IRP_E2E_CACHE: ${{ github.workspace }}/.cache/irp-e2e/images
+      # Outside of the home directory, so incusd and QEMU can reach the mounts whatever the mode of the home directory is.
+      IRP_E2E_MEDIA_DIR: /var/lib/irp-e2e/media
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -58,6 +61,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install --no-install-recommends -y fuse3 make
           echo user_allow_other | sudo tee -a /etc/fuse.conf
+          sudo mkdir -p "$IRP_E2E_MEDIA_DIR"
+          sudo chown "$(id -u):$(id -g)" "$IRP_E2E_MEDIA_DIR"
+
+      # The boot image of the stream tests is pinned in e2e_tests/stream_test.go, the key changes with it.
+      - name: Cache boot images
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.IRP_E2E_CACHE }}
+          key: e2e-images-${{ hashFiles('e2e_tests/stream_test.go') }}
 
       - name: Download go dependencies
         run: |
