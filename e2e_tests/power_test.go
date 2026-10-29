@@ -64,7 +64,7 @@ func TestPower_Generic(t *testing.T) {
 			name: "a start outside of the proxy shows as On",
 			action: func(t *testing.T) response {
 				t.Helper()
-				startVM(t, vm)
+				changeState(t, vm, "start")
 
 				return response{status: http.StatusNoContent}
 			},
@@ -143,9 +143,9 @@ func TestPower_Task(t *testing.T) {
 	require.Equal(t, "Base.1.18.ResourceInStandby", resp.messageID(t), "message of the refused write")
 	require.NotEmpty(t, resp.header.Get("Retry-After"), "the refusal asks for a retry interval")
 
-	require.Eventually(t, func() bool {
+	eventually(t, 30*time.Second, func() bool {
 		return p.do(t, http.MethodPatch, p.systemPath(), map[string]any{}).status == http.StatusNoContent
-	}, timeout(30*time.Second), pollInterval, "writes are accepted after the settle window")
+	}, "writes are accepted after the settle window")
 
 	// Run test: reset types outside of the profile are refused.
 	resp = p.reset(t, "GracefulRestart")
