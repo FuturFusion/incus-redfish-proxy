@@ -1,0 +1,59 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261027T081500Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1."
+
+bios:
+  patch_response: 202-taskmonitor   # seq 4
+  task_resource: false              # no evidence
+  settings_object: true             # seq 4
+  pending: true                     # seq 4, 5
+  apply_time:
+    supported: [OnReset, Immediate] # seq 2; TODO verify; dropped AtMaintenanceWindowStart, OnReset needs pending
+    default: OnReset                # seq 4; as asked for by Operations Center
+  patch_requires_power_off: false   # seq 1, 4
+  registry:
+    id: DraftBiosAttributeRegistry.v1_0_0 # seq 3, 4, 8; vendor registry IDs are not copied
+    attributes:
+      - {name: DraftEnumeration, type: Enumeration, values: ["Standard", "Performance"]} # seq 3, 4; vendor attributes Mode
+      - {name: DraftInteger, type: Integer, min: 0, max: 100} # seq 3, 4; vendor attributes Threshold
+      - {name: DraftRequirement, type: Enumeration, values: ["Standard", "Performance"], default: "Standard"} # seq 3, 8; TODO verify; stands for the attribute the deferred ones depend on
+      - {name: DraftDeferred, type: Enumeration, values: ["Enabled", "Disabled"], requires: {attribute: DraftRequirement, value: Performance}} # seq 3, 8; TODO verify; vendor attributes ModeOption
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence
+    deferred_rejected: {status: 400, message_id: Base.1.12.PropertyUnknown} # seq 6
+
+secure_boot:
+  database_write: true              # no evidence
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence
+  reset_keys:
+    supported: false                # no evidence
+    types: [DeleteAllKeys, DeletePK] # no evidence
+    response: "204"                 # no evidence
+  certificate_id_style: hash        # no evidence
+  certificate_id_prefix: ""         # no evidence
+  enable_requires_power_off: true   # no evidence
+
+virtual_media:
+  insert: standard                  # no evidence
+  oem_vendor: Incus                 # no evidence; never a real vendor
+  oem_action: InsertVirtualMedia    # no evidence
+  insert_response: "204"            # no evidence
+  boot_override_once: false         # no evidence
+  delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
+  stream:
+    read_ahead: 4MiB                # no evidence
+    cache: 64MiB                    # no evidence
+    fallback: full-fetch            # no evidence
+
+power:
+  reset_types: []                   # no evidence
+  response: "204"                   # seq 7
+  not_settled_window: 0s            # no evidence
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence
+  delay: 0s                         # no evidence
+
+timing:
+  scale: 1.0                        # no evidence
