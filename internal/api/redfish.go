@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"slices"
 	"strconv"
@@ -64,8 +65,12 @@ type redfishServer struct {
 	// mediaMu serializes the inserts and ejects of the virtual media, they share the mount point and the volume.
 	mediaMu *sync.Mutex
 
-	// resetMu is held while a reset runs in the background.
+	// A reset in the background holds resetMu while it runs.
 	resetMu *sync.Mutex
+
+	mediaDir string
+	mounter  MediaMounter
+	mounted  *mountedMedia
 
 	now func() time.Time
 }
@@ -128,6 +133,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		powerMu:      &sync.Mutex{},
 		mediaMu:      &sync.Mutex{},
 		resetMu:      &sync.Mutex{},
+		mounted:      &mountedMedia{},
 		now:          time.Now,
 	}
 
@@ -136,6 +142,21 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	}
 
 	s.bios = biosStore{bios: s.profile.BIOS}
+
+	if s.mounter == nil {
+		s.mounter = fuseMounter{dir: s.mediaDir, client: s.httpClient}
+	}
+
+	if s.profile.VirtualMedia.Delivery != profile.DeliveryFullFetch {
+		s.restoreMedia()
+
+		context.AfterFunc(s.ctx, func() {
+			err := s.mounted.close()
+			if err != nil {
+				log.Printf("remove the media of instance %q: %v", s.instanceName, err)
+			}
+		})
+	}
 
 	if s.profile.BIOS.Pending {
 		s.resets.onPowerOn(s.applyPendingOnPowerOn)
@@ -599,6 +620,16 @@ func (s redfishServer) ejectVirtualMedia() error {
 		return err
 	}
 
+	// A streamed image has no volume, its file goes away with the mount.
+	if originalDevice[bootMediaDeliveryKey] != "" {
+		err = s.mounted.close()
+		if err != nil {
+			log.Printf("remove the media of instance %q: %v", s.instanceName, err)
+		}
+
+		return nil
+	}
+
 	err = s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
 	if err != nil {
 		rollbackErr := s.restoreBootMediaDevice(originalDevice)
@@ -617,6 +648,21 @@ func (s redfishServer) insertVirtualMedia(ctx context.Context, image string) err
 	_, inserted := instance.Devices["boot-media"]
 	if inserted {
 		return statusErrorf(http.StatusConflict, "virtual media is already inserted")
+	}
+
+	// An eject outside of the proxy leaves the mount behind. The next mount uses the same mount point.
+	err = s.mounted.close()
+	if err != nil {
+		return fmt.Errorf("remove the previous media: %w", err)
+	}
+
+	mounted, err := s.mountMedia(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	if mounted != nil {
+		return s.attachMountedMedia(instance, etag, image, mounted)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, image, nil)
@@ -1405,8 +1451,14 @@ func (s redfishServer) reset(ctx context.Context, action string, force bool, noo
 
 	s.resets.poweredOn(s.now())
 
-	if s.profile.VirtualMedia.BootOverrideOnce {
-		return s.consumeBootOnce()
+	if !s.profile.VirtualMedia.BootOverrideOnce {
+		return nil
+	}
+
+	// The power state changed already. An error would make the client reset again.
+	err = s.consumeBootOnce()
+	if err != nil {
+		log.Printf("drop the one time boot override of instance %q: %v", s.instanceName, err)
 	}
 
 	return nil

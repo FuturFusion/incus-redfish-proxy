@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -293,4 +294,34 @@ func TestResetTracker_watch(t *testing.T) {
 
 	// Assert
 	require.Eventually(t, func() bool { return len(done) > 0 }, time.Second, time.Millisecond, "watch ends with the context, also while it waits to reconnect")
+}
+
+func TestRedfishServer_resetBootOnceFailure(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p := profile.Default()
+	p.VirtualMedia.BootOverrideOnce = true
+
+	client := &stateClient{instance: incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{
+		Config:  map[string]string{},
+		Devices: incusapi.DevicesMap{"boot-media": {"type": "disk", "source": "boot-media"}},
+	}}}
+	server := NewRedfishServer("test-instance", client, WithProfile(p))
+
+	err := server.setBootOverride(ComputerSystemV1290BootSourceOverrideEnabledOnce)
+	require.NoError(t, err, "set the boot override once")
+
+	client.updateErr = func(*incusapi.Instance) error {
+		return boom.Error
+	}
+
+	// Run test
+	rec := httptest.NewRecorder()
+	server.PostRedfishV1SystemsComputerSystemIDActionsComputerSystemReset(rec, httptest.NewRequest(http.MethodPost, "/", strings.NewReader(`{"ResetType":"On"}`)), "test-instance")
+
+	// Assert
+	require.Equal(t, http.StatusNoContent, rec.Code, "the reset succeeds, as the power state changed")
+	require.Equal(t, []string{"start"}, client.actions, "the reset starts the instance")
+	require.Equal(t, ComputerSystemV1290BootSourceOverrideEnabledOnce, bootOverride(&client.instance), "the override stays for the power on hook")
 }

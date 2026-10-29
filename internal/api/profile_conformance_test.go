@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -24,6 +25,7 @@ import (
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api/mock"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/media"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
 
@@ -38,25 +40,76 @@ type conformanceScenario struct {
 }
 
 // conformanceScenarios derive their expectations from the profile, never from a literal per profile.
+// A behavior with variants has one scenario per variant, so every scenario runs a straight sequence.
 var conformanceScenarios = []conformanceScenario{
 	{name: "identity", applies: always, run: conformanceIdentity},
 	{name: "bios-registry", applies: hasRegistry, run: conformanceBIOSRegistry},
+	{name: "bios-registry-write-immediate", applies: allOf(hasRegistry, appliesAtOnce), run: conformanceBIOSRegistryWrite(getBIOSAttributes)},
+	{name: "bios-registry-write-staged", applies: allOf(hasRegistry, stages), run: conformanceBIOSRegistryWrite(getBIOSSettings)},
 	{name: "bios-unknown-attribute", applies: always, run: conformanceBIOSUnknownAttribute},
-	{name: "bios-patch-response", applies: always, run: conformanceBIOSPatchResponse},
-	{name: "task-service", applies: always, run: conformanceTaskService},
+	{name: "bios-patch-response-task-monitor-immediate", applies: allOf(patchResponse(profile.PatchResponseTaskMonitor), appliesAtOnce), run: conformanceBIOSPatchTask("^/redfish/v1/TaskMonitors/", http.StatusOK)},
+	{name: "bios-patch-response-task-monitor-staged", applies: allOf(patchResponse(profile.PatchResponseTaskMonitor), stages), run: conformanceBIOSPatchTask("^/redfish/v1/TaskMonitors/", http.StatusAccepted)},
+	{name: "bios-patch-response-task", applies: patchResponse(profile.PatchResponseTask), run: conformanceBIOSPatchTask("^/redfish/v1/TaskService/Tasks/", http.StatusOK)},
+	{name: "bios-patch-response-200", applies: patchResponse(profile.PatchResponseOK), run: conformanceBIOSPatchNoTask(http.StatusOK)},
+	{name: "bios-patch-response-204", applies: patchResponse(profile.PatchResponseNoContent), run: conformanceBIOSPatchNoTask(http.StatusNoContent)},
+	{name: "task-service-absent", applies: not(hasTaskResource), run: conformanceTaskServiceAbsent},
+	{name: "task-service-immediate", applies: allOf(hasTaskResource, appliesAtOnce), run: conformanceTaskService(schemas.CompletedTaskState)},
+	{name: "task-service-staged", applies: allOf(hasTaskResource, stages), run: conformanceTaskService(schemas.RunningTaskState)},
 	{name: "bios-immediate", applies: appliesAtOnce, run: conformanceBIOSImmediate},
 	{name: "bios-stage-and-apply", applies: hasStagedAttribute, run: conformanceBIOSStageAndApply},
-	{name: "bios-requires", applies: hasRequirement, run: conformanceBIOSRequires},
-	{name: "secure-boot-write", applies: always, run: conformanceSecureBootWrite},
-	{name: "virtual-media-insert", applies: always, run: conformanceVirtualMediaInsert},
-	{name: "virtual-media-hidden-paths", applies: always, run: conformanceVirtualMediaHiddenPaths},
+	{name: "bios-requires-immediate", applies: allOf(hasRequirement, appliesAtOnce), run: conformanceBIOSRequires("Stopped", writeBIOS)},
+	{name: "bios-requires-staged", applies: allOf(hasRequirement, stages), run: conformanceBIOSRequires("Running", writeBIOSAndReset)},
+	{name: "secure-boot-write", applies: databaseWritable, run: conformanceSecureBootWrite},
+	{name: "secure-boot-write-refused", applies: not(databaseWritable), run: conformanceSecureBootWriteRefused},
+	{name: "virtual-media-actions", applies: always, run: conformanceVirtualMediaActions},
+	{name: "virtual-media-insert-standard", applies: mediaInsert(profile.MediaInsertStandard), run: conformanceVirtualMediaInsert(http.MethodPost, standardInsertTarget, actionInsertBody)},
+	{name: "virtual-media-insert-oem", applies: mediaInsert(profile.MediaInsertOEM), run: conformanceVirtualMediaInsert(http.MethodPost, oemInsertTarget, actionInsertBody)},
+	{name: "virtual-media-insert-patch", applies: mediaInsert(profile.MediaInsertPatch), run: conformanceVirtualMediaInsert(http.MethodPatch, patchInsertTarget, patchInsertBody)},
+	{name: "virtual-media-hidden-paths", applies: not(mediaInsert(profile.MediaInsertStandard)), run: conformanceVirtualMediaHiddenPaths},
 	{name: "secure-boot-reset-keys", applies: resetKeysSupported, run: conformanceSecureBootResetKeys},
-	{name: "secure-boot-reset-keys-absent", applies: func(p profile.Profile) bool { return !resetKeysSupported(p) }, run: conformanceSecureBootResetKeysAbsent},
+	{name: "secure-boot-reset-keys-absent", applies: not(resetKeysSupported), run: conformanceSecureBootResetKeysAbsent},
 	{name: "power-reset-types", applies: always, run: conformancePowerResetTypes},
 	{name: "power-reset-type-refused", applies: hasUnlistedResetType, run: conformancePowerResetTypeRefused},
 	{name: "power-settle", applies: func(p profile.Profile) bool { return p.Power.NotSettledWindow > 0 }, run: conformancePowerSettle},
-	{name: "boot-override", applies: always, run: conformanceBootOverride},
+	{name: "boot-override-continuous", applies: not(bootOverrideOnce), run: conformanceBootOverride(schemas.ContinuousBootSourceOverrideEnabled, schemas.ContinuousBootSourceOverrideEnabled)},
+	{name: "boot-override-once", applies: bootOverrideOnce, run: conformanceBootOverride(schemas.OnceBootSourceOverrideEnabled, schemas.DisabledBootSourceOverrideEnabled)},
 	{name: "overlay", applies: func(p profile.Profile) bool { return len(p.Overlay) > 0 }, run: conformanceOverlay},
+}
+
+func allOf(predicates ...func(profile.Profile) bool) func(profile.Profile) bool {
+	return func(p profile.Profile) bool {
+		for _, predicate := range predicates {
+			if !predicate(p) {
+				return false
+			}
+		}
+
+		return true
+	}
+}
+
+func not(predicate func(profile.Profile) bool) func(profile.Profile) bool {
+	return func(p profile.Profile) bool { return !predicate(p) }
+}
+
+func patchResponse(response profile.PatchResponse) func(profile.Profile) bool {
+	return func(p profile.Profile) bool { return p.BIOS.PatchResponse == response }
+}
+
+func mediaInsert(insert profile.MediaInsert) func(profile.Profile) bool {
+	return func(p profile.Profile) bool { return p.VirtualMedia.Insert == insert }
+}
+
+func hasTaskResource(p profile.Profile) bool {
+	return p.BIOS.TaskResource
+}
+
+func databaseWritable(p profile.Profile) bool {
+	return p.SecureBoot.DatabaseWrite
+}
+
+func bootOverrideOnce(p profile.Profile) bool {
+	return p.VirtualMedia.BootOverrideOnce
 }
 
 func hasUnlistedResetType(p profile.Profile) bool {
@@ -137,14 +190,14 @@ func conformanceProfiles(t *testing.T) []profile.Profile {
 	t.Helper()
 
 	files, err := filepath.Glob(filepath.Join("testdata", "profiles", "*.yaml"))
-	require.NoError(t, err)
+	require.NoError(t, err, "list the test profiles")
 
 	names := append(profile.List(), files...)
 
 	profiles := make([]profile.Profile, 0, len(names))
 	for _, name := range names {
 		p, err := profile.Load(name)
-		require.NoError(t, err)
+		require.NoError(t, err, "load the profile %s", name)
 
 		profiles = append(profiles, p)
 	}
@@ -153,19 +206,26 @@ func conformanceProfiles(t *testing.T) []profile.Profile {
 }
 
 func TestProfileConformance(t *testing.T) {
+	t.Parallel()
+
 	for _, p := range conformanceProfiles(t) {
 		t.Run(p.Name, func(t *testing.T) {
-			for _, scenario := range conformanceScenarios {
-				if !scenario.applies(p) {
-					continue
-				}
+			t.Parallel()
 
+			for _, scenario := range applicableScenarios(p) {
 				t.Run(scenario.name, func(t *testing.T) {
+					t.Parallel()
+
 					scenario.run(t, p)
 				})
 			}
 		})
 	}
+}
+
+// applicableScenarios returns the scenarios that are meaningful for the profile.
+func applicableScenarios(p profile.Profile) []conformanceScenario {
+	return slices.DeleteFunc(slices.Clone(conformanceScenarios), func(scenario conformanceScenario) bool { return !scenario.applies(p) })
 }
 
 // fakeIncus returns an Incus client keeping the instance and its UEFI (Unified Extensible Firmware Interface) variables, so the tests read writes back.
@@ -282,11 +342,11 @@ func conformanceIdentity(t *testing.T, p profile.Profile) {
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
 
 	systems, err := client.Service.Systems()
-	require.NoError(t, err)
-	require.Len(t, systems, 1)
+	require.NoError(t, err, "list the systems")
+	require.Len(t, systems, 1, "the proxy serves one system")
 
-	require.Equal(t, "linuxcontainers.org", systems[0].Manufacturer)
-	require.Equal(t, "Incus ("+p.Name+")", systems[0].Model)
+	require.Equal(t, "linuxcontainers.org", systems[0].Manufacturer, "the manufacturer names Incus")
+	require.Equal(t, "Incus ("+p.Name+")", systems[0].Model, "the model names the profile")
 }
 
 func conformanceBIOSRegistry(t *testing.T, p profile.Profile) {
@@ -295,39 +355,51 @@ func conformanceBIOSRegistry(t *testing.T, p profile.Profile) {
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
 
 	bios := getBIOS(t, client)
-	require.Equal(t, p.BIOS.Registry.ID, bios.AttributeRegistry)
+	require.Equal(t, p.BIOS.Registry.ID, bios.AttributeRegistry, "Bios names the registry of the profile")
 
 	published := registryAttributes(t, client, bios.AttributeRegistry)
 
-	// Attributes with a requirement are covered by bios-requires.
 	for _, attribute := range p.BIOS.Registry.Attributes {
-		require.True(t, published[attribute.Name], attribute.Name)
-
-		if attribute.Requires != nil {
-			continue
-		}
-
-		require.Equal(t, fmt.Sprint(attribute.DefaultValue()), fmt.Sprint(bios.Attributes[attribute.Name]), attribute.Name)
+		require.True(t, published[attribute.Name], "the registry lists %s", attribute.Name)
 	}
 
-	for _, attribute := range p.BIOS.Registry.Attributes {
-		if attribute.ReadOnly || attribute.Requires != nil {
-			continue
-		}
-
-		value := otherValue(attribute)
-
-		resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{attribute.Name: value}})
-		require.NoError(t, err, attribute.Name)
-		resp.Body.Close()
-
-		written := getBIOS(t, client).Attributes
-		if stages(p) {
-			written = getBIOSSettings(t, client)
-		}
-
-		require.Equal(t, fmt.Sprint(value), fmt.Sprint(written[attribute.Name]), attribute.Name)
+	// bios-requires covers the attributes with a requirement.
+	for _, attribute := range attributesWithoutRequirement(p) {
+		require.Equal(t, fmt.Sprint(attribute.DefaultValue()), fmt.Sprint(bios.Attributes[attribute.Name]), "Bios publishes the default of %s", attribute.Name)
 	}
+}
+
+// conformanceBIOSRegistryWrite writes every writable attribute and reads it back from where the profile keeps it.
+func conformanceBIOSRegistryWrite(read func(t *testing.T, client *gofish.APIClient) map[string]any) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
+
+		client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+		for _, attribute := range writableAttributes(p) {
+			value := otherValue(attribute)
+
+			writeBIOS(t, client, map[string]any{attribute.Name: value})
+
+			require.Equal(t, fmt.Sprint(value), fmt.Sprint(read(t, client)[attribute.Name]), "the write of %s takes effect", attribute.Name)
+		}
+	}
+}
+
+// attributesWithoutRequirement returns the attributes, which Bios always publishes.
+func attributesWithoutRequirement(p profile.Profile) []profile.Attribute {
+	return slices.DeleteFunc(slices.Clone(p.BIOS.Registry.Attributes), func(attribute profile.Attribute) bool { return attribute.Requires != nil })
+}
+
+// writableAttributes returns the attributes a client can write without a requirement.
+func writableAttributes(p profile.Profile) []profile.Attribute {
+	return slices.DeleteFunc(slices.Clone(p.BIOS.Registry.Attributes), func(attribute profile.Attribute) bool { return attribute.ReadOnly || attribute.Requires != nil })
+}
+
+func getBIOSAttributes(t *testing.T, client *gofish.APIClient) map[string]any {
+	t.Helper()
+
+	return getBIOS(t, client).Attributes
 }
 
 func conformanceBIOSUnknownAttribute(t *testing.T, p profile.Profile) {
@@ -336,91 +408,74 @@ func conformanceBIOSUnknownAttribute(t *testing.T, p profile.Profile) {
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
 
 	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{"NoSuchAttribute": "value"}})
-	if resp != nil {
+	answer := answerOf(t, resp, err)
+
+	require.Equal(t, p.BIOS.Errors.UnknownAttribute.Status, answer.status, "status of bios.errors.unknown_attribute")
+	require.Equal(t, p.BIOS.Errors.UnknownAttribute.MessageID, answer.messageID, "message of bios.errors.unknown_attribute")
+}
+
+// conformanceBIOSPatchTask checks a PATCH, which answers with a task, and the first poll of that task.
+func conformanceBIOSPatchTask(wantLocation string, wantPollStatus int) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
+
+		client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+		status, location := patchBIOS(t, client)
+
+		require.Equal(t, http.StatusAccepted, status, "a task answer is 202")
+		require.Regexp(t, wantLocation, location, "the location points to the task")
+
+		resp, err := client.Get(location)
+		require.NoError(t, err, "poll the task")
 		resp.Body.Close()
-	}
 
-	redfishErr := &schemas.Error{}
-	require.ErrorAs(t, err, &redfishErr)
-	require.Equal(t, p.BIOS.Errors.UnknownAttribute.Status, redfishErr.HTTPReturnedStatusCode)
-	require.Len(t, redfishErr.ExtendedInfos, 1)
-	require.Equal(t, p.BIOS.Errors.UnknownAttribute.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+		// A task monitor answers 202 while its task runs. A task resource always answers 200.
+		require.Equal(t, wantPollStatus, resp.StatusCode, "status of the first poll")
+	}
 }
 
-func conformanceBIOSPatchResponse(t *testing.T, p profile.Profile) {
-	t.Helper()
+// conformanceBIOSPatchNoTask checks a PATCH, which answers without a task.
+func conformanceBIOSPatchNoTask(wantStatus int) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
 
-	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+		client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
 
-	status, location := patchBIOS(t, client)
+		status, location := patchBIOS(t, client)
 
-	switch p.BIOS.PatchResponse {
-	case profile.PatchResponseTaskMonitor:
-		require.Equal(t, http.StatusAccepted, status)
-		require.True(t, strings.HasPrefix(location, "/redfish/v1/TaskMonitors/"), location)
-
-	case profile.PatchResponseTask:
-		require.Equal(t, http.StatusAccepted, status)
-		require.True(t, strings.HasPrefix(location, "/redfish/v1/TaskService/Tasks/"), location)
-
-	case profile.PatchResponseOK:
-		require.Equal(t, http.StatusOK, status)
-		require.Empty(t, location)
-
-	case profile.PatchResponseNoContent:
-		require.Equal(t, http.StatusNoContent, status)
-		require.Empty(t, location)
+		require.Equal(t, wantStatus, status, "status of bios.patch_response")
+		require.Empty(t, location, "an answer without a task has no location")
 	}
-
-	if location == "" {
-		return
-	}
-
-	// A change applied at once is completed when it is first polled, a task resource always answers 200.
-	expected := http.StatusOK
-	if stages(p) && p.BIOS.PatchResponse == profile.PatchResponseTaskMonitor {
-		expected = http.StatusAccepted
-	}
-
-	resp, err := client.Get(location)
-	require.NoError(t, err)
-	resp.Body.Close()
-	require.Equal(t, expected, resp.StatusCode)
 }
 
-func conformanceTaskService(t *testing.T, p profile.Profile) {
+func conformanceTaskServiceAbsent(t *testing.T, p profile.Profile) {
 	t.Helper()
 
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
 
 	resp, err := client.Get("/redfish/v1/TaskService/Tasks")
-	if !p.BIOS.TaskResource {
-		redfishErr := &schemas.Error{}
-		require.ErrorAs(t, err, &redfishErr)
-		require.Equal(t, http.StatusNotFound, redfishErr.HTTPReturnedStatusCode)
 
-		return
+	require.Equal(t, http.StatusNotFound, answerOf(t, resp, err).status, "the task collection exists only with bios.task_resource")
+}
+
+// conformanceTaskService checks that the task collection lists the task of a BIOS PATCH in the given state.
+func conformanceTaskService(wantState schemas.TaskState) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
+
+		client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+		tasks, err := client.Service.Tasks()
+		require.NoError(t, err, "read the task service")
+
+		patchBIOS(t, client)
+
+		listed, err := tasks.Tasks()
+		require.NoError(t, err, "list the tasks")
+		require.NotEmpty(t, listed, "the collection lists the task of the PATCH")
+		require.Equal(t, wantState, listed[len(listed)-1].TaskState, "state of the task of the PATCH")
 	}
-
-	require.NoError(t, err)
-	resp.Body.Close()
-
-	tasks, err := client.Service.Tasks()
-	require.NoError(t, err)
-	require.NotNil(t, tasks)
-
-	patchBIOS(t, client)
-
-	listed, err := tasks.Tasks()
-	require.NoError(t, err)
-	require.NotEmpty(t, listed)
-
-	expected := schemas.CompletedTaskState
-	if stages(p) {
-		expected = schemas.RunningTaskState
-	}
-
-	require.Equal(t, expected, listed[len(listed)-1].TaskState)
 }
 
 func conformanceBIOSImmediate(t *testing.T, p profile.Profile) {
@@ -430,7 +485,7 @@ func conformanceBIOSImmediate(t *testing.T, p profile.Profile) {
 
 	patchBIOS(t, client)
 
-	require.Equal(t, "2", getBIOS(t, client).Attributes["incus.config.limits.cpu"])
+	require.Equal(t, "2", getBIOS(t, client).Attributes["incus.config.limits.cpu"], "the PATCH takes effect at once")
 }
 
 func conformanceBIOSStageAndApply(t *testing.T, p profile.Profile) {
@@ -442,7 +497,7 @@ func conformanceBIOSStageAndApply(t *testing.T, p profile.Profile) {
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Running"}), api.WithProfile(p))
 
 	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{attribute.Name: value}})
-	require.NoError(t, err)
+	require.NoError(t, err, "stage the attribute")
 	resp.Body.Close()
 
 	location := resp.Header.Get("Location")
@@ -458,43 +513,36 @@ func conformanceBIOSStageAndApply(t *testing.T, p profile.Profile) {
 	require.False(t, taskRunning(t, client, location), "the reset completes the task")
 }
 
-func conformanceBIOSRequires(t *testing.T, p profile.Profile) {
-	t.Helper()
+// conformanceBIOSRequires checks a deferred attribute on an instance with the given status.
+// write writes attributes and puts them into effect the way the profile needs.
+func conformanceBIOSRequires(status string, write func(t *testing.T, client *gofish.APIClient, attributes map[string]any)) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
 
-	dependent, _ := dependentAttribute(p)
-	requirement := map[string]any{dependent.Requires.Attribute: dependent.Requires.Value}
-	value := otherValue(dependent)
+		dependent, _ := dependentAttribute(p)
+		requirement := map[string]any{dependent.Requires.Attribute: dependent.Requires.Value}
+		value := otherValue(dependent)
 
-	// Staged attributes apply on a restart, others need a stopped instance.
-	status := "Stopped"
-	if stages(p) {
-		status = "Running"
+		client := setup(t, fakeIncus(incusapi.Instance{Status: status}), api.WithProfile(p))
+
+		bios := getBIOS(t, client)
+		require.NotContains(t, bios.Attributes, dependent.Name, "Bios hides the attribute until its requirement is in effect")
+		require.True(t, registryAttributes(t, client, bios.AttributeRegistry)[dependent.Name], "the registry lists the attribute")
+
+		// A requirement written in the same PATCH is not in effect yet, so nothing of the PATCH is taken.
+		resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{dependent.Requires.Attribute: dependent.Requires.Value, dependent.Name: value}})
+		answer := answerOf(t, resp, err)
+
+		require.Equal(t, p.BIOS.Errors.DeferredRejected.Status, answer.status, "status of bios.errors.deferred_rejected")
+		require.Equal(t, p.BIOS.Errors.DeferredRejected.MessageID, answer.messageID, "message of bios.errors.deferred_rejected")
+		require.NotContains(t, getBIOSSettings(t, client), dependent.Requires.Attribute, "a refused PATCH stages nothing")
+
+		write(t, client, requirement)
+		require.Equal(t, fmt.Sprint(dependent.DefaultValue()), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]), "Bios publishes the attribute once its requirement is in effect")
+
+		write(t, client, map[string]any{dependent.Name: value})
+		require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]), "the attribute is writable once its requirement is in effect")
 	}
-
-	client := setup(t, fakeIncus(incusapi.Instance{Status: status}), api.WithProfile(p))
-
-	bios := getBIOS(t, client)
-	require.NotContains(t, bios.Attributes, dependent.Name, "Bios hides the attribute until its requirement is in effect")
-	require.True(t, registryAttributes(t, client, bios.AttributeRegistry)[dependent.Name], "the registry lists the attribute")
-
-	// A requirement written in the same PATCH is not in effect yet, so nothing of the PATCH is taken.
-	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{dependent.Requires.Attribute: dependent.Requires.Value, dependent.Name: value}})
-	if resp != nil {
-		resp.Body.Close()
-	}
-
-	redfishErr := &schemas.Error{}
-	require.ErrorAs(t, err, &redfishErr)
-	require.Equal(t, p.BIOS.Errors.DeferredRejected.Status, redfishErr.HTTPReturnedStatusCode)
-	require.Len(t, redfishErr.ExtendedInfos, 1)
-	require.Equal(t, p.BIOS.Errors.DeferredRejected.MessageID, redfishErr.ExtendedInfos[0].MessageID)
-	require.NotContains(t, getBIOSSettings(t, client), dependent.Requires.Attribute, "a refused PATCH stages nothing")
-
-	writeAndApply(t, client, p, requirement)
-	require.Equal(t, fmt.Sprint(dependent.DefaultValue()), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]), "Bios publishes the attribute once its requirement is in effect")
-
-	writeAndApply(t, client, p, map[string]any{dependent.Name: value})
-	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[dependent.Name]))
 }
 
 func conformanceSecureBootWrite(t *testing.T, p profile.Profile) {
@@ -505,22 +553,22 @@ func conformanceSecureBootWrite(t *testing.T, p profile.Profile) {
 	_, certificate := testCertificate(t, "conformance")
 
 	resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates", map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
-	if resp != nil {
-		resp.Body.Close()
-	}
 
-	if p.SecureBoot.DatabaseWrite {
-		require.NoError(t, err)
-		require.Equal(t, http.StatusCreated, resp.StatusCode)
+	require.Equal(t, http.StatusCreated, answerOf(t, resp, err).status, "a writable database accepts a certificate")
+}
 
-		return
-	}
+func conformanceSecureBootWriteRefused(t *testing.T, p profile.Profile) {
+	t.Helper()
 
-	redfishErr := &schemas.Error{}
-	require.ErrorAs(t, err, &redfishErr)
-	require.Equal(t, p.SecureBoot.DatabaseWriteError.Status, redfishErr.HTTPReturnedStatusCode)
-	require.Len(t, redfishErr.ExtendedInfos, 1)
-	require.Equal(t, p.SecureBoot.DatabaseWriteError.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	_, certificate := testCertificate(t, "conformance")
+
+	resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates", map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
+	answer := answerOf(t, resp, err)
+
+	require.Equal(t, p.SecureBoot.DatabaseWriteError.Status, answer.status, "status of secure_boot.database_write_error")
+	require.Equal(t, p.SecureBoot.DatabaseWriteError.MessageID, answer.messageID, "message of secure_boot.database_write_error")
 }
 
 func conformanceSecureBootResetKeys(t *testing.T, p profile.Profile) {
@@ -531,17 +579,17 @@ func conformanceSecureBootResetKeys(t *testing.T, p profile.Profile) {
 
 	// Enroll a platform key the way the guest does, not over Redfish.
 	err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", uefi.EfiGlobalVariableGuid, "PK", incusapi.InstanceNVRAMVariablePut{}, "")
-	require.NoError(t, err)
+	require.NoError(t, err, "enroll the platform key")
 
 	secureBoot := getSecureBoot(t, client)
-	require.Equal(t, schemas.UserModeSecureBootModeType, secureBoot.SecureBootMode)
-	require.Equal(t, p.SecureBoot.ResetKeys.Types, resetKeysAllowableValues(t, secureBoot))
+	require.Equal(t, schemas.UserModeSecureBootModeType, secureBoot.SecureBootMode, "a platform key puts the firmware into user mode")
+	require.Equal(t, p.SecureBoot.ResetKeys.Types, resetKeysAllowableValues(t, secureBoot), "the action publishes the reset keys types of the profile")
 
 	// Reset the keys the way Operations Center does.
 	_, err = secureBoot.ResetKeys(schemas.ResetKeysType(p.SecureBoot.ResetKeys.Types[0]))
-	require.NoError(t, err)
+	require.NoError(t, err, "reset the keys")
 
-	require.Equal(t, schemas.SetupModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode)
+	require.Equal(t, schemas.SetupModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode, "the reset puts the firmware into setup mode")
 }
 
 func conformanceSecureBootResetKeysAbsent(t *testing.T, p profile.Profile) {
@@ -549,25 +597,23 @@ func conformanceSecureBootResetKeysAbsent(t *testing.T, p profile.Profile) {
 
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
 
-	require.Empty(t, resetKeysAllowableValues(t, getSecureBoot(t, client)))
+	require.Empty(t, resetKeysAllowableValues(t, getSecureBoot(t, client)), "SecureBoot publishes no reset keys action")
 
 	resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/Actions/SecureBoot.ResetKeys", map[string]any{"ResetKeysType": "DeleteAllKeys"})
-	if resp != nil {
-		resp.Body.Close()
-	}
+	closeBody(resp)
 
-	require.Error(t, err)
+	require.Error(t, err, "the proxy refuses the reset keys action")
 }
 
 func getSecureBoot(t *testing.T, client *gofish.APIClient) *schemas.SecureBoot {
 	t.Helper()
 
 	systems, err := client.Service.Systems()
-	require.NoError(t, err)
-	require.Len(t, systems, 1)
+	require.NoError(t, err, "list the systems")
+	require.Len(t, systems, 1, "the proxy serves one system")
 
 	secureBoot, err := systems[0].SecureBoot()
-	require.NoError(t, err)
+	require.NoError(t, err, "read the SecureBoot resource")
 
 	return secureBoot
 }
@@ -585,54 +631,80 @@ func resetKeysAllowableValues(t *testing.T, secureBoot *schemas.SecureBoot) []pr
 	}
 
 	err := json.Unmarshal(secureBoot.RawData, &resource)
-	require.NoError(t, err)
+	require.NoError(t, err, "decode the SecureBoot resource")
 
 	return resource.Actions.ResetKeys.AllowableValues
 }
 
 const virtualMediaPath = "/redfish/v1/Managers/bmc1/VirtualMedia/CD"
 
-func conformanceVirtualMediaInsert(t *testing.T, p profile.Profile) {
+// conformanceVirtualMediaInsert inserts virtual media the way Operations Center does for the insert variant of the profile.
+func conformanceVirtualMediaInsert(method string, target func(t *testing.T, client *gofish.APIClient) string, body func(image string) map[string]any) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
+
+		image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("image"))
+		}))
+		t.Cleanup(image.Close)
+
+		incusClient := fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}})
+		client := setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(&fakeMounter{}))
+
+		insertTarget := target(t, client)
+
+		payload, err := json.Marshal(body(image.URL))
+		require.NoError(t, err, "encode the insert request")
+
+		resp, err := client.RunRawRequestWithHeaders(method, insertTarget, bytes.NewReader(payload), "application/json", nil)
+		require.NoError(t, err, "insert the virtual media")
+		resp.Body.Close()
+
+		waitForTask(t, client, resp.Header.Get("Location"))
+
+		require.Equal(t, new(true), getVirtualMedia(t, client).Inserted, "virtual media is inserted through %s %s", method, insertTarget)
+
+		instance, _, err := incusClient.GetInstance("test-instance")
+		require.NoError(t, err, "read the instance")
+
+		_, volume := instance.Devices["boot-media"]["pool"]
+		require.Equal(t, p.VirtualMedia.Delivery == profile.DeliveryFullFetch, volume, "only a full fetch uses a storage volume")
+	}
+}
+
+func standardInsertTarget(t *testing.T, client *gofish.APIClient) string {
 	t.Helper()
 
-	image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("image"))
-	}))
-	t.Cleanup(image.Close)
+	return virtualMediaActions(t, client).InsertMedia.Target
+}
+
+func oemInsertTarget(t *testing.T, client *gofish.APIClient) string {
+	t.Helper()
+
+	return findOEMInsertTarget(virtualMediaActions(t, client).Oem, 3)
+}
+
+func patchInsertTarget(*testing.T, *gofish.APIClient) string {
+	return virtualMediaPath
+}
+
+func actionInsertBody(image string) map[string]any {
+	return map[string]any{"Image": image}
+}
+
+func patchInsertBody(image string) map[string]any {
+	return map[string]any{"Image": image, "Inserted": true}
+}
+
+func conformanceVirtualMediaActions(t *testing.T, p profile.Profile) {
+	t.Helper()
 
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
 
-	method, target, body := insertRequest(t, client, image.URL)
-
-	payload, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	resp, err := client.RunRawRequestWithHeaders(method, target, bytes.NewReader(payload), "application/json", nil)
-	require.NoError(t, err)
-	resp.Body.Close()
-
-	waitForTask(t, client, resp.Header.Get("Location"))
-
-	require.Equal(t, new(true), getVirtualMedia(t, client).Inserted, "virtual media is inserted through %s %s", method, target)
-}
-
-// insertRequest picks the insert request with the rules of Operations Center: the standard action, an OEM action or a PATCH.
-func insertRequest(t *testing.T, client *gofish.APIClient, image string) (string, string, map[string]any) {
-	t.Helper()
-
 	actions := virtualMediaActions(t, client)
 
-	standard := actions.InsertMedia.Target
-	if standard != "" {
-		return http.MethodPost, standard, map[string]any{"Image": image}
-	}
-
-	oem := findOEMInsertTarget(actions.Oem, 3)
-	if oem != "" {
-		return http.MethodPost, oem, map[string]any{"Image": image}
-	}
-
-	return http.MethodPatch, virtualMediaPath, map[string]any{"Image": image, "Inserted": true}
+	require.Equal(t, p.VirtualMedia.Insert == profile.MediaInsertStandard, actions.InsertMedia.Target != "", "the standard action is only published for standard")
+	require.Equal(t, p.VirtualMedia.Insert == profile.MediaInsertOEM, findOEMInsertTarget(actions.Oem, 3) != "", "the OEM action is only published for oem")
 }
 
 func conformanceVirtualMediaHiddenPaths(t *testing.T, p profile.Profile) {
@@ -640,30 +712,18 @@ func conformanceVirtualMediaHiddenPaths(t *testing.T, p profile.Profile) {
 
 	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
 
-	actions := virtualMediaActions(t, client)
-
-	standard := p.VirtualMedia.Insert == profile.MediaInsertStandard
-	require.Equal(t, standard, actions.InsertMedia.Target != "", "the standard action is only published for standard")
-	require.Equal(t, p.VirtualMedia.Insert == profile.MediaInsertOEM, findOEMInsertTarget(actions.Oem, 3) != "", "the OEM action is only published for oem")
-
-	if standard {
-		return
+	requests := []struct {
+		method string
+		path   string
+	}{
+		{method: http.MethodGet, path: virtualMediaPath + "/InsertMediaActionInfo"},
+		{method: http.MethodPost, path: virtualMediaPath + "/Actions/VirtualMedia.InsertMedia"},
 	}
 
-	for _, path := range []string{virtualMediaPath + "/InsertMediaActionInfo", virtualMediaPath + "/Actions/VirtualMedia.InsertMedia"} {
-		method := http.MethodGet
-		if strings.HasSuffix(path, "InsertMedia") {
-			method = http.MethodPost
-		}
+	for _, request := range requests {
+		resp, err := client.RunRawRequestWithHeaders(request.method, request.path, strings.NewReader(`{"Image":"http://localhost/image.iso"}`), "application/json", nil)
 
-		resp, err := client.RunRawRequestWithHeaders(method, path, strings.NewReader(`{"Image":"http://localhost/image.iso"}`), "application/json", nil)
-		if resp != nil {
-			resp.Body.Close()
-		}
-
-		redfishErr := &schemas.Error{}
-		require.ErrorAs(t, err, &redfishErr, path)
-		require.Equal(t, http.StatusNotFound, redfishErr.HTTPReturnedStatusCode, path)
+		require.Equal(t, http.StatusNotFound, answerOf(t, resp, err).status, "%s %s is hidden without the standard action", request.method, request.path)
 	}
 }
 
@@ -682,7 +742,7 @@ func virtualMediaActions(t *testing.T, client *gofish.APIClient) virtualMediaAct
 	}
 
 	err := json.Unmarshal(getVirtualMedia(t, client).RawData, &resource)
-	require.NoError(t, err)
+	require.NoError(t, err, "decode the actions of the virtual media")
 
 	return resource.Actions
 }
@@ -721,23 +781,25 @@ func getVirtualMedia(t *testing.T, client *gofish.APIClient) *schemas.VirtualMed
 	t.Helper()
 
 	virtualMedia, err := schemas.GetVirtualMedia(client, virtualMediaPath)
-	require.NoError(t, err)
+	require.NoError(t, err, "read the virtual media")
 
 	return virtualMedia
 }
 
-// writeAndApply writes the attributes and resets the instance, if the profile stages them.
-func writeAndApply(t *testing.T, client *gofish.APIClient, p profile.Profile, attributes map[string]any) {
+// writeBIOS writes the attributes.
+func writeBIOS(t *testing.T, client *gofish.APIClient, attributes map[string]any) {
 	t.Helper()
 
 	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": attributes})
-	require.NoError(t, err)
+	require.NoError(t, err, "write the attributes")
 	resp.Body.Close()
+}
 
-	if !stages(p) {
-		return
-	}
+// writeBIOSAndReset writes the attributes and resets the instance, which applies the staged attributes.
+func writeBIOSAndReset(t *testing.T, client *gofish.APIClient, attributes map[string]any) {
+	t.Helper()
 
+	writeBIOS(t, client, attributes)
 	resetSystem(t, client, profile.ResetTypeForceRestart)
 }
 
@@ -746,7 +808,7 @@ func registryAttributes(t *testing.T, client *gofish.APIClient, registryID strin
 	t.Helper()
 
 	files, err := client.Service.Registries()
-	require.NoError(t, err)
+	require.NoError(t, err, "list the registries")
 
 	var registry *schemas.AttributeRegistry
 
@@ -756,10 +818,10 @@ func registryAttributes(t *testing.T, client *gofish.APIClient, registryID strin
 		}
 
 		registry, err = schemas.GetAttributeRegistry(client, file.Location[0].URI)
-		require.NoError(t, err)
+		require.NoError(t, err, "read the attribute registry")
 	}
 
-	require.NotNil(t, registry)
+	require.NotNil(t, registry, "the registries list %s", registryID)
 
 	published := map[string]bool{}
 	for _, attribute := range registry.RegistryEntries.Attributes {
@@ -769,23 +831,19 @@ func registryAttributes(t *testing.T, client *gofish.APIClient, registryID strin
 	return published
 }
 
-// taskRunning follows the location of a PATCH answer, which has no location for the 200 and 204 answers.
+// taskRunning follows the location of a PATCH answer with a task.
 func taskRunning(t *testing.T, client *gofish.APIClient, location string) bool {
 	t.Helper()
 
-	if location == "" {
-		return false
-	}
-
 	resp, err := client.Get(location)
-	require.NoError(t, err)
+	require.NoError(t, err, "poll the task")
 
 	defer resp.Body.Close()
 
 	// A completed task monitor answers with the Bios resource, which has no task state.
 	body := struct{ TaskState schemas.TaskState }{}
 	err = json.NewDecoder(resp.Body).Decode(&body)
-	require.NoError(t, err)
+	require.NoError(t, err, "decode the task")
 
 	return resp.StatusCode == http.StatusAccepted || body.TaskState == schemas.RunningTaskState
 }
@@ -795,13 +853,13 @@ func getBIOSSettings(t *testing.T, client *gofish.APIClient) map[string]any {
 	t.Helper()
 
 	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios/Settings")
-	require.NoError(t, err)
+	require.NoError(t, err, "read the settings object")
 
 	defer resp.Body.Close()
 
 	settings := struct{ Attributes map[string]any }{}
 	err = json.NewDecoder(resp.Body).Decode(&settings)
-	require.NoError(t, err)
+	require.NoError(t, err, "decode the settings object")
 
 	return settings.Attributes
 }
@@ -811,7 +869,7 @@ func patchBIOS(t *testing.T, client *gofish.APIClient) (int, string) {
 	t.Helper()
 
 	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{"incus.config.limits.cpu": "2"}})
-	require.NoError(t, err)
+	require.NoError(t, err, "write limits.cpu")
 
 	defer resp.Body.Close()
 
@@ -822,11 +880,11 @@ func getBIOS(t *testing.T, client *gofish.APIClient) *schemas.Bios {
 	t.Helper()
 
 	systems, err := client.Service.Systems()
-	require.NoError(t, err)
-	require.Len(t, systems, 1)
+	require.NoError(t, err, "list the systems")
+	require.Len(t, systems, 1, "the proxy serves one system")
 
 	bios, err := systems[0].Bios()
-	require.NoError(t, err)
+	require.NoError(t, err, "read the Bios resource")
 
 	return bios
 }
@@ -873,7 +931,7 @@ func conformancePowerResetTypes(t *testing.T, p profile.Profile) {
 	}
 
 	err := json.Unmarshal(getSystem(t, client).RawData, &resource)
-	require.NoError(t, err)
+	require.NoError(t, err, "decode the system")
 
 	require.ElementsMatch(t, p.Power.ResetTypes, resource.Actions.Reset.AllowableValues, "the reset action publishes the reset types of the profile")
 }
@@ -887,16 +945,11 @@ func conformancePowerResetTypeRefused(t *testing.T, p profile.Profile) {
 	client := setup(t, incusClient, api.WithProfile(p))
 
 	resp, err := client.Post(systemPath+"/Actions/ComputerSystem.Reset", map[string]any{"ResetType": resetType})
-	if resp != nil {
-		resp.Body.Close()
-	}
+	answer := answerOf(t, resp, err)
 
-	redfishErr := &schemas.Error{}
-	require.ErrorAs(t, err, &redfishErr)
-	require.Equal(t, http.StatusBadRequest, redfishErr.HTTPReturnedStatusCode)
-	require.Len(t, redfishErr.ExtendedInfos, 1)
-	require.Equal(t, "Base.1.18.ActionParameterValueNotInList", redfishErr.ExtendedInfos[0].MessageID)
-	require.Equal(t, []string{"#/ResetType"}, redfishErr.ExtendedInfos[0].RelatedProperties)
+	require.Equal(t, http.StatusBadRequest, answer.status, "a reset type outside of the profile is refused")
+	require.Equal(t, "Base.1.18.ActionParameterValueNotInList", answer.messageID, "message of a refused reset type")
+	require.Equal(t, []string{"#/ResetType"}, answer.relatedProperties, "the message names the reset type")
 	require.Empty(t, incusClient.UpdateInstanceStateCalls(), "a refused reset type leaves the instance")
 }
 
@@ -917,75 +970,63 @@ func conformancePowerSettle(t *testing.T, p profile.Profile) {
 
 	resetSystem(t, client, profile.ResetTypeOn)
 
-	err := patchBoot(client, schemas.DisabledBootSourceOverrideEnabled)
+	resp, err := patchBoot(client, schemas.DisabledBootSourceOverrideEnabled)
+	answer := answerOf(t, resp, err)
 
-	redfishErr := &schemas.Error{}
-	require.ErrorAs(t, err, &redfishErr, "a write right after the power on is refused")
-	require.Equal(t, p.Power.NotSettledError.Status, redfishErr.HTTPReturnedStatusCode)
-	require.Len(t, redfishErr.ExtendedInfos, 1)
-	require.Equal(t, p.Power.NotSettledError.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+	require.Equal(t, p.Power.NotSettledError.Status, answer.status, "a write right after the power on is refused")
+	require.Equal(t, p.Power.NotSettledError.MessageID, answer.messageID, "message of power.not_settled_error")
 	require.Equal(t, "On", string(getSystem(t, client).PowerState), "reads pass in the window")
 
 	mu.Lock()
 	now = now.Add(p.Scaled(p.Power.NotSettledWindow))
 	mu.Unlock()
 
-	require.NoError(t, patchBoot(client, schemas.DisabledBootSourceOverrideEnabled), "a write after the window passes")
+	resp, err = patchBoot(client, schemas.DisabledBootSourceOverrideEnabled)
+	require.NoError(t, err, "a write after the window passes")
+	resp.Body.Close()
 }
 
-func conformanceBootOverride(t *testing.T, p profile.Profile) {
-	t.Helper()
+// conformanceBootOverride sets the boot override and checks what is left of it after a power on.
+func conformanceBootOverride(enabled schemas.BootSourceOverrideEnabled, wantAfterPowerOn schemas.BootSourceOverrideEnabled) func(t *testing.T, p profile.Profile) {
+	return func(t *testing.T, p profile.Profile) {
+		t.Helper()
 
-	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{
-		Devices: incusapi.DevicesMap{"boot-media": {"type": "disk", "source": "boot-media"}},
-	}}), api.WithProfile(p))
+		client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{
+			Devices: incusapi.DevicesMap{"boot-media": {"type": "disk", "source": "boot-media"}},
+		}}), api.WithProfile(p))
 
-	var resource struct {
-		Boot struct {
-			AllowableValues []schemas.BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled@Redfish.AllowableValues"`
-		} `json:"Boot"`
+		var resource struct {
+			Boot struct {
+				AllowableValues []schemas.BootSourceOverrideEnabled `json:"BootSourceOverrideEnabled@Redfish.AllowableValues"`
+			} `json:"Boot"`
+		}
+
+		err := json.Unmarshal(getSystem(t, client).RawData, &resource)
+		require.NoError(t, err, "decode the system")
+		require.Equal(t, p.VirtualMedia.BootOverrideOnce, slices.Contains(resource.Boot.AllowableValues, schemas.OnceBootSourceOverrideEnabled), "Once is offered exactly with boot_override_once")
+
+		resp, err := patchBoot(client, enabled)
+		require.NoError(t, err, "set the boot override")
+		resp.Body.Close()
+		require.Equal(t, enabled, getSystem(t, client).Boot.BootSourceOverrideEnabled, "the system shows the boot override")
+
+		resetSystem(t, client, profile.ResetTypeOn)
+
+		require.Equal(t, wantAfterPowerOn, getSystem(t, client).Boot.BootSourceOverrideEnabled, "the power on drops a one time override only")
 	}
-
-	err := json.Unmarshal(getSystem(t, client).RawData, &resource)
-	require.NoError(t, err)
-
-	once := slices.Contains(resource.Boot.AllowableValues, schemas.OnceBootSourceOverrideEnabled)
-	require.Equal(t, p.VirtualMedia.BootOverrideOnce, once, "Once is offered exactly with boot_override_once")
-
-	enabled := schemas.ContinuousBootSourceOverrideEnabled
-	if once {
-		enabled = schemas.OnceBootSourceOverrideEnabled
-	}
-
-	require.NoError(t, patchBoot(client, enabled))
-	require.Equal(t, enabled, getSystem(t, client).Boot.BootSourceOverrideEnabled)
-
-	resetSystem(t, client, profile.ResetTypeOn)
-
-	want := schemas.ContinuousBootSourceOverrideEnabled
-	if once {
-		want = schemas.DisabledBootSourceOverrideEnabled
-	}
-
-	require.Equal(t, want, getSystem(t, client).Boot.BootSourceOverrideEnabled, "the power on drops a one time override only")
 }
 
 func getSystem(t *testing.T, client *gofish.APIClient) *schemas.ComputerSystem {
 	t.Helper()
 
 	system, err := schemas.GetComputerSystem(client, systemPath)
-	require.NoError(t, err)
+	require.NoError(t, err, "read the system")
 
 	return system
 }
 
-func patchBoot(client *gofish.APIClient, enabled schemas.BootSourceOverrideEnabled) error {
-	resp, err := client.Patch(systemPath, map[string]any{"Boot": map[string]any{"BootSourceOverrideEnabled": enabled, "BootSourceOverrideTarget": schemas.CdBootSource}})
-	if resp != nil {
-		resp.Body.Close()
-	}
-
-	return err
+func patchBoot(client *gofish.APIClient, enabled schemas.BootSourceOverrideEnabled) (*http.Response, error) {
+	return client.Patch(systemPath, map[string]any{"Boot": map[string]any{"BootSourceOverrideEnabled": enabled, "BootSourceOverrideTarget": schemas.CdBootSource}})
 }
 
 // resetSystem resets the system and waits for the task, if the reset answers with one.
@@ -993,7 +1034,7 @@ func resetSystem(t *testing.T, client *gofish.APIClient, resetType profile.Reset
 	t.Helper()
 
 	resp, err := client.Post(systemPath+"/Actions/ComputerSystem.Reset", map[string]any{"ResetType": resetType})
-	require.NoError(t, err)
+	require.NoError(t, err, "reset the system")
 	resp.Body.Close()
 
 	waitForTask(t, client, resp.Header.Get("Location"))
@@ -1009,7 +1050,7 @@ func waitForTask(t *testing.T, client *gofish.APIClient, location string) {
 		}
 
 		resp, err := client.Get(location)
-		require.NoError(t, err)
+		require.NoError(t, err, "poll the task")
 		resp.Body.Close()
 
 		if resp.StatusCode != http.StatusAccepted {
@@ -1031,12 +1072,12 @@ func conformanceOverlay(t *testing.T, p profile.Profile) {
 
 	for path, patch := range p.Overlay {
 		resp, err := client.Get(strings.TrimSuffix(placeholders.Replace(path), "/"))
-		require.NoError(t, err)
+		require.NoError(t, err, "read %s", path)
 
 		document := map[string]any{}
 		err = json.NewDecoder(resp.Body).Decode(&document)
 		resp.Body.Close()
-		require.NoError(t, err)
+		require.NoError(t, err, "decode %s", path)
 
 		requirePatched(t, document, patch, path)
 	}
@@ -1060,12 +1101,65 @@ func requirePatched(t *testing.T, document map[string]any, patch map[string]any,
 
 		default:
 			want, err := json.Marshal(value)
-			require.NoError(t, err)
+			require.NoError(t, err, "encode the patched value")
 
 			got, err := json.Marshal(document[name])
-			require.NoError(t, err)
+			require.NoError(t, err, "encode the served value")
 
 			require.JSONEq(t, string(want), string(got), "%s: the overlay sets %s", path, name)
 		}
 	}
+}
+
+// fakeMounter records the media it mounts, so the tests need no FUSE.
+type fakeMounter struct {
+	mu     sync.Mutex
+	err    error
+	images []string
+	opts   []media.Options
+	closed int
+}
+
+const fakeMediaPath = "/var/lib/incus-redfish-proxy/media/default_test-instance/mnt/boot-media.iso"
+
+func (m *fakeMounter) Mount(ctx context.Context, image string, opts media.Options) (api.MountedMedia, error) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.err != nil {
+		return nil, m.err
+	}
+
+	m.images = append(m.images, image)
+	m.opts = append(m.opts, opts)
+
+	return fakeMedia{mounter: m}, nil
+}
+
+func (m *fakeMounter) Cleanup() error {
+	return nil
+}
+
+func (m *fakeMounter) closeCount() int {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	return m.closed
+}
+
+type fakeMedia struct {
+	mounter *fakeMounter
+}
+
+func (f fakeMedia) Path() string {
+	return fakeMediaPath
+}
+
+func (f fakeMedia) Close() error {
+	f.mounter.mu.Lock()
+	defer f.mounter.mu.Unlock()
+
+	f.mounter.closed++
+
+	return nil
 }
