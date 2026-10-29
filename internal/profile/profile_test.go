@@ -546,7 +546,59 @@ func TestLoad_Overlay(t *testing.T) {
 	}
 }
 
+func TestLoad_Delivery(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name         string
+		virtualMedia string
+
+		assertErr require.ErrorAssertionFunc
+		want      profile.Stream
+	}{
+		{
+			name:         "success - units",
+			virtualMedia: "{delivery: prefetch, stream: {read_ahead: 512KiB, cache: 1GiB, fallback: error}}",
+
+			assertErr: require.NoError,
+			want:      profile.Stream{ReadAhead: 512 << 10, Cache: 1 << 30, Fallback: profile.StreamFallbackError},
+		},
+		{
+			name:         "success - plain bytes",
+			virtualMedia: "{delivery: stream, stream: {read_ahead: 4096, cache: 4MiB}}",
+
+			assertErr: require.NoError,
+			want:      profile.Stream{ReadAhead: 4096, Cache: 4 << 20, Fallback: profile.StreamFallbackFullFetch},
+		},
+		{name: "error - unknown delivery", virtualMedia: "{delivery: nbd}", assertErr: require.Error},
+		{name: "error - unknown unit", virtualMedia: "{stream: {read_ahead: 4MB}}", assertErr: require.Error},
+		{name: "error - zero size", virtualMedia: "{stream: {read_ahead: 0}}", assertErr: require.Error},
+		{name: "error - read ahead below the minimum", virtualMedia: "{stream: {read_ahead: 4095}}", assertErr: require.Error},
+		{name: "error - size overflows", virtualMedia: "{stream: {cache: 9007199254740993GiB}}", assertErr: require.Error},
+		{name: "error - read ahead above the cache", virtualMedia: "{stream: {read_ahead: 128MiB}}", assertErr: require.Error},
+		{name: "error - unknown fallback", virtualMedia: "{stream: {fallback: retry}}", assertErr: require.Error},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\nvirtual_media: "+tc.virtualMedia+"\n"), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			p, err := profile.Load(filename)
+			tc.assertErr(t, err, "load the profile")
+
+			require.Equal(t, tc.want, p.VirtualMedia.Stream, "the stream settings are parsed")
+		})
+	}
+}
+
 func TestErrorShape_Validate(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		name  string
 		shape profile.ErrorShape
@@ -575,7 +627,9 @@ func TestErrorShape_Validate(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			tc.assertErr(t, tc.shape.Validate())
+			t.Parallel()
+
+			tc.assertErr(t, tc.shape.Validate(), "validate the error shape")
 		})
 	}
 }
