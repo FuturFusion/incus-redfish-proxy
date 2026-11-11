@@ -18,3 +18,7 @@ bios:
       - {name: ModeOption, type: Enumeration, values: [Enabled, Disabled], default: Disabled, requires: {attribute: Mode, value: Performance}}
       - {name: Revision, type: String, read_only: true, default: "1.0"}
       - {name: Threshold, type: Integer, min: 0, max: 100, default: 50}
+
+secure_boot:
+  database_add_response: "204"      # like Dell iDRAC 9, no Location
+  database_delete_response: 200-error   # like Dell iDRAC 9

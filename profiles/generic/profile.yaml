@@ -21,10 +21,13 @@ bios:
 secure_boot:
   database_write: true              # false: certificates and signatures are read only over Redfish
   database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported}
+  database_add_response: "201"      # 201 | 204, 204 has no Location and no body
+  database_delete_response: "204"   # 204 | 200 | 200-error
   reset_keys:
     supported: false                # true: publish the #SecureBoot.ResetKeys action
     types: [DeleteAllKeys, DeletePK]
-    response: "204"                 # 204 | 202-task
+    response: "204"                 # 204 | 202-task | 200 | 200-error
+    applies: immediately            # immediately | on_reset, on_reset deletes the keys on the next reset that powers on
   certificate_id_style: hash        # hash | sequential
   certificate_id_prefix: ""         # sequential only, "Certificate" gives Certificate1
   enable_requires_power_off: true   # false: SecureBootEnable on a running instance applies on the next reset
@@ -33,7 +36,7 @@ virtual_media:
   insert: standard                  # standard | oem | patch
   oem_vendor: Incus                 # oem only, key below Actions.Oem, never a real vendor
   oem_action: InsertVirtualMedia    # oem only
-  insert_response: "204"            # 204 | 202-task, a PATCH always answers 204
+  insert_response: "204"            # 204 | 202-task | 200 | 200-error, also the eject actions
   boot_override_once: false         # true: offer BootSourceOverrideEnabled Once, the next power on drops it
   delivery: full-fetch              # full-fetch | stream | prefetch, stream and prefetch mount the image through FUSE
   stream:
@@ -43,10 +46,13 @@ virtual_media:
 
 power:
   reset_types: []                   # published as ResetType@Redfish.AllowableValues, empty: not published, all accepted
-  response: "204"                   # 204 | 202-task
+  response: "204"                   # 204 | 202-task | 200 | 200-error
   not_settled_window: 0s            # writes below Systems and Managers are refused for this long after a power on
   not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby}  # OC waits only for IDs ending in ResourceInStandby or UnableToModifyDuringSystemPOST
   delay: 0s                         # a reset waits this long before it changes the power state
+
+responses:
+  patch: "204"                      # 204 | 200-resource | 200 | 200-error, PATCH of Systems, SecureBoot and VirtualMedia
 
 timing:
   scale: 1.0                        # multiplies every duration of the profile, overridden by --timing-scale

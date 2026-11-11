@@ -31,6 +31,19 @@ bios:
 must match the directory name of an embedded profile. `description` is one
 sentence that `--list-profiles` prints.
 
+An answer key names the HTTP status and the shape of the body:
+
+- `204`: no body.
+- `202-task`: 202 with a task monitor.
+- `200`: 200 with a top level `@Message.ExtendedInfo`.
+- `200-error`: 200 with the messages inside an `error` object. Some BMCs
+  answer a success like this. This is not standard Redfish, but a client must
+  accept it.
+- `200-resource`: 200 with the changed resource.
+
+The message is `Base.1.18.Success`, if the change takes effect at once. It is
+`Base.1.18.ResetRequired`, if the change waits for the next power on.
+
 Write durations like `20s` or `1m30s`. Sizes are plain bytes or a number
 with `KiB`, `MiB` or `GiB`. An error shape is
 `{status: <HTTP status>, message_id: <Registry>.<major>.<minor>.<Id>}`.
@@ -75,36 +88,47 @@ A synthetic attribute has a `name` and a `type`: `Enumeration`, `String`,
 |-----------------------------------------|-----------------------------------------------------------|--------------------------------------------------------------------------------------------------|---------------------------------------------------|
 | `secure_boot.database_write`            | `true`                                                    | `false` makes the certificates and signatures read only                                          | `ApplySecureBootCertificates`                     |
 | `secure_boot.database_write_error`      | `{status: 405, message_id: Base.1.18.ActionNotSupported}` | Error shape for a refused write                                                                  | `ApplySecureBootCertificates`                     |
+| `secure_boot.database_add_response`     | `"201"`                                                   | `201` with `Location` and the entry, `204` without `Location` and body                           | `ApplySecureBootCertificates`                     |
+| `secure_boot.database_delete_response`  | `"204"`                                                   | `204`, `200`, `200-error`                                                                        | `wipeSecureBootDatabase`, `deleteSecureBootEntry` |
 | `secure_boot.reset_keys.supported`      | `false`                                                   | `true` publishes `#SecureBoot.ResetKeys`                                                         | `secureBootSupportsResetKeys`                     |
 | `secure_boot.reset_keys.types`          | `[DeleteAllKeys, DeletePK]`                               | `DeleteAllKeys`, `DeletePK`                                                                      | `ResetSecureBootKeys`                             |
-| `secure_boot.reset_keys.response`       | `"204"`                                                   | `204`, `202-task`                                                                                | `ResetSecureBootKeys`, `WaitForTask`              |
+| `secure_boot.reset_keys.response`       | `"204"`                                                   | `204`, `202-task`, `200`, `200-error`                                                            | `ResetSecureBootKeys`, `WaitForTask`              |
+| `secure_boot.reset_keys.applies`        | `immediately`                                             | `immediately` (needs a stopped instance), `on_reset` (the next reset that powers on applies it)  | `isDeploymentInSecureBootSetupMode`               |
 | `secure_boot.certificate_id_style`      | `hash`                                                    | `hash`, `sequential` (one counter for all databases, IDs are never used again until a key reset) | `wipeSecureBootDatabase`, `deleteSecureBootEntry` |
 | `secure_boot.certificate_id_prefix`     | `""`                                                      | `sequential` only, `Certificate` gives `Certificate1`                                            | `readSecureBootDatabase`                          |
 | `secure_boot.enable_requires_power_off` | `true`                                                    | `false` accepts `SecureBootEnable` on a running instance and applies it on the next reset        | `EnableSecureBoot`                                |
 
 ### `virtual_media`
 
-| Key                                | Default              | Values                                                                                                  | OC                                                          |
-|------------------------------------|----------------------|---------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
-| `virtual_media.insert`             | `standard`           | `standard` (`#VirtualMedia.InsertMedia`), `oem` (OEM action only), `patch` (PATCH of the resource only) | `insertMedia`                                               |
-| `virtual_media.oem_vendor`         | `Incus`              | Key below `Actions.Oem`. Never a real vendor                                                            | `oemActionTarget`                                           |
-| `virtual_media.oem_action`         | `InsertVirtualMedia` | Name of the OEM action                                                                                  | `oemActionTarget`                                           |
-| `virtual_media.insert_response`    | `"204"`              | `204`, `202-task`. A PATCH always answers 204                                                           | `AttachMedia`, `WaitForTask`                                |
-| `virtual_media.boot_override_once` | `false`              | `true` offers `BootSourceOverrideEnabled` `Once`, the next power on drops it                            | `bootSourceOverrideEnabledCandidates`, `overrideBootDevice` |
-| `virtual_media.delivery`           | `full-fetch`         | `full-fetch`, `stream`, `prefetch`, see the main README                                                 | none, invisible to OC                                       |
-| `virtual_media.stream.read_ahead`  | `4MiB`               | Size of every range request, at least `4KiB`, at most `cache`                                           | none                                                        |
-| `virtual_media.stream.cache`       | `64MiB`              | Bytes kept in memory                                                                                    | none                                                        |
-| `virtual_media.stream.fallback`    | `full-fetch`         | `full-fetch`, `error`, if the server has no range requests or FUSE is missing                           | none                                                        |
+| Key                                | Default              | Values                                                                                                      | OC                                                          |
+|------------------------------------|----------------------|-------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+| `virtual_media.insert`             | `standard`           | `standard` (`#VirtualMedia.InsertMedia`), `oem` (OEM action only), `patch` (PATCH of the resource only)     | `insertMedia`                                               |
+| `virtual_media.oem_vendor`         | `Incus`              | Key below `Actions.Oem`. Never a real vendor                                                                | `oemActionTarget`                                           |
+| `virtual_media.oem_action`         | `InsertVirtualMedia` | Name of the OEM action                                                                                      | `oemActionTarget`                                           |
+| `virtual_media.insert_response`    | `"204"`              | `204`, `202-task`, `200`, `200-error`. Applies to the eject actions as well, they answer 204 for `202-task` | `AttachMedia`, `WaitForTask`                                |
+| `virtual_media.boot_override_once` | `false`              | `true` offers `BootSourceOverrideEnabled` `Once`, the next power on drops it                                | `bootSourceOverrideEnabledCandidates`, `overrideBootDevice` |
+| `virtual_media.delivery`           | `full-fetch`         | `full-fetch`, `stream`, `prefetch`, see the main README                                                     | none, invisible to OC                                       |
+| `virtual_media.stream.read_ahead`  | `4MiB`               | Size of every range request, at least `4KiB`, at most `cache`                                               | none                                                        |
+| `virtual_media.stream.cache`       | `64MiB`              | Bytes kept in memory                                                                                        | none                                                        |
+| `virtual_media.stream.fallback`    | `full-fetch`         | `full-fetch`, `error`, if the server has no range requests or FUSE is missing                               | none                                                        |
 
 ### `power`
 
 | Key                        | Default                                                  | Values                                                                                                                                                                               | OC                            |
 |----------------------------|----------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------|
 | `power.reset_types`        | `[]`                                                     | `On`, `ForceOn`, `GracefulShutdown`, `ForceOff`, `GracefulRestart`, `ForceRestart`, published as `ResetType@Redfish.AllowableValues`. Empty publishes nothing and accepts every type | `performReset`                |
-| `power.response`           | `"204"`                                                  | `204`, `202-task`                                                                                                                                                                    | `performReset`, `WaitForTask` |
+| `power.response`           | `"204"`                                                  | `204`, `202-task`, `200`, `200-error`                                                                                                                                                | `performReset`, `WaitForTask` |
 | `power.not_settled_window` | `0s`                                                     | Writes below `Systems` and `Managers` are refused for this long after a power on                                                                                                     | `isNotSettledRedfishError`    |
 | `power.not_settled_error`  | `{status: 400, message_id: Base.1.18.ResourceInStandby}` | Error shape of the refusal. OC waits only for IDs ending in `ResourceInStandby` or `UnableToModifyDuringSystemPOST`                                                                  | `isNotSettledRedfishError`    |
 | `power.delay`              | `0s`                                                     | A reset waits this long before it changes the power state                                                                                                                            | `hasPowerState`               |
+
+### `responses`
+
+| Key               | Default | Values                                                                                         | OC                                       |
+|-------------------|---------|------------------------------------------------------------------------------------------------|------------------------------------------|
+| `responses.patch` | `"204"` | `204`, `200-resource`, `200`, `200-error`. PATCH of `Systems`, `SecureBoot` and `VirtualMedia` | `overrideBootDevice`, `EnableSecureBoot` |
+
+The BIOS PATCH has its own key, `bios.patch_response`.
 
 ### `timing`
 
