@@ -28,11 +28,8 @@ import (
 // pollInterval bounds the wait between two polls, a task monitor may ask for longer.
 const pollInterval = time.Second
 
-// vmOption changes the instance before it is created.
-type vmOption func(*api.InstancesPost)
-
 // newVM creates an empty, stopped VM. Without an operating system it only runs the firmware, which is enough to observe power states.
-func newVM(t *testing.T, opts ...vmOption) string {
+func newVM(t *testing.T) string {
 	t.Helper()
 
 	suffix := make([]byte, 4)
@@ -54,10 +51,6 @@ func newVM(t *testing.T, opts ...vmOption) string {
 				"root": {"type": "disk", "path": "/", "pool": env.pool, "size": "1GiB"},
 			},
 		},
-	}
-
-	for _, opt := range opts {
-		opt(&instance)
 	}
 
 	op, err := env.client.CreateInstance(instance)
@@ -113,13 +106,37 @@ func dumpInstance(t *testing.T, name string) {
 	t.Logf("instance %s dumped to %s", name, file)
 }
 
-// startVM starts the VM outside of the proxy.
-func startVM(t *testing.T, name string) {
+// eventually polls the condition in the test goroutine, so the condition may use require.
+func eventually(t *testing.T, d time.Duration, condition func() bool, msgAndArgs ...any) {
 	t.Helper()
 
-	op, err := env.client.UpdateInstanceState(name, api.InstanceStatePut{Action: "start"}, "")
-	require.NoError(t, err, "start the VM %s", name)
-	require.NoError(t, op.Wait(), "start the VM %s", name)
+	deadline := time.Now().Add(timeout(d))
+
+	for !condition() {
+		if time.Now().After(deadline) {
+			require.Fail(t, "the condition is not met in time", msgAndArgs...)
+		}
+
+		time.Sleep(pollInterval)
+	}
+}
+
+// changeState starts, stops or restarts the VM outside of the proxy.
+func changeState(t *testing.T, name string, action string) {
+	t.Helper()
+
+	op, err := env.client.UpdateInstanceState(name, api.InstanceStatePut{Action: action, Force: true}, "")
+	require.NoError(t, err, "%s the VM %s", action, name)
+	require.NoError(t, op.Wait(), "%s the VM %s", action, name)
+}
+
+func instanceConfig(t *testing.T, name string) map[string]string {
+	t.Helper()
+
+	instance, _, err := env.client.GetInstance(name)
+	require.NoError(t, err, "read the config of the VM %s", name)
+
+	return instance.Config
 }
 
 func instanceStatus(t *testing.T, name string) string {
@@ -133,34 +150,55 @@ func instanceStatus(t *testing.T, name string) string {
 
 // proxy is an in process proxy for one VM.
 type proxy struct {
-	vm     string
-	url    string
-	client *http.Client
+	vm      string
+	profile string
+	url     string
+	client  *http.Client
+	stop    func()
 }
 
 // startProxy serves the Redfish API of the VM with the profile, an embedded name or a file path.
 func startProxy(t *testing.T, vm string, profileName string) *proxy {
 	t.Helper()
 
+	p := &proxy{vm: vm, profile: profileName}
+	p.start(t)
+
+	t.Cleanup(func() { p.stop() })
+
+	return p
+}
+
+func (p *proxy) start(t *testing.T) {
+	t.Helper()
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	handler, err := redfishproxy.NewHandler(redfishproxy.Config{
-		InstanceName: vm,
+		InstanceName: p.vm,
 		Remote:       env.remote,
 		Project:      env.project,
-		Profile:      profileName,
+		Profile:      p.profile,
 		MediaDir:     env.mediaDir,
 		Context:      ctx,
 	})
-	require.NoError(t, err, "start the proxy with the profile %s", profileName)
+	require.NoError(t, err, "start the proxy with the profile %s", p.profile)
 
 	server := httptest.NewServer(handler)
-	t.Cleanup(func() {
+
+	p.url, p.client = server.URL, server.Client()
+	p.stop = func() {
 		server.Close()
 		cancel()
-	})
+	}
+}
 
-	return &proxy{vm: vm, url: server.URL, client: server.Client()}
+// restart replaces the proxy by a new one. Only the state kept in Incus survives, the tasks are lost.
+func (p *proxy) restart(t *testing.T) {
+	t.Helper()
+
+	p.stop()
+	p.start(t)
 }
 
 func (p *proxy) systemPath() string {
