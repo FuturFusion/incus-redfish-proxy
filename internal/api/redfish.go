@@ -174,6 +174,12 @@ func (s redfishServer) hasNVRAMSupport(w http.ResponseWriter) bool {
 }
 
 func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
+	// The generated route is a subtree pattern, which also matches every unknown path.
+	if r.URL.Path != "/redfish/v1/" {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
 	response(w, ServiceRootV1220ServiceRoot{
 		OdataID:   ref("/redfish/v1/"),
 		OdataType: ref("#ServiceRoot.v1_22_0.ServiceRoot"),
@@ -192,15 +198,13 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 		Name:           "Root Service",
 		RedfishVersion: ref("1.21.0"),
 		Registries:     s.registriesLink(),
+		Tasks:          s.tasksLink(),
 		// SessionService: &OdataV4IdRef{
 		// 	OdataID: ref("/redfish/v1/SessionService"),
 		// },
 		Systems: &OdataV4IdRef{
 			OdataID: ref("/redfish/v1/Systems"),
 		},
-		// Tasks: &OdataV4IdRef{
-		// 	OdataID: ref("/redfish/v1/TaskService"),
-		// },
 	})
 }
 
@@ -1198,19 +1202,56 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		return
 	}
 
-	// The change is already applied, the task monitor only serves clients expecting an asynchronous answer.
-	responseAccepted(w, fmt.Sprintf("/redfish/v1/TaskMonitors/%s", s.tasks.add()))
+	s.respondBIOSPatch(w, r, TaskV174TaskStateCompleted)
 }
 
-// GetRedfishV1TaskMonitorsTaskID serves the task monitor of a BIOS change, which is not part of the generated routes.
+// respondBIOSPatch answers a BIOS PATCH the way the profile asks for, the task is only created for the 202 answers.
+func (s redfishServer) respondBIOSPatch(w http.ResponseWriter, r *http.Request, state TaskV174TaskState) {
+	switch s.profile.BIOS.PatchResponse {
+	case profile.PatchResponseTask:
+		t, _ := s.tasks.get(s.tasks.create(s.biosPath(), state))
+
+		w.Header().Set("Location", taskPath(t.id))
+		w.WriteHeader(http.StatusAccepted)
+		enc := json.NewEncoder(w)
+		enc.SetIndent("", "  ")
+		_ = enc.Encode(taskResource(t))
+
+	case profile.PatchResponseOK:
+		s.GetRedfishV1SystemsComputerSystemIDBios(w, r, s.instanceName)
+
+	case profile.PatchResponseNoContent:
+		responseNoContent(w)
+
+	default:
+		// A completed change only gets a task monitor for clients expecting an asynchronous answer.
+		responseAccepted(w, taskMonitorPath(s.tasks.create(s.biosPath(), state)))
+	}
+}
+
+func (s redfishServer) biosPath() string {
+	return fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)
+}
+
+// GetRedfishV1TaskMonitorsTaskID serves the task monitor of a task. The generated routes do not include it.
 func (s redfishServer) GetRedfishV1TaskMonitorsTaskID(w http.ResponseWriter, r *http.Request, taskID string) {
-	if !s.tasks.has(taskID) {
+	t, ok := s.tasks.get(taskID)
+	if !ok {
 		responseErr(w, http.StatusNotFound)
 		return
 	}
 
-	// A completed task monitor answers with the resulting Bios resource.
-	s.GetRedfishV1SystemsComputerSystemIDBios(w, r, s.instanceName)
+	switch {
+	case !taskEnded(t.state):
+		responseTaskRunning(w, t)
+
+	case t.state == TaskV174TaskStateCompleted && t.target == s.biosPath():
+		// A completed task monitor answers with the resulting resource.
+		s.GetRedfishV1SystemsComputerSystemIDBios(w, r, s.instanceName)
+
+	default:
+		response(w, taskResource(t))
+	}
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWriter, r *http.Request, computerSystemID string) {

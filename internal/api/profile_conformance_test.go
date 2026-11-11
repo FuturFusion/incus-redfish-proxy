@@ -3,7 +3,9 @@ package api_test
 import (
 	"fmt"
 	"maps"
+	"net/http"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 
@@ -33,6 +35,8 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "identity", applies: always, run: conformanceIdentity},
 	{name: "bios-registry", applies: hasRegistry, run: conformanceBIOSRegistry},
 	{name: "bios-unknown-attribute", applies: always, run: conformanceBIOSUnknownAttribute},
+	{name: "bios-patch-response", applies: always, run: conformanceBIOSPatchResponse},
+	{name: "task-service", applies: always, run: conformanceTaskService},
 }
 
 func always(profile.Profile) bool {
@@ -189,6 +193,83 @@ func conformanceBIOSUnknownAttribute(t *testing.T, p profile.Profile) {
 	require.Equal(t, p.BIOS.Errors.UnknownAttribute.Status, redfishErr.HTTPReturnedStatusCode)
 	require.Len(t, redfishErr.ExtendedInfos, 1)
 	require.Equal(t, p.BIOS.Errors.UnknownAttribute.MessageID, redfishErr.ExtendedInfos[0].MessageID)
+}
+
+func conformanceBIOSPatchResponse(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	status, location := patchBIOS(t, client)
+
+	switch p.BIOS.PatchResponse {
+	case profile.PatchResponseTaskMonitor:
+		require.Equal(t, http.StatusAccepted, status)
+		require.True(t, strings.HasPrefix(location, "/redfish/v1/TaskMonitors/"), location)
+
+	case profile.PatchResponseTask:
+		require.Equal(t, http.StatusAccepted, status)
+		require.True(t, strings.HasPrefix(location, "/redfish/v1/TaskService/Tasks/"), location)
+
+	case profile.PatchResponseOK:
+		require.Equal(t, http.StatusOK, status)
+		require.Empty(t, location)
+
+	case profile.PatchResponseNoContent:
+		require.Equal(t, http.StatusNoContent, status)
+		require.Empty(t, location)
+	}
+
+	if location == "" {
+		return
+	}
+
+	// The change applies at once, so the task is completed when it is first polled.
+	resp, err := client.Get(location)
+	require.NoError(t, err)
+	resp.Body.Close()
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+}
+
+func conformanceTaskService(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	resp, err := client.Get("/redfish/v1/TaskService/Tasks")
+	if !p.BIOS.TaskResource {
+		redfishErr := &schemas.Error{}
+		require.ErrorAs(t, err, &redfishErr)
+		require.Equal(t, http.StatusNotFound, redfishErr.HTTPReturnedStatusCode)
+
+		return
+	}
+
+	require.NoError(t, err)
+	resp.Body.Close()
+
+	tasks, err := client.Service.Tasks()
+	require.NoError(t, err)
+	require.NotNil(t, tasks)
+
+	patchBIOS(t, client)
+
+	listed, err := tasks.Tasks()
+	require.NoError(t, err)
+	require.NotEmpty(t, listed)
+	require.Equal(t, schemas.CompletedTaskState, listed[len(listed)-1].TaskState)
+}
+
+// patchBIOS writes one attribute every profile accepts and returns the status and location of the answer.
+func patchBIOS(t *testing.T, client *gofish.APIClient) (int, string) {
+	t.Helper()
+
+	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{"incus.config.limits.cpu": "2"}})
+	require.NoError(t, err)
+
+	defer resp.Body.Close()
+
+	return resp.StatusCode, resp.Header.Get("Location")
 }
 
 func getBIOS(t *testing.T, client *gofish.APIClient) *schemas.Bios {
