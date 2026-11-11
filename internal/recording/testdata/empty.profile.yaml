@@ -1,0 +1,55 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261027T081500Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1."
+
+bios:
+  patch_response: 202-taskmonitor   # no evidence; Operations Center sent no BIOS PATCH
+  task_resource: false              # no evidence; Operations Center sent no BIOS PATCH
+  settings_object: false            # no evidence; Operations Center sent no BIOS PATCH
+  pending: false                    # no evidence; Operations Center sent no BIOS PATCH
+  apply_time:
+    supported: []                   # no evidence; Operations Center sent no BIOS PATCH
+    default: ""                     # no evidence; Operations Center sent no BIOS PATCH
+  patch_requires_power_off: true    # no evidence; Operations Center sent no BIOS PATCH
+  registry:
+    id: ""                          # no evidence; Operations Center sent no BIOS PATCH
+    attributes: []
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center sent no BIOS PATCH
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center sent no BIOS PATCH
+
+secure_boot:
+  database_write: true              # no evidence
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence
+  reset_keys:
+    supported: false                # no evidence
+    types: [DeleteAllKeys, DeletePK] # no evidence
+    response: "204"                 # no evidence
+  certificate_id_style: hash        # no evidence
+  certificate_id_prefix: ""         # no evidence
+  enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+
+virtual_media:
+  insert: standard                  # no evidence
+  oem_vendor: Incus                 # proxy setting, never a real vendor
+  oem_action: InsertVirtualMedia    # no evidence
+  insert_response: "204"            # no evidence
+  boot_override_once: false         # no evidence; no allowable values published, no PATCH with Once
+  delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
+  stream:
+    read_ahead: 4MiB                # proxy setting
+    cache: 64MiB                    # proxy setting
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: []                   # no evidence
+  response: "204"                   # no evidence
+  not_settled_window: 0s            # no evidence; no write was refused after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
+  delay: 0s                         # no evidence
+
+timing:
+  scale: 1.0                        # proxy setting

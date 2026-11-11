@@ -1,0 +1,55 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261109T063456Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 3, BMC firmware 3.10, BIOS A40.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 3, BMC firmware 3.10, BIOS A40."
+
+bios:
+  patch_response: 202-taskmonitor   # no evidence; Operations Center sent no BIOS PATCH
+  task_resource: false              # no evidence; Operations Center sent no BIOS PATCH
+  settings_object: true             # seq 3
+  pending: true                     # seq 3; TODO verify; a settings object holds the future settings
+  apply_time:
+    supported: []                   # no evidence; Operations Center sent no BIOS PATCH
+    default: ""                     # no evidence; Operations Center sent no BIOS PATCH
+  patch_requires_power_off: true    # no evidence; Operations Center sent no BIOS PATCH
+  registry:
+    id: ""                          # no evidence; Operations Center sent no BIOS PATCH
+    attributes: []
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center sent no BIOS PATCH
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center sent no BIOS PATCH
+
+secure_boot:
+  database_write: true              # no evidence; keys enrolled from media, no database write
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence; keys enrolled from media, no database write
+  reset_keys:
+    supported: true                 # seq 2
+    types: [DeleteAllKeys]          # seq 6; TODO verify; accepted by the BMC, no allowable values published
+    response: "204"                 # seq 6; TODO verify; answered 200, iLO.2.25.SystemResetRequired
+  certificate_id_style: hash        # no evidence; keys enrolled from media, no database write
+  certificate_id_prefix: ""         # no evidence; keys enrolled from media, no database write
+  enable_requires_power_off: true   # no evidence; changed only while the server was off
+
+virtual_media:
+  insert: standard                  # seq 10, 11; the BMC refused the parameter MediaType, Base.1.18.ActionParameterUnknown
+  oem_vendor: Incus                 # proxy setting, never a real vendor
+  oem_action: InsertVirtualMedia    # not used with insert standard
+  insert_response: "204"            # seq 11; TODO verify; answered 200, Base.1.18.Success
+  boot_override_once: true          # seq 12; accepted in a PATCH, no allowable values published
+  delivery: full-fetch              # no evidence; the BMC reports no TransferMethod; TODO verify; range requests against the media URL are not recorded
+  stream:
+    read_ahead: 4MiB                # proxy setting
+    cache: 64MiB                    # proxy setting
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: []                   # no evidence
+  response: "204"                   # seq 5, 7; TODO verify; answered 200, Base.1.18.Success; refused ForceOff while Off with 400, iLO.2.25.InvalidOperationForSystemState
+  not_settled_window: 0s            # no evidence; no write was refused after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
+  delay: 9s                         # seq 7, 9, 15, 16; TODO verify; the power state became On 12s to 32s and Off 0s to 9s after the reset, bounded by the polls; the BMC reported Reset in between
+
+timing:
+  scale: 1.0                        # proxy setting
