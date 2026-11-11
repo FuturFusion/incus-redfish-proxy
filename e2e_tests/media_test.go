@@ -93,7 +93,7 @@ func TestMedia_FullFetch(t *testing.T) {
 	// Setup
 	vm := newVM(t)
 	p := startProxy(t, vm, "generic")
-	images := newImageServer(t, "install.iso", randomImage(t, 4<<20))
+	images := newImageServer(t, "install.iso", randomImage(t))
 
 	// Run test
 	resp := p.insert(t, images.url)
@@ -132,7 +132,7 @@ func TestMedia_OEM(t *testing.T) {
 	// Setup
 	vm := newVM(t)
 	p := startProxy(t, vm, "oem-media")
-	images := newImageServer(t, "install.iso", randomImage(t, 4<<20))
+	images := newImageServer(t, "install.iso", randomImage(t))
 
 	resp := p.do(t, http.MethodGet, virtualMediaPath, nil)
 	require.Equal(t, http.StatusOK, resp.status, "GET the virtual media: %s", resp.body)
@@ -177,7 +177,7 @@ func TestMedia_BootOverrideOnce(t *testing.T) {
 	// Setup
 	vm := newVM(t)
 	p := startProxy(t, vm, "testdata/profiles/e2e-once.yaml")
-	images := newImageServer(t, "install.iso", randomImage(t, 4<<20))
+	images := newImageServer(t, "install.iso", randomImage(t))
 	require.Equal(t, http.StatusNoContent, p.insert(t, images.url).status, "insert")
 
 	_, allowed := p.bootOverride(t)

@@ -103,6 +103,13 @@ func dumpInstance(t *testing.T, name string) {
 		fmt.Fprintf(&b, "console log:\n%s\n", data)
 	}
 
+	logfile, err := env.client.GetInstanceLogfile(name, "qemu.log")
+	if err == nil {
+		data, _ := io.ReadAll(logfile)
+		_ = logfile.Close()
+		fmt.Fprintf(&b, "qemu.log:\n%s\n", data)
+	}
+
 	file := filepath.Join(env.logDir, strings.ReplaceAll(t.Name(), "/", "_")+".log")
 	_ = os.WriteFile(file, []byte(b.String()), 0o644)
 	t.Logf("instance %s dumped to %s", name, file)
@@ -196,11 +203,39 @@ func (p *proxy) start(t *testing.T) {
 }
 
 // restart replaces the proxy by a new one. Only the state kept in Incus survives, the tasks are lost.
+// It waits for the old mount to go, as its unmount goes by path and would detach the new mount.
 func (p *proxy) restart(t *testing.T) {
 	t.Helper()
 
 	p.stop()
+
+	eventually(t, 30*time.Second, func() bool { return mounts(t, mountPoint(p.vm)) == 0 }, "the old proxy unmounts the media")
+
 	p.start(t)
+}
+
+// mountPoint is the directory, in which the proxy mounts the streamed media of the VM.
+func mountPoint(vm string) string {
+	return filepath.Join(env.mediaDir, env.project+"_"+vm, "mnt")
+}
+
+// mounts counts the mounts at the path. The proxy runs in the test process, so its mounts show in its own mount table.
+func mounts(t *testing.T, path string) int {
+	t.Helper()
+
+	data, err := os.ReadFile("/proc/self/mountinfo")
+	require.NoError(t, err, "read the mount table")
+
+	count := 0
+
+	for line := range strings.Lines(string(data)) {
+		fields := strings.Fields(line)
+		if len(fields) > 4 && fields[4] == path {
+			count++
+		}
+	}
+
+	return count
 }
 
 func (p *proxy) systemPath() string {
@@ -337,15 +372,34 @@ type imageRequest struct {
 func newImageServer(t *testing.T, name string, image []byte) *imageServer {
 	t.Helper()
 
-	s := &imageServer{}
 	modified := time.Now()
+
+	return startImageServer(t, name, func(w http.ResponseWriter, r *http.Request) {
+		http.ServeContent(w, r, name, modified, bytes.NewReader(image))
+	})
+}
+
+// newPlainImageServer serves the image without range support, so the proxy cannot stream it.
+func newPlainImageServer(t *testing.T, name string, image []byte) *imageServer {
+	t.Helper()
+
+	return startImageServer(t, name, func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Length", strconv.Itoa(len(image)))
+		_, _ = w.Write(image)
+	})
+}
+
+func startImageServer(t *testing.T, name string, serve http.HandlerFunc) *imageServer {
+	t.Helper()
+
+	s := &imageServer{}
 
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		s.mu.Lock()
 		s.requests = append(s.requests, imageRequest{Method: r.Method, Range: r.Header.Get("Range")})
 		s.mu.Unlock()
 
-		http.ServeContent(w, r, name, modified, bytes.NewReader(image))
+		serve(w, r)
 	}))
 	t.Cleanup(server.Close)
 
@@ -361,13 +415,60 @@ func (s *imageServer) recorded() []imageRequest {
 	return slices.Clone(s.requests)
 }
 
-// randomImage returns content for an ISO volume. Incus does not check the content, and the firmware boots on without it.
-func randomImage(t *testing.T, size int) []byte {
+// byteRange is a range of an image, both ends included.
+type byteRange struct {
+	start int64
+	end   int64
+}
+
+// ranges returns the ranges of the GET requests with a Range header, starting at the request with the given index.
+func (s *imageServer) ranges(t *testing.T, from int) []byteRange {
 	t.Helper()
 
-	image := make([]byte, size)
+	var ranges []byteRange
+
+	for _, request := range s.recorded()[from:] {
+		if request.Method != http.MethodGet || request.Range == "" {
+			continue
+		}
+
+		var r byteRange
+
+		_, err := fmt.Sscanf(request.Range, "bytes=%d-%d", &r.start, &r.end)
+		require.NoError(t, err, "parse the range %q", request.Range)
+
+		ranges = append(ranges, r)
+	}
+
+	return ranges
+}
+
+// covers reports whether the ranges hold every byte from start to end, end excluded.
+func covers(ranges []byteRange, start int64, end int64) bool {
+	for start < end {
+		index := slices.IndexFunc(ranges, func(r byteRange) bool { return r.start <= start && start <= r.end })
+		if index < 0 {
+			return false
+		}
+
+		start = ranges[index].end + 1
+	}
+
+	return true
+}
+
+// overlaps reports whether the ranges hold any byte from start to end, end excluded.
+func overlaps(ranges []byteRange, start int64, end int64) bool {
+	return slices.ContainsFunc(ranges, func(r byteRange) bool { return r.start < end && start <= r.end })
+}
+
+// randomImage returns content for an ISO volume. Incus does not check the content, and the firmware boots on without it.
+func randomImage(t *testing.T) []byte {
+	t.Helper()
+
+	image := make([]byte, 4<<20)
 	_, err := rand.Read(image)
-	require.NoError(t, err)
+	require.NoError(t, err, "create the random image")
 
 	return image
 }
