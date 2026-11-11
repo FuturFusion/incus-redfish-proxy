@@ -122,6 +122,8 @@ the end to end tests of Operations Center. `redfishproxy.NewHandler` takes a
 
 - `cmd/redfish-profile-draft` drafts a profile from a BMC recording of
   Operations Center, see [profiles/README.md](profiles/README.md).
+- `cmd/redfish-recording-compare` compares the recording of a profile with
+  the recording of the real server, see [profiles/README.md](profiles/README.md).
 - `cmd/redfish-scraper` downloads every resource of a Redfish service.
 
 ## End to end tests
