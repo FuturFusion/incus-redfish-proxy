@@ -103,6 +103,131 @@ func TestLoad_File(t *testing.T) {
 	}
 }
 
+func TestLoad_BIOSRegistry(t *testing.T) {
+	t.Parallel()
+
+	header := "version: 1\nname: custom\nbios:\n  registry:\n"
+
+	tests := []struct {
+		name     string
+		registry string
+
+		assertErr require.ErrorAssertionFunc
+	}{
+		{
+			name: "success",
+			registry: `    id: TestRegistry.v1_0_0
+    attributes:
+      - {name: Mode, type: Enumeration, values: [A, B], default: B}
+      - {name: Label, type: String, read_only: true}
+      - {name: Threshold, type: Integer, min: 0, max: 10, default: 5}
+      - {name: Turbo, type: Boolean, default: true}
+      - {name: Secure, type: Enumeration, values: [On, Off], maps_to: security.secureboot, value_map: {On: "true", Off: "false"}}
+`,
+
+			assertErr: require.NoError,
+		},
+		{
+			name:     "error - attributes without id",
+			registry: "    attributes: [{name: Mode, type: String}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - malformed id",
+			registry: "    id: TestRegistry\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - duplicate name",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: Mode, type: String}, {name: Mode, type: String}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - incus name",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: incus.config.foo, type: String}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - unknown type",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: Mode, type: Float}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - enumeration without values",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: Mode, type: Enumeration}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - default not in values",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: Mode, type: Enumeration, values: [A], default: B}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - integer default not an integer",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: N, type: Integer, default: x}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - min greater than max",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: N, type: Integer, min: 5, max: 1}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - negative min",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: N, type: Integer, min: -1}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - bounds on a string",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: N, type: String, max: 1}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - value map missing a value",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: S, type: Enumeration, values: [On, Off], maps_to: security.secureboot, value_map: {On: \"true\"}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - value map not one to one",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: S, type: Enumeration, values: [On, Off], maps_to: security.secureboot, value_map: {On: \"true\", Off: \"true\"}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - maps to proxy state",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: S, type: String, maps_to: user.redfish.bios.x}]\n",
+
+			assertErr: require.Error,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte(header+tc.registry), 0o600)
+			require.NoError(t, err, "write the profile file")
+
+			_, err = profile.Load(filename)
+			tc.assertErr(t, err, "load the profile")
+		})
+	}
+}
+
 func TestErrorShape_Validate(t *testing.T) {
 	tests := []struct {
 		name  string
