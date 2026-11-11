@@ -14,8 +14,10 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -316,4 +318,56 @@ func (p *proxy) waitTask(t *testing.T, location string) []response {
 	require.Failf(t, "task monitor did not end", "%s is still running", location)
 
 	return nil
+}
+
+// imageServer serves an image with range support and records the requests.
+type imageServer struct {
+	url string
+
+	mu       sync.Mutex
+	requests []imageRequest
+}
+
+// imageRequest is one request of the image, Range is empty for a full download.
+type imageRequest struct {
+	Method string
+	Range  string
+}
+
+func newImageServer(t *testing.T, name string, image []byte) *imageServer {
+	t.Helper()
+
+	s := &imageServer{}
+	modified := time.Now()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		s.mu.Lock()
+		s.requests = append(s.requests, imageRequest{Method: r.Method, Range: r.Header.Get("Range")})
+		s.mu.Unlock()
+
+		http.ServeContent(w, r, name, modified, bytes.NewReader(image))
+	}))
+	t.Cleanup(server.Close)
+
+	s.url = server.URL + "/" + name
+
+	return s
+}
+
+func (s *imageServer) recorded() []imageRequest {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	return slices.Clone(s.requests)
+}
+
+// randomImage returns content for an ISO volume. Incus does not check the content, and the firmware boots on without it.
+func randomImage(t *testing.T, size int) []byte {
+	t.Helper()
+
+	image := make([]byte, size)
+	_, err := rand.Read(image)
+	require.NoError(t, err)
+
+	return image
 }
