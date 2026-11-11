@@ -103,14 +103,26 @@ type Attribute struct {
 
 	// ValueMap translates attribute values into the values of the Incus config key.
 	ValueMap map[string]string `yaml:"value_map"`
+
+	// Requires hides and refuses the attribute until another attribute has a value in effect.
+	Requires *Requirement `yaml:"requires"`
+}
+
+// Requirement is the value another attribute must have in effect.
+type Requirement struct {
+	Attribute string `yaml:"attribute"`
+	Value     any    `yaml:"value"`
 }
 
 // BIOSErrors are the answers to refused BIOS attribute writes.
 type BIOSErrors struct {
 	UnknownAttribute ErrorShape `yaml:"unknown_attribute"`
+
+	// DeferredRejected answers a write to an attribute, whose requirement is not in effect.
+	DeferredRejected ErrorShape `yaml:"deferred_rejected"`
 }
 
-// DefaultValue returns the value of the attribute before it is written.
+// DefaultValue returns the value of the attribute before the first write.
 func (a Attribute) DefaultValue() any {
 	switch a.Type {
 	case AttributeTypeEnumeration:
@@ -196,6 +208,11 @@ func (b BIOS) validate() error {
 		return fmt.Errorf("bios.errors.unknown_attribute: %w", err)
 	}
 
+	err = b.Errors.DeferredRejected.Validate()
+	if err != nil {
+		return fmt.Errorf("bios.errors.deferred_rejected: %w", err)
+	}
+
 	return nil
 }
 
@@ -206,6 +223,19 @@ func (b *BIOS) resolve() {
 		if b.Pending {
 			b.ApplyTime.Default = ApplyTimeOnReset
 		}
+	}
+
+	for _, attribute := range b.Registry.Attributes {
+		if attribute.Requires == nil {
+			continue
+		}
+
+		index := slices.IndexFunc(b.Registry.Attributes, func(a Attribute) bool { return a.Name == attribute.Requires.Attribute })
+		required := b.Registry.Attributes[index]
+
+		// The YAML decoder produces several integer types, the stored values are int64.
+		required.Default = attribute.Requires.Value
+		attribute.Requires.Value = required.DefaultValue()
 	}
 }
 
@@ -264,6 +294,44 @@ func (r Registry) validate() error {
 		if err != nil {
 			return fmt.Errorf("attribute %q: %w", attribute.Name, err)
 		}
+	}
+
+	for _, attribute := range r.Attributes {
+		err := r.validateRequirement(attribute)
+		if err != nil {
+			return fmt.Errorf("attribute %q: %w", attribute.Name, err)
+		}
+	}
+
+	return nil
+}
+
+// validateRequirement allows one level of requirements only, which covers the deferred pass of the clients.
+func (r Registry) validateRequirement(attribute Attribute) error {
+	if attribute.Requires == nil {
+		return nil
+	}
+
+	index := slices.IndexFunc(r.Attributes, func(a Attribute) bool { return a.Name == attribute.Requires.Attribute })
+	if index < 0 {
+		return fmt.Errorf("requires unknown attribute %q", attribute.Requires.Attribute)
+	}
+
+	if attribute.Requires.Value == nil {
+		return errors.New("requires a value")
+	}
+
+	required := r.Attributes[index]
+	if required.Requires != nil {
+		return fmt.Errorf("requires attribute %q, which has a requirement itself", required.Name)
+	}
+
+	// The required value must be valid as a default of the required attribute.
+	required.Default = attribute.Requires.Value
+
+	err := required.validateDefault()
+	if err != nil {
+		return fmt.Errorf("requires: %w", err)
 	}
 
 	return nil

@@ -1,0 +1,20 @@
+version: 1
+name: deferred-bios
+description: BIOS with pending settings applied on reset and one attribute, which is only accepted once another one is in effect.
+
+bios:
+  settings_object: true
+  pending: true
+  apply_time:
+    supported: [OnReset, Immediate]   # TODO verify against a recording
+    default: OnReset
+  patch_requires_power_off: false
+  patch_response: 202-taskmonitor
+  task_resource: true
+  registry:
+    id: IncusBiosAttributeRegistry.v1_0_0
+    attributes:
+      - {name: Mode, type: Enumeration, values: [Standard, Performance], default: Standard}
+      - {name: ModeOption, type: Enumeration, values: [Enabled, Disabled], default: Disabled, requires: {attribute: Mode, value: Performance}}
+      - {name: Revision, type: String, read_only: true, default: "1.0"}
+      - {name: Threshold, type: Integer, min: 0, max: 100, default: 50}

@@ -62,6 +62,7 @@ func defaults() Profile {
 			},
 			Errors: BIOSErrors{
 				UnknownAttribute: ErrorShape{Status: 400, MessageID: "Base.1.18.PropertyUnknown"},
+				DeferredRejected: ErrorShape{Status: 400, MessageID: "Base.1.18.PropertyUnknown"},
 			},
 		},
 	}
