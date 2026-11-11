@@ -42,6 +42,9 @@ Embedded profiles:
 |------------------------|---------------------------------------------------------------------------------------------------------|
 | `generic`              | Every key holds its default. The behavior of the proxy before profiles existed.                         |
 | `deferred-bios`        | BIOS settings stay pending until a reset. One attribute is only accepted once another one is in effect. |
+| `dell-idrac9`          | Like Dell iDRAC 9. Pending BIOS settings, secure boot databases written over Redfish.                   |
+| `hpe-ilo5`             | Like HPE iLO 5. Success inside an error object, keys reset on the next power on.                        |
+| `lenovo-xcc`           | Like Lenovo XClarity Controller. Virtual media inserted by a PATCH, keys reset on the next power on.    |
 | `no-secure-boot-write` | Secure boot databases are read only over Redfish. Keys can only be reset.                               |
 | `oem-media`            | Virtual media is only inserted through an OEM action, answered with a task.                             |
 | `stream-media`         | Virtual media is streamed with range requests while the server reads it.                                |
