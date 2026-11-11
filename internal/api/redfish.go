@@ -1238,7 +1238,7 @@ func (s redfishServer) patchBIOSSettings(w http.ResponseWriter, r *http.Request)
 			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
 		}
 
-		return true, s.bios.apply(put, request.Attributes)
+		return true, s.bios.apply(instance, put, request.Attributes)
 	})
 	if err != nil {
 		respondStatusError(w, err)

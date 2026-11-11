@@ -52,10 +52,28 @@ func (b biosStore) attributes(instance *incusapi.Instance) BiosV130Attributes {
 	}
 
 	for _, attribute := range b.bios.Registry.Attributes {
+		if !b.requirementMet(instance, attribute) {
+			continue
+		}
+
 		attributes[attribute.Name] = syntheticValue(instance, attribute)
 	}
 
 	return attributes
+}
+
+// requirementMet reports whether the attribute required by the given one has the required value in effect.
+func (b biosStore) requirementMet(instance *incusapi.Instance, attribute profile.Attribute) bool {
+	if attribute.Requires == nil {
+		return true
+	}
+
+	index := slices.IndexFunc(b.bios.Registry.Attributes, func(a profile.Attribute) bool { return a.Name == attribute.Requires.Attribute })
+	if index < 0 {
+		return false
+	}
+
+	return syntheticValue(instance, b.bios.Registry.Attributes[index]) == attribute.Requires.Value
 }
 
 // syntheticValue returns the current value of a synthetic attribute, its default if it was never written.
@@ -103,7 +121,8 @@ func parseAttributeValue(attribute profile.Attribute, value string) any {
 }
 
 // apply writes the attributes into the writable instance, it does not talk to Incus.
-func (b biosStore) apply(put *incusapi.InstancePut, attributes map[string]any) error {
+// It checks requirements against the current instance, never against attributes written along with them.
+func (b biosStore) apply(instance *incusapi.Instance, put *incusapi.InstancePut, attributes map[string]any) error {
 	if put.Config == nil {
 		put.Config = map[string]string{}
 	}
@@ -123,7 +142,7 @@ func (b biosStore) apply(put *incusapi.InstancePut, attributes map[string]any) e
 			err = applyDeviceAttribute(put, name, value)
 
 		default:
-			err = b.applySyntheticAttribute(put, name, value)
+			err = b.applySyntheticAttribute(instance, put, name, value)
 		}
 
 		if err != nil {
@@ -187,7 +206,7 @@ func applyDeviceAttribute(put *incusapi.InstancePut, name string, value any) err
 	return nil
 }
 
-func (b biosStore) applySyntheticAttribute(put *incusapi.InstancePut, name string, value any) error {
+func (b biosStore) applySyntheticAttribute(instance *incusapi.Instance, put *incusapi.InstancePut, name string, value any) error {
 	index := slices.IndexFunc(b.bios.Registry.Attributes, func(a profile.Attribute) bool { return a.Name == name })
 	if index < 0 {
 		shape := b.bios.Errors.UnknownAttribute
@@ -195,6 +214,11 @@ func (b biosStore) applySyntheticAttribute(put *incusapi.InstancePut, name strin
 	}
 
 	attribute := b.bios.Registry.Attributes[index]
+
+	if !b.requirementMet(instance, attribute) {
+		shape := b.bios.Errors.DeferredRejected
+		return attributeError(shape.Status, shape.MessageID, name, []string{name}, "bios attribute %q requires %s to be %v", name, attribute.Requires.Attribute, attribute.Requires.Value)
+	}
 
 	if attribute.ReadOnly {
 		return attributeError(http.StatusBadRequest, baseRegistry+"PropertyNotWritable", name, []string{name}, "bios attribute %q is read only", name)
