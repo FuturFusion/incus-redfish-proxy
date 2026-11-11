@@ -52,7 +52,11 @@ func Default() Profile {
 func defaults() Profile {
 	return Profile{
 		BIOS: BIOS{
-			PatchResponse: PatchResponseTaskMonitor,
+			PatchResponse:         PatchResponseTaskMonitor,
+			PatchRequiresPowerOff: true,
+			ApplyTime: ApplyTimes{
+				Supported: []ApplyTime{},
+			},
 			Registry: Registry{
 				Attributes: []Attribute{},
 			},
@@ -130,6 +134,8 @@ func decode(data []byte) (Profile, error) {
 	if err != nil {
 		return Profile{}, err
 	}
+
+	p.BIOS.resolve()
 
 	return p, nil
 }

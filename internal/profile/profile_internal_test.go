@@ -16,6 +16,7 @@ func TestGenericEqualsDefaults(t *testing.T) {
 	want.Version = generic.Version
 	want.Name = generic.Name
 	want.Description = generic.Description
+	want.BIOS.resolve()
 
-	require.Equal(t, want, generic)
+	require.Equal(t, want, generic, "the generic profile file documents every default")
 }
