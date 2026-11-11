@@ -59,6 +59,16 @@ func (t *resetTracker) lastPowerOn() time.Time {
 	return t.lastPowerOnAt
 }
 
+// poweredOn records a power on, the proxy issued and therefore needs no event for.
+func (t *resetTracker) poweredOn(at time.Time) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	if at.After(t.lastPowerOnAt) {
+		t.lastPowerOnAt = at
+	}
+}
+
 // onPowerOn registers a hook, hooks run in registration order.
 func (t *resetTracker) onPowerOn(hook powerHook) {
 	t.hooks = append(t.hooks, hook)
