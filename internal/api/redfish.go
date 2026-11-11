@@ -13,6 +13,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -56,6 +57,9 @@ type redfishServer struct {
 	tasks        *taskRegistry
 	profile      profile.Profile
 	bios         biosStore
+
+	// powerMu serializes the resets and the power hooks, which apply the staged BIOS attributes.
+	powerMu *sync.Mutex
 }
 
 // Option customizes the Redfish server.
@@ -104,6 +108,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		resets:       &resetTracker{instanceName: instanceName},
 		tasks:        &taskRegistry{},
 		profile:      profile.Default(),
+		powerMu:      &sync.Mutex{},
 	}
 
 	for _, opt := range opts {
@@ -111,6 +116,10 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	}
 
 	s.bios = biosStore{bios: s.profile.BIOS}
+
+	if s.profile.BIOS.Pending {
+		s.resets.onPowerOn(s.applyPendingOnPowerOn)
+	}
 
 	if s.events != nil {
 		go s.resets.watch(s.ctx, s.events)
@@ -1095,7 +1104,10 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		return
 	}
 
-	if noopStatus != "" {
+	s.powerMu.Lock()
+	defer s.powerMu.Unlock()
+
+	if noopStatus != "" || s.profile.BIOS.Pending {
 		instance, _, err := s.client.GetInstance(computerSystemID)
 		if err != nil {
 			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
@@ -1106,18 +1118,18 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 			responseNoContent(w)
 			return
 		}
+
+		// Firmware applies staged settings on the next boot, so a power off leaves them staged.
+		if s.profile.BIOS.Pending && action != "stop" {
+			action, err = s.applyPendingOnReset(instance, action, force)
+			if err != nil {
+				responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+				return
+			}
+		}
 	}
 
-	op, err := s.client.UpdateInstanceState(computerSystemID, incusapi.InstanceStatePut{
-		Action: action,
-		Force:  force,
-	}, "")
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	err = op.Wait()
+	err = s.changeInstanceState(action, force)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
 		return
@@ -1139,13 +1151,26 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 
 	biosAttributes := s.bios.attributes(instance)
 
+	supportedApplyTimes := make([]SettingsV150ApplyTime, 0, len(s.profile.BIOS.ApplyTime.Supported))
+	for _, applyTime := range s.profile.BIOS.ApplyTime.Supported {
+		supportedApplyTimes = append(supportedApplyTimes, SettingsV150ApplyTime(applyTime))
+	}
+
+	settings := SettingsV150Settings{
+		SettingsObject: &OdataV4IdRef{
+			OdataID: ref(s.biosPath() + "/Settings"),
+		},
+		SupportedApplyTimes: refNonEmpty(supportedApplyTimes),
+	}
+
+	applied, err := time.Parse(time.RFC3339Nano, instance.Config[biosAppliedKey])
+	if err == nil {
+		settings.Time = &applied
+	}
+
 	response(w, BiosV130Bios{
-		RedfishSettings: ref(SettingsV150Settings{
-			SettingsObject: &OdataV4IdRef{
-				OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios/Settings", s.instanceName)),
-			},
-		}),
-		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
+		RedfishSettings:   &settings,
+		OdataID:           ref(s.biosPath()),
 		OdataType:         ref("#Bios.v1_3_0.Bios"),
 		AttributeRegistry: refNonZero(s.profile.BIOS.Registry.ID),
 		Attributes:        &biosAttributes,
@@ -1159,57 +1184,75 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		return
 	}
 
-	request := BiosV130Bios{}
+	// Real BMCs only take changes on the settings object, if they have one.
+	if s.profile.BIOS.SettingsObject {
+		w.Header().Set("Allow", http.MethodGet)
+		respondStatusError(w, propertyError(http.StatusMethodNotAllowed, baseRegistry+"PropertyNotWritable", "#/Attributes", []string{"Attributes"}, "bios attributes are written on %s", s.biosPath()+"/Settings"))
+
+		return
+	}
+
+	s.patchBIOSSettings(w, r)
+}
+
+// biosSettingsRequest is a PATCH of the BIOS settings, BiosV130Bios has no field for the apply time.
+type biosSettingsRequest struct {
+	Attributes        map[string]any     `json:"Attributes"`
+	SettingsApplyTime *settingsApplyTime `json:"@Redfish.SettingsApplyTime"`
+}
+
+// patchBIOSSettings writes the attributes at once or stages them, depending on the apply time.
+func (s redfishServer) patchBIOSSettings(w http.ResponseWriter, r *http.Request) {
+	request := biosSettingsRequest{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if request.Attributes == nil || len(*request.Attributes) == 0 {
+	if len(request.Attributes) == 0 {
 		responseNoContent(w)
 		return
 	}
 
-	instance, etag, err := s.client.GetInstance(computerSystemID)
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if instance.Status != "Stopped" {
-		responseErrWithMessage(w, http.StatusPreconditionFailed, fmt.Sprintf("instance %q is not stopped", computerSystemID))
-		return
-	}
-
-	put := instance.Writable()
-
-	err = s.bios.apply(&put, *request.Attributes)
+	applyTime, err := s.bios.applyTime(request.SettingsApplyTime)
 	if err != nil {
 		respondStatusError(w, err)
 		return
 	}
 
-	op, err := s.client.UpdateInstance(computerSystemID, put, etag)
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+	if applyTime == profile.ApplyTimeOnReset {
+		taskID, err := s.stageBIOS(request.Attributes, applyTime)
+		if err != nil {
+			respondStatusError(w, err)
+			return
+		}
+
+		s.respondBIOSPatch(w, r, taskID)
+
 		return
 	}
 
-	err = op.Wait()
+	err = s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		if s.bios.requiresStop(request.Attributes) && instance.Status != "Stopped" {
+			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+		}
+
+		return true, s.bios.apply(put, request.Attributes)
+	})
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
-	s.respondBIOSPatch(w, r, TaskV174TaskStateCompleted)
+	s.respondBIOSPatch(w, r, s.tasks.create(s.biosPath(), TaskV174TaskStateCompleted))
 }
 
-// respondBIOSPatch answers a BIOS PATCH the way the profile asks for, the task is only created for the 202 answers.
-func (s redfishServer) respondBIOSPatch(w http.ResponseWriter, r *http.Request, state TaskV174TaskState) {
+// respondBIOSPatch answers a BIOS PATCH the way the profile asks for.
+func (s redfishServer) respondBIOSPatch(w http.ResponseWriter, r *http.Request, taskID string) {
 	switch s.profile.BIOS.PatchResponse {
 	case profile.PatchResponseTask:
-		t, _ := s.tasks.get(s.tasks.create(s.biosPath(), state))
+		t, _ := s.tasks.get(taskID)
 
 		w.Header().Set("Location", taskPath(t.id))
 		w.WriteHeader(http.StatusAccepted)
@@ -1224,8 +1267,7 @@ func (s redfishServer) respondBIOSPatch(w http.ResponseWriter, r *http.Request, 
 		responseNoContent(w)
 
 	default:
-		// A completed change only gets a task monitor for clients expecting an asynchronous answer.
-		responseAccepted(w, taskMonitorPath(s.tasks.create(s.biosPath(), state)))
+		responseAccepted(w, taskMonitorPath(taskID))
 	}
 }
 
@@ -1262,12 +1304,60 @@ func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 	responseNotImplemented(w)
 }
 
+// biosSettings is the settings object of the Bios resource, BiosV130Bios has no field for the apply time.
+type biosSettings struct {
+	BiosV130Bios
+
+	SettingsApplyTime *settingsApplyTime `json:"@Redfish.SettingsApplyTime,omitempty"`
+}
+
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	s.GetRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+	if !s.profile.BIOS.SettingsObject {
+		s.GetRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+		return
+	}
+
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
+	instance, _, err := s.client.GetInstance(computerSystemID)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	staged, err := s.bios.pending(instance)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	settings := biosSettings{
+		BiosV130Bios: BiosV130Bios{
+			OdataID:           ref(s.biosPath() + "/Settings"),
+			OdataType:         ref("#Bios.v1_3_0.Bios"),
+			AttributeRegistry: refNonZero(s.profile.BIOS.Registry.ID),
+			Attributes:        &BiosV130Attributes{},
+			ID:                "Settings",
+			Name:              "BIOS Configuration Pending Settings",
+		},
+	}
+
+	if staged != nil {
+		settings.Attributes = &staged.Attributes
+		settings.SettingsApplyTime = &settingsApplyTime{ApplyTime: staged.ApplyTime}
+	}
+
+	response(w, settings)
 }
 
 func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {
-	s.PatchRedfishV1SystemsComputerSystemIDBios(w, r, computerSystemID)
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
+	s.patchBIOSSettings(w, r)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string) {

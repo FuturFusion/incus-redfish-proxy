@@ -1,6 +1,7 @@
 package api_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"net/http"
@@ -37,6 +38,8 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "bios-unknown-attribute", applies: always, run: conformanceBIOSUnknownAttribute},
 	{name: "bios-patch-response", applies: always, run: conformanceBIOSPatchResponse},
 	{name: "task-service", applies: always, run: conformanceTaskService},
+	{name: "bios-immediate", applies: appliesAtOnce, run: conformanceBIOSImmediate},
+	{name: "bios-stage-and-apply", applies: hasStagedAttribute, run: conformanceBIOSStageAndApply},
 }
 
 func always(profile.Profile) bool {
@@ -45,6 +48,31 @@ func always(profile.Profile) bool {
 
 func hasRegistry(p profile.Profile) bool {
 	return p.BIOS.Registry.ID != ""
+}
+
+// stages reports whether a PATCH without an apply time stages the attributes.
+func stages(p profile.Profile) bool {
+	return p.BIOS.ApplyTime.Default == profile.ApplyTimeOnReset
+}
+
+func appliesAtOnce(p profile.Profile) bool {
+	return !stages(p)
+}
+
+func hasStagedAttribute(p profile.Profile) bool {
+	_, ok := stagedAttribute(p)
+	return stages(p) && ok
+}
+
+// stagedAttribute returns a writable attribute kept in the proxy state, which can be staged on a running instance.
+func stagedAttribute(p profile.Profile) (profile.Attribute, bool) {
+	for _, attribute := range p.BIOS.Registry.Attributes {
+		if !attribute.ReadOnly && attribute.MapsTo == "" {
+			return attribute, true
+		}
+	}
+
+	return profile.Attribute{}, false
 }
 
 // conformanceProfiles returns the embedded profiles and the test profiles.
@@ -95,6 +123,17 @@ func fakeIncus(instance incusapi.Instance) *mock.IncusClientMock {
 	}
 
 	return &mock.IncusClientMock{
+		UpdateInstanceStateFunc: func(name string, state incusapi.InstanceStatePut, ETag string) (incusclient.Operation, error) {
+			mu.Lock()
+			defer mu.Unlock()
+
+			instance.Status = "Running"
+			if state.Action == "stop" {
+				instance.Status = "Stopped"
+			}
+
+			return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+		},
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 			mu.Lock()
 			defer mu.Unlock()
@@ -174,7 +213,12 @@ func conformanceBIOSRegistry(t *testing.T, p profile.Profile) {
 		require.NoError(t, err, attribute.Name)
 		resp.Body.Close()
 
-		require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[attribute.Name]), attribute.Name)
+		written := getBIOS(t, client).Attributes
+		if stages(p) {
+			written = getBIOSSettings(t, client)
+		}
+
+		require.Equal(t, fmt.Sprint(value), fmt.Sprint(written[attribute.Name]), attribute.Name)
 	}
 }
 
@@ -224,11 +268,16 @@ func conformanceBIOSPatchResponse(t *testing.T, p profile.Profile) {
 		return
 	}
 
-	// The change applies at once, so the task is completed when it is first polled.
+	// A change applied at once is completed when it is first polled, a task resource always answers 200.
+	expected := http.StatusOK
+	if stages(p) && p.BIOS.PatchResponse == profile.PatchResponseTaskMonitor {
+		expected = http.StatusAccepted
+	}
+
 	resp, err := client.Get(location)
 	require.NoError(t, err)
 	resp.Body.Close()
-	require.Equal(t, http.StatusOK, resp.StatusCode)
+	require.Equal(t, expected, resp.StatusCode)
 }
 
 func conformanceTaskService(t *testing.T, p profile.Profile) {
@@ -257,7 +306,87 @@ func conformanceTaskService(t *testing.T, p profile.Profile) {
 	listed, err := tasks.Tasks()
 	require.NoError(t, err)
 	require.NotEmpty(t, listed)
-	require.Equal(t, schemas.CompletedTaskState, listed[len(listed)-1].TaskState)
+
+	expected := schemas.CompletedTaskState
+	if stages(p) {
+		expected = schemas.RunningTaskState
+	}
+
+	require.Equal(t, expected, listed[len(listed)-1].TaskState)
+}
+
+func conformanceBIOSImmediate(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	patchBIOS(t, client)
+
+	require.Equal(t, "2", getBIOS(t, client).Attributes["incus.config.limits.cpu"])
+}
+
+func conformanceBIOSStageAndApply(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	attribute, _ := stagedAttribute(p)
+	value := otherValue(attribute)
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Running"}), api.WithProfile(p))
+
+	resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": map[string]any{attribute.Name: value}})
+	require.NoError(t, err)
+	resp.Body.Close()
+
+	location := resp.Header.Get("Location")
+
+	require.Equal(t, fmt.Sprint(attribute.DefaultValue()), fmt.Sprint(getBIOS(t, client).Attributes[attribute.Name]), "Bios holds the current value")
+	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOSSettings(t, client)[attribute.Name]), "Bios/Settings holds the staged value")
+	require.True(t, taskRunning(t, client, location), "the task runs until the reset")
+
+	resp, err = client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": "ForceRestart"})
+	require.NoError(t, err)
+	resp.Body.Close()
+
+	require.Equal(t, fmt.Sprint(value), fmt.Sprint(getBIOS(t, client).Attributes[attribute.Name]), "the reset applies the staged value")
+	require.Empty(t, getBIOSSettings(t, client), "nothing is staged after the reset")
+	require.False(t, taskRunning(t, client, location), "the reset completes the task")
+}
+
+// taskRunning follows the location of a PATCH answer, which has no location for the 200 and 204 answers.
+func taskRunning(t *testing.T, client *gofish.APIClient, location string) bool {
+	t.Helper()
+
+	if location == "" {
+		return false
+	}
+
+	resp, err := client.Get(location)
+	require.NoError(t, err)
+
+	defer resp.Body.Close()
+
+	// A completed task monitor answers with the Bios resource, which has no task state.
+	body := struct{ TaskState schemas.TaskState }{}
+	err = json.NewDecoder(resp.Body).Decode(&body)
+	require.NoError(t, err)
+
+	return resp.StatusCode == http.StatusAccepted || body.TaskState == schemas.RunningTaskState
+}
+
+// getBIOSSettings returns the attributes of the settings object.
+func getBIOSSettings(t *testing.T, client *gofish.APIClient) map[string]any {
+	t.Helper()
+
+	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios/Settings")
+	require.NoError(t, err)
+
+	defer resp.Body.Close()
+
+	settings := struct{ Attributes map[string]any }{}
+	err = json.NewDecoder(resp.Body).Decode(&settings)
+	require.NoError(t, err)
+
+	return settings.Attributes
 }
 
 // patchBIOS writes one attribute every profile accepts and returns the status and location of the answer.

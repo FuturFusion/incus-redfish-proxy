@@ -8,17 +8,23 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	incusapi "github.com/lxc/incus/v7/shared/api"
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
 
-// redfishConfigPrefix marks the instance config keys the proxy keeps its own state in.
-const redfishConfigPrefix = "user.redfish."
+const redfishConfigPrefix = profile.ReservedConfigPrefix
 
 // biosConfigPrefix holds the current values of the synthetic BIOS attributes.
 const biosConfigPrefix = redfishConfigPrefix + "bios."
+
+// biosPendingKey holds the staged BIOS attributes. Attribute names contain no dash, so it is apart from the attribute values.
+const biosPendingKey = redfishConfigPrefix + "bios-pending"
+
+// biosAppliedKey holds the time the staged BIOS attributes were last applied.
+const biosAppliedKey = redfishConfigPrefix + "bios-applied"
 
 // baseRegistry prefixes the message IDs of the Redfish Base message registry.
 const baseRegistry = "Base.1.18."
@@ -265,8 +271,96 @@ func formatAttributeValue(attribute profile.Attribute, value any) (string, error
 	return "", statusErrorf(http.StatusInternalServerError, "bios attribute %q has unknown type %q", attribute.Name, attribute.Type)
 }
 
+// requiresStop reports whether writing one of the attributes needs a stopped instance.
+func (b biosStore) requiresStop(attributes map[string]any) bool {
+	for name := range attributes {
+		if b.attributeRequiresStop(name) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// attributeRequiresStop reports whether writing the attribute needs a stopped instance, which is all but the attributes kept in the proxy state.
+func (b biosStore) attributeRequiresStop(name string) bool {
+	index := slices.IndexFunc(b.bios.Registry.Attributes, func(a profile.Attribute) bool { return a.Name == name })
+
+	return index < 0 || b.bios.Registry.Attributes[index].MapsTo != ""
+}
+
+// settingsApplyTime is the @Redfish.SettingsApplyTime annotation of a PATCH.
+type settingsApplyTime struct {
+	ApplyTime profile.ApplyTime `json:"ApplyTime"`
+}
+
+// applyTime returns when the attributes of a PATCH take effect.
+func (b biosStore) applyTime(requested *settingsApplyTime) (profile.ApplyTime, error) {
+	// Without published apply times, clients assume any is supported, so the request is not refused.
+	if requested == nil || len(b.bios.ApplyTime.Supported) == 0 {
+		return b.bios.ApplyTime.Default, nil
+	}
+
+	if !slices.Contains(b.bios.ApplyTime.Supported, requested.ApplyTime) {
+		return "", propertyError(http.StatusBadRequest, baseRegistry+"PropertyValueNotInList", "#/@Redfish.SettingsApplyTime/ApplyTime", []string{string(requested.ApplyTime), "ApplyTime"}, "apply time %q is not supported", requested.ApplyTime)
+	}
+
+	return requested.ApplyTime, nil
+}
+
+// pendingBIOS are the staged BIOS attributes, waiting for the next reset.
+type pendingBIOS struct {
+	TaskID     string            `json:"task_id"`
+	ApplyTime  profile.ApplyTime `json:"apply_time"`
+	Attributes map[string]any    `json:"attributes"`
+	StagedAt   time.Time         `json:"staged_at"`
+}
+
+// pending returns the staged attributes of the instance, nil if there are none.
+func (b biosStore) pending(instance *incusapi.Instance) (*pendingBIOS, error) {
+	value, ok := instance.Config[biosPendingKey]
+	if !ok {
+		return nil, nil
+	}
+
+	staged := &pendingBIOS{}
+
+	err := json.Unmarshal([]byte(value), staged)
+	if err != nil {
+		return nil, fmt.Errorf("decode pending bios attributes: %w", err)
+	}
+
+	return staged, nil
+}
+
+// setPending writes the staged attributes into the writable instance, it removes them if none are left.
+func (b biosStore) setPending(put *incusapi.InstancePut, staged *pendingBIOS) error {
+	if staged == nil || len(staged.Attributes) == 0 {
+		delete(put.Config, biosPendingKey)
+		return nil
+	}
+
+	data, err := json.Marshal(staged)
+	if err != nil {
+		return fmt.Errorf("encode pending bios attributes: %w", err)
+	}
+
+	if put.Config == nil {
+		put.Config = map[string]string{}
+	}
+
+	put.Config[biosPendingKey] = string(data)
+
+	return nil
+}
+
 // attributeError builds a status error for a refused BIOS attribute, answered with a Redfish message.
 func attributeError(status int, messageID string, name string, messageArgs []string, format string, args ...any) error {
+	return propertyError(status, messageID, "#/Attributes/"+name, messageArgs, format, args...)
+}
+
+// propertyError builds a status error for a refused property of a request, answered with a Redfish message.
+func propertyError(status int, messageID string, property string, messageArgs []string, format string, args ...any) error {
 	err := fmt.Errorf(format, args...)
 
 	return &statusError{
@@ -276,7 +370,7 @@ func attributeError(status int, messageID string, name string, messageArgs []str
 			MessageID:         messageID,
 			Message:           err.Error(),
 			MessageArgs:       messageArgs,
-			RelatedProperties: []string{"#/Attributes/" + name},
+			RelatedProperties: []string{property},
 		}},
 	}
 }
