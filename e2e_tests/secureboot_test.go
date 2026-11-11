@@ -19,7 +19,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const secureBootEnableKey = "user.redfish.secureboot.enable"
+const (
+	secureBootEnableKey = "user.redfish.secureboot.enable"
+	resetKeysKey        = "user.redfish.secureboot.reset_keys"
+)
 
 func (p *proxy) secureBootPath() string {
 	return p.systemPath() + "/SecureBoot"
@@ -175,7 +178,7 @@ func TestSecureBoot_NoDatabaseWrite(t *testing.T) {
 
 	// Setup
 	vm := newVM(t)
-	p := startProxy(t, vm, "no-secure-boot-write")
+	p := startProxy(t, vm, "testdata/profiles/e2e-reset-keys-immediately.yaml")
 	certificate, _ := newCertificate(t)
 	kek := func() []byte { return nvramVariable(t, vm, uefi.EfiGlobalVariableGuid, "KEK") }
 
@@ -217,6 +220,90 @@ func TestSecureBoot_NoDatabaseWrite(t *testing.T) {
 	require.Nil(t, kek(), "DeleteAllKeys removes the KEK")
 	require.Nil(t, nvramVariable(t, vm, uefi.EfiImageSecurityDatabaseGuid, "db"), "DeleteAllKeys removes db")
 	require.Equal(t, "SetupMode", p.secureBoot(t).Mode, "the firmware stays in setup mode")
+}
+
+func TestSecureBoot_ResetKeysOnReset(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	vm := newVM(t)
+	p := startProxy(t, vm, "no-secure-boot-write")
+	pk := func() []byte { return nvramVariable(t, vm, uefi.EfiGlobalVariableGuid, "PK") }
+	kek := func() []byte { return nvramVariable(t, vm, uefi.EfiGlobalVariableGuid, "KEK") }
+
+	resp := p.enableSecureBoot(t)
+	require.Equal(t, http.StatusOK, resp.status, "SecureBootEnable: %s", resp.body)
+	require.Equal(t, okMessage{messageID: "Base.1.18.Success"}, resp.okMessage(t), "the PATCH answers the messages at the top level")
+	require.Equal(t, "UserMode", p.secureBoot(t).Mode, "the firmware with secure boot has a platform key")
+
+	resp = p.reset(t, "On")
+	require.Equal(t, http.StatusOK, resp.status, "power on: %s", resp.body)
+	require.Equal(t, okMessage{messageID: "Base.1.18.Success", inError: true}, resp.okMessage(t), "the reset answers the messages inside an error object")
+
+	// Run test: the running VM accepts the request.
+	resp = p.resetKeys(t, "DeleteAllKeys")
+
+	// Assert
+	require.Equal(t, http.StatusOK, resp.status, "ResetKeys on a running VM: %s", resp.body)
+	require.Equal(t, okMessage{messageID: "Base.1.18.ResetRequired"}, resp.okMessage(t), "the keys wait for the next reset")
+	require.Equal(t, "UserMode", p.secureBoot(t).Mode, "the keys stay until the next reset")
+
+	// Run test: a power off keeps the request.
+	require.Equal(t, http.StatusOK, p.reset(t, "ForceOff").status, "power off")
+
+	// Assert
+	require.Equal(t, "UserMode", p.secureBoot(t).Mode, "a power off keeps the keys")
+	require.Equal(t, "DeleteAllKeys", instanceConfig(t, vm)[resetKeysKey], "the request waits for the next power on")
+	require.NotNil(t, pk(), "a power off keeps the platform key")
+
+	// Run test
+	require.Equal(t, http.StatusOK, p.reset(t, "On").status, "power on")
+
+	// Assert
+	require.Equal(t, "SetupMode", p.secureBoot(t).Mode, "the power on deletes the keys")
+	require.Nil(t, pk(), "the power on deletes the platform key")
+	require.Nil(t, kek(), "the power on deletes the KEK")
+	require.NotContains(t, instanceConfig(t, vm), resetKeysKey, "the power on removes the request")
+	require.Equal(t, "Running", instanceStatus(t, vm), "the VM runs after the reset")
+}
+
+func TestSecureBoot_DatabaseAnswers(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	vm := newVM(t)
+	p := startProxy(t, vm, "deferred-bios")
+	certificate, der := newCertificate(t)
+	db := func() []byte { return nvramVariable(t, vm, uefi.EfiImageSecurityDatabaseGuid, "db") }
+
+	// Run test
+	resp := p.addToDB(t, certificate)
+
+	// Assert
+	require.Equal(t, http.StatusNoContent, resp.status, "POST the certificate: %s", resp.body)
+	require.Empty(t, resp.header.Get("Location"), "the answer has no location")
+	require.Empty(t, resp.body, "the answer has no body")
+	require.True(t, bytes.Contains(db(), der), "the certificate is in the UEFI variable db")
+
+	// Run test: a client learns the ID from the collection.
+	resp = p.do(t, http.MethodGet, p.secureBootPath()+"/SecureBootDatabases/db/Certificates", nil)
+	require.Equal(t, http.StatusOK, resp.status, "GET the certificates: %s", resp.body)
+
+	var collection struct {
+		Members []struct {
+			ODataID string `json:"@odata.id"`
+		} `json:"Members"`
+	}
+
+	resp.decode(t, &collection)
+	require.Len(t, collection.Members, 1, "the collection lists the new certificate")
+
+	resp = p.do(t, http.MethodDelete, collection.Members[0].ODataID, nil)
+
+	// Assert
+	require.Equal(t, http.StatusOK, resp.status, "DELETE the certificate: %s", resp.body)
+	require.Equal(t, okMessage{messageID: "Base.1.18.ResetRequired", inError: true}, resp.okMessage(t), "the DELETE answers the messages inside an error object")
+	require.Nil(t, db(), "deleting the only certificate removes the UEFI variable db")
 }
 
 func TestSecureBoot_EnableOnReset(t *testing.T) {

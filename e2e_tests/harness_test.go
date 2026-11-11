@@ -273,6 +273,44 @@ func (r response) messageID(t *testing.T) string {
 	return body.Error.ExtendedInfo[0].MessageID
 }
 
+// okMessage is the first message of a 200 answer and where the answer has it.
+type okMessage struct {
+	messageID string
+	inError   bool
+}
+
+// okMessage returns the first message of a 200 answer, at the top level or inside an error object.
+func (r response) okMessage(t *testing.T) okMessage {
+	t.Helper()
+
+	type extendedInfo []struct {
+		MessageID string `json:"MessageId"`
+	}
+
+	var body struct {
+		ExtendedInfo extendedInfo `json:"@Message.ExtendedInfo"`
+		Error        *struct {
+			ExtendedInfo extendedInfo `json:"@Message.ExtendedInfo"`
+		} `json:"error"`
+	}
+
+	require.NoError(t, json.Unmarshal(r.body, &body), "decode %s", r.body)
+
+	message := okMessage{}
+
+	info := body.ExtendedInfo
+	if body.Error != nil {
+		message.inError = true
+		info = body.Error.ExtendedInfo
+	}
+
+	require.NotEmpty(t, info, "extended info in %s", r.body)
+
+	message.messageID = info[0].MessageID
+
+	return message
+}
+
 func (p *proxy) do(t *testing.T, method string, path string, body any) response {
 	t.Helper()
 
