@@ -55,6 +55,7 @@ type redfishServer struct {
 	resets       *resetTracker
 	tasks        *taskRegistry
 	profile      profile.Profile
+	bios         biosStore
 }
 
 // Option customizes the Redfish server.
@@ -252,7 +253,7 @@ const virtualMediaName = "CD"
 
 const (
 	bootMediaDeviceName = "boot-media"
-	bootMediaImageKey   = "user.redfish.image"
+	bootMediaImageKey   = redfishConfigPrefix + "image"
 )
 
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.ResponseWriter, r *http.Request, managerID string) {
@@ -1126,16 +1127,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 		return
 	}
 
-	biosAttributes := BiosV130Attributes{}
-
-	for configKey, configValue := range instance.Config {
-		biosAttributes[fmt.Sprintf("incus.config.%s", configKey)] = configValue
-	}
-
-	for deviceName, deviceConfig := range instance.Devices {
-		deviceConfigJSON, _ := json.Marshal(deviceConfig)
-		biosAttributes[fmt.Sprintf("incus.devices.%s", deviceName)] = string(deviceConfigJSON)
-	}
+	biosAttributes := s.bios.attributes(instance)
 
 	response(w, BiosV130Bios{
 		RedfishSettings: ref(SettingsV150Settings{
@@ -1179,65 +1171,15 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDBios(w http.Response
 		return
 	}
 
-	if instance.Config == nil {
-		instance.Config = map[string]string{}
+	put := instance.Writable()
+
+	err = s.bios.apply(&put, *request.Attributes)
+	if err != nil {
+		respondStatusError(w, err)
+		return
 	}
 
-	if instance.Devices == nil {
-		instance.Devices = incusapi.DevicesMap{}
-	}
-
-	for name, value := range *request.Attributes {
-		valueStr, ok := value.(string)
-		if !ok {
-			responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q has invalid type %T, string expected", name, value))
-			return
-		}
-
-		switch {
-		case strings.HasPrefix(name, "incus.config."):
-			configKey := strings.TrimPrefix(name, "incus.config.")
-			if configKey == "" {
-				responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q has an empty config key", name))
-				return
-			}
-
-			if valueStr == "" {
-				delete(instance.Config, configKey)
-				continue
-			}
-
-			instance.Config[configKey] = valueStr
-
-		case strings.HasPrefix(name, "incus.devices."):
-			deviceName := strings.TrimPrefix(name, "incus.devices.")
-			if deviceName == "" {
-				responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q has an empty device name", name))
-				return
-			}
-
-			if valueStr == "" {
-				delete(instance.Devices, deviceName)
-				continue
-			}
-
-			var deviceConfig map[string]string
-
-			err = json.Unmarshal([]byte(valueStr), &deviceConfig)
-			if err != nil {
-				responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("invalid value for device %q, JSON string expected: %v", deviceName, err))
-				return
-			}
-
-			instance.Devices[deviceName] = deviceConfig
-
-		default:
-			responseErrWithMessage(w, http.StatusBadRequest, fmt.Sprintf("bios attribute %q is not supported", name))
-			return
-		}
-	}
-
-	op, err := s.client.UpdateInstance(computerSystemID, instance.Writable(), etag)
+	op, err := s.client.UpdateInstance(computerSystemID, put, etag)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
 		return

@@ -2329,6 +2329,34 @@ func TestRedfishServer_PatchBiosAttributes(t *testing.T) {
 	require.NotContains(t, updateCalls[0].Instance.Devices, "incus.devices.")
 }
 
+func TestRedfishServer_GetBiosAttributes_HidesProxyState(t *testing.T) {
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"limits.cpu":        "2",
+						"user.redfish.bios": "{}",
+					},
+				},
+			}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient)
+
+	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios")
+	require.NoError(t, err)
+
+	bios := schemas.Bios{}
+	err = json.NewDecoder(resp.Body).Decode(&bios)
+	resp.Body.Close()
+	require.NoError(t, err)
+
+	require.Equal(t, schemas.SettingsAttributes{"incus.config.limits.cpu": "2"}, bios.Attributes)
+}
+
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
 	client := setup(t, &mock.IncusClientMock{})
 
@@ -2349,6 +2377,7 @@ func TestRedfishServer_PatchBiosAttributes_Invalid(t *testing.T) {
 		{name: "empty device name", body: `{"Attributes":{"incus.devices.":"value"}}`, wantErr: "empty device name"},
 		{name: "invalid device JSON", body: `{"Attributes":{"incus.devices.vtpm":"{"}}`, wantErr: "JSON string expected"},
 		{name: "non-string value", body: `{"Attributes":{"incus.config.foo":1}}`, wantErr: "string expected"},
+		{name: "reserved config key", body: `{"Attributes":{"incus.config.user.redfish.x":"value"}}`, wantErr: "is reserved"},
 	}
 
 	for _, tc := range tests {
