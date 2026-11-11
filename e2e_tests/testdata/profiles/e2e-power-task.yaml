@@ -1,0 +1,9 @@
+version: 1
+name: e2e-power-task
+description: Resets answer with a task after a delay, writes are refused for a while after a power on.
+
+power:
+  reset_types: [On, ForceOff, ForceRestart]
+  response: 202-task
+  not_settled_window: 10s
+  delay: 2s
