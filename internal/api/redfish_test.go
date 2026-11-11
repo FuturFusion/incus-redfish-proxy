@@ -30,6 +30,7 @@ import (
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api/mock"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/boom"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/queue"
 )
@@ -2330,6 +2331,8 @@ func TestRedfishServer_PatchBiosAttributes(t *testing.T) {
 }
 
 func TestRedfishServer_GetBiosAttributes_HidesProxyState(t *testing.T) {
+	t.Parallel()
+
 	incusClient := &mock.IncusClientMock{
 		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 			return &incusapi.Instance{
@@ -2347,14 +2350,177 @@ func TestRedfishServer_GetBiosAttributes_HidesProxyState(t *testing.T) {
 	client := setup(t, incusClient)
 
 	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios")
-	require.NoError(t, err)
+	require.NoError(t, err, "get the BIOS")
 
 	bios := schemas.Bios{}
 	err = json.NewDecoder(resp.Body).Decode(&bios)
 	resp.Body.Close()
-	require.NoError(t, err)
+	require.NoError(t, err, "decode the BIOS")
 
-	require.Equal(t, schemas.SettingsAttributes{"incus.config.limits.cpu": "2"}, bios.Attributes)
+	require.Equal(t, schemas.SettingsAttributes{"incus.config.limits.cpu": "2"}, bios.Attributes, "the user.redfish keys are hidden")
+}
+
+func TestRedfishServer_GetSyntheticBiosAttributes(t *testing.T) {
+	t.Parallel()
+
+	p, err := profile.Load("testdata/profiles/registry.yaml")
+	require.NoError(t, err, "load the profile")
+
+	incusClient := &mock.IncusClientMock{
+		GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+			return &incusapi.Instance{
+				Status: "Stopped",
+				InstancePut: incusapi.InstancePut{
+					Config: map[string]string{
+						"user.redfish.bios.Threshold": "80",
+						"user.redfish.bios.Label":     "rack-1",
+						"security.secureboot":         "false",
+					},
+				},
+			}, "", nil
+		},
+	}
+
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	resp, err := client.Get("/redfish/v1/Systems/test-instance/Bios")
+	require.NoError(t, err, "get the BIOS")
+
+	bios := struct {
+		AttributeRegistry string
+		Attributes        map[string]any
+	}{}
+
+	err = json.NewDecoder(resp.Body).Decode(&bios)
+	resp.Body.Close()
+	require.NoError(t, err, "decode the BIOS")
+
+	require.Equal(t, "TestBiosAttributeRegistry.v1_0_0", bios.AttributeRegistry, "the BIOS names the registry of the profile")
+	require.Equal(t, map[string]any{
+		"Mode":                             "Standard",
+		"Revision":                         "1.0",
+		"Label":                            "rack-1",
+		"Threshold":                        float64(80),
+		"Turbo":                            true,
+		"SecureBootControl":                "Disabled",
+		"incus.config.security.secureboot": "false",
+	}, bios.Attributes, "stored values and defaults of the registry attributes")
+}
+
+func TestRedfishServer_PatchSyntheticBiosAttributes(t *testing.T) {
+	t.Parallel()
+
+	p, err := profile.Load("testdata/profiles/registry.yaml")
+	require.NoError(t, err, "load the profile")
+
+	tests := []struct {
+		name       string
+		attributes map[string]any
+
+		wantStatus            int
+		wantMessageID         string
+		wantRelatedProperties []string
+		wantConfigs           []incusapi.ConfigMap
+	}{
+		{
+			name:       "success - stored by the proxy",
+			attributes: map[string]any{"Mode": "Performance", "Threshold": 80, "Turbo": false, "Label": "rack-1"},
+
+			wantStatus: http.StatusAccepted,
+			wantConfigs: []incusapi.ConfigMap{{
+				"user.redfish.bios.Mode":      "Performance",
+				"user.redfish.bios.Threshold": "80",
+				"user.redfish.bios.Turbo":     "false",
+				"user.redfish.bios.Label":     "rack-1",
+			}},
+		},
+		{
+			name:       "success - maps to an Incus key",
+			attributes: map[string]any{"SecureBootControl": "Disabled"},
+
+			wantStatus:  http.StatusAccepted,
+			wantConfigs: []incusapi.ConfigMap{{"security.secureboot": "false"}},
+		},
+		{
+			name:       "error - unknown attribute",
+			attributes: map[string]any{"NoSuchAttribute": "value"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Test.1.0.AttributeUnknown",
+			wantRelatedProperties: []string{"#/Attributes/NoSuchAttribute"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - read only",
+			attributes: map[string]any{"Revision": "2.0"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyNotWritable",
+			wantRelatedProperties: []string{"#/Attributes/Revision"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - not in list",
+			attributes: map[string]any{"Mode": "Turbo"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueNotInList",
+			wantRelatedProperties: []string{"#/Attributes/Mode"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - out of range",
+			attributes: map[string]any{"Threshold": 101},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueOutOfRange",
+			wantRelatedProperties: []string{"#/Attributes/Threshold"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - not an integer",
+			attributes: map[string]any{"Threshold": 1.5},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueTypeError",
+			wantRelatedProperties: []string{"#/Attributes/Threshold"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
+			name:       "error - not a boolean",
+			attributes: map[string]any{"Turbo": "false"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyValueTypeError",
+			wantRelatedProperties: []string{"#/Attributes/Turbo"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			incusClient := &mock.IncusClientMock{
+				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
+					return &incusapi.Instance{Status: "Stopped"}, "", nil
+				},
+				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
+					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
+				},
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.Patch("/redfish/v1/Systems/test-instance/Bios/Settings", map[string]any{"Attributes": tc.attributes})
+			answer := answerOf(t, resp, err)
+
+			require.Equal(t, tc.wantStatus, answer.status, "status of the PATCH")
+			require.Equal(t, tc.wantMessageID, answer.messageID, "message of a refused attribute")
+			require.Equal(t, tc.wantRelatedProperties, answer.relatedProperties, "the message names the refused attribute")
+			require.Equal(t, tc.wantConfigs, updatedConfigs(incusClient), "only an accepted PATCH writes the instance")
+		})
+	}
 }
 
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
