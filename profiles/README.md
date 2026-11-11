@@ -213,12 +213,72 @@ Operations Center records the Redfish traffic of a deployment. The tool
 
 6. Write `profiles/<name>/README.md` from the template below.
 
-7. Add the profile to the end to end tests of Operations Center. Run them and
-   compare the deployment state history with `history` in `manifest.json`.
+7. Add the profile to the end to end tests of Operations Center. Run them.
+   The tests write the anonymized recording of the deployment against the proxy
+   as `<server>-<name>-bmc-recording.zip`. A failed deployment writes
+   `<server>-<name>-bmc-recording-failed-<id>.zip`. Compare it with the
+   archived recording:
+
+   ```sh
+   go run ./cmd/redfish-recording-compare --out report.md profiles/<name> <server>-<name>-bmc-recording.zip
+   ```
+
+   See "Comparing a profile with its recording" below.
 
 `redfish-profile-draft` also reads a profile directory. So
 `go run ./cmd/redfish-profile-draft --name <name> profiles/<name>` drafts the profile again
 from the archived recording.
+
+## Comparing a profile with its recording
+
+`redfish-recording-compare` compares two recordings of a deployment: the
+reference, which is the archived recording of the real server, and the
+candidate, which is the recording against the proxy. It writes a Markdown
+report. The report is informational. The tool fails only if it can not read
+an input.
+
+```sh
+redfish-recording-compare [--verbose] [--out report.md] <reference> <candidate>
+```
+
+Each section starts with a parity line. The summary at the top repeats them.
+
+- Header: hardware, firmware, Operations Center version, final state and
+  duration of both sides. Differences can come from changes of Operations
+  Center if the versions differ. The header warns about this.
+- Deployment steps: the deployment states of both sides, aligned. A state that
+  only one side enters is a code path of Operations Center that only one side
+  covers. A second parity line counts the transitions from one state to the
+  next. It shows a loop or a reverted step, even if both sides enter the same
+  states.
+- Operations per step: every exchange as method, resource kind and outcome.
+  The resource kind does not depend on the vendor URIs. Only steps with
+  exchanges on both sides count for the parity. `--verbose` adds the aligned
+  operations of every step.
+- Errors and retries: all error answers, transport errors and transport
+  retries. An error on the reference side only points to error handling of
+  Operations Center that the profile does not exercise.
+- Profile keys: a draft of both recordings and the value of `profile.yaml`.
+- Timing: the duration of every step. The virtual machine boots faster than a
+  real server, so this section has no parity.
+
+If the reference is a profile directory, the profile keys section has a third
+column with the value of `profile.yaml`. A key differs in one of three ways:
+
+| Difference                        | Meaning                                                                         |
+|-----------------------------------|---------------------------------------------------------------------------------|
+| reference draft ≠ `profile.yaml`  | A modeling decision. The README of the profile must list it.                    |
+| candidate draft ≠ `profile.yaml`  | A bug in the proxy, or a draft rule that does not understand the proxy answers. |
+| reference draft ≠ candidate draft | The behavior Operations Center sees differs. This is the parity number.         |
+
+A key without evidence on one side is shown, but not counted. The tool
+compares the BIOS attributes by type and requirement only. Their names are
+synthetic. The draft ignores the `incus.*` attributes of the proxy.
+A draft draws `power.delay`, `secure_boot.power_cycle.off_after`,
+`secure_boot.power_cycle.off_for`, `secure_boot.empty_after_power_on.for` and
+`secure_boot.reset_keys.unreachable` from the polls of Operations Center. It can only tell whether a poll saw the
+change. So the drafts compare by that, and the value of `profile.yaml` is
+shown, but not compared.
 
 ## README of a profile
 
