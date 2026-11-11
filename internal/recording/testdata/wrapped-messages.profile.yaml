@@ -31,16 +31,32 @@ secure_boot:
     types: [DeleteAllKeys]          # seq 6; TODO verify; accepted by the BMC, no allowable values published
     response: "200-error"           # seq 6; iLO.2.25.SystemResetRequired
     applies: on_reset               # seq 6, 7
+    disables_secure_boot: false     # no evidence; no read of SecureBoot shows setup mode
+    unreachable:
+      after: 0s                     # no evidence; the BMC answered every request after the power on
+      for: 0s                       # seq 6, 8; the BMC answered every request after the power on
   certificate_id_style: hash        # no evidence; keys enrolled from media, no database write
   certificate_id_prefix: ""         # no evidence; keys enrolled from media, no database write
   enable_requires_power_off: true   # no evidence; changed only while the server was off
+  power_cycle:
+    after: []                       # seq 6, 18; no power cycle followed a secure boot change
+    off_after: 0s                   # no evidence; no power cycle followed a secure boot change
+    off_for: 0s                     # no evidence; no power cycle followed a secure boot change
+  empty_after_power_on:
+    times: 0                        # no evidence; Operations Center wrote no key database
+    for: 0s                         # no evidence; Operations Center wrote no key database
 
 virtual_media:
-  insert: standard                  # seq 11, 12; the BMC refused the parameter MediaType, Base.1.18.ActionParameterUnknown
+  insert: standard                  # seq 11, 12
   oem_vendor: Incus                 # proxy setting, never a real vendor
   oem_action: InsertVirtualMedia    # not used with insert standard
   insert_response: "200-error"      # seq 12; Base.1.18.Success
   boot_override_once: true          # seq 13; accepted in a PATCH, no allowable values published
+  refused_parameters:
+    names: [MediaType]              # seq 11, 12
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # seq 11
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "2"                           # seq 12
   delivery: full-fetch              # no evidence; the BMC reports no TransferMethod; TODO verify; range requests against the media URL are not recorded
   stream:
     read_ahead: 4MiB                # proxy setting
@@ -52,10 +68,14 @@ power:
   response: "200-error"             # seq 8; Base.1.18.Success
   not_settled_window: 0s            # no evidence; no write was refused after a power on
   not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
-  delay: 9s                         # seq 8, 10, 16, 17; TODO verify; the power state became On 12s to 32s and Off 0s to 9s after the reset, bounded by the polls; the BMC reported Reset in between
+  delay: {on: 12s, off: 0s}         # seq 8, 10, 16, 17; TODO verify; the power state became On 12s to 32s and Off 0s to 9s after the reset, bounded by the polls; the BMC reported Reset in between
   redundant_reset_errors:
     off: {status: 400, message_id: iLO.2.25.InvalidOperationForSystemState} # seq 4, 5; refused ForceOff while Off
     on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
 
 responses:
   patch: "200-error"                # seq 13; Base.1.18.Success

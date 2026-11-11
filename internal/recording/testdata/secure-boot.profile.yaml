@@ -32,9 +32,20 @@ secure_boot:
     types: [DeleteAllKeys, DeletePK] # seq 1; published ResetAllKeysToDefault, DeleteAllKeys, DeletePK
     response: "202-task"            # seq 2
     applies: immediately            # no evidence; no read of SecureBoot shows when the reset takes effect
+    disables_secure_boot: false     # no evidence; SecureBoot was not read before the ResetKeys
+    unreachable:
+      after: 0s                     # no evidence; no power on followed the ResetKeys
+      for: 0s                       # no evidence; no power on followed the ResetKeys
   certificate_id_style: sequential  # seq 4, 5; numbered per database, the proxy numbers all databases with one counter
   certificate_id_prefix: "Certificate" # seq 4, 5
   enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+  power_cycle:
+    after: []                       # seq 2; no power cycle followed a secure boot change
+    off_after: 0s                   # no evidence; no power cycle followed a secure boot change
+    off_for: 0s                     # no evidence; no power cycle followed a secure boot change
+  empty_after_power_on:
+    times: 0                        # no evidence; Operations Center wrote no key database
+    for: 0s                         # no evidence; Operations Center wrote no key database
 
 virtual_media:
   insert: standard                  # no evidence
@@ -42,6 +53,11 @@ virtual_media:
   oem_action: InsertVirtualMedia    # no evidence
   insert_response: "204"            # no evidence
   boot_override_once: false         # no evidence; no allowable values published, no PATCH with Once
+  refused_parameters:
+    names: []                       # no evidence; Operations Center inserted no media
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # no evidence; Operations Center inserted no media
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "CD"                          # no evidence; Operations Center inserted no media
   delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
   stream:
     read_ahead: 4MiB                # proxy setting
@@ -57,6 +73,10 @@ power:
   redundant_reset_errors:
     off: null                       # no evidence; Operations Center sent no reset to the current power state
     on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
 
 responses:
   patch: "204"                      # no evidence; Operations Center sent no PATCH of Systems, SecureBoot or VirtualMedia

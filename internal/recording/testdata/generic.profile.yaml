@@ -34,9 +34,20 @@ secure_boot:
     types: [DeleteAllKeys, DeletePK] # no evidence
     response: "204"                 # no evidence; Operations Center sent no ResetKeys
     applies: immediately            # no evidence; Operations Center sent no ResetKeys
+    disables_secure_boot: false     # no evidence; Operations Center sent no ResetKeys
+    unreachable:
+      after: 0s                     # no evidence; Operations Center sent no ResetKeys
+      for: 0s                       # no evidence; Operations Center sent no ResetKeys
   certificate_id_style: hash        # seq 7
   certificate_id_prefix: ""         # no evidence
   enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+  power_cycle:
+    after: []                       # no evidence; Operations Center changed no secure boot setting
+    off_after: 0s                   # no evidence; Operations Center changed no secure boot setting
+    off_for: 0s                     # no evidence; Operations Center changed no secure boot setting
+  empty_after_power_on:
+    times: 0                        # seq 6; no key database read empty after a power on
+    for: 0s                         # no evidence; no key database read empty after a power on
 
 virtual_media:
   insert: standard                  # seq 8
@@ -44,6 +55,11 @@ virtual_media:
   oem_action: InsertVirtualMedia    # not used with insert standard
   insert_response: "204"            # seq 8
   boot_override_once: false         # seq 1
+  refused_parameters:
+    names: []                       # seq 8; the first insert was accepted
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # no evidence; no parameter was refused
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "CD1"                         # seq 8
   delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
   stream:
     read_ahead: 4MiB                # proxy setting
@@ -59,6 +75,10 @@ power:
   redundant_reset_errors:
     off: null                       # no evidence; Operations Center sent no reset to the current power state
     on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
 
 responses:
   patch: "204"                      # no evidence; Operations Center sent no PATCH of Systems, SecureBoot or VirtualMedia

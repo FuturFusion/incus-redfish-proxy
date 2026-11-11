@@ -31,9 +31,20 @@ secure_boot:
     types: [DeleteAllKeys, DeletePK] # no evidence
     response: "204"                 # no evidence
     applies: immediately            # no evidence
+    disables_secure_boot: false     # no evidence; Operations Center sent no ResetKeys
+    unreachable:
+      after: 0s                     # no evidence; Operations Center sent no ResetKeys
+      for: 0s                       # no evidence; Operations Center sent no ResetKeys
   certificate_id_style: hash        # no evidence
   certificate_id_prefix: ""         # no evidence
   enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+  power_cycle:
+    after: []                       # no evidence; Operations Center changed no secure boot setting
+    off_after: 0s                   # no evidence; Operations Center changed no secure boot setting
+    off_for: 0s                     # no evidence; Operations Center changed no secure boot setting
+  empty_after_power_on:
+    times: 0                        # no evidence; Operations Center wrote no key database
+    for: 0s                         # no evidence; Operations Center wrote no key database
 
 virtual_media:
   insert: oem                       # seq 2
@@ -41,6 +52,11 @@ virtual_media:
   oem_action: InsertVirtualMedia    # seq 2
   insert_response: "202-task"       # seq 2
   boot_override_once: true          # seq 1
+  refused_parameters:
+    names: []                       # not used with insert oem
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # not used with insert oem
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "CD1"                         # seq 2
   delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
   stream:
     read_ahead: 4MiB                # proxy setting
@@ -56,6 +72,10 @@ power:
   redundant_reset_errors:
     off: null                       # no evidence; Operations Center sent no reset to the current power state
     on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
 
 responses:
   patch: "204"                      # seq 6

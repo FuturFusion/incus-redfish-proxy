@@ -31,9 +31,20 @@ secure_boot:
     types: [DeleteAllKeys]          # seq 4; TODO verify; accepted by the BMC, allowable values published through @Redfish.ActionInfo, not recorded
     response: "200"                 # seq 4; ExtendedError.1.2.RebootRequired
     applies: on_reset               # seq 4, 5
+    disables_secure_boot: false     # seq 2, 4, 10
+    unreachable:
+      after: 0s                     # no evidence; the BMC answered every request after the power on
+      for: 0s                       # seq 4, 7; the BMC answered every request after the power on
   certificate_id_style: hash        # no evidence; keys enrolled from media, no database write
   certificate_id_prefix: ""         # no evidence; keys enrolled from media, no database write
   enable_requires_power_off: true   # no evidence; secure boot already enabled
+  power_cycle:
+    after: []                       # seq 4; no power cycle followed a secure boot change
+    off_after: 0s                   # no evidence; no power cycle followed a secure boot change
+    off_for: 0s                     # no evidence; no power cycle followed a secure boot change
+  empty_after_power_on:
+    times: 0                        # no evidence; Operations Center wrote no key database
+    for: 0s                         # no evidence; Operations Center wrote no key database
 
 virtual_media:
   insert: patch                     # seq 14
@@ -41,6 +52,11 @@ virtual_media:
   oem_action: InsertVirtualMedia    # not used with insert patch
   insert_response: "204"            # not used with insert patch, the BMC answered 200
   boot_override_once: true          # seq 1; published Once, Disabled
+  refused_parameters:
+    names: []                       # not used with insert patch
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # not used with insert patch
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "EXT1"                        # seq 14
   delivery: stream                  # seq 14; TODO verify; BMC reports TransferMethod Stream
   stream:
     read_ahead: 4MiB                # proxy setting
@@ -52,10 +68,14 @@ power:
   response: "204"                   # seq 7
   not_settled_window: 0s            # no evidence; no write was refused after a power on
   not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
-  delay: 3s                         # seq 7, 9, 12, 13, 17 and 1 more; TODO verify; the power state became On 3s to 4s and Off 0s to 5s after the reset, bounded by the polls
+  delay: {on: 3s, off: 0s}          # seq 7, 9, 12, 13, 17 and 1 more; TODO verify; the power state became On 3s to 4s and Off 0s to 5s after the reset, bounded by the polls
   redundant_reset_errors:
     off: null                       # no evidence; Operations Center sent no reset to the current power state
     on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
 
 responses:
   patch: "200-resource"             # seq 14

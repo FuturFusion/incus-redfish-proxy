@@ -22,6 +22,9 @@ type Exchange struct {
 	Timestamp       time.Time `json:"timestamp"`
 	DeploymentState string    `json:"deployment_state"`
 
+	// Attempt numbers the transport attempts of one request from 0. Values above 0 are retries.
+	Attempt int `json:"attempt"`
+
 	Method string `json:"method"`
 	URL    string `json:"url"`
 

@@ -569,6 +569,10 @@ func attributeType(value any, entry *registryEntry) profile.AttributeType {
 }
 
 // biosRegistry adds one synthetic attribute per type the PATCHes carry. Vendor names stay in the comments.
+// proxyAttributePrefix starts the BIOS attributes of the proxy itself, which map to the Incus config.
+// They are not attributes of the BMC, so the draft gives them no synthetic attribute.
+const proxyAttributePrefix = "incus."
+
 func (d *Draft) biosRegistry(rec *Recording, patches []Exchange) {
 	registry := recordedRegistry(rec)
 	byType := map[profile.AttributeType]*synthetic{}
@@ -588,6 +592,10 @@ func (d *Draft) biosRegistry(rec *Recording, patches []Exchange) {
 		}
 
 		for _, name := range slices.Sorted(maps.Keys(request.Attributes)) {
+			if strings.HasPrefix(name, proxyAttributePrefix) {
+				continue
+			}
+
 			var entry *registryEntry
 
 			recorded, ok := registry[name]
@@ -748,6 +756,10 @@ func (d *Draft) secureBoot(rec *Recording) {
 	d.explain("Operations Center deleted no database entry", "secure_boot.database_delete_response")
 
 	d.secureBootEnable(rec)
+	d.resetKeysDisables(rec)
+	d.powerCycle(rec)
+	d.emptyAfterPowerOn(rec)
+	d.unreachable(rec)
 }
 
 // databaseAnswers draws the answers to the first accepted POST and DELETE of a database entry.
@@ -1077,9 +1089,12 @@ func (d *Draft) responses(rec *Recording) {
 
 func (d *Draft) virtualMedia(rec *Recording) {
 	insert, ok := rec.first(func(e Exchange) bool { return e.Succeeded() && insertKind(e) != "" })
+	d.mediaLocations(rec, insert, ok)
+
 	if ok {
 		kind := insertKind(insert)
 		d.set("virtual_media.insert", refusedFirst(rec, insert, observed(string(kind), insert)))
+		d.refusedParameters(rec, insert)
 
 		switch kind {
 		case profile.MediaInsertOEM:
@@ -1106,20 +1121,37 @@ func (d *Draft) virtualMedia(rec *Recording) {
 		}
 	}
 
+	d.explain("Operations Center inserted no media", "virtual_media.refused_parameters.names", "virtual_media.refused_parameters.error")
+
 	d.transferMethod(rec)
 	d.bootOverrideOnce(rec)
 }
 
-// refusedFirst names the parameters of a refused try before the accepted insert.
+// refusedFirst notes a refused try before the accepted insert, if it did not differ in its parameters.
+// refusedParameters draws the parameters a refused try differed in.
 func refusedFirst(rec *Recording, insert Exchange, v value) value {
-	refused, ok := rec.lastBefore(insert, func(e Exchange) bool {
-		return e.Method == insert.Method && e.Path() == insert.Path() && e.Status >= http.StatusBadRequest
-	})
+	refused, dropped, ok := refusedTry(rec, insert)
 	if !ok {
 		return v
 	}
 
 	v.seqs = append(v.seqs, refused.Sequence)
+
+	if len(dropped) == 0 {
+		return v.addNote("the BMC refused a first try, %s", messageID(refused))
+	}
+
+	return v
+}
+
+// refusedTry returns the refused try before the accepted insert and the parameters the accepted insert dropped.
+func refusedTry(rec *Recording, insert Exchange) (Exchange, []string, bool) {
+	refused, ok := rec.lastBefore(insert, func(e Exchange) bool {
+		return e.Method == insert.Method && e.Path() == insert.Path() && e.Status >= http.StatusBadRequest
+	})
+	if !ok {
+		return Exchange{}, nil, false
+	}
 
 	accepted := requestKeys(insert)
 
@@ -1131,11 +1163,36 @@ func refusedFirst(rec *Recording, insert Exchange, v value) value {
 		}
 	}
 
-	if len(dropped) == 0 {
-		return v.addNote("the BMC refused a first try, %s", messageID(refused))
+	return refused, dropped, true
+}
+
+// refusedParameters draws the InsertMedia parameters the BMC refused, and that the accepted insert dropped.
+func (d *Draft) refusedParameters(rec *Recording, insert Exchange) {
+	kind := insertKind(insert)
+	if kind != profile.MediaInsertStandard {
+		for _, key := range []string{"virtual_media.refused_parameters.names", "virtual_media.refused_parameters.error"} {
+			v := d.values[key]
+			v.fixed, v.note = true, "not used with insert "+string(kind)
+			d.set(key, v)
+		}
+
+		return
 	}
 
-	return v.addNote("the BMC refused the parameter %s, %s", strings.Join(dropped, ", "), messageID(refused))
+	refused, dropped, ok := refusedTry(rec, insert)
+	if !ok || len(dropped) == 0 {
+		d.set("virtual_media.refused_parameters.names", observed("[]", insert).withNote("the first insert was accepted"))
+		d.explain("no parameter was refused", "virtual_media.refused_parameters.error")
+
+		return
+	}
+
+	d.set("virtual_media.refused_parameters.names", observed(yamlList(dropped), refused, insert))
+
+	shape, ok := errorShape(refused)
+	if ok {
+		d.set("virtual_media.refused_parameters.error", observed(shape, refused))
+	}
 }
 
 // requestKeys returns the sorted top level keys of the request body.
@@ -1282,8 +1339,99 @@ func (d *Draft) power(rec *Recording) {
 	}
 
 	d.redundantResets(rec)
+	d.busyReads(rec)
 	d.notSettled(rec)
 	d.powerDelay(rec)
+}
+
+// busyResources match the paths of the resources a busy BMC refuses to read.
+var busyResources = []struct {
+	resource profile.BusyResource
+	match    func(string) bool
+}{
+	{profile.BusyResourceSystem, isSystem},
+	{profile.BusyResourceBios, isBIOS},
+	{profile.BusyResourceSecureBoot, isSecureBoot},
+}
+
+// isTransient reports a status that Operations Center asks again for.
+func isTransient(status int) bool {
+	switch status {
+	case http.StatusTooManyRequests, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+		return true
+	}
+
+	return false
+}
+
+// busyReads draws the reads a BMC refuses until a retry succeeds.
+// The failures are the longest run of refused reads of one request that a successful retry ends.
+func (d *Draft) busyReads(rec *Recording) {
+	var resources []string
+
+	var evidence []Exchange
+
+	var first *Exchange
+
+	failures, unended := 0, 0
+
+	for _, busy := range busyResources {
+		run := 0
+		seen := false
+
+		for _, e := range rec.where(func(e Exchange) bool { return e.Method == http.MethodGet && busy.match(e.Path()) }) {
+			// A new request starts a new run, a retry of it has an attempt above 0.
+			if e.Attempt == 0 {
+				unended = max(unended, run)
+				run = 0
+			}
+
+			switch {
+			case isTransient(e.Status):
+				if first == nil || e.Sequence < first.Sequence {
+					first = &e
+				}
+
+				run++
+
+			case e.Succeeded() && run > 0:
+				failures = max(failures, run)
+				evidence = append(evidence, e)
+				seen = true
+				run = 0
+
+			default:
+				unended = max(unended, run)
+				run = 0
+			}
+		}
+
+		unended = max(unended, run)
+
+		if seen {
+			resources = append(resources, string(busy.resource))
+		}
+	}
+
+	if len(resources) == 0 {
+		d.explain("no read was refused until a retry succeeded", "power.busy_reads.resources", "power.busy_reads.failures", "power.busy_reads.error")
+
+		return
+	}
+
+	d.set("power.busy_reads.resources", observed(yamlList(resources), evidence...))
+
+	v := observed(strconv.Itoa(failures), evidence...)
+	if unended > failures {
+		v = v.withNote("a run of %d refused reads failed the read", unended)
+	}
+
+	d.set("power.busy_reads.failures", v)
+
+	shape, ok := errorShape(*first)
+	if ok {
+		d.set("power.busy_reads.error", observed(shape, *first))
+	}
 }
 
 // redundantResetKeys are the profile keys of a reset to the power state the server has already, by target power state.
@@ -1472,33 +1620,37 @@ func (d *Draft) powerDelay(rec *Recording) {
 		return
 	}
 
-	// The profile has one delay. The largest lower bound fits every power state, unless it exceeds an upper bound.
-	var lower time.Duration
+	// Each power state gets its lower bound, the last poll that still showed the old state, unless it exceeds the upper bound.
+	delays := map[string]time.Duration{}
 
-	upper := time.Duration(math.MaxInt64)
-
-	var ranges []string
+	var ranges, unseen []string
 
 	differs := false
 
 	for _, target := range []string{"On", "Off"} {
 		b, ok := bounds[target]
 		if !ok {
+			unseen = append(unseen, target)
+
 			continue
 		}
 
 		b.lower = b.lower.Truncate(time.Second)
 		b.upper = time.Duration(math.Ceil(b.upper.Seconds())) * time.Second
-		lower, upper = max(lower, b.lower), min(upper, b.upper)
+		delays[target] = min(b.lower, b.upper)
 		differs = differs || b.lower > b.upper
 		ranges = append(ranges, fmt.Sprintf("%s %s to %s", target, b.lower, b.upper))
 	}
 
-	v := inferred(min(lower, upper).String(), evidence...).
+	v := inferred(fmt.Sprintf("{on: %s, off: %s}", delays["On"], delays["Off"]), evidence...).
 		withNote("the power state became %s after the reset, bounded by the polls", strings.Join(ranges, " and "))
 
 	if differs {
 		v = v.addNote("the delay differs between resets")
+	}
+
+	if len(unseen) > 0 {
+		v = v.addNote("no reset to %s was polled", strings.Join(unseen, ", "))
 	}
 
 	if len(transitional) > 0 {

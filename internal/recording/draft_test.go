@@ -40,7 +40,7 @@ func TestDraft(t *testing.T) {
 				want.Name, want.Description = p.Name, p.Description
 				require.Equal(t, want, p, "a draft without evidence equals the generic profile")
 			},
-			wantGaps: 34,
+			wantGaps: 49,
 			wantGap:  recording.Gap{Key: "bios.patch_response", Reason: "Operations Center sent no BIOS PATCH"},
 		},
 		{
@@ -54,7 +54,7 @@ func TestDraft(t *testing.T) {
 				require.Len(t, p.BIOS.Registry.Attributes, 3, "one synthetic attribute per type")
 				require.Equal(t, []profile.ResetType{"On", "ForceOff", "GracefulShutdown", "ForceRestart"}, p.Power.ResetTypes, "power.reset_types")
 			},
-			wantGaps: 20,
+			wantGaps: 32,
 			wantGap:  recording.Gap{Key: "power.not_settled_window", Reason: "no write was refused after a power on"},
 		},
 		{
@@ -69,7 +69,7 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, &profile.Requirement{Attribute: "DraftRequirement", Value: "Performance"}, p.BIOS.Registry.Attributes[3].Requires, "deferred attribute")
 				require.Equal(t, profile.ErrorShape{Status: 400, MessageID: "Base.1.12.PropertyUnknown"}, p.BIOS.Errors.DeferredRejected, "bios.errors.deferred_rejected")
 			},
-			wantGaps: 25,
+			wantGaps: 40,
 			wantGap:  recording.Gap{Key: "secure_boot.enable_requires_power_off", Reason: "Operations Center did not change SecureBootEnable"},
 		},
 		{
@@ -83,7 +83,7 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.ResetKeysResponseTask, p.SecureBoot.ResetKeys.Response, "secure_boot.reset_keys.response")
 				require.Equal(t, "Certificate", p.SecureBoot.CertificateIDPrefix, "secure_boot.certificate_id_prefix")
 			},
-			wantGaps: 23,
+			wantGaps: 37,
 			wantGap:  recording.Gap{Key: "bios.pending"},
 		},
 		{
@@ -97,7 +97,7 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.PowerResponseTask, p.Power.Response, "power.response")
 				require.Equal(t, "19s", p.Power.NotSettledWindow.String(), "power.not_settled_window")
 			},
-			wantGaps: 25,
+			wantGaps: 37,
 			wantGap:  recording.Gap{Key: "bios.registry.id", Reason: "Operations Center sent no BIOS PATCH"},
 		},
 		{
@@ -109,7 +109,7 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.MediaInsertPatch, p.VirtualMedia.Insert, "virtual_media.insert")
 				require.True(t, p.BIOS.TaskResource, "bios.task_resource")
 			},
-			wantGaps: 29,
+			wantGaps: 41,
 			wantGap:  recording.Gap{Key: "virtual_media.delivery"},
 		},
 		{
@@ -128,9 +128,9 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.ResourcePatchResponseResource, p.Responses.Patch, "responses.patch, the PATCH answers the resource")
 				require.Equal(t, profile.MediaInsertPatch, p.VirtualMedia.Insert, "virtual_media.insert")
 				require.Equal(t, profile.DeliveryStream, p.VirtualMedia.Delivery, "virtual_media.delivery from TransferMethod")
-				require.Equal(t, 3*time.Second, p.Power.Delay, "power.delay, the lower bound of the polls")
+				require.Equal(t, profile.PowerDelay{On: 3 * time.Second}, p.Power.Delay, "power.delay, the lower bound of the polls")
 			},
-			wantGaps: 17,
+			wantGaps: 26,
 			wantGap:  recording.Gap{Key: "secure_boot.database_write", Reason: "keys enrolled from media, no database write"},
 		},
 		{
@@ -149,9 +149,9 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.ResetKeysResponseOKError, p.SecureBoot.ResetKeys.Response, "secure_boot.reset_keys.response")
 				require.Equal(t, profile.ResetKeysAppliesOnReset, p.SecureBoot.ResetKeys.Applies, "secure_boot.reset_keys.applies")
 				require.Equal(t, profile.ResourcePatchResponseOKError, p.Responses.Patch, "responses.patch")
-				require.Equal(t, 9*time.Second, p.Power.Delay, "power.delay, the upper bound of the power off is below the lower bound of the power on")
+				require.Equal(t, profile.PowerDelay{On: 12 * time.Second}, p.Power.Delay, "power.delay, power on is slower than power off")
 			},
-			wantGaps: 20,
+			wantGaps: 30,
 			wantGap:  recording.Gap{Key: "secure_boot.enable_requires_power_off", Reason: "changed only while the server was off"},
 		},
 		{
@@ -170,7 +170,7 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.DatabaseDeleteResponseOKError, p.SecureBoot.DatabaseDeleteResponse, "secure_boot.database_delete_response")
 				require.Equal(t, profile.ResourcePatchResponseOK, p.Responses.Patch, "responses.patch, top level messages")
 			},
-			wantGaps: 18,
+			wantGaps: 32,
 			wantGap:  recording.Gap{Key: "bios.patch_requires_power_off", Reason: "BIOS PATCHes sent only while the server was off"},
 		},
 	}
@@ -229,4 +229,115 @@ func goldenFile(t *testing.T, path string, data []byte) []byte {
 func TestMain(m *testing.M) {
 	flag.Parse()
 	os.Exit(m.Run())
+}
+
+func TestDraftValues(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		key  string
+
+		want recording.DraftValue
+	}{
+		{
+			name: "observed",
+			key:  "bios.patch_response",
+			want: recording.DraftValue{YAML: `"204"`, Seqs: []int64{3}, Status: recording.DraftObserved},
+		},
+		{
+			name: "fixed",
+			key:  "virtual_media.stream.cache",
+			want: recording.DraftValue{YAML: "64MiB", Status: recording.DraftFixed},
+		},
+		{
+			name: "gap",
+			key:  "power.not_settled_window",
+			want: recording.DraftValue{YAML: "0s", Status: recording.DraftGap},
+		},
+		{
+			name: "attributes are inferred",
+			key:  recording.AttributesKey,
+			want: recording.DraftValue{
+				YAML:   "[{name: DraftString, type: String}, {name: DraftInteger, type: Integer}, {name: DraftBoolean, type: Boolean}]",
+				Seqs:   []int64{3},
+				Status: recording.DraftInferred,
+			},
+		},
+	}
+
+	// Setup
+	rec, err := recording.Open("testdata/generic")
+	require.NoError(t, err, "open the recording")
+
+	// Run test
+	values := recording.NewDraft(rec, "generic").Values()
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Assert
+			require.Equal(t, tc.want, values[tc.key], "value of %s", tc.key)
+		})
+	}
+}
+
+func TestDraftValuesWithoutAttributes(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	rec, err := recording.Open("testdata/empty")
+	require.NoError(t, err, "open the recording")
+
+	// Run test
+	values := recording.NewDraft(rec, "empty").Values()
+
+	// Assert
+	require.Equal(t, recording.DraftValue{YAML: "[]", Status: recording.DraftGap}, values[recording.AttributesKey], "no attributes are a gap")
+	require.Len(t, values, 55, "every profile key and the attributes")
+}
+
+func TestDraftIgnoresProxyAttributes(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name       string
+		attributes string
+
+		want recording.DraftValue
+	}{
+		{
+			name:       "only proxy attributes",
+			attributes: `{"incus.config.user.oc.bios-profile": "applied"}`,
+			want:       recording.DraftValue{YAML: "[]", Status: recording.DraftGap},
+		},
+		{
+			name:       "proxy and BMC attributes",
+			attributes: `{"incus.config.user.oc.bios-profile": "applied", "BootMode": "Uefi"}`,
+			want:       recording.DraftValue{YAML: "[{name: DraftString, type: String}]", Seqs: []int64{1}, Status: recording.DraftInferred},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			rec := &recording.Recording{Exchanges: []recording.Exchange{{
+				Sequence:        1,
+				DeploymentState: "apply-bios",
+				Method:          "PATCH",
+				URL:             "https://bmc.example/redfish/v1/Systems/1/Bios/Settings",
+				RequestBody:     `{"Attributes": ` + tc.attributes + `}`,
+				Status:          202,
+			}}}
+
+			// Run test
+			values := recording.NewDraft(rec, "proxy").Values()
+
+			// Assert
+			require.Equal(t, tc.want, values[recording.AttributesKey], "synthetic attributes")
+		})
+	}
 }

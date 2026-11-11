@@ -34,9 +34,20 @@ secure_boot:
     types: [DeleteAllKeys, DeletePK] # no evidence
     response: "204"                 # no evidence
     applies: immediately            # no evidence
+    disables_secure_boot: false     # no evidence; Operations Center sent no ResetKeys
+    unreachable:
+      after: 0s                     # no evidence; Operations Center sent no ResetKeys
+      for: 0s                       # no evidence; Operations Center sent no ResetKeys
   certificate_id_style: sequential  # seq 15, 16, 19, 20
   certificate_id_prefix: "CustPolicy." # seq 15, 16, 19, 20
   enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+  power_cycle:
+    after: []                       # no evidence; Operations Center changed no secure boot setting
+    off_after: 0s                   # no evidence; Operations Center changed no secure boot setting
+    off_for: 0s                     # no evidence; Operations Center changed no secure boot setting
+  empty_after_power_on:
+    times: 0                        # seq 18; no key database read empty after a power on
+    for: 0s                         # no evidence; no key database read empty after a power on
 
 virtual_media:
   insert: standard                  # no evidence
@@ -44,6 +55,11 @@ virtual_media:
   oem_action: InsertVirtualMedia    # no evidence
   insert_response: "204"            # no evidence
   boot_override_once: true          # seq 21; accepted in a PATCH, no allowable values published
+  refused_parameters:
+    names: []                       # no evidence; Operations Center inserted no media
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # no evidence; Operations Center inserted no media
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "CD"                          # no evidence; Operations Center inserted no media
   delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
   stream:
     read_ahead: 4MiB                # proxy setting
@@ -55,10 +71,14 @@ power:
   response: "204"                   # seq 8
   not_settled_window: 0s            # no evidence; no write was refused after a power on
   not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
-  delay: 0s                         # seq 8, 11, 12, 13; TODO verify; the power state became On 0s to 21s and Off 0s to 9s after the reset, bounded by the polls
+  delay: {on: 0s, off: 0s}          # seq 8, 11, 12, 13; TODO verify; the power state became On 0s to 21s and Off 0s to 9s after the reset, bounded by the polls
   redundant_reset_errors:
     off: {status: 409, message_id: IDRAC.2.8.PSU502} # seq 1, 5; refused ForceOff while Off
     on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
 
 responses:
   patch: "200"                      # seq 21; Base.1.12.Success
