@@ -32,11 +32,12 @@ var namePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 
 // Profile describes how the proxy behaves towards a Redfish client.
 type Profile struct {
-	Version     int        `yaml:"version"`
-	Name        string     `yaml:"name"`
-	Description string     `yaml:"description"`
-	BIOS        BIOS       `yaml:"bios"`
-	SecureBoot  SecureBoot `yaml:"secure_boot"`
+	Version      int          `yaml:"version"`
+	Name         string       `yaml:"name"`
+	Description  string       `yaml:"description"`
+	BIOS         BIOS         `yaml:"bios"`
+	SecureBoot   SecureBoot   `yaml:"secure_boot"`
+	VirtualMedia VirtualMedia `yaml:"virtual_media"`
 }
 
 // Default returns the generic profile, which reproduces the behavior of the proxy before profiles existed.
@@ -75,6 +76,12 @@ func defaults() Profile {
 			},
 			CertificateIDStyle:     CertificateIDStyleHash,
 			EnableRequiresPowerOff: true,
+		},
+		VirtualMedia: VirtualMedia{
+			Insert:         MediaInsertStandard,
+			OEMVendor:      "Incus",
+			OEMAction:      "InsertVirtualMedia",
+			InsertResponse: InsertResponseNoContent,
 		},
 	}
 }
@@ -186,5 +193,10 @@ func (p Profile) Validate() error {
 		return err
 	}
 
-	return p.SecureBoot.validate()
+	err = p.SecureBoot.validate()
+	if err != nil {
+		return err
+	}
+
+	return p.VirtualMedia.validate()
 }

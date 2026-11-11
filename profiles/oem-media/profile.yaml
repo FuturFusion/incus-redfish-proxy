@@ -1,0 +1,9 @@
+version: 1
+name: oem-media
+description: Virtual media is only inserted through an OEM action, answered with a task.
+
+virtual_media:
+  insert: oem
+  oem_vendor: Incus
+  oem_action: InsertVirtualMedia
+  insert_response: 202-task
