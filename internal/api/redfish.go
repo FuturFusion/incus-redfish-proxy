@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
@@ -56,9 +57,14 @@ type redfishServer struct {
 	ctx          context.Context
 	events       EventSource
 	resets       *resetTracker
-	tasks        *taskRegistry
-	profile      profile.Profile
-	bios         biosStore
+	busyReads    *busyCounter
+
+	databaseRefresh *databaseRefresh
+
+	unreachableWindow *unreachableWindow
+	tasks             *taskRegistry
+	profile           profile.Profile
+	bios              biosStore
 
 	// powerMu serializes the resets and the power hooks, which apply the staged BIOS attributes.
 	powerMu *sync.Mutex
@@ -125,17 +131,22 @@ var _ ServerInterface = (*redfishServer)(nil)
 func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *redfishServer {
 	s := &redfishServer{
 		instanceName: instanceName,
-		client:       client,
+		client:       transientRetryClient{IncusClient: client, sleep: time.Sleep},
 		httpClient:   http.DefaultClient,
 		ctx:          context.Background(),
 		resets:       &resetTracker{instanceName: instanceName},
-		tasks:        &taskRegistry{},
-		profile:      profile.Default(),
-		powerMu:      &sync.Mutex{},
-		mediaMu:      &sync.Mutex{},
-		resetMu:      &sync.Mutex{},
-		mounted:      &mountedMedia{},
-		now:          time.Now,
+		busyReads:    &busyCounter{},
+
+		databaseRefresh: &databaseRefresh{},
+
+		unreachableWindow: &unreachableWindow{},
+		tasks:             &taskRegistry{},
+		profile:           profile.Default(),
+		powerMu:           &sync.Mutex{},
+		mediaMu:           &sync.Mutex{},
+		resetMu:           &sync.Mutex{},
+		mounted:           &mountedMedia{},
+		now:               time.Now,
 	}
 
 	for _, opt := range opts {
@@ -183,17 +194,61 @@ func validateManagerID(w http.ResponseWriter, managerID string) bool {
 	return true
 }
 
-func validateVirtualMediaID(w http.ResponseWriter, managerID string, virtualMediaID string) bool {
+// mediaSlot is the virtual media device at one of its locations.
+type mediaSlot struct {
+	// collection is the path of the VirtualMedia collection.
+	collection string
+	id         string
+}
+
+func (m mediaSlot) path() string {
+	return m.collection + "/" + m.id
+}
+
+func (s redfishServer) managerMediaCollection() string {
+	return fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)
+}
+
+func (s redfishServer) systemMediaCollection() string {
+	return fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)
+}
+
+// firstMediaSlot is the device at the first location of the profile. Task resources name it.
+func (s redfishServer) firstMediaSlot() mediaSlot {
+	collection := s.managerMediaCollection()
+	if s.profile.VirtualMedia.Locations[0] == profile.MediaLocationSystems {
+		collection = s.systemMediaCollection()
+	}
+
+	return mediaSlot{collection: collection, id: s.profile.VirtualMedia.ID}
+}
+
+// managerMedia validates the IDs of a request below the manager. It answers 404, if the manager does not show the device.
+func (s redfishServer) managerMedia(w http.ResponseWriter, managerID string, virtualMediaID string) (mediaSlot, bool) {
 	if !validateManagerID(w, managerID) {
-		return false
+		return mediaSlot{}, false
 	}
 
-	if virtualMediaID != virtualMediaName {
+	if !s.profile.VirtualMedia.HasLocation(profile.MediaLocationManagers) || virtualMediaID != s.profile.VirtualMedia.ID {
 		responseErr(w, http.StatusNotFound)
-		return false
+		return mediaSlot{}, false
 	}
 
-	return true
+	return mediaSlot{collection: s.managerMediaCollection(), id: virtualMediaID}, true
+}
+
+// systemMedia validates the IDs of a request below the system. It answers 404, if the system does not show the device.
+func (s redfishServer) systemMedia(w http.ResponseWriter, systemID string, virtualMediaID string) (mediaSlot, bool) {
+	if !s.validateComputerSystemID(w, systemID) {
+		return mediaSlot{}, false
+	}
+
+	if !s.profile.VirtualMedia.HasLocation(profile.MediaLocationSystems) || virtualMediaID != s.profile.VirtualMedia.ID {
+		responseErr(w, http.StatusNotFound)
+		return mediaSlot{}, false
+	}
+
+	return mediaSlot{collection: s.systemMediaCollection(), id: virtualMediaID}, true
 }
 
 func (s redfishServer) validateComputerSystemID(w http.ResponseWriter, computerSystemID string) bool {
@@ -284,14 +339,17 @@ func (s redfishServer) GetRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 		return
 	}
 
+	var virtualMedia *OdataV4IdRef
+	if s.profile.VirtualMedia.HasLocation(profile.MediaLocationManagers) {
+		virtualMedia = &OdataV4IdRef{OdataID: ref(s.managerMediaCollection())}
+	}
+
 	response(w, ManagerV1250Manager{
-		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s", managerName)),
-		OdataType: ref("#Manager.v1_25_0.Manager"),
-		VirtualMedia: &OdataV4IdRef{
-			OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
-		},
-		ID:   managerName,
-		Name: managerName,
+		OdataID:      ref(fmt.Sprintf("/redfish/v1/Managers/%s", managerName)),
+		OdataType:    ref("#Manager.v1_25_0.Manager"),
+		VirtualMedia: virtualMedia,
+		ID:           managerName,
+		Name:         managerName,
 	})
 }
 
@@ -311,8 +369,6 @@ func (s redfishServer) PutRedfishV1ManagersManagerID(w http.ResponseWriter, r *h
 	responseNotImplemented(w)
 }
 
-const virtualMediaName = "CD"
-
 const (
 	bootMediaDeviceName = "boot-media"
 	bootMediaImageKey   = redfishConfigPrefix + "image"
@@ -323,12 +379,21 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.Response
 		return
 	}
 
+	if !s.profile.VirtualMedia.HasLocation(profile.MediaLocationManagers) {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
+	s.getVirtualMediaCollection(w, s.managerMediaCollection())
+}
+
+func (s redfishServer) getVirtualMediaCollection(w http.ResponseWriter, collection string) {
 	response(w, VirtualMediaCollectionVirtualMediaCollection{
-		OdataID:   ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia", managerName)),
+		OdataID:   ref(collection),
 		OdataType: ref("#VirtualMediaCollection.VirtualMediaCollection"),
 		Members: &[]OdataV4IdRef{
 			{
-				OdataID: ref(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)),
+				OdataID: ref(collection + "/" + s.profile.VirtualMedia.ID),
 			},
 		},
 		MembersOdataCount: ref(OdataV4Count(1)),
@@ -337,13 +402,18 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMedia(w http.Response
 }
 
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+	slot, ok := s.managerMedia(w, managerID, virtualMediaID)
+	if !ok {
 		return
 	}
 
+	s.getVirtualMedia(w, slot)
+}
+
+func (s redfishServer) getVirtualMedia(w http.ResponseWriter, slot mediaSlot) {
 	instance, _, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -361,14 +431,14 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 
 	transferMethod, transferProtocol := transferOfMedia(device, image)
 
-	base := fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)
+	base := slot.path()
 
 	response(w, virtualMediaGetResponse{
 		VirtualMediaV170VirtualMedia: VirtualMediaV170VirtualMedia{
 			OdataID:   ref(base),
 			OdataType: ref("#VirtualMedia.v1_7_0.VirtualMedia"),
-			ID:        virtualMediaName,
-			Name:      ResourceName(virtualMediaName),
+			ID:        slot.id,
+			Name:      slot.id,
 			MediaTypes: &[]VirtualMediaV170MediaType{
 				CD,
 				DVD,
@@ -451,35 +521,95 @@ func (s redfishServer) oemInsertAction() string {
 	return s.profile.VirtualMedia.OEMVendor + "VirtualMedia." + s.profile.VirtualMedia.OEMAction
 }
 
-// registerVirtualMediaRoutes adds the OEM insert action, which is not part of the generated routes.
+// registerVirtualMediaRoutes adds the routes the schema does not generate: the device below the system and the OEM insert action.
 func (s redfishServer) registerVirtualMediaRoutes(mux *http.ServeMux) {
+	s.registerSystemMediaRoutes(mux)
+
 	if s.profile.VirtualMedia.Insert != profile.MediaInsertOEM {
 		return
 	}
 
 	mux.HandleFunc("POST /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/Oem/"+s.oemInsertAction(), func(w http.ResponseWriter, r *http.Request) {
-		if !validateVirtualMediaID(w, r.PathValue("ManagerId"), r.PathValue("VirtualMediaId")) {
-			return
+		_, ok := s.managerMedia(w, r.PathValue("ManagerId"), r.PathValue("VirtualMediaId"))
+		if ok {
+			s.oemInsertMedia(w, r)
 		}
-
-		// OEM actions predate the other parameters of the standard action, so only the image counts.
-		request := struct {
-			Image string `json:"Image"`
-		}{}
-
-		err := json.NewDecoder(r.Body).Decode(&request)
-		if err != nil {
-			responseErrWithMessage(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if request.Image == "" {
-			responseErrWithMessage(w, http.StatusBadRequest, "virtual media image is required")
-			return
-		}
-
-		s.insertAndRespond(w, r, request.Image)
 	})
+
+	mux.HandleFunc("POST /redfish/v1/Systems/{ComputerSystemId}/VirtualMedia/{VirtualMediaId}/Actions/Oem/"+s.oemInsertAction(), func(w http.ResponseWriter, r *http.Request) {
+		_, ok := s.systemMedia(w, r.PathValue("ComputerSystemId"), r.PathValue("VirtualMediaId"))
+		if ok {
+			s.oemInsertMedia(w, r)
+		}
+	})
+}
+
+// registerSystemMediaRoutes shows the virtual media device below the system, like iDRAC and XCC.
+// The generated routes only cover the manager, so these routes call the same code.
+func (s redfishServer) registerSystemMediaRoutes(mux *http.ServeMux) {
+	const base = "/redfish/v1/Systems/{ComputerSystemId}/VirtualMedia"
+
+	mux.HandleFunc("GET "+base, func(w http.ResponseWriter, r *http.Request) {
+		if !s.validateComputerSystemID(w, r.PathValue("ComputerSystemId")) {
+			return
+		}
+
+		if !s.profile.VirtualMedia.HasLocation(profile.MediaLocationSystems) {
+			responseErr(w, http.StatusNotFound)
+			return
+		}
+
+		s.getVirtualMediaCollection(w, s.systemMediaCollection())
+	})
+
+	// slotHandler calls handle for a request to the device below the system.
+	slotHandler := func(handle func(w http.ResponseWriter, r *http.Request, slot mediaSlot)) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			slot, ok := s.systemMedia(w, r.PathValue("ComputerSystemId"), r.PathValue("VirtualMediaId"))
+			if ok {
+				handle(w, r, slot)
+			}
+		}
+	}
+
+	mux.HandleFunc("GET "+base+"/{VirtualMediaId}", slotHandler(func(w http.ResponseWriter, _ *http.Request, slot mediaSlot) {
+		s.getVirtualMedia(w, slot)
+	}))
+
+	mux.HandleFunc("PATCH "+base+"/{VirtualMediaId}", slotHandler(s.patchVirtualMedia))
+
+	mux.HandleFunc("POST "+base+"/{VirtualMediaId}/Actions/VirtualMedia.InsertMedia", slotHandler(func(w http.ResponseWriter, r *http.Request, _ mediaSlot) {
+		s.insertMediaAction(w, r)
+	}))
+
+	mux.HandleFunc("POST "+base+"/{VirtualMediaId}/Actions/VirtualMedia.EjectMedia", slotHandler(func(w http.ResponseWriter, _ *http.Request, _ mediaSlot) {
+		s.ejectMediaAction(w)
+	}))
+
+	mux.HandleFunc("GET "+base+"/{VirtualMediaId}/InsertMediaActionInfo", slotHandler(func(w http.ResponseWriter, _ *http.Request, slot mediaSlot) {
+		s.insertMediaActionInfo(w, slot)
+	}))
+}
+
+// oemInsertMedia inserts the image of the OEM insert action.
+func (s redfishServer) oemInsertMedia(w http.ResponseWriter, r *http.Request) {
+	// OEM actions predate the other parameters of the standard action, so only the image counts.
+	request := struct {
+		Image string `json:"Image"`
+	}{}
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if request.Image == "" {
+		responseErrWithMessage(w, http.StatusBadRequest, "virtual media image is required")
+		return
+	}
+
+	s.insertAndRespond(w, r, request.Image)
 }
 
 // insertAndRespond inserts the image of an insert action and answers the way the profile asks for.
@@ -497,12 +627,12 @@ func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, 
 			return
 		}
 
-		responseNoContent(w)
+		responseDone(w, s.profile.VirtualMedia.InsertResponse, successMessage())
 
 		return
 	}
 
-	taskID := s.tasks.create(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName), TaskV174TaskStateRunning)
+	taskID := s.tasks.create(s.firstMediaSlot().path(), TaskV174TaskStateRunning)
 
 	// The insert outlives the request, so it stops with the server context.
 	go func() {
@@ -549,10 +679,15 @@ type virtualMediaActions struct {
 }
 
 func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+	slot, ok := s.managerMedia(w, managerID, virtualMediaID)
+	if !ok {
 		return
 	}
 
+	s.patchVirtualMedia(w, r, slot)
+}
+
+func (s redfishServer) patchVirtualMedia(w http.ResponseWriter, r *http.Request, slot mediaSlot) {
 	request := VirtualMediaV170VirtualMedia{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -583,22 +718,18 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 
 	if !*request.Inserted {
 		err = s.ejectVirtualMedia()
-		if err != nil {
-			respondStatusError(w, err)
-			return
-		}
-
-		responseNoContent(w)
-		return
+	} else {
+		err = s.insertVirtualMedia(r.Context(), deref(request.Image))
 	}
 
-	err = s.insertVirtualMedia(r.Context(), deref(request.Image))
 	if err != nil {
 		respondStatusError(w, err)
 		return
 	}
 
-	responseNoContent(w)
+	s.respondPatch(w, r, func(w http.ResponseWriter, _ *http.Request) {
+		s.getVirtualMedia(w, slot)
+	})
 }
 
 // statusError pairs an error with the HTTP status code the
@@ -609,6 +740,9 @@ type statusError struct {
 
 	// messages become @Message.ExtendedInfo of the answer, if set.
 	messages []redfishMessage
+
+	// retryAfter becomes the Retry-After header of the answer, if set.
+	retryAfter time.Duration
 }
 
 func (e *statusError) Error() string {
@@ -628,11 +762,15 @@ func statusErrorf(status int, format string, args ...any) error {
 func respondStatusError(w http.ResponseWriter, err error) {
 	var statusErr *statusError
 	if errors.As(err, &statusErr) {
+		if statusErr.retryAfter > 0 {
+			w.Header().Set("Retry-After", retryAfterSeconds(statusErr.retryAfter))
+		}
+
 		responseRedfishError(w, statusErr.status, statusErr.Error(), statusErr.messages...)
 		return
 	}
 
-	responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+	responseRedfishError(w, http.StatusInternalServerError, err.Error(), redfishMessage{MessageID: "Base.1.18.InternalError", Message: err.Error()})
 }
 
 func (s redfishServer) ejectVirtualMedia() error {
@@ -832,7 +970,8 @@ func (s redfishServer) consumeBootOnce() error {
 }
 
 func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+	_, ok := s.managerMedia(w, managerID, virtualMediaID)
+	if !ok {
 		return
 	}
 
@@ -840,10 +979,15 @@ func (s redfishServer) PutRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 }
 
 func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaEjectMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+	_, ok := s.managerMedia(w, managerID, virtualMediaID)
+	if !ok {
 		return
 	}
 
+	s.ejectMediaAction(w)
+}
+
+func (s redfishServer) ejectMediaAction(w http.ResponseWriter) {
 	if !s.lockMedia(w) {
 		return
 	}
@@ -856,24 +1000,39 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 		return
 	}
 
-	responseNoContent(w)
+	responseDone(w, s.profile.VirtualMedia.InsertResponse, successMessage())
 }
 
 func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDActionsVirtualMediaInsertMedia(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+	_, ok := s.managerMedia(w, managerID, virtualMediaID)
+	if !ok {
 		return
 	}
 
+	s.insertMediaAction(w, r)
+}
+
+func (s redfishServer) insertMediaAction(w http.ResponseWriter, r *http.Request) {
 	// The route is generated, so it answers like an absent one for the other variants.
 	if s.profile.VirtualMedia.Insert != profile.MediaInsertStandard {
 		responseErr(w, http.StatusNotFound)
 		return
 	}
 
-	request := VirtualMediaV170InsertMediaRequestBody{}
-	err := json.NewDecoder(r.Body).Decode(&request)
+	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	request := VirtualMediaV170InsertMediaRequestBody{}
+	err = json.NewDecoder(bytes.NewReader(body)).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if s.refuseInsertParameters(w, body) {
 		return
 	}
 
@@ -888,6 +1047,41 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 	}
 
 	s.insertAndRespond(w, r, request.Image)
+}
+
+// refuseInsertParameters answers the error of the profile, if the request holds a parameter the profile refuses.
+// It names the parameter in the message, the arguments and the related properties, like iDRAC, so a client knows what to drop.
+func (s redfishServer) refuseInsertParameters(w http.ResponseWriter, body []byte) bool {
+	refused := s.profile.VirtualMedia.RefusedParameters
+	if len(refused.Names) == 0 {
+		return false
+	}
+
+	var request map[string]json.RawMessage
+
+	err := json.Unmarshal(body, &request)
+	if err != nil {
+		return false
+	}
+
+	for _, name := range refused.Names {
+		_, ok := request[name]
+		if !ok {
+			continue
+		}
+
+		message := fmt.Sprintf("The action InsertMedia was submitted with the invalid parameter %s.", name)
+		responseRedfishError(w, refused.Error.Status, message, redfishMessage{
+			MessageID:         refused.Error.MessageID,
+			Message:           message,
+			MessageArgs:       []string{"InsertMedia", name},
+			RelatedProperties: []string{"#/" + name},
+		})
+
+		return true
+	}
+
+	return false
 }
 
 // actionInfo and actionInfoParameter mirror the Redfish ActionInfo schema
@@ -916,26 +1110,34 @@ type actionInfoParameter struct {
 // "@Redfish.ActionInfo" annotation. It is not part of the generated
 // ServerInterface, NewHandler registers it directly.
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDInsertMediaActionInfo(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
-	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+	slot, ok := s.managerMedia(w, managerID, virtualMediaID)
+	if !ok {
 		return
 	}
 
+	s.insertMediaActionInfo(w, slot)
+}
+
+func (s redfishServer) insertMediaActionInfo(w http.ResponseWriter, slot mediaSlot) {
 	if s.profile.VirtualMedia.Insert != profile.MediaInsertStandard {
 		responseErr(w, http.StatusNotFound)
 		return
 	}
 
 	response(w, actionInfo{
-		OdataID:   fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s/InsertMediaActionInfo", managerName, virtualMediaName),
+		OdataID:   slot.path() + "/InsertMediaActionInfo",
 		OdataType: "#ActionInfo.v1_5_0.ActionInfo",
 		ID:        "InsertMediaActionInfo",
 		Name:      "Insert Media Action Info",
-		Parameters: []actionInfoParameter{
+		// A refused parameter is unknown to the BMC, so it does not publish it.
+		Parameters: slices.DeleteFunc([]actionInfoParameter{
 			{Name: "Image", Required: true, DataType: "String"},
 			{Name: "TransferProtocolType", Required: false, DataType: "String", AllowableValues: []string{string(HTTP), string(HTTPS)}},
 			{Name: "Inserted", Required: false, DataType: "Boolean"},
 			{Name: "WriteProtected", Required: false, DataType: "Boolean"},
-		},
+		}, func(p actionInfoParameter) bool {
+			return slices.Contains(s.profile.VirtualMedia.RefusedParameters.Names, p.Name)
+		}),
 	})
 }
 
@@ -1077,7 +1279,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 
 	instance, _, err := s.client.GetInstance(computerSystemID)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1095,13 +1297,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 
 	lastResetTime, err := s.lastResetTime(instance)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
 	server, _, err := s.client.GetServer()
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1142,6 +1344,11 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		},
 	}
 
+	var systemVirtualMedia *OdataV4IdRef
+	if s.profile.VirtualMedia.HasLocation(profile.MediaLocationSystems) {
+		systemVirtualMedia = &OdataV4IdRef{OdataID: ref(s.systemMediaCollection())}
+	}
+
 	response(w, computerSystemGetResponse{Boot: boot, Actions: actions, ComputerSystemV1290ComputerSystem: ComputerSystemV1290ComputerSystem{
 		OdataID:   ref(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName)),
 		OdataType: ref("#ComputerSystem.v1_29_0.ComputerSystem"),
@@ -1177,10 +1384,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		SerialNumber:   ref(s.instanceName),
 		TrustedModules: trustedModules,
 		UUID:           instanceUUID(instance),
-		// TODO: add virtual media for system
-		// VirtualMedia: &OdataV4IdRef{
-		// 	OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/VirtualMedia", s.instanceName)),
-		// },
+		VirtualMedia:   systemVirtualMedia,
 	}})
 }
 
@@ -1291,14 +1495,18 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 		return
 	}
 
+	getSystem := func(w http.ResponseWriter, r *http.Request) {
+		s.GetRedfishV1SystemsComputerSystemID(w, r, computerSystemID)
+	}
+
 	if request.Boot == nil || (request.Boot.BootSourceOverrideEnabled == nil && request.Boot.BootSourceOverrideTarget == nil) {
-		responseNoContent(w)
+		s.respondPatch(w, r, getSystem)
 		return
 	}
 
 	instance, _, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1339,7 +1547,7 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemID(w http.ResponseWrit
 		return
 	}
 
-	responseNoContent(w)
+	s.respondPatch(w, r, getSystem)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemID(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -1413,14 +1621,29 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		return
 	}
 
-	if s.profile.Power.Response != profile.PowerResponseTask {
+	// Like on real BMCs, the refusal is synchronous, also with a task answer.
+	refused, err := s.refuseRedundantReset(noopStatus)
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	if refused != nil {
+		message := fmt.Sprintf("the system is %s already", strings.ToLower(noopStatus))
+		responseRedfishError(w, refused.Status, message, redfishMessage{MessageID: refused.MessageID, Message: message})
+
+		return
+	}
+
+	// Without a delay, the reset runs in the request, so the client learns about a failure.
+	if s.profile.Power.Response != profile.PowerResponseTask && s.resetDelay(action) <= 0 {
 		err = s.reset(r.Context(), action, force, noopStatus)
 		if err != nil {
 			respondStatusError(w, err)
 			return
 		}
 
-		responseNoContent(w)
+		responseDone(w, s.profile.Power.Response, successMessage())
 
 		return
 	}
@@ -1428,6 +1651,23 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	if !s.resetMu.TryLock() {
 		message := "a reset is in progress"
 		responseRedfishError(w, http.StatusConflict, message, redfishMessage{MessageID: baseRegistry + "ResourceInUse", Message: message})
+
+		return
+	}
+
+	if s.profile.Power.Response != profile.PowerResponseTask {
+		// Like a real BMC, the answer comes at once and the power state changes after the delay.
+		// So a client that polls right after the answer still sees the old power state.
+		go func() {
+			defer s.resetMu.Unlock()
+
+			err := s.reset(s.ctx, action, force, noopStatus)
+			if err != nil {
+				log.Printf("reset of instance %q failed after the answer: %v", s.instanceName, err)
+			}
+		}()
+
+		responseDone(w, s.profile.Power.Response, successMessage())
 
 		return
 	}
@@ -1450,9 +1690,48 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	responseAccepted(w, taskMonitorPath(taskID))
 }
 
+// refuseRedundantReset returns the error shape of the profile, if the instance is in noopStatus already.
+// It returns nil, if the profile accepts the reset.
+func (s redfishServer) refuseRedundantReset(noopStatus string) (*profile.ErrorShape, error) {
+	var shape *profile.ErrorShape
+
+	switch noopStatus {
+	case "Stopped":
+		shape = s.profile.Power.RedundantResetErrors.Off
+
+	case "Running":
+		shape = s.profile.Power.RedundantResetErrors.On
+	}
+
+	if shape == nil {
+		return nil, nil
+	}
+
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return nil, err
+	}
+
+	if instance.Status != noopStatus {
+		return nil, nil
+	}
+
+	return shape, nil
+}
+
+// resetDelay returns the scaled delay of the profile for the Incus action of a reset.
+// A restart first turns the system off, so it waits the delay of off.
+func (s redfishServer) resetDelay(action string) time.Duration {
+	if action == "start" {
+		return s.profile.Scaled(s.profile.Power.Delay.On)
+	}
+
+	return s.profile.Scaled(s.profile.Power.Delay.Off)
+}
+
 // reset waits the delay of the profile and changes the power state, unless the instance is in noopStatus already.
 func (s redfishServer) reset(ctx context.Context, action string, force bool, noopStatus string) error {
-	err := s.wait(ctx, s.profile.Scaled(s.profile.Power.Delay))
+	err := s.wait(ctx, s.resetDelay(action))
 	if err != nil {
 		return err
 	}
@@ -1460,7 +1739,7 @@ func (s redfishServer) reset(ctx context.Context, action string, force bool, noo
 	s.powerMu.Lock()
 	defer s.powerMu.Unlock()
 
-	applyOnReset := s.profile.BIOS.Pending || !s.profile.SecureBoot.EnableRequiresPowerOff
+	applyOnReset := s.profile.BIOS.Pending || !s.profile.SecureBoot.EnableRequiresPowerOff || s.profile.SecureBoot.ResetKeys.Applies == profile.ResetKeysAppliesOnReset
 
 	if noopStatus != "" || applyOnReset {
 		instance, _, err := s.client.GetInstance(s.instanceName)
@@ -1487,6 +1766,13 @@ func (s redfishServer) reset(ctx context.Context, action string, force bool, noo
 	}
 
 	s.resets.poweredOn(s.now())
+	s.openUnreachable(s.now())
+
+	// The power state changed already. An error would make the client reset again.
+	err = s.startPowerCycle()
+	if err != nil {
+		log.Printf("power cycle of instance %q after a secure boot change: %v", s.instanceName, err)
+	}
 
 	if !s.profile.VirtualMedia.BootOverrideOnce {
 		return nil
@@ -1529,7 +1815,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 
 	instance, _, err := s.client.GetInstance(computerSystemID)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1707,13 +1993,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBiosSettings(w http.Re
 
 	instance, _, err := s.client.GetInstance(computerSystemID)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
 	staged, err := s.bios.pending(instance)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1759,7 +2045,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessors(w http.Resp
 
 	instance, _, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1805,7 +2091,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID(
 	// Incus does not report the vCPU vendor, so use the host CPU instead.
 	socket, err := s.serverCPUSocket(instance)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1874,7 +2160,7 @@ func (s redfishServer) validateProcessorID(w http.ResponseWriter, computerSystem
 
 	instance, _, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return nil, false
 	}
 
@@ -1895,7 +2181,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 
 	instance, _, err := s.client.GetInstance(computerSystemID)
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1981,16 +2267,22 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.Re
 		return
 	}
 
+	getSecureBoot := func(w http.ResponseWriter, r *http.Request) {
+		s.GetRedfishV1SystemsComputerSystemIDSecureBoot(w, r, computerSystemID)
+	}
+
 	// The remaining properties of the resource are read only.
 	if request.SecureBootEnable == nil {
-		responseNoContent(w)
+		s.respondPatch(w, r, getSecureBoot)
 		return
 	}
 
 	enable := strconv.FormatBool(*request.SecureBootEnable)
 
+	var running bool
+
 	err = s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
-		running := instance.Status != "Stopped"
+		running = instance.Status != "Stopped"
 		if running && s.profile.SecureBoot.EnableRequiresPowerOff {
 			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
 		}
@@ -2005,6 +2297,7 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.Re
 			return true, nil
 		}
 
+		s.markSecureBootEnable(instance, put, enable)
 		put.Config["security.secureboot"] = enable
 		delete(put.Config, secureBootEnableKey)
 
@@ -2015,7 +2308,12 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.Re
 		return
 	}
 
-	responseNoContent(w)
+	if running {
+		s.respondPatch(w, r, getSecureBoot, s.resetRequiredMessage())
+		return
+	}
+
+	s.respondPatch(w, r, getSecureBoot)
 }
 
 func (s redfishServer) PutRedfishV1SystemsComputerSystemIDSecureBoot(w http.ResponseWriter, r *http.Request, computerSystemID string) {
@@ -2082,6 +2380,16 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 	if err != nil {
 		respondNVRAMError(w, err)
 		return
+	}
+
+	empty, err := s.databasesEmpty()
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	if empty {
+		lists = nil
 	}
 
 	certificates, err := s.signatureRefs(db, lists, true)
@@ -2167,6 +2475,11 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootD
 		return
 	}
 
+	if s.profile.SecureBoot.DatabaseAddResponse == profile.DatabaseAddResponseNoContent {
+		responseNoContent(w)
+		return
+	}
+
 	location := fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Certificates/%s", s.instanceName, db.id, certificateID)
 
 	responseCreated(w, location, s.certificateResource(db, signatureRef{id: certificateID, entry: signatureEntry{Owner: owner, Data: der}}))
@@ -2192,7 +2505,7 @@ func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBoo
 		return
 	}
 
-	responseNoContent(w)
+	responseDone(w, s.profile.SecureBoot.DatabaseDeleteResponse, s.resetRequiredMessage())
 }
 
 func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificatesCertificateID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, certificateID string) {
@@ -2330,6 +2643,16 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 		return
 	}
 
+	empty, err := s.databasesEmpty()
+	if err != nil {
+		respondStatusError(w, err)
+		return
+	}
+
+	if empty {
+		lists = nil
+	}
+
 	signatures, err := s.signatureRefs(db, lists, false)
 	if err != nil {
 		respondNVRAMError(w, err)
@@ -2421,6 +2744,11 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootD
 		return
 	}
 
+	if s.profile.SecureBoot.DatabaseAddResponse == profile.DatabaseAddResponseNoContent {
+		responseNoContent(w)
+		return
+	}
+
 	location := fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases/%s/Signatures/%s", s.instanceName, db.id, signatureID)
 
 	responseCreated(w, location, s.signatureResource(db, signatureRef{
@@ -2481,7 +2809,7 @@ func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBoo
 		return
 	}
 
-	responseNoContent(w)
+	responseDone(w, s.profile.SecureBoot.DatabaseDeleteResponse, s.resetRequiredMessage())
 }
 
 // signatureResource builds the Redfish representation of a non certificate signature entry.

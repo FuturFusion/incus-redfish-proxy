@@ -11,6 +11,7 @@ import (
 	"net/http/httptest"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -66,8 +67,11 @@ var conformanceScenarios = []conformanceScenario{
 	{name: "virtual-media-insert-oem", applies: mediaInsert(profile.MediaInsertOEM), run: conformanceVirtualMediaInsert(http.MethodPost, oemInsertTarget, actionInsertBody)},
 	{name: "virtual-media-insert-patch", applies: mediaInsert(profile.MediaInsertPatch), run: conformanceVirtualMediaInsert(http.MethodPatch, patchInsertTarget, patchInsertBody)},
 	{name: "virtual-media-hidden-paths", applies: not(mediaInsert(profile.MediaInsertStandard)), run: conformanceVirtualMediaHiddenPaths},
-	{name: "secure-boot-reset-keys", applies: resetKeysSupported, run: conformanceSecureBootResetKeys},
+	{name: "secure-boot-database-answers", applies: databaseWritable, run: conformanceSecureBootDatabaseAnswers},
+	{name: "secure-boot-reset-keys", applies: allOf(resetKeysSupported, resetKeysApplies(profile.ResetKeysAppliesImmediately)), run: conformanceSecureBootResetKeys},
+	{name: "secure-boot-reset-keys-on-reset", applies: resetKeysApplies(profile.ResetKeysAppliesOnReset), run: conformanceSecureBootResetKeysOnReset},
 	{name: "secure-boot-reset-keys-absent", applies: not(resetKeysSupported), run: conformanceSecureBootResetKeysAbsent},
+	{name: "ok-answers", applies: not(powerResponse(profile.PowerResponseTask)), run: conformanceOKAnswers},
 	{name: "power-reset-types", applies: always, run: conformancePowerResetTypes},
 	{name: "power-reset-type-refused", applies: hasUnlistedResetType, run: conformancePowerResetTypeRefused},
 	{name: "power-settle", applies: func(p profile.Profile) bool { return p.Power.NotSettledWindow > 0 }, run: conformancePowerSettle},
@@ -134,6 +138,14 @@ func unlistedResetType(p profile.Profile) (profile.ResetType, bool) {
 
 func resetKeysSupported(p profile.Profile) bool {
 	return p.SecureBoot.ResetKeys.Supported
+}
+
+func resetKeysApplies(applies profile.ResetKeysApplies) func(profile.Profile) bool {
+	return func(p profile.Profile) bool { return p.SecureBoot.ResetKeys.Applies == applies }
+}
+
+func powerResponse(response profile.PowerResponse) func(profile.Profile) bool {
+	return func(p profile.Profile) bool { return p.Power.Response == response }
 }
 
 func always(profile.Profile) bool {
@@ -211,6 +223,21 @@ func TestProfileConformance(t *testing.T) {
 	for _, p := range conformanceProfiles(t) {
 		t.Run(p.Name, func(t *testing.T) {
 			t.Parallel()
+
+			// The scenarios read the system right after a power on. TestProfileConformanceBusyReads covers the refused reads.
+			p.Power.BusyReads = profile.BusyReads{}
+
+			// The scenarios expect the new power state right after the reset. TestRedfishServer_DelayedReset covers the delay.
+			p.Power.Delay = profile.PowerDelay{}
+
+			// The scenarios expect no power change after the reset. TestRedfishServer_SecureBootPowerCycle covers the power cycle.
+			p.SecureBoot.PowerCycle = profile.PowerCycle{After: []profile.PowerCycleTrigger{}}
+
+			// The scenarios read the key databases back after a power on. TestRedfishServer_EmptyDatabasesAfterPowerOn covers the empty reads.
+			p.SecureBoot.EmptyAfterPowerOn = profile.EmptyAfterPowerOn{}
+
+			// The scenarios read right after the power on that follows a key reset. TestRedfishServer_Unreachable covers the window.
+			p.SecureBoot.ResetKeys.Unreachable = profile.Unreachable{}
 
 			for _, scenario := range applicableScenarios(p) {
 				t.Run(scenario.name, func(t *testing.T) {
@@ -559,7 +586,47 @@ func conformanceSecureBootWrite(t *testing.T, p profile.Profile) {
 
 	resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates", map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
 
-	require.Equal(t, http.StatusCreated, answerOf(t, resp, err).status, "a writable database accepts a certificate")
+	require.Equal(t, databaseAddStatus(t, p), answerOf(t, resp, err).status, "a writable database accepts a certificate")
+}
+
+// databaseAddStatus returns the status of secure_boot.database_add_response, which is a plain status.
+func databaseAddStatus(t *testing.T, p profile.Profile) int {
+	t.Helper()
+
+	status, err := strconv.Atoi(string(p.SecureBoot.DatabaseAddResponse))
+	require.NoError(t, err, "secure_boot.database_add_response is a status")
+
+	return status
+}
+
+func conformanceSecureBootDatabaseAnswers(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	const certificates = "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates"
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	_, certificate := testCertificate(t, "conformance")
+
+	resp, err := client.Post(certificates, map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
+	added := answerOf(t, resp, err)
+
+	require.Equal(t, databaseAddStatus(t, p), added.status, "status of secure_boot.database_add_response")
+	require.Equal(t, p.SecureBoot.DatabaseAddResponse == profile.DatabaseAddResponseCreated, added.location != "", "only a 201 answer has a location")
+
+	// A client without the location learns the ID from the collection.
+	listed, err := schemas.ListReferencedCertificates(client, certificates)
+	require.NoError(t, err, "list the certificates")
+	require.Len(t, listed, 1, "the collection lists the new certificate")
+
+	// gofish drops the body of a DELETE answer, so the raw request keeps it.
+	resp, err = client.RunRawRequestWithHeaders(http.MethodDelete, listed[0].ODataID, nil, "", nil)
+
+	require.Equal(t, wantDoneAnswer(p.SecureBoot.DatabaseDeleteResponse, "Base.1.18.ResetRequired"), doneAnswerOf(t, resp, err), "answer of secure_boot.database_delete_response")
+
+	listed, err = schemas.ListReferencedCertificates(client, certificates)
+	require.NoError(t, err, "list the certificates")
+	require.Empty(t, listed, "the delete removes the certificate")
 }
 
 func conformanceSecureBootWriteRefused(t *testing.T, p profile.Profile) {
@@ -595,6 +662,37 @@ func conformanceSecureBootResetKeys(t *testing.T, p profile.Profile) {
 	require.NoError(t, err, "reset the keys")
 
 	require.Equal(t, schemas.SetupModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode, "the reset puts the firmware into setup mode")
+}
+
+func conformanceSecureBootResetKeysOnReset(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	incusClient := fakeIncus(incusapi.Instance{Status: "Running"})
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", uefi.EfiGlobalVariableGuid, "PK", incusapi.InstanceNVRAMVariablePut{}, "")
+	require.NoError(t, err, "enroll the platform key")
+
+	// Firmware stores the request, so it is accepted on a running system.
+	_, err = getSecureBoot(t, client).ResetKeys(schemas.ResetKeysType(p.SecureBoot.ResetKeys.Types[0]))
+	require.NoError(t, err, "reset the keys")
+	require.Equal(t, schemas.UserModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode, "the keys stay until the next reset")
+
+	resetSystem(t, client, profile.ResetTypeForceOff)
+	require.Equal(t, schemas.UserModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode, "a power off keeps the keys")
+
+	resetSystem(t, client, profile.ResetTypeOn)
+	require.Equal(t, schemas.SetupModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode, "the power on deletes the keys")
+}
+
+func conformanceOKAnswers(t *testing.T, p profile.Profile) {
+	t.Helper()
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	resp, err := client.Post(systemPath+"/Actions/ComputerSystem.Reset", map[string]any{"ResetType": profile.ResetTypeOn})
+
+	require.Equal(t, wantDoneAnswer(p.Power.Response, "Base.1.18.Success"), doneAnswerOf(t, resp, err), "answer of power.response")
 }
 
 func conformanceSecureBootResetKeysAbsent(t *testing.T, p profile.Profile) {
@@ -956,6 +1054,52 @@ func conformancePowerResetTypeRefused(t *testing.T, p profile.Profile) {
 	require.Equal(t, "Base.1.18.ActionParameterValueNotInList", answer.messageID, "message of a refused reset type")
 	require.Equal(t, []string{"#/ResetType"}, answer.relatedProperties, "the message names the reset type")
 	require.Empty(t, incusClient.UpdateInstanceStateCalls(), "a refused reset type leaves the instance")
+}
+
+func TestProfileConformanceBusyReads(t *testing.T) {
+	t.Parallel()
+
+	profiles := slices.DeleteFunc(conformanceProfiles(t), func(p profile.Profile) bool { return !p.Power.BusyReads.Enabled() })
+	require.NotEmpty(t, profiles, "a profile refuses reads")
+
+	paths := map[profile.BusyResource]string{
+		profile.BusyResourceSystem:     systemPath,
+		profile.BusyResourceBios:       systemPath + "/Bios",
+		profile.BusyResourceSecureBoot: systemPath + "/SecureBoot",
+	}
+
+	for _, p := range profiles {
+		t.Run(p.Name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p.Power.Delay = profile.PowerDelay{}
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+			resetSystem(t, client, profile.ResetTypeOn)
+
+			want := make([]redfishAnswer, 0, len(p.Power.BusyReads.Resources)*(p.Power.BusyReads.Failures+1))
+			got := make([]redfishAnswer, 0, cap(want))
+
+			// Run test
+			for _, resource := range p.Power.BusyReads.Resources {
+				for range p.Power.BusyReads.Failures {
+					resp, err := client.Get(paths[resource])
+
+					got = append(got, answerOf(t, resp, err))
+					want = append(want, redfishAnswer{status: p.Power.BusyReads.Error.Status, messageID: p.Power.BusyReads.Error.MessageID})
+				}
+
+				resp, err := client.Get(paths[resource])
+
+				got = append(got, answerOf(t, resp, err))
+				want = append(want, redfishAnswer{status: http.StatusOK})
+			}
+
+			// Assert
+			require.Equal(t, want, got, "the first reads of each resource after the power on are refused")
+		})
+	}
 }
 
 func conformancePowerSettle(t *testing.T, p profile.Profile) {

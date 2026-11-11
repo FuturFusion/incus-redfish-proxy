@@ -41,13 +41,23 @@ func (s redfishServer) settle(next http.Handler) http.Handler {
 
 // settleRemaining returns how long the running instance still refuses writes, not more than the window.
 func (s redfishServer) settleRemaining(window time.Duration) (time.Duration, error) {
-	state, _, err := s.client.GetInstanceState(s.instanceName)
-	if err != nil {
+	poweredOn, running, err := s.poweredOnAt()
+	if err != nil || !running {
 		return 0, err
 	}
 
+	return min(window-s.now().Sub(poweredOn), window), nil
+}
+
+// poweredOnAt returns the last power on of the instance. It reports false for an instance that does not run.
+func (s redfishServer) poweredOnAt() (time.Time, bool, error) {
+	state, _, err := s.client.GetInstanceState(s.instanceName)
+	if err != nil {
+		return time.Time{}, false, err
+	}
+
 	if state.Status != "Running" {
-		return 0, nil
+		return time.Time{}, false, nil
 	}
 
 	// The tracker knows about in place restarts, which leave StartedAt unchanged.
@@ -57,5 +67,5 @@ func (s redfishServer) settleRemaining(window time.Duration) (time.Duration, err
 		poweredOn = lastPowerOn
 	}
 
-	return min(window-s.now().Sub(poweredOn), window), nil
+	return poweredOn, true, nil
 }

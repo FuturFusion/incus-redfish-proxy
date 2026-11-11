@@ -4486,3 +4486,472 @@ func setup(t *testing.T, client api.IncusClient, opts ...api.Option) *gofish.API
 
 	return c
 }
+
+func TestRedfishServer_RedundantReset(t *testing.T) {
+	t.Parallel()
+
+	off := &profile.ErrorShape{Status: http.StatusConflict, MessageID: "IDRAC.2.8.PSU502"}
+	on := &profile.ErrorShape{Status: http.StatusConflict, MessageID: "IDRAC.2.8.PSU501"}
+
+	tests := []struct {
+		name      string
+		status    string
+		resetType string
+		errors    profile.RedundantResetErrors
+		response  profile.PowerResponse
+
+		wantStatus    int
+		wantMessageID string
+		wantUpdates   int
+	}{
+		{
+			name:      "refused - ForceOff while off",
+			status:    "Stopped",
+			resetType: "ForceOff",
+			errors:    profile.RedundantResetErrors{Off: off},
+			response:  profile.PowerResponseNoContent,
+
+			wantStatus:    http.StatusConflict,
+			wantMessageID: "IDRAC.2.8.PSU502",
+		},
+		{
+			name:      "refused - GracefulShutdown while off",
+			status:    "Stopped",
+			resetType: "GracefulShutdown",
+			errors:    profile.RedundantResetErrors{Off: off},
+			response:  profile.PowerResponseNoContent,
+
+			wantStatus:    http.StatusConflict,
+			wantMessageID: "IDRAC.2.8.PSU502",
+		},
+		{
+			name:      "refused - On while on, synchronous with a task answer",
+			status:    "Running",
+			resetType: "On",
+			errors:    profile.RedundantResetErrors{On: on},
+			response:  profile.PowerResponseTask,
+
+			wantStatus:    http.StatusConflict,
+			wantMessageID: "IDRAC.2.8.PSU501",
+		},
+		{
+			name:      "accepted - On while on without an error for it",
+			status:    "Running",
+			resetType: "On",
+			errors:    profile.RedundantResetErrors{Off: off},
+			response:  profile.PowerResponseNoContent,
+
+			wantStatus: http.StatusNoContent,
+		},
+		{
+			name:      "accepted - ForceOff while on",
+			status:    "Running",
+			resetType: "ForceOff",
+			errors:    profile.RedundantResetErrors{Off: off},
+			response:  profile.PowerResponseNoContent,
+
+			wantStatus:  http.StatusNoContent,
+			wantUpdates: 1,
+		},
+		{
+			name:      "accepted - ForceRestart never is redundant",
+			status:    "Running",
+			resetType: "ForceRestart",
+			errors:    profile.RedundantResetErrors{Off: off, On: on},
+			response:  profile.PowerResponseNoContent,
+
+			wantStatus:  http.StatusNoContent,
+			wantUpdates: 1,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p := profile.Default()
+			p.Power.RedundantResetErrors = tc.errors
+			p.Power.Response = tc.response
+
+			incusClient := fakeIncus(incusapi.Instance{Status: tc.status})
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			// Run test
+			resp, err := client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": tc.resetType})
+			answer := answerOf(t, resp, err)
+
+			// Assert
+			require.Equal(t, tc.wantStatus, answer.status, "status of the reset")
+			require.Equal(t, tc.wantMessageID, answer.messageID, "message ID of the refusal")
+			require.Len(t, incusClient.UpdateInstanceStateCalls(), tc.wantUpdates, "changes of the power state")
+		})
+	}
+}
+
+func TestRedfishServer_DelayedReset(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name  string
+		delay profile.PowerDelay
+
+		wantStatusAfterAnswer string
+		wantSecondReset       int
+	}{
+		{
+			name:  "delay - the answer comes before the power state changes",
+			delay: profile.PowerDelay{On: 200 * time.Millisecond},
+
+			wantStatusAfterAnswer: "Stopped",
+			wantSecondReset:       http.StatusConflict,
+		},
+		{
+			name:  "no delay - the reset runs in the request",
+			delay: profile.PowerDelay{Off: time.Hour},
+
+			wantStatusAfterAnswer: "Running",
+			wantSecondReset:       http.StatusNoContent,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p := profile.Default()
+			p.Power.Delay = tc.delay
+
+			incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			const target = "/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset"
+
+			// Run test
+			resp, err := client.Post(target, map[string]any{"ResetType": "On"})
+			first := answerOf(t, resp, err)
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			statusAfterAnswer := instance.Status
+
+			resp, err = client.Post(target, map[string]any{"ResetType": "On"})
+			second := answerOf(t, resp, err)
+
+			// Assert
+			require.Equal(t, http.StatusNoContent, first.status, "the reset is accepted")
+			require.Equal(t, tc.wantStatusAfterAnswer, statusAfterAnswer, "the power state right after the answer")
+			require.Equal(t, tc.wantSecondReset, second.status, "a second reset waits for the delayed one")
+			require.Eventually(t, func() bool {
+				instance, _, err := incusClient.GetInstance("test-instance")
+
+				return err == nil && instance.Status == "Running"
+			}, 5*time.Second, 10*time.Millisecond, "the instance runs after the delay")
+		})
+	}
+}
+
+func TestRedfishServer_RefusedInsertParameters(t *testing.T) {
+	t.Parallel()
+
+	const target = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia"
+
+	tests := []struct {
+		name  string
+		names []string
+		body  map[string]any
+
+		wantAnswer redfishAnswer
+	}{
+		{
+			name:  "refused - MediaType",
+			names: []string{"MediaType"},
+			body:  map[string]any{"Image": "https://images.example/boot.iso", "MediaType": "CD"},
+
+			wantAnswer: redfishAnswer{status: http.StatusBadRequest, messageID: "Base.1.12.ActionParameterUnknown", relatedProperties: []string{"#/MediaType"}},
+		},
+		{
+			name:  "passed - without MediaType the request reaches the next check",
+			names: []string{"MediaType"},
+			body:  map[string]any{"Image": ""},
+
+			wantAnswer: redfishAnswer{status: http.StatusBadRequest},
+		},
+		{
+			name:  "passed - no refused parameters",
+			names: []string{},
+			body:  map[string]any{"Image": "", "MediaType": "CD"},
+
+			wantAnswer: redfishAnswer{status: http.StatusBadRequest},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p := profile.Default()
+			p.VirtualMedia.RefusedParameters = profile.RefusedParameters{
+				Names: tc.names,
+				Error: profile.ErrorShape{Status: http.StatusBadRequest, MessageID: "Base.1.12.ActionParameterUnknown"},
+			}
+
+			incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			// Run test
+			resp, err := client.Post(target, tc.body)
+			answer := answerOf(t, resp, err)
+
+			// Assert
+			require.Equal(t, tc.wantAnswer, answer, "the answer to the insert")
+			require.Empty(t, incusClient.UpdateInstanceCalls(), "a refused insert leaves the instance")
+		})
+	}
+}
+
+func TestRedfishServer_InsertMediaActionInfoWithoutRefusedParameters(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p := profile.Default()
+	p.VirtualMedia.RefusedParameters.Names = []string{"WriteProtected"}
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	// Run test
+	resp, err := client.Get("/redfish/v1/Managers/bmc1/VirtualMedia/CD/InsertMediaActionInfo")
+	require.NoError(t, err, "read the action info")
+
+	defer resp.Body.Close()
+
+	var info struct {
+		Parameters []struct {
+			Name string `json:"Name"`
+		} `json:"Parameters"`
+	}
+
+	err = json.NewDecoder(resp.Body).Decode(&info)
+	require.NoError(t, err, "decode the action info")
+
+	names := make([]string, 0, len(info.Parameters))
+	for _, parameter := range info.Parameters {
+		names = append(names, parameter.Name)
+	}
+
+	// Assert
+	require.Equal(t, []string{"Image", "TransferProtocolType", "Inserted"}, names, "a refused parameter is not published")
+}
+
+func TestRedfishServer_VirtualMediaLocations(t *testing.T) {
+	t.Parallel()
+
+	const (
+		system  = "/redfish/v1/Systems/test-instance"
+		manager = "/redfish/v1/Managers/bmc1"
+	)
+
+	tests := []struct {
+		name      string
+		locations []profile.MediaLocation
+		id        string
+
+		wantSystemLink  string
+		wantManagerLink string
+		wantStatuses    map[string]int
+	}{
+		{
+			name:      "managers only, as before profiles existed",
+			locations: []profile.MediaLocation{profile.MediaLocationManagers},
+			id:        "CD",
+
+			wantManagerLink: manager + "/VirtualMedia",
+			wantStatuses: map[string]int{
+				system + "/VirtualMedia":     http.StatusNotFound,
+				system + "/VirtualMedia/CD":  http.StatusNotFound,
+				manager + "/VirtualMedia":    http.StatusOK,
+				manager + "/VirtualMedia/CD": http.StatusOK,
+			},
+		},
+		{
+			name:      "systems only",
+			locations: []profile.MediaLocation{profile.MediaLocationSystems},
+			id:        "1",
+
+			wantSystemLink: system + "/VirtualMedia",
+			wantStatuses: map[string]int{
+				system + "/VirtualMedia":                          http.StatusOK,
+				system + "/VirtualMedia/1":                        http.StatusOK,
+				system + "/VirtualMedia/1/InsertMediaActionInfo":  http.StatusOK,
+				system + "/VirtualMedia/CD":                       http.StatusNotFound,
+				"/redfish/v1/Systems/other/VirtualMedia":          http.StatusNotFound,
+				manager + "/VirtualMedia":                         http.StatusNotFound,
+				manager + "/VirtualMedia/1":                       http.StatusNotFound,
+				manager + "/VirtualMedia/1/InsertMediaActionInfo": http.StatusNotFound,
+			},
+		},
+		{
+			name:      "both like XCC",
+			locations: []profile.MediaLocation{profile.MediaLocationSystems, profile.MediaLocationManagers},
+			id:        "EXT1",
+
+			wantSystemLink:  system + "/VirtualMedia",
+			wantManagerLink: manager + "/VirtualMedia",
+			wantStatuses: map[string]int{
+				system + "/VirtualMedia/EXT1":  http.StatusOK,
+				manager + "/VirtualMedia/EXT1": http.StatusOK,
+				manager + "/VirtualMedia/CD":   http.StatusNotFound,
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p := profile.Default()
+			p.VirtualMedia.Locations = tc.locations
+			p.VirtualMedia.ID = tc.id
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			// Run test
+			var links struct {
+				VirtualMedia struct {
+					OdataID string `json:"@odata.id"`
+				} `json:"VirtualMedia"`
+			}
+
+			systemLink := readJSON(t, client, system, &links).VirtualMedia.OdataID
+			managerLink := readJSON(t, client, manager, &links).VirtualMedia.OdataID
+
+			statuses := map[string]int{}
+			for path := range tc.wantStatuses {
+				resp, err := client.Get(path)
+				statuses[path] = answerOf(t, resp, err).status
+			}
+
+			// Assert
+			require.Equal(t, tc.wantSystemLink, systemLink, "the system links its virtual media")
+			require.Equal(t, tc.wantManagerLink, managerLink, "the manager links its virtual media")
+			require.Equal(t, tc.wantStatuses, statuses, "only the locations of the profile show the device")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaBothLocations(t *testing.T) {
+	t.Parallel()
+
+	const (
+		systemMedia  = "/redfish/v1/Systems/test-instance/VirtualMedia/EXT1"
+		managerMedia = "/redfish/v1/Managers/bmc1/VirtualMedia/EXT1"
+	)
+
+	// Setup
+	image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("image"))
+	}))
+	t.Cleanup(image.Close)
+
+	p := profile.Default()
+	p.VirtualMedia.Locations = []profile.MediaLocation{profile.MediaLocationSystems, profile.MediaLocationManagers}
+	p.VirtualMedia.ID = "EXT1"
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+	var resource struct {
+		OdataID  string `json:"@odata.id"`
+		Inserted bool   `json:"Inserted"`
+		Actions  struct {
+			InsertMedia struct {
+				Target string `json:"target"`
+			} `json:"#VirtualMedia.InsertMedia"`
+		} `json:"Actions"`
+	}
+
+	// Run test
+	resp, err := client.Post(systemMedia+"/Actions/VirtualMedia.InsertMedia", map[string]any{"Image": image.URL})
+	inserted := answerOf(t, resp, err)
+
+	managerAfterInsert := *readJSON(t, client, managerMedia, &resource)
+
+	resp, err = client.Post(managerMedia+"/Actions/VirtualMedia.EjectMedia", map[string]any{})
+	ejected := answerOf(t, resp, err)
+
+	systemAfterEject := *readJSON(t, client, systemMedia, &resource)
+
+	// Assert
+	require.Equal(t, http.StatusNoContent, inserted.status, "insert through the system")
+	require.True(t, managerAfterInsert.Inserted, "the manager shows the inserted media")
+	require.Equal(t, managerMedia, managerAfterInsert.OdataID, "the resource names its own location")
+	require.Equal(t, managerMedia+"/Actions/VirtualMedia.InsertMedia", managerAfterInsert.Actions.InsertMedia.Target, "the actions belong to the location")
+	require.Equal(t, http.StatusNoContent, ejected.status, "eject through the manager, like Operations Center on XCC")
+	require.False(t, systemAfterEject.Inserted, "the system shows the ejected media")
+}
+
+// readJSON decodes the resource at the path into v and returns v.
+func readJSON[T any](t *testing.T, client *gofish.APIClient, path string, v *T) *T {
+	t.Helper()
+
+	resp, err := client.Get(path)
+	require.NoError(t, err, "read %s", path)
+
+	defer resp.Body.Close()
+
+	*v = *new(T)
+
+	err = json.NewDecoder(resp.Body).Decode(v)
+	require.NoError(t, err, "decode %s", path)
+
+	return v
+}
+
+func TestRedfishServer_OEMInsertBelowSystem(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		path string
+		body string
+
+		wantStatus int
+	}{
+		{name: "success", path: "/redfish/v1/Systems/test-instance/VirtualMedia/1", body: `{"Image": "%s"}`, wantStatus: http.StatusNoContent},
+		{name: "error - no image", path: "/redfish/v1/Systems/test-instance/VirtualMedia/1", body: `{}`, wantStatus: http.StatusBadRequest},
+		{name: "error - invalid JSON", path: "/redfish/v1/Systems/test-instance/VirtualMedia/1", body: `{`, wantStatus: http.StatusBadRequest},
+		{name: "error - manager does not show the device", path: "/redfish/v1/Managers/bmc1/VirtualMedia/1", body: `{"Image": "%s"}`, wantStatus: http.StatusNotFound},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("image"))
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.Insert = profile.MediaInsertOEM
+			p.VirtualMedia.OEMVendor = "Test"
+			p.VirtualMedia.Locations = []profile.MediaLocation{profile.MediaLocationSystems}
+			p.VirtualMedia.ID = "1"
+
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}}), api.WithProfile(p))
+
+			body := strings.ReplaceAll(tc.body, "%s", image.URL)
+
+			// Run test
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPost, tc.path+"/Actions/Oem/TestVirtualMedia.InsertVirtualMedia", strings.NewReader(body), "application/json", nil)
+			answer := answerOf(t, resp, err)
+
+			// Assert
+			require.Equal(t, tc.wantStatus, answer.status, "the answer to the OEM insert")
+		})
+	}
+}

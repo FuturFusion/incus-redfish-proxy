@@ -15,7 +15,7 @@ func (s redfishServer) overlay(next http.Handler) http.Handler {
 		return next
 	}
 
-	placeholders := strings.NewReplacer("{system}", s.instanceName, "{manager}", managerName, "{media}", virtualMediaName)
+	placeholders := strings.NewReplacer("{system}", s.instanceName, "{manager}", managerName, "{media}", s.profile.VirtualMedia.ID)
 
 	patches := make(map[string]map[string]any, len(s.profile.Overlay))
 	for path, patch := range s.profile.Overlay {

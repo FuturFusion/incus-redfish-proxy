@@ -325,3 +325,36 @@ func TestRedfishServer_resetBootOnceFailure(t *testing.T) {
 	require.Equal(t, []string{"start"}, client.actions, "the reset starts the instance")
 	require.Equal(t, ComputerSystemV1290BootSourceOverrideEnabledOnce, bootOverride(&client.instance), "the override stays for the power on hook")
 }
+
+func TestRedfishServer_resetDelay(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		action string
+
+		want time.Duration
+	}{
+		{action: "start", want: 2 * time.Second},
+		{action: "stop", want: 500 * time.Millisecond},
+		{action: "restart", want: 500 * time.Millisecond},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.action, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p := profile.Default()
+			p.Power.Delay = profile.PowerDelay{On: 20 * time.Second, Off: 5 * time.Second}
+			p.Timing.Scale = 0.1
+
+			server := NewRedfishServer("test-instance", instanceStateClient{}, WithProfile(p))
+
+			// Run test
+			got := server.resetDelay(tc.action)
+
+			// Assert
+			require.Equal(t, tc.want, got, "the scaled delay of the target power state")
+		})
+	}
+}
