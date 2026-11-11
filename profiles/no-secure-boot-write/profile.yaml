@@ -1,0 +1,11 @@
+version: 1
+name: no-secure-boot-write
+description: Secure boot databases are read only over Redfish, keys can only be reset. Enrollment happens from the guest.
+
+secure_boot:
+  database_write: false
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported}   # TODO verify against a recording
+  reset_keys:
+    supported: true
+    types: [DeleteAllKeys, DeletePK]
+    response: "204"

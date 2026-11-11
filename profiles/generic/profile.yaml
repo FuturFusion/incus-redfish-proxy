@@ -17,3 +17,14 @@ bios:
   errors:
     unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown}
     deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown}  # write to an attribute, whose requirement is not in effect
+
+secure_boot:
+  database_write: true              # false: certificates and signatures are read only over Redfish
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported}
+  reset_keys:
+    supported: false                # true: publish the #SecureBoot.ResetKeys action
+    types: [DeleteAllKeys, DeletePK]
+    response: "204"                 # 204 | 202-task
+  certificate_id_style: hash        # hash | sequential
+  certificate_id_prefix: ""         # sequential only, "Certificate" gives Certificate1
+  enable_requires_power_off: true   # false: SecureBootEnable on a running instance applies on the next reset

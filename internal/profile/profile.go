@@ -32,10 +32,11 @@ var namePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
 
 // Profile describes how the proxy behaves towards a Redfish client.
 type Profile struct {
-	Version     int    `yaml:"version"`
-	Name        string `yaml:"name"`
-	Description string `yaml:"description"`
-	BIOS        BIOS   `yaml:"bios"`
+	Version     int        `yaml:"version"`
+	Name        string     `yaml:"name"`
+	Description string     `yaml:"description"`
+	BIOS        BIOS       `yaml:"bios"`
+	SecureBoot  SecureBoot `yaml:"secure_boot"`
 }
 
 // Default returns the generic profile, which reproduces the behavior of the proxy before profiles existed.
@@ -64,6 +65,16 @@ func defaults() Profile {
 				UnknownAttribute: ErrorShape{Status: 400, MessageID: "Base.1.18.PropertyUnknown"},
 				DeferredRejected: ErrorShape{Status: 400, MessageID: "Base.1.18.PropertyUnknown"},
 			},
+		},
+		SecureBoot: SecureBoot{
+			DatabaseWrite:      true,
+			DatabaseWriteError: ErrorShape{Status: 405, MessageID: "Base.1.18.ActionNotSupported"},
+			ResetKeys: ResetKeys{
+				Types:    []ResetKeysType{ResetKeysTypeDeleteAllKeys, ResetKeysTypeDeletePK},
+				Response: ResetKeysResponseNoContent,
+			},
+			CertificateIDStyle:     CertificateIDStyleHash,
+			EnableRequiresPowerOff: true,
 		},
 	}
 }
@@ -170,5 +181,10 @@ func (p Profile) Validate() error {
 		return fmt.Errorf("invalid profile name %q, lower case letters, digits and dashes expected", p.Name)
 	}
 
-	return p.BIOS.validate()
+	err := p.BIOS.validate()
+	if err != nil {
+		return err
+	}
+
+	return p.SecureBoot.validate()
 }
