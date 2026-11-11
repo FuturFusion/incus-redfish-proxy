@@ -1107,7 +1107,9 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	s.powerMu.Lock()
 	defer s.powerMu.Unlock()
 
-	if noopStatus != "" || s.profile.BIOS.Pending {
+	applyOnReset := s.profile.BIOS.Pending || !s.profile.SecureBoot.EnableRequiresPowerOff
+
+	if noopStatus != "" || applyOnReset {
 		instance, _, err := s.client.GetInstance(computerSystemID)
 		if err != nil {
 			responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
@@ -1120,7 +1122,7 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		}
 
 		// Firmware applies staged settings on the next boot, so a power off leaves them staged.
-		if s.profile.BIOS.Pending && action != "stop" {
+		if applyOnReset && action != "stop" {
 			action, err = s.applyPendingOnReset(instance, action, force)
 			if err != nil {
 				responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
@@ -1516,6 +1518,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 	}
 
 	enabled := incusutil.IsTrueOrEmpty(instance.ExpandedConfig["security.secureboot"])
+	currentlyEnabled := enabled
+
+	// Like firmware, report the requested setting, while the current boot shows the setting in effect.
+	requested, ok := instance.Config[secureBootEnableKey]
+	if ok {
+		enabled = incusutil.IsTrue(requested)
+	}
 
 	mode := SetupMode
 
@@ -1532,7 +1541,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 	}
 
 	currentBootType := SecureBootV121SecureBootCurrentBootTypeDisabled
-	if enabled && instance.Status == "Running" {
+	if currentlyEnabled && instance.Status == "Running" {
 		currentBootType = SecureBootV121SecureBootCurrentBootTypeEnabled
 	}
 
@@ -1542,17 +1551,20 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBoot(w http.Resp
 	secureBootMode := SecureBootV121SecureBoot_SecureBootMode{}
 	_ = secureBootMode.FromSecureBootV121SecureBootModeType(mode)
 
-	response(w, SecureBootV121SecureBoot{
-		OdataID:               ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)),
-		OdataType:             ref("#SecureBoot.v1_2_1.SecureBoot"),
-		ID:                    "SecureBoot",
-		Name:                  "UEFI Secure Boot",
-		SecureBootCurrentBoot: &secureBootCurrentBootType,
-		SecureBootDatabases: &OdataV4IdRef{
-			OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot/SecureBootDatabases", s.instanceName)),
+	response(w, secureBootResponse{
+		SecureBootV121SecureBoot: SecureBootV121SecureBoot{
+			OdataID:               ref(s.secureBootPath()),
+			OdataType:             ref("#SecureBoot.v1_2_1.SecureBoot"),
+			ID:                    "SecureBoot",
+			Name:                  "UEFI Secure Boot",
+			SecureBootCurrentBoot: &secureBootCurrentBootType,
+			SecureBootDatabases: &OdataV4IdRef{
+				OdataID: ref(s.secureBootPath() + "/SecureBootDatabases"),
+			},
+			SecureBootEnable: ref(enabled),
+			SecureBootMode:   &secureBootMode,
 		},
-		SecureBootEnable: ref(enabled),
-		SecureBootMode:   &secureBootMode,
+		Actions: s.secureBootActions(),
 	})
 }
 
@@ -1593,32 +1605,31 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.Re
 		return
 	}
 
-	instance, etag, err := s.client.GetInstance(computerSystemID)
+	enable := strconv.FormatBool(*request.SecureBootEnable)
+
+	err = s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		running := instance.Status != "Stopped"
+		if running && s.profile.SecureBoot.EnableRequiresPowerOff {
+			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+		}
+
+		if put.Config == nil {
+			put.Config = map[string]string{}
+		}
+
+		// Incus changes secure boot of a stopped instance only, so the next reset applies it.
+		if running {
+			put.Config[secureBootEnableKey] = enable
+			return true, nil
+		}
+
+		put.Config["security.secureboot"] = enable
+		delete(put.Config, secureBootEnableKey)
+
+		return true, nil
+	})
 	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if instance.Status != "Stopped" {
-		responseErrWithMessage(w, http.StatusPreconditionFailed, fmt.Sprintf("instance %q is not stopped", computerSystemID))
-		return
-	}
-
-	if instance.Config == nil {
-		instance.Config = map[string]string{}
-	}
-
-	instance.Config["security.secureboot"] = strconv.FormatBool(*request.SecureBootEnable)
-
-	op, err := s.client.UpdateInstance(computerSystemID, instance.Writable(), etag)
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	err = op.Wait()
-	if err != nil {
-		responseErrWithMessage(w, http.StatusInternalServerError, err.Error())
+		respondStatusError(w, err)
 		return
 	}
 
@@ -1691,7 +1702,11 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 		return
 	}
 
-	certificates := collectSignatures(lists, true)
+	certificates, err := s.signatureRefs(db, lists, true)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
 
 	members := make([]OdataV4IdRef, 0, len(certificates))
 	for _, certificate := range certificates {
@@ -1712,6 +1727,10 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDCertificates(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
 	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
 	if !ok {
+		return
+	}
+
+	if !s.databaseWritable(w) {
 		return
 	}
 
@@ -1777,6 +1796,10 @@ func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBoo
 		return
 	}
 
+	if !s.databaseWritable(w) {
+		return
+	}
+
 	if !s.hasNVRAMSupport(w) {
 		return
 	}
@@ -1806,7 +1829,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 		return
 	}
 
-	certificate, ok := lookupSignature(collectSignatures(lists, true), certificateID)
+	refs, err := s.signatureRefs(db, lists, true)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	certificate, ok := lookupSignature(refs, certificateID)
 	if !ok {
 		responseErr(w, http.StatusNotFound)
 		return
@@ -1919,7 +1948,11 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 		return
 	}
 
-	signatures := collectSignatures(lists, false)
+	signatures, err := s.signatureRefs(db, lists, false)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
 
 	members := make([]OdataV4IdRef, 0, len(signatures))
 	for _, signature := range signatures {
@@ -1942,6 +1975,10 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 func (s redfishServer) PostRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignatures(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string) {
 	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
 	if !ok {
+		return
+	}
+
+	if !s.databaseWritable(w) {
 		return
 	}
 
@@ -2027,7 +2064,13 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 		return
 	}
 
-	signature, ok := lookupSignature(collectSignatures(lists, false), signatureID)
+	refs, err := s.signatureRefs(db, lists, false)
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	signature, ok := lookupSignature(refs, signatureID)
 	if !ok {
 		responseErr(w, http.StatusNotFound)
 		return
@@ -2039,6 +2082,10 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDSecureBootSecureBootDa
 func (s redfishServer) DeleteRedfishV1SystemsComputerSystemIDSecureBootSecureBootDatabasesDatabaseIDSignaturesSignatureID(w http.ResponseWriter, r *http.Request, computerSystemID string, databaseID string, signatureID string) {
 	db, ok := s.validateDatabaseID(w, computerSystemID, databaseID)
 	if !ok {
+		return
+	}
+
+	if !s.databaseWritable(w) {
 		return
 	}
 
@@ -2094,7 +2141,20 @@ func (s redfishServer) addSignature(db secureBootDatabase, list signatureList, c
 		return "", err
 	}
 
-	return signatureID(list.Type, list.Entries[0].Data), nil
+	hash := signatureID(list.Type, list.Entries[0].Data)
+
+	refs, err := s.signatureRefs(db, lists, certificate)
+	if err != nil {
+		return "", err
+	}
+
+	for _, added := range refs {
+		if added.hash == hash {
+			return added.id, nil
+		}
+	}
+
+	return hash, nil
 }
 
 // deleteSignature removes the entries with the given ID from a signature database. Removing
@@ -2105,12 +2165,22 @@ func (s redfishServer) deleteSignature(db secureBootDatabase, id string, certifi
 		return err
 	}
 
-	_, ok := lookupSignature(collectSignatures(lists, certificate), id)
+	refs, err := s.signatureRefs(db, lists, certificate)
+	if err != nil {
+		return err
+	}
+
+	signature, ok := lookupSignature(refs, id)
 	if !ok {
 		return statusErrorf(http.StatusNotFound, "%s", http.StatusText(http.StatusNotFound))
 	}
 
-	return s.putSignatureDatabase(db, removeSignature(lists, id, certificate), variable, etag)
+	err = s.putSignatureDatabase(db, removeSignature(lists, signature.hash, certificate), variable, etag)
+	if err != nil {
+		return err
+	}
+
+	return s.forgetSignature(db, signature.hash)
 }
 
 // getSignatureDatabaseForUpdate fetches a signature database for modification. Incus only

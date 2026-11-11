@@ -1311,6 +1311,344 @@ func testCertificate(t *testing.T, commonName string) ([]byte, string) {
 	return der, string(pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: der}))
 }
 
+func TestRedfishServer_SecureBootResetKeys(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		types         []profile.ResetKeysType
+		response      profile.ResetKeysResponse
+		status        string
+		resetKeysType string
+
+		wantStatus   int
+		wantLocation string
+		wantKept     []string
+	}{
+		{
+			name:          "success - delete platform key",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeletePK},
+			response:      profile.ResetKeysResponseNoContent,
+			status:        "Stopped",
+			resetKeysType: "DeletePK",
+
+			wantStatus: http.StatusNoContent,
+			wantKept:   []string{"KEK", "db"},
+		},
+		{
+			name:          "success - delete all keys with a task",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeleteAllKeys},
+			response:      profile.ResetKeysResponseTask,
+			status:        "Stopped",
+			resetKeysType: "DeleteAllKeys",
+
+			wantStatus:   http.StatusAccepted,
+			wantLocation: "/redfish/v1/TaskMonitors/",
+			wantKept:     []string{},
+		},
+		{
+			name:          "error - type not published",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeletePK},
+			response:      profile.ResetKeysResponseNoContent,
+			status:        "Stopped",
+			resetKeysType: "DeleteAllKeys",
+
+			wantStatus: http.StatusBadRequest,
+			wantKept:   []string{"PK", "KEK", "db"},
+		},
+		{
+			name:          "error - running instance",
+			types:         []profile.ResetKeysType{profile.ResetKeysTypeDeleteAllKeys},
+			response:      profile.ResetKeysResponseNoContent,
+			status:        "Running",
+			resetKeysType: "DeleteAllKeys",
+
+			wantStatus: http.StatusPreconditionFailed,
+			wantKept:   []string{"PK", "KEK", "db"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			p.SecureBoot.ResetKeys = profile.ResetKeys{Supported: true, Types: tc.types, Response: tc.response}
+
+			incusClient := fakeIncus(incusapi.Instance{Status: tc.status})
+			for _, db := range []struct{ guid, name string }{{uefi.EfiGlobalVariableGuid, "PK"}, {uefi.EfiGlobalVariableGuid, "KEK"}, {uefi.EfiImageSecurityDatabaseGuid, "db"}} {
+				err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", db.guid, db.name, incusapi.InstanceNVRAMVariablePut{}, "")
+				require.NoError(t, err, "store the UEFI variable")
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.RunRawRequestWithHeaders(http.MethodPost, "/redfish/v1/Systems/test-instance/SecureBoot/Actions/SecureBoot.ResetKeys", strings.NewReader(`{"ResetKeysType":"`+tc.resetKeysType+`"}`), "application/json", nil)
+			answer := answerOf(t, resp, err)
+
+			kept := nvramNames(incusClient, []struct{ guid, name string }{{uefi.EfiGlobalVariableGuid, "PK"}, {uefi.EfiGlobalVariableGuid, "KEK"}, {uefi.EfiImageSecurityDatabaseGuid, "db"}, {uefi.EfiImageSecurityDatabaseGuid, "dbx"}})
+
+			require.Equal(t, tc.wantStatus, answer.status, "status of the reset keys action")
+			require.True(t, strings.HasPrefix(answer.location, tc.wantLocation), "location of the task monitor")
+			require.Equal(t, tc.wantKept, kept, "UEFI variables left")
+		})
+	}
+}
+
+func TestRedfishServer_SecureBootSequentialIDs(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p := profile.Default()
+	p.SecureBoot.CertificateIDStyle = profile.CertificateIDStyleSequential
+	p.SecureBoot.CertificateIDPrefix = "Policy."
+	p.SecureBoot.ResetKeys = profile.ResetKeys{Supported: true, Types: []profile.ResetKeysType{profile.ResetKeysTypeDeleteAllKeys, profile.ResetKeysTypeDeletePK}, Response: profile.ResetKeysResponseNoContent}
+
+	client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+	resetKeys := func(resetKeysType string) {
+		t.Helper()
+
+		resp, err := client.Post("/redfish/v1/Systems/test-instance/SecureBoot/Actions/SecureBoot.ResetKeys", map[string]any{"ResetKeysType": resetKeysType})
+		require.NoError(t, err, "reset the keys with %s", resetKeysType)
+		resp.Body.Close()
+	}
+
+	const databases = "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/"
+
+	add := func(database string, commonName string) string {
+		t.Helper()
+
+		_, certificate := testCertificate(t, commonName)
+
+		resp, err := client.Post(databases+database+"/Certificates", map[string]any{"CertificateString": certificate, "CertificateType": "PEM"})
+		require.NoError(t, err, "add the certificate %s", commonName)
+		resp.Body.Close()
+
+		return strings.TrimPrefix(resp.Header.Get("Location"), databases)
+	}
+
+	remove := func(location string) {
+		t.Helper()
+
+		resp, err := client.Delete(databases + location)
+		require.NoError(t, err, "delete %s", location)
+		resp.Body.Close()
+	}
+
+	list := func(database string) []string {
+		t.Helper()
+
+		certificates, err := schemas.ListReferencedCertificates(client, databases+database+"/Certificates")
+		require.NoError(t, err, "list the certificates of %s", database)
+
+		ids := make([]string, 0, len(certificates))
+		for _, certificate := range certificates {
+			ids = append(ids, certificate.ID+"="+certificate.Subject.CommonName)
+		}
+
+		return ids
+	}
+
+	// Run test and assert: the numbers follow the order of the additions, across the databases.
+	require.Equal(t, "KEK/Certificates/Policy.1", add("KEK", "kek"), "the first entry gets the first number")
+	require.Equal(t, "db/Certificates/Policy.2", add("db", "first"), "the next database continues the count")
+	require.Equal(t, "db/Certificates/Policy.3", add("db", "second"), "the numbers follow the order of the additions")
+
+	// A deleted entry leaves a gap. A number is never used again.
+	remove("db/Certificates/Policy.2")
+	require.ElementsMatch(t, []string{"Policy.3=second"}, list("db"), "the other entries keep their numbers")
+	require.Equal(t, "db/Certificates/Policy.4", add("db", "third"), "a new entry gets a number never used before")
+	require.Equal(t, "db/Certificates/Policy.5", add("db", "first"), "an entry added again gets a new number")
+	require.ElementsMatch(t, []string{"Policy.3=second", "Policy.4=third", "Policy.5=first"}, list("db"), "the numbers are stable")
+	require.ElementsMatch(t, []string{"Policy.1=kek"}, list("KEK"), "the other database keeps its numbers")
+
+	// A reset of the platform key keeps the count and the other numbers.
+	require.Equal(t, "PK/Certificates/Policy.6", add("PK", "pk"), "the platform key continues the count")
+	resetKeys("DeletePK")
+	require.Empty(t, list("PK"), "DeletePK deletes the platform key")
+	require.ElementsMatch(t, []string{"Policy.1=kek"}, list("KEK"), "DeletePK keeps the numbers of KEK")
+	require.Equal(t, "db/Certificates/Policy.7", add("db", "fourth"), "DeletePK does not restart the count")
+
+	// A reset of all keys restarts the count.
+	resetKeys("DeleteAllKeys")
+
+	require.Empty(t, list("db"), "the reset deletes the entries")
+	require.Equal(t, "db/Certificates/Policy.1", add("db", "first"), "the count restarts after the reset")
+}
+
+func TestRedfishServer_SecureBootSequentialIDsOfPresentEntries(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p := profile.Default()
+	p.SecureBoot.CertificateIDStyle = profile.CertificateIDStyleSequential
+
+	incusClient := fakeIncus(incusapi.Instance{Status: "Stopped"})
+
+	der := map[string][]byte{}
+	for _, commonName := range []string{"kek", "first", "second", "third"} {
+		der[commonName], _ = testCertificate(t, commonName)
+	}
+
+	// store writes the certificates like the firmware or the guest, without the proxy.
+	store := func(guid string, name string, commonNames ...string) {
+		t.Helper()
+
+		lists := make([]map[string]any, 0, len(commonNames))
+		for _, commonName := range commonNames {
+			lists = append(lists, map[string]any{"type": "x509", "entries": []map[string]any{{"owner": "00000000-0000-0000-0000-000000000000", "data": der[commonName]}}})
+		}
+
+		err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", guid, name, incusapi.InstanceNVRAMVariablePut{Data: lists}, "")
+		require.NoError(t, err, "store the UEFI variable %s", name)
+	}
+
+	store(uefi.EfiGlobalVariableGuid, "KEK", "kek")
+	store(uefi.EfiImageSecurityDatabaseGuid, "db", "first", "second")
+
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	list := func(database string) []string {
+		t.Helper()
+
+		certificates, err := schemas.ListReferencedCertificates(client, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/"+database+"/Certificates")
+		require.NoError(t, err, "list the certificates of %s", database)
+
+		ids := make([]string, 0, len(certificates))
+		for _, certificate := range certificates {
+			ids = append(ids, certificate.ID+"="+certificate.Subject.CommonName)
+		}
+
+		return ids
+	}
+
+	// Run test and assert
+	require.ElementsMatch(t, []string{"2=first", "3=second"}, list("db"), "the first read numbers all databases in their order")
+	require.ElementsMatch(t, []string{"1=kek"}, list("KEK"), "KEK comes before db")
+
+	store(uefi.EfiImageSecurityDatabaseGuid, "db", "second", "third")
+	require.ElementsMatch(t, []string{"3=second", "4=third"}, list("db"), "an entry written by the guest gets the next number")
+}
+
+func TestRedfishServer_SecureBootEnableOnReset(t *testing.T) {
+	t.Parallel()
+
+	p := profile.Default()
+	p.SecureBoot.EnableRequiresPowerOff = false
+
+	incusClient := fakeIncus(incusapi.Instance{
+		Status:         "Running",
+		InstancePut:    incusapi.InstancePut{Config: map[string]string{"security.secureboot": "false"}},
+		ExpandedConfig: map[string]string{"security.secureboot": "false"},
+	})
+	client := setup(t, incusClient, api.WithProfile(p))
+
+	resp, err := client.Patch("/redfish/v1/Systems/test-instance/SecureBoot", map[string]any{"SecureBootEnable": true})
+	require.NoError(t, err, "enable secure boot")
+	resp.Body.Close()
+
+	instance, _, err := incusClient.GetInstance("test-instance")
+	require.NoError(t, err, "read the instance")
+	require.Equal(t, "false", instance.Config["security.secureboot"], "a running instance keeps its setting")
+
+	secureBoot := getSecureBoot(t, client)
+	require.True(t, secureBoot.SecureBootEnable, "SecureBootEnable reports the requested setting")
+	require.Equal(t, schemas.DisabledSecureBootCurrentBootType, secureBoot.SecureBootCurrentBoot, "the current boot reports the setting in effect")
+
+	resp, err = client.Post("/redfish/v1/Systems/test-instance/Actions/ComputerSystem.Reset", map[string]any{"ResetType": "ForceRestart"})
+	require.NoError(t, err, "reset the system")
+	resp.Body.Close()
+
+	instance, _, err = incusClient.GetInstance("test-instance")
+	require.NoError(t, err, "read the instance")
+	require.Equal(t, "true", instance.Config["security.secureboot"], "the reset applies the setting")
+	require.NotContains(t, instance.Config, "user.redfish.secureboot.enable", "the reset removes the pending setting")
+
+	calls := incusClient.UpdateInstanceStateCalls()
+
+	actions := make([]string, 0, len(calls))
+	for _, call := range calls {
+		actions = append(actions, call.State.Action)
+	}
+
+	require.Equal(t, []string{"stop", "start"}, actions, "secure boot changes on a stopped instance only")
+}
+
+func TestRedfishServer_SecureBootEnableKeepsKeys(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		status  string
+		profile func(p *profile.Profile)
+		enable  func(t *testing.T, client *gofish.APIClient)
+	}{
+		{
+			name:    "stopped instance",
+			status:  "Stopped",
+			profile: func(*profile.Profile) {},
+			enable:  func(*testing.T, *gofish.APIClient) {},
+		},
+		{
+			name:   "running instance applies at the reset",
+			status: "Running",
+			profile: func(p *profile.Profile) {
+				p.SecureBoot.EnableRequiresPowerOff = false
+			},
+			enable: func(t *testing.T, client *gofish.APIClient) {
+				t.Helper()
+
+				resetSystem(t, client, profile.ResetTypeForceRestart)
+			},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			p := profile.Default()
+			tc.profile(&p)
+
+			incusClient := fakeIncus(incusapi.Instance{
+				Status:      tc.status,
+				InstancePut: incusapi.InstancePut{Config: map[string]string{"security.secureboot": "false"}},
+			})
+
+			// Enroll the keys the way the enrollment media does, while secure boot is off.
+			enrolled := map[string]incusapi.InstanceNVRAMVariablePut{}
+			for _, db := range []struct{ guid, name string }{{uefi.EfiGlobalVariableGuid, "PK"}, {uefi.EfiGlobalVariableGuid, "KEK"}, {uefi.EfiImageSecurityDatabaseGuid, "db"}} {
+				put := incusapi.InstanceNVRAMVariablePut{Data: []any{db.name}, Attributes: []string{"NON_VOLATILE"}}
+				enrolled[db.name] = put
+
+				err := incusClient.UpdateInstanceNVRAMGUIDVar("test-instance", db.guid, db.name, put, "")
+				require.NoError(t, err, "enroll %s", db.name)
+			}
+
+			client := setup(t, incusClient, api.WithProfile(p))
+
+			resp, err := client.Patch(systemPath+"/SecureBoot", map[string]any{"SecureBootEnable": true})
+			require.NoError(t, err, "enable secure boot")
+			resp.Body.Close()
+
+			tc.enable(t, client)
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+			require.Equal(t, "true", instance.Config["security.secureboot"], "secure boot is enabled")
+
+			kept := nvramNames(incusClient, []struct{ guid, name string }{{uefi.EfiGlobalVariableGuid, "PK"}, {uefi.EfiGlobalVariableGuid, "KEK"}, {uefi.EfiImageSecurityDatabaseGuid, "db"}, {uefi.EfiImageSecurityDatabaseGuid, "dbx"}})
+			require.Equal(t, []string{"PK", "KEK", "db"}, kept, "the rebuild of the UEFI variable store keeps the enrolled keys and no other database")
+
+			variable, _, err := incusClient.GetInstanceNVRAMGUIDVar("test-instance", uefi.EfiImageSecurityDatabaseGuid, "db")
+			require.NoError(t, err, "read db")
+			require.Equal(t, enrolled["db"], variable.InstanceNVRAMVariablePut, "db keeps its content")
+			require.Equal(t, schemas.UserModeSecureBootModeType, getSecureBoot(t, client).SecureBootMode, "the platform key keeps the firmware in user mode")
+		})
+	}
+}
+
 func TestRedfishServer_GetRedfishV1SystemsComputerSystemIDSecureBoot(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -1425,6 +1763,7 @@ func TestRedfishServer_PatchSecureBoot(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			incusClient := &mock.IncusClientMock{
+				HasExtensionFunc: func(string) bool { return false },
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return &incusapi.Instance{Status: tc.instanceStatus}, "", nil
 				},
@@ -2510,6 +2849,7 @@ func TestRedfishServer_PatchSyntheticBiosAttributes(t *testing.T) {
 			t.Parallel()
 
 			incusClient := &mock.IncusClientMock{
+				HasExtensionFunc: func(string) bool { return false },
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return &incusapi.Instance{Status: "Stopped"}, "", nil
 				},
