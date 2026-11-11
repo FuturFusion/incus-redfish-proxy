@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
+	"strings"
 )
 
 // MediaInsert is how virtual media is inserted.
@@ -26,6 +28,10 @@ const (
 	InsertResponseNoContent InsertResponse = "204"
 	// InsertResponseTask answers 202 with a task monitor and inserts in the background.
 	InsertResponseTask InsertResponse = "202-task"
+	// InsertResponseOK inserts before it answers 200 with a top level @Message.ExtendedInfo.
+	InsertResponseOK InsertResponse = AnswerOK
+	// InsertResponseOKError inserts before it answers 200 with the messages inside an error object.
+	InsertResponseOKError InsertResponse = AnswerOKError
 )
 
 // Delivery is how inserted media reaches the instance.
@@ -66,7 +72,7 @@ type VirtualMedia struct {
 	OEMVendor string `yaml:"oem_vendor"`
 	OEMAction string `yaml:"oem_action"`
 
-	// InsertResponse applies to the insert actions. A PATCH always answers 204.
+	// InsertResponse applies to the insert and eject actions. The answer to a PATCH is Responses.Patch.
 	InsertResponse InsertResponse `yaml:"insert_response"`
 
 	// BootOverrideOnce also offers BootSourceOverrideEnabled Once. Without it, the proxy offers Disabled and Continuous, as before profiles existed.
@@ -74,7 +80,44 @@ type VirtualMedia struct {
 
 	Delivery Delivery `yaml:"delivery"`
 	Stream   Stream   `yaml:"stream"`
+
+	// RefusedParameters are InsertMedia parameters the BMC does not know. A client must send the insert again without them.
+	RefusedParameters RefusedParameters `yaml:"refused_parameters"`
+
+	// Locations are the collections that show the virtual media device. All of them show the same device.
+	Locations []MediaLocation `yaml:"locations"`
+
+	// ID is the member ID of the virtual media device, like CD on the proxy or 1 on iDRAC.
+	ID string `yaml:"id"`
 }
+
+// MediaLocation is a collection that shows the virtual media device.
+type MediaLocation string
+
+const (
+	// MediaLocationManagers shows the device below /redfish/v1/Managers/{manager}/VirtualMedia.
+	MediaLocationManagers MediaLocation = "managers"
+
+	// MediaLocationSystems shows the device below /redfish/v1/Systems/{system}/VirtualMedia.
+	MediaLocationSystems MediaLocation = "systems"
+)
+
+// mediaIDPattern keeps the member ID usable in a URI.
+var mediaIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]*$`)
+
+// HasLocation reports whether the collection shows the virtual media device.
+func (v VirtualMedia) HasLocation(location MediaLocation) bool {
+	return slices.Contains(v.Locations, location)
+}
+
+// RefusedParameters refuse an InsertMedia request that holds one of the names.
+type RefusedParameters struct {
+	Names []string   `yaml:"names"`
+	Error ErrorShape `yaml:"error"`
+}
+
+// insertMediaParameters are the optional parameters of InsertMedia in the Redfish schema. Image is required, so a profile can not refuse it.
+var insertMediaParameters = []string{"Inserted", "MediaType", "Password", "TransferMethod", "TransferProtocolType", "UserName", "WriteProtected"}
 
 // minReadAhead is the smallest size of a range request.
 const minReadAhead = 4 << 10
@@ -106,7 +149,7 @@ func (v VirtualMedia) validate() error {
 	}
 
 	switch v.InsertResponse {
-	case InsertResponseNoContent, InsertResponseTask:
+	case InsertResponseNoContent, InsertResponseTask, InsertResponseOK, InsertResponseOKError:
 
 	default:
 		return fmt.Errorf("unknown virtual_media.insert_response %q", v.InsertResponse)
@@ -117,6 +160,36 @@ func (v VirtualMedia) validate() error {
 
 	default:
 		return fmt.Errorf("unknown virtual_media.delivery %q", v.Delivery)
+	}
+
+	if len(v.Locations) == 0 {
+		return errors.New("virtual_media.locations must not be empty")
+	}
+
+	for _, location := range v.Locations {
+		switch location {
+		case MediaLocationManagers, MediaLocationSystems:
+
+		default:
+			return fmt.Errorf("unknown virtual_media.locations entry %q", location)
+		}
+	}
+
+	if !mediaIDPattern.MatchString(v.ID) {
+		return fmt.Errorf("virtual_media.id %q must start with a letter or digit and contain only letters, digits, dots, dashes and underscores", v.ID)
+	}
+
+	for _, name := range v.RefusedParameters.Names {
+		if !slices.Contains(insertMediaParameters, name) {
+			return fmt.Errorf("virtual_media.refused_parameters.names entry %q is not one of %s", name, strings.Join(insertMediaParameters, ", "))
+		}
+	}
+
+	if len(v.RefusedParameters.Names) > 0 {
+		err := v.RefusedParameters.Error.Validate()
+		if err != nil {
+			return fmt.Errorf("virtual_media.refused_parameters.error: %w", err)
+		}
 	}
 
 	return v.Stream.validate()

@@ -39,6 +39,7 @@ type Profile struct {
 	SecureBoot   SecureBoot   `yaml:"secure_boot"`
 	VirtualMedia VirtualMedia `yaml:"virtual_media"`
 	Power        Power        `yaml:"power"`
+	Responses    Responses    `yaml:"responses"`
 	Timing       Timing       `yaml:"timing"`
 	Overlay      Overlay      `yaml:"overlay"`
 }
@@ -71,14 +72,20 @@ func defaults() Profile {
 			},
 		},
 		SecureBoot: SecureBoot{
-			DatabaseWrite:      true,
-			DatabaseWriteError: ErrorShape{Status: 405, MessageID: "Base.1.18.ActionNotSupported"},
+			DatabaseWrite:          true,
+			DatabaseWriteError:     ErrorShape{Status: 405, MessageID: "Base.1.18.ActionNotSupported"},
+			DatabaseAddResponse:    DatabaseAddResponseCreated,
+			DatabaseDeleteResponse: DatabaseDeleteResponseNoContent,
 			ResetKeys: ResetKeys{
 				Types:    []ResetKeysType{ResetKeysTypeDeleteAllKeys, ResetKeysTypeDeletePK},
 				Response: ResetKeysResponseNoContent,
+				Applies:  ResetKeysAppliesImmediately,
 			},
 			CertificateIDStyle:     CertificateIDStyleHash,
 			EnableRequiresPowerOff: true,
+			PowerCycle: PowerCycle{
+				After: []PowerCycleTrigger{},
+			},
 		},
 		VirtualMedia: VirtualMedia{
 			Insert:         MediaInsertStandard,
@@ -91,11 +98,24 @@ func defaults() Profile {
 				Cache:     64 << 20,
 				Fallback:  StreamFallbackFullFetch,
 			},
+			RefusedParameters: RefusedParameters{
+				Names: []string{},
+				Error: ErrorShape{Status: 400, MessageID: "Base.1.18.ActionParameterUnknown"},
+			},
+			Locations: []MediaLocation{MediaLocationManagers},
+			ID:        "CD",
 		},
 		Power: Power{
 			ResetTypes:      []ResetType{},
 			Response:        PowerResponseNoContent,
 			NotSettledError: ErrorShape{Status: 400, MessageID: "Base.1.18.ResourceInStandby"},
+			BusyReads: BusyReads{
+				Resources: []BusyResource{},
+				Error:     ErrorShape{Status: 503, MessageID: "Base.1.18.ServiceTemporarilyUnavailable"},
+			},
+		},
+		Responses: Responses{
+			Patch: ResourcePatchResponseNoContent,
 		},
 		Timing: Timing{
 			Scale: 1,
@@ -227,6 +247,11 @@ func (p Profile) Validate() error {
 	}
 
 	err = p.Power.validate()
+	if err != nil {
+		return err
+	}
+
+	err = p.Responses.validate()
 	if err != nil {
 		return err
 	}
