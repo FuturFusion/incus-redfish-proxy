@@ -29,17 +29,22 @@ func TestResponse(t *testing.T) {
 		{
 			name:     "ok with a message",
 			exchange: Exchange{Sequence: 3, Status: 200, ResponseBody: `{"@Message.ExtendedInfo": [{"MessageId": "ExtendedError.1.2.RebootRequired"}]}`},
-			want:     value{yaml: `"204"`, seqs: []int64{3}, verify: true, note: "answered 200, ExtendedError.1.2.RebootRequired"},
+			want:     value{yaml: `"200"`, seqs: []int64{3}, note: "ExtendedError.1.2.RebootRequired"},
 		},
 		{
 			name:     "ok with a message wrapped in an error",
 			exchange: Exchange{Sequence: 5, Status: 200, ResponseBody: `{"error": {"code": "iLO.0.10.ExtendedInfo", "@Message.ExtendedInfo": [{"MessageId": "Base.1.18.Success"}]}}`},
-			want:     value{yaml: `"204"`, seqs: []int64{5}, verify: true, note: "answered 200, Base.1.18.Success"},
+			want:     value{yaml: `"200-error"`, seqs: []int64{5}, note: "Base.1.18.Success"},
 		},
 		{
 			name:     "ok without a body",
 			exchange: Exchange{Sequence: 4, Status: 200},
-			want:     value{yaml: `"204"`, seqs: []int64{4}, verify: true, note: "answered 200"},
+			want:     value{yaml: `"200"`, seqs: []int64{4}},
+		},
+		{
+			name:     "created",
+			exchange: Exchange{Sequence: 6, Status: 201, ResponseBody: `{"@Message.ExtendedInfo": [{"MessageId": "Base.1.18.Created"}]}`},
+			want:     value{yaml: `"204"`, seqs: []int64{6}, verify: true, note: "answered 201, Base.1.18.Created"},
 		},
 	}
 
@@ -278,7 +283,7 @@ func TestRefusedFirst(t *testing.T) {
 	}
 }
 
-func TestRedundantReset(t *testing.T) {
+func TestRedundantResets(t *testing.T) {
 	t.Parallel()
 
 	system := func(seq int64, state string) Exchange {
@@ -296,26 +301,38 @@ func TestRedundantReset(t *testing.T) {
 		}
 	}
 
+	const reason = "Operations Center sent no reset to the current power state"
+
 	tests := []struct {
 		name      string
 		exchanges []Exchange
 
-		want value
+		wantOff value
+		wantOn  value
 	}{
 		{
-			name:      "accepted",
+			name:      "accepted while in the target state",
 			exchanges: []Exchange{system(1, "Off"), reset(2, "ForceOff", 204)},
-			want:      value{yaml: `"204"`},
+			wantOff:   value{yaml: "null", seqs: []int64{1, 2}, note: "accepted ForceOff while Off"},
+			wantOn:    value{yaml: "null", reason: reason},
 		},
 		{
 			name:      "refused for another reason",
 			exchanges: []Exchange{system(1, "On"), reset(2, "ForceOff", 400)},
-			want:      value{yaml: `"204"`},
+			wantOff:   value{yaml: "null", reason: reason},
+			wantOn:    value{yaml: "null", reason: reason},
 		},
 		{
 			name:      "refused while in the target state",
-			exchanges: []Exchange{system(1, "Off"), reset(2, "ForceOff", 400)},
-			want:      value{yaml: `"204"`, seqs: []int64{2}, note: "refused ForceOff while Off with 400, iLO.2.25.InvalidOperationForSystemState"},
+			exchanges: []Exchange{system(1, "Off"), reset(2, "ForceOff", 400), system(3, "On"), reset(4, "On", 409)},
+			wantOff:   value{yaml: "{status: 400, message_id: iLO.2.25.InvalidOperationForSystemState}", seqs: []int64{1, 2}, note: "refused ForceOff while Off"},
+			wantOn:    value{yaml: "{status: 409, message_id: iLO.2.25.InvalidOperationForSystemState}", seqs: []int64{3, 4}, note: "refused On while On"},
+		},
+		{
+			name:      "the first evidence wins",
+			exchanges: []Exchange{system(1, "Off"), reset(2, "ForceOff", 400), system(3, "Off"), reset(4, "ForceOff", 204)},
+			wantOff:   value{yaml: "{status: 400, message_id: iLO.2.25.InvalidOperationForSystemState}", seqs: []int64{1, 2}, note: "refused ForceOff while Off"},
+			wantOn:    value{yaml: "null", reason: reason},
 		},
 	}
 
@@ -323,11 +340,15 @@ func TestRedundantReset(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
+			// Setup
+			d := &Draft{values: defaultValues()}
+
 			// Run test
-			got := redundantReset(&Recording{Exchanges: tc.exchanges}, value{yaml: `"204"`})
+			d.redundantResets(&Recording{Exchanges: tc.exchanges})
 
 			// Assert
-			require.Equal(t, tc.want, got, "power.response")
+			require.Equal(t, tc.wantOff, d.values["power.redundant_reset_errors.off"], "power.redundant_reset_errors.off")
+			require.Equal(t, tc.wantOn, d.values["power.redundant_reset_errors.on"], "power.redundant_reset_errors.on")
 		})
 	}
 }
@@ -461,6 +482,213 @@ func TestBIOSPatchResponse(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.wantResponse, d.values["bios.patch_response"], "bios.patch_response")
 			require.Equal(t, tc.wantTask, d.values["bios.task_resource"], "bios.task_resource")
+		})
+	}
+}
+
+func TestPatchResponse(t *testing.T) {
+	t.Parallel()
+
+	patch := func(seq int64, path string, status int, body string) Exchange {
+		return Exchange{
+			Sequence: seq, Method: "PATCH", URL: "https://bmc.example.com/redfish/v1/" + path,
+			RequestBody: `{}`, Status: status, ResponseBody: body,
+		}
+	}
+
+	tests := []struct {
+		name      string
+		exchanges []Exchange
+
+		want value
+	}{
+		{
+			name:      "no patch",
+			exchanges: []Exchange{patch(1, "Systems/1/Bios/Settings", 200, `{"@odata.id": "/redfish/v1/Systems/1/Bios/Settings"}`)},
+			want:      value{yaml: `"204"`, reason: "Operations Center sent no PATCH of Systems, SecureBoot or VirtualMedia"},
+		},
+		{
+			name:      "no content",
+			exchanges: []Exchange{patch(1, "Systems/1/SecureBoot", 204, "")},
+			want:      value{yaml: `"204"`, seqs: []int64{1}},
+		},
+		{
+			name:      "resource",
+			exchanges: []Exchange{patch(1, "Managers/1/VirtualMedia/CD1", 200, `{"@odata.id": "/redfish/v1/Managers/1/VirtualMedia/CD1", "Id": "CD1"}`)},
+			want:      value{yaml: `"200-resource"`, seqs: []int64{1}},
+		},
+		{
+			name:      "top level messages",
+			exchanges: []Exchange{patch(1, "Systems/1", 200, `{"@Message.ExtendedInfo": [{"MessageId": "Base.1.12.Success"}, {"MessageId": "IDRAC.2.8.SYS413"}]}`)},
+			want:      value{yaml: `"200"`, seqs: []int64{1}, note: "Base.1.12.Success"},
+		},
+		{
+			name: "messages inside error after a refused patch",
+			exchanges: []Exchange{
+				patch(1, "Systems/1", 400, `{"error": {"@Message.ExtendedInfo": [{"MessageId": "Base.1.18.PropertyUnknown"}]}}`),
+				patch(2, "Systems/1", 200, `{"error": {"code": "iLO.0.10.ExtendedInfo", "@Message.ExtendedInfo": [{"MessageId": "Base.1.18.Success"}]}}`),
+			},
+			want: value{yaml: `"200-error"`, seqs: []int64{2}, note: "Base.1.18.Success"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			d := &Draft{values: defaultValues()}
+
+			// Run test
+			d.responses(&Recording{Exchanges: tc.exchanges})
+
+			// Assert
+			require.Equal(t, tc.want, d.values["responses.patch"], "responses.patch")
+		})
+	}
+}
+
+func TestDatabaseAnswers(t *testing.T) {
+	t.Parallel()
+
+	const certificates = "https://bmc.example.com/redfish/v1/Systems/1/SecureBoot/SecureBootDatabases/db/Certificates"
+
+	post := func(seq int64, status int) Exchange {
+		return Exchange{Sequence: seq, Method: "POST", URL: certificates, RequestBody: `{}`, Status: status}
+	}
+
+	deleted := func(seq int64, status int, body string) Exchange {
+		return Exchange{Sequence: seq, Method: "DELETE", URL: certificates + "/CustPolicy.1", Status: status, ResponseBody: body}
+	}
+
+	tests := []struct {
+		name      string
+		exchanges []Exchange
+
+		wantAdd    value
+		wantDelete value
+	}{
+		{
+			name:       "no writes",
+			exchanges:  []Exchange{},
+			wantAdd:    value{yaml: `"201"`},
+			wantDelete: value{yaml: `"204"`},
+		},
+		{
+			name:       "standard answers",
+			exchanges:  []Exchange{post(1, 201), deleted(2, 204, "")},
+			wantAdd:    value{yaml: `"201"`, seqs: []int64{1}},
+			wantDelete: value{yaml: `"204"`, seqs: []int64{2}},
+		},
+		{
+			name: "answers of Dell after a refused write",
+			exchanges: []Exchange{
+				post(1, 400), post(2, 204),
+				deleted(3, 200, `{"error": {"@Message.ExtendedInfo": [{"MessageId": "IDRAC.2.8.SYS430"}, {"MessageId": "Base.1.12.ResetRequired"}]}}`),
+			},
+			wantAdd:    value{yaml: `"204"`, seqs: []int64{2}},
+			wantDelete: value{yaml: `"200-error"`, seqs: []int64{3}, note: "IDRAC.2.8.SYS430"},
+		},
+		{
+			name:       "unknown answers",
+			exchanges:  []Exchange{post(1, 200), deleted(2, 202, "")},
+			wantAdd:    value{yaml: `"201"`, seqs: []int64{1}, verify: true, note: "answered 200"},
+			wantDelete: value{yaml: `"204"`, seqs: []int64{2}, verify: true, note: "answered 202"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			d := &Draft{values: defaultValues()}
+
+			// Run test
+			d.databaseAnswers(&Recording{Exchanges: tc.exchanges})
+
+			// Assert
+			require.Equal(t, tc.wantAdd, d.values["secure_boot.database_add_response"], "secure_boot.database_add_response")
+			require.Equal(t, tc.wantDelete, d.values["secure_boot.database_delete_response"], "secure_boot.database_delete_response")
+		})
+	}
+}
+
+func TestResetKeysApplies(t *testing.T) {
+	t.Parallel()
+
+	const system = "https://bmc.example.com/redfish/v1/Systems/1"
+
+	secureBoot := func(seq int64, mode string) Exchange {
+		return Exchange{
+			Sequence: seq, Method: "GET", URL: system + "/SecureBoot", Status: 200,
+			ResponseBody: `{"SecureBootMode": "` + mode + `", "Actions": {"#SecureBoot.ResetKeys": {"target": "/redfish/v1/Systems/1/SecureBoot/Actions/SecureBoot.ResetKeys"}}}`,
+		}
+	}
+
+	resetKeys := func(seq int64, body string) Exchange {
+		return Exchange{
+			Sequence: seq, Method: "POST", URL: system + "/SecureBoot/Actions/SecureBoot.ResetKeys",
+			RequestBody: `{"ResetKeysType": "DeleteAllKeys"}`, Status: 200, ResponseBody: body,
+		}
+	}
+
+	reset := func(seq int64, resetType string) Exchange {
+		return Exchange{Sequence: seq, Method: "POST", URL: system + "/Actions/ComputerSystem.Reset", RequestBody: `{"ResetType": "` + resetType + `"}`, Status: 204}
+	}
+
+	rebootRequired := `{"@Message.ExtendedInfo": [{"MessageId": "ExtendedError.1.2.RebootRequired"}]}`
+
+	tests := []struct {
+		name      string
+		exchanges []Exchange
+
+		want value
+	}{
+		{
+			name:      "no reset of the keys",
+			exchanges: []Exchange{secureBoot(1, "UserMode")},
+			want:      value{yaml: "immediately", reason: "Operations Center sent no ResetKeys"},
+		},
+		{
+			name:      "user mode after the reset of the keys",
+			exchanges: []Exchange{secureBoot(1, "UserMode"), resetKeys(2, ""), reset(3, "ForceOff"), secureBoot(4, "UserMode")},
+			want:      value{yaml: "on_reset", seqs: []int64{2, 4}},
+		},
+		{
+			name:      "setup mode before a power on",
+			exchanges: []Exchange{secureBoot(1, "UserMode"), resetKeys(2, ""), secureBoot(3, "SetupMode")},
+			want:      value{yaml: "immediately", seqs: []int64{2, 3}},
+		},
+		{
+			name:      "setup mode after a power on, message asks for a reboot",
+			exchanges: []Exchange{secureBoot(1, "UserMode"), resetKeys(2, rebootRequired), reset(3, "On"), secureBoot(4, "SetupMode")},
+			want:      value{yaml: "on_reset", seqs: []int64{2}, verify: true, note: "ExtendedError.1.2.RebootRequired"},
+		},
+		{
+			name:      "no read, message inside error asks for a reset",
+			exchanges: []Exchange{secureBoot(1, "UserMode"), resetKeys(2, `{"error": {"@Message.ExtendedInfo": [{"MessageId": "iLO.2.25.SystemResetRequired"}]}}`)},
+			want:      value{yaml: "on_reset", seqs: []int64{2}, verify: true, note: "iLO.2.25.SystemResetRequired"},
+		},
+		{
+			name:      "no read, no message",
+			exchanges: []Exchange{secureBoot(1, "UserMode"), resetKeys(2, "")},
+			want:      value{yaml: "immediately", reason: "no read of SecureBoot shows when the reset takes effect"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			d := &Draft{values: defaultValues()}
+
+			// Run test
+			d.resetKeys(&Recording{Exchanges: tc.exchanges})
+
+			// Assert
+			require.Equal(t, tc.want, d.values["secure_boot.reset_keys.applies"], "secure_boot.reset_keys.applies")
 		})
 	}
 }

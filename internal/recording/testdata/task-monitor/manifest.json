@@ -20,7 +20,7 @@
     "system_uuid": "4c4c4544-0001"
   },
   "bmc_endpoint": "https://bmc.example.com",
-  "exchanges": 18,
+  "exchanges": 21,
   "bytes": 0,
   "truncated_exchanges": 0
 }

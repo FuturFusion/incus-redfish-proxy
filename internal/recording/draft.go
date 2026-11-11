@@ -141,6 +141,7 @@ func NewDraft(rec *Recording, name string) *Draft {
 	d.secureBoot(rec)
 	d.virtualMedia(rec)
 	d.power(rec)
+	d.responses(rec)
 
 	return d
 }
@@ -322,6 +323,9 @@ func defaultValues() map[string]value {
 		"secure_boot.database_write_error":      {yaml: yamlError(405, "Base.1.18.ActionNotSupported")},
 		"secure_boot.reset_keys.supported":      {yaml: "false"},
 		"secure_boot.reset_keys.response":       {yaml: quote(string(profile.ResetKeysResponseNoContent))},
+		"secure_boot.reset_keys.applies":        {yaml: string(profile.ResetKeysAppliesImmediately)},
+		"secure_boot.database_add_response":     {yaml: quote(string(profile.DatabaseAddResponseCreated))},
+		"secure_boot.database_delete_response":  {yaml: quote(string(profile.DatabaseDeleteResponseNoContent))},
 		"secure_boot.certificate_id_style":      {yaml: string(profile.CertificateIDStyleHash)},
 		"secure_boot.certificate_id_prefix":     {yaml: `""`},
 		"secure_boot.enable_requires_power_off": {yaml: "true"},
@@ -330,6 +334,9 @@ func defaultValues() map[string]value {
 		"power.not_settled_window":              {yaml: "0s"},
 		"power.not_settled_error":               {yaml: yamlError(400, "Base.1.18.ResourceInStandby")},
 		"power.delay":                           {yaml: "0s"},
+		"power.redundant_reset_errors.off":      {yaml: "null"},
+		"power.redundant_reset_errors.on":       {yaml: "null"},
+		"responses.patch":                       {yaml: quote(string(profile.ResourcePatchResponseNoContent))},
 		"timing.scale":                          {yaml: "1.0", fixed: true, note: "proxy setting"},
 	}
 }
