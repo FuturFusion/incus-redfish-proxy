@@ -1,0 +1,3 @@
+version: 1
+name: generic
+description: Behavior of the proxy without profiles. Every switch holds its default.
