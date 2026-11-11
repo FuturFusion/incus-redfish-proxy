@@ -2,6 +2,7 @@ package api_test
 
 import (
 	"bytes"
+	"context"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -31,6 +32,7 @@ import (
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api/mock"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/media"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/boom"
 	"github.com/FuturFusion/incus-redfish-proxy/internal/util/testing/queue"
@@ -2835,6 +2837,15 @@ func TestRedfishServer_PatchSyntheticBiosAttributes(t *testing.T) {
 			wantConfigs:           []incusapi.ConfigMap{},
 		},
 		{
+			name:       "error - requirement written in the same PATCH",
+			attributes: map[string]any{"Mode": "Performance", "ModeOption": "Enabled"},
+
+			wantStatus:            http.StatusBadRequest,
+			wantMessageID:         "Base.1.18.PropertyUnknown",
+			wantRelatedProperties: []string{"#/Attributes/ModeOption"},
+			wantConfigs:           []incusapi.ConfigMap{},
+		},
+		{
 			name:       "error - not a boolean",
 			attributes: map[string]any{"Turbo": "false"},
 
@@ -2852,7 +2863,7 @@ func TestRedfishServer_PatchSyntheticBiosAttributes(t *testing.T) {
 			incusClient := &mock.IncusClientMock{
 				HasExtensionFunc: func(string) bool { return false },
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
-					return &incusapi.Instance{Status: "Stopped"}, "", nil
+					return &incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Config: map[string]string{}}}, "", nil
 				},
 				UpdateInstanceFunc: func(name string, instance incusapi.InstancePut, ETag string) (incusclient.Operation, error) {
 					return &mock.IncusOperationMock{WaitFunc: func() error { return nil }}, nil
@@ -3380,6 +3391,199 @@ func TestRedfishServer_Overlay(t *testing.T) {
 	}
 }
 
+func TestRedfishServer_VirtualMediaDelivery(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		delivery profile.Delivery
+		fallback profile.StreamFallback
+		mountErr error
+
+		assertErr      require.ErrorAssertionFunc
+		wantDevice     func(image string) map[string]string
+		wantVolumes    int
+		wantMounts     []media.Options
+		wantEjectClose int
+	}{
+		{
+			name:     "success - stream",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackError,
+
+			assertErr: require.NoError,
+			wantDevice: func(image string) map[string]string {
+				return map[string]string{"type": "disk", "source": fakeMediaPath, "readonly": "true", "user.redfish.image": image, "user.redfish.delivery": "stream"}
+			},
+			wantMounts:     []media.Options{{ReadAhead: 4 << 20, CacheSize: 64 << 20}},
+			wantEjectClose: 1,
+		},
+		{
+			name:     "success - prefetch",
+			delivery: profile.DeliveryPrefetch,
+			fallback: profile.StreamFallbackError,
+
+			assertErr: require.NoError,
+			wantDevice: func(image string) map[string]string {
+				return map[string]string{"type": "disk", "source": fakeMediaPath, "readonly": "true", "user.redfish.image": image, "user.redfish.delivery": "prefetch"}
+			},
+			wantMounts:     []media.Options{{ReadAhead: 4 << 20, CacheSize: 64 << 20, Prefetch: true}},
+			wantEjectClose: 1,
+		},
+		{
+			name:     "success - fallback to a full fetch",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackFullFetch,
+			mountErr: fmt.Errorf("%w: %w", media.ErrImage, media.ErrRangeNotSupported),
+
+			assertErr: require.NoError,
+			wantDevice: func(image string) map[string]string {
+				return map[string]string{"type": "disk", "pool": "default", "source": "test-instance-boot-media.iso", "user.redfish.image": image}
+			},
+			wantVolumes: 1,
+		},
+		{
+			name:     "error - fallback refused",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackError,
+			mountErr: fmt.Errorf("%w: %w", media.ErrImage, media.ErrRangeNotSupported),
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				requireStatusError(tt, err, http.StatusBadRequest, a...)
+				require.ErrorContains(tt, err, "server does not support range requests", a...)
+			},
+			wantDevice: func(string) map[string]string { return nil },
+		},
+		{
+			name:     "error - unavailable image is not fetched in full",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackFullFetch,
+			mountErr: fmt.Errorf("%w: probe: 404 Not Found", media.ErrImage),
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				requireStatusError(tt, err, http.StatusBadRequest, a...)
+			},
+			wantDevice: func(string) map[string]string { return nil },
+		},
+		{
+			name:     "error - broken mount is not fetched in full",
+			delivery: profile.DeliveryStream,
+			fallback: profile.StreamFallbackFullFetch,
+			mountErr: boom.Error,
+
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				requireStatusError(tt, err, http.StatusInternalServerError, a...)
+			},
+			wantDevice: func(string) map[string]string { return nil },
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			image := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				_, _ = w.Write([]byte("image"))
+			}))
+			t.Cleanup(image.Close)
+
+			p := profile.Default()
+			p.VirtualMedia.Delivery = tc.delivery
+			p.VirtualMedia.Stream.Fallback = tc.fallback
+
+			mounter := &fakeMounter{err: tc.mountErr}
+			incusClient := fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}})
+			client := setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(mounter))
+
+			const actions = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions"
+
+			resp, err := client.Post(actions+"/VirtualMedia.InsertMedia", map[string]any{"Image": image.URL})
+			closeBody(resp)
+
+			tc.assertErr(t, err, "insert the media")
+
+			instance, _, err := incusClient.GetInstance("test-instance")
+			require.NoError(t, err, "read the instance")
+
+			require.Equal(t, tc.wantDevice(image.URL), instance.Devices["boot-media"], "the device matches the delivery")
+			require.Len(t, incusClient.CreateStoragePoolVolumeFromISOCalls(), tc.wantVolumes, "only a full fetch creates a volume")
+			require.Equal(t, tc.wantMounts, mounter.opts, "options of the mounts")
+
+			// Without inserted media the eject fails, only its effects matter here.
+			resp, _ = client.Post(actions+"/VirtualMedia.EjectMedia", map[string]any{})
+			closeBody(resp)
+
+			require.Equal(t, tc.wantEjectClose, mounter.closeCount(), "eject removes the mount")
+			require.Len(t, incusClient.DeleteStoragePoolVolumeCalls(), tc.wantVolumes, "eject deletes only a volume it created")
+		})
+	}
+}
+
+func TestRedfishServer_VirtualMediaStaleMount(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	p := profile.Default()
+	p.VirtualMedia.Delivery = profile.DeliveryStream
+
+	mounter := &fakeMounter{}
+	incusClient := fakeIncus(incusapi.Instance{Status: "Stopped", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{}}})
+	client := setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(mounter))
+
+	const insert = "/redfish/v1/Managers/bmc1/VirtualMedia/CD/Actions/VirtualMedia.InsertMedia"
+
+	resp, err := client.Post(insert, map[string]any{"Image": "http://localhost/first.iso"})
+	require.NoError(t, err, "insert the first media")
+	resp.Body.Close()
+
+	instance, etag, err := incusClient.GetInstance("test-instance")
+	require.NoError(t, err, "read the instance")
+
+	delete(instance.Devices, "boot-media")
+
+	op, err := incusClient.UpdateInstance("test-instance", instance.Writable(), etag)
+	require.NoError(t, err, "remove the device outside of the proxy")
+	require.NoError(t, op.Wait(), "the media is ejected outside of the proxy")
+
+	// Run test
+	resp, err = client.Post(insert, map[string]any{"Image": "http://localhost/second.iso"})
+	require.NoError(t, err, "insert the second media")
+	resp.Body.Close()
+
+	// Assert
+	require.Equal(t, []string{"http://localhost/first.iso", "http://localhost/second.iso"}, mounter.images, "both images are mounted")
+	require.Equal(t, 1, mounter.closeCount(), "the insert removes the mount that the outside eject left behind")
+}
+
+func requireStatusError(t require.TestingT, err error, status int, msgAndArgs ...any) {
+	redfishErr := &schemas.Error{}
+	require.ErrorAs(t, err, &redfishErr, msgAndArgs...)
+	require.Equal(t, status, redfishErr.HTTPReturnedStatusCode, msgAndArgs...)
+}
+
+func TestRedfishServer_RestoreMedia(t *testing.T) {
+	t.Parallel()
+
+	ctx, cancel := context.WithCancel(t.Context())
+
+	p, err := profile.Load("stream-media")
+	require.NoError(t, err, "load the profile")
+
+	mounter := &fakeMounter{}
+	incusClient := fakeIncus(incusapi.Instance{Status: "Running", InstancePut: incusapi.InstancePut{Devices: incusapi.DevicesMap{
+		"boot-media": {"type": "disk", "source": fakeMediaPath, "user.redfish.image": "http://images/boot.iso", "user.redfish.delivery": "stream"},
+	}}})
+
+	_ = setup(t, incusClient, api.WithProfile(p), api.WithMediaMounter(mounter), api.WithContext(ctx))
+
+	require.Equal(t, []string{"http://images/boot.iso"}, mounter.images, "a streamed device is mounted again")
+	require.Equal(t, []media.Options{{ReadAhead: 4 << 20, CacheSize: 64 << 20, ProbeTimeout: 30 * time.Second}}, mounter.opts, "the restore probes shortly, so the start of the proxy does not wait long")
+
+	cancel()
+
+	require.Eventually(t, func() bool { return mounter.closeCount() == 1 }, time.Second, time.Millisecond, "the end of the context removes the mount")
+}
+
 func TestRedfishServer_PatchBiosAttributes_NoOp(t *testing.T) {
 	client := setup(t, &mock.IncusClientMock{})
 
@@ -3475,6 +3679,8 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 				require.NotNil(t, vm.Inserted)
 				require.False(t, *vm.Inserted)
 				require.Empty(t, vm.Image)
+				require.Empty(t, vm.TransferMethod, "no image, no transfer method")
+				require.Empty(t, vm.TransferProtocolType, "no image, no transfer protocol")
 				require.Equal(t, schemas.URIConnectedVia, vm.ConnectedVia)
 				require.NotNil(t, vm.WriteProtected)
 				require.True(t, *vm.WriteProtected)
@@ -3507,6 +3713,36 @@ func TestRedfishServer_GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(t
 				require.NotNil(t, vm.Inserted)
 				require.True(t, *vm.Inserted)
 				require.Equal(t, "https://example.com/boot.iso", vm.Image)
+				require.Empty(t, vm.TransferMethod, "a full fetch has no transfer method")
+				require.Equal(t, schemas.HTTPSVirtualMediaTransferProtocolType, vm.TransferProtocolType, "the protocol of the image URL")
+			},
+		},
+		{
+			name: "success - inserted and streamed",
+			clientGetInstance: &incusapi.Instance{
+				InstancePut: incusapi.InstancePut{
+					Devices: incusapi.DevicesMap{
+						"boot-media": map[string]string{
+							"source":   fakeMediaPath,
+							"type":     "disk",
+							"readonly": "true",
+
+							"user.redfish.image":    "http://example.com/boot.iso",
+							"user.redfish.delivery": "stream",
+						},
+					},
+				},
+			},
+
+			assertErr: require.NoError,
+			assert: func(t *testing.T, vms []*schemas.VirtualMedia) {
+				t.Helper()
+
+				require.Len(t, vms, 1)
+				vm := vms[0]
+
+				require.Equal(t, schemas.StreamTransferMethod, vm.TransferMethod, "a streamed image")
+				require.Equal(t, schemas.HTTPVirtualMediaTransferProtocolType, vm.TransferProtocolType, "the protocol of the image URL")
 			},
 		},
 		{
@@ -4242,9 +4478,11 @@ func setup(t *testing.T, client api.IncusClient, opts ...api.Option) *gofish.API
 			AutoExpand: false,
 			Endpoint:   httpserver.URL,
 			DumpWriter: t.Output(),
+			// Parallel tests race on the shared default transport, which gofish otherwise copies.
+			HTTPClient: httpserver.Client(),
 		},
 	)
-	require.NoError(t, err)
+	require.NoError(t, err, "connect to the proxy")
 
 	return c
 }

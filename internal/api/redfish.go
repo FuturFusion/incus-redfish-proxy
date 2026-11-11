@@ -9,7 +9,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
+	"net/url"
 	"slices"
 	"strconv"
 	"strings"
@@ -64,8 +66,12 @@ type redfishServer struct {
 	// mediaMu serializes the inserts and ejects of the virtual media, they share the mount point and the volume.
 	mediaMu *sync.Mutex
 
-	// resetMu is held while a reset runs in the background.
+	// A reset in the background holds resetMu while it runs.
 	resetMu *sync.Mutex
+
+	mediaDir string
+	mounter  MediaMounter
+	mounted  *mountedMedia
 
 	now func() time.Time
 }
@@ -128,6 +134,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		powerMu:      &sync.Mutex{},
 		mediaMu:      &sync.Mutex{},
 		resetMu:      &sync.Mutex{},
+		mounted:      &mountedMedia{},
 		now:          time.Now,
 	}
 
@@ -136,6 +143,21 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	}
 
 	s.bios = biosStore{bios: s.profile.BIOS}
+
+	if s.mounter == nil {
+		s.mounter = fuseMounter{dir: s.mediaDir, client: s.httpClient}
+	}
+
+	if s.profile.VirtualMedia.Delivery != profile.DeliveryFullFetch {
+		s.restoreMedia()
+
+		context.AfterFunc(s.ctx, func() {
+			err := s.mounted.close()
+			if err != nil {
+				log.Printf("remove the media of instance %q: %v", s.instanceName, err)
+			}
+		})
+	}
 
 	if s.profile.BIOS.Pending {
 		s.resets.onPowerOn(s.applyPendingOnPowerOn)
@@ -337,6 +359,8 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 	connectedViaURI := VirtualMediaV170VirtualMedia_ConnectedVia{}
 	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(URI)
 
+	transferMethod, transferProtocol := transferOfMedia(device, image)
+
 	base := fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName)
 
 	response(w, virtualMediaGetResponse{
@@ -349,14 +373,50 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 				CD,
 				DVD,
 			},
-			Image:             image,
-			ConnectedVia:      ref(connectedViaURI),
-			Inserted:          ref(inserted),
-			WriteProtected:    ref(true),
-			VerifyCertificate: ref(false),
+			Image:                image,
+			TransferMethod:       transferMethod,
+			TransferProtocolType: transferProtocol,
+			ConnectedVia:         ref(connectedViaURI),
+			Inserted:             ref(inserted),
+			WriteProtected:       ref(true),
+			VerifyCertificate:    ref(false),
 		},
 		Actions: s.virtualMediaActions(base),
 	})
+}
+
+// transferOfMedia returns how the inserted image reaches the instance, nil for no image.
+// Like on real BMCs, only an inserted image has a transfer method and protocol.
+// A full fetch has no transfer method, like on HPE iLO.
+func transferOfMedia(device map[string]string, image *string) (*VirtualMediaV170VirtualMedia_TransferMethod, *VirtualMediaV170VirtualMedia_TransferProtocolType) {
+	if image == nil {
+		return nil, nil
+	}
+
+	var method *VirtualMediaV170VirtualMedia_TransferMethod
+
+	delivery := profile.Delivery(device[bootMediaDeliveryKey])
+	if delivery == profile.DeliveryStream || delivery == profile.DeliveryPrefetch {
+		method = &VirtualMediaV170VirtualMedia_TransferMethod{}
+		_ = method.FromVirtualMediaV170TransferMethod(Stream)
+	}
+
+	var protocol *VirtualMediaV170VirtualMedia_TransferProtocolType
+
+	u, err := url.Parse(*image)
+	if err == nil {
+		switch strings.ToUpper(u.Scheme) {
+		case string(HTTP):
+			protocol = &VirtualMediaV170VirtualMedia_TransferProtocolType{}
+			_ = protocol.FromVirtualMediaV170TransferProtocolType(HTTP)
+
+		case string(HTTPS):
+			protocol = &VirtualMediaV170VirtualMedia_TransferProtocolType{}
+			_ = protocol.FromVirtualMediaV170TransferProtocolType(HTTPS)
+		}
+	}
+
+	return method, protocol
 }
 
 // virtualMediaActions returns the actions of the virtual media resource. An insert variant hides the variants Operations Center prefers to it.
@@ -599,6 +659,16 @@ func (s redfishServer) ejectVirtualMedia() error {
 		return err
 	}
 
+	// A streamed image has no volume, its file goes away with the mount.
+	if originalDevice[bootMediaDeliveryKey] != "" {
+		err = s.mounted.close()
+		if err != nil {
+			log.Printf("remove the media of instance %q: %v", s.instanceName, err)
+		}
+
+		return nil
+	}
+
 	err = s.client.DeleteStoragePoolVolume("default", "custom", fmt.Sprintf("%s-boot-media.iso", s.instanceName))
 	if err != nil {
 		rollbackErr := s.restoreBootMediaDevice(originalDevice)
@@ -617,6 +687,21 @@ func (s redfishServer) insertVirtualMedia(ctx context.Context, image string) err
 	_, inserted := instance.Devices["boot-media"]
 	if inserted {
 		return statusErrorf(http.StatusConflict, "virtual media is already inserted")
+	}
+
+	// An eject outside of the proxy leaves the mount behind. The next mount uses the same mount point.
+	err = s.mounted.close()
+	if err != nil {
+		return fmt.Errorf("remove the previous media: %w", err)
+	}
+
+	mounted, err := s.mountMedia(ctx, image)
+	if err != nil {
+		return err
+	}
+
+	if mounted != nil {
+		return s.attachMountedMedia(instance, etag, image, mounted)
 	}
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, image, nil)
@@ -1403,8 +1488,14 @@ func (s redfishServer) reset(ctx context.Context, action string, force bool, noo
 
 	s.resets.poweredOn(s.now())
 
-	if s.profile.VirtualMedia.BootOverrideOnce {
-		return s.consumeBootOnce()
+	if !s.profile.VirtualMedia.BootOverrideOnce {
+		return nil
+	}
+
+	// The power state changed already. An error would make the client reset again.
+	err = s.consumeBootOnce()
+	if err != nil {
+		log.Printf("drop the one time boot override of instance %q: %v", s.instanceName, err)
 	}
 
 	return nil

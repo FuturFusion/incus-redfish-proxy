@@ -7,6 +7,7 @@ bios:
     id: TestBiosAttributeRegistry.v1_0_0
     attributes:
       - {name: Mode, type: Enumeration, values: [Standard, Performance], default: Standard}
+      - {name: ModeOption, type: Enumeration, values: [Enabled, Disabled], default: Disabled, requires: {attribute: Mode, value: Performance}}
       - {name: Revision, type: String, read_only: true, default: "1.0"}
       - {name: Label, type: String}
       - {name: Threshold, type: Integer, min: 0, max: 100, default: 50}
