@@ -1,0 +1,58 @@
+# Drawn from recording 20261109T122950Z, made by Operations Center 0.10.1.
+# Server model PowerEdge R740xd, BMC firmware 7.00.00.184, BIOS 2.27.0.
+version: 1
+name: dell-idrac9
+description: Like Dell iDRAC 9, BIOS settings wait for the next reset, secure boot databases are written over Redfish with sequential IDs.
+
+bios:
+  patch_response: 202-taskmonitor   # seq 93, 99; the task URI answers like a task monitor, without a task body
+  settings_object: true             # seq 10, 93
+  pending: true                     # seq 93, 237; the attributes changed only after the next power on
+  apply_time:
+    supported: [OnReset]            # seq 10; the BMC also publishes AtMaintenanceWindowStart, InMaintenanceWindowOnReset
+    default: OnReset                # seq 10, 93
+  registry:
+    id: IncusBiosAttributeRegistry.v1_0_0 # vendor registry IDs are not copied
+    attributes:
+      # seq 10, 93; neutral names for the three attributes of the first PATCH.
+      - {name: Protection, type: Enumeration, values: [Disabled, Enabled], default: Disabled}
+      - {name: ProtectionPolicy, type: Enumeration, values: [Standard, Custom], default: Standard}
+      - {name: Module, type: Enumeration, values: ["Off", "On"], default: "Off"}
+      # seq 10, 237, 298; the BMC only shows this attribute once Module is On in effect.
+      - {name: ModuleAlgorithm, type: Enumeration, values: [SHA1, SHA256], default: SHA1, requires: {attribute: Module, value: "On"}}
+
+secure_boot:
+  database_add_response: "204"      # seq 510, 525
+  database_delete_response: "200-error" # seq 508; IDRAC.2.8.SYS430
+  reset_keys:
+    supported: true                 # seq 9
+    types: [DeleteAllKeys, DeletePK] # seq 9; the BMC also publishes ResetAllKeysToDefault, ResetPK, ResetKEK, ResetDB, ResetDBX
+  certificate_id_style: sequential  # seq 505, 512, 1048, 1051
+  certificate_id_prefix: "CustSecbootpolicy." # seq 505, 512, 1048, 1051
+  empty_after_power_on:
+    times: 1                        # seq 740, 965, 967, 968, 1080 and 2 more; the recording shows 2, 1 covers the retry of Operations Center with one round less
+    for: 10m                        # seq 740, 965, 967, 968, 1080 and 2 more; the last empty read came 4m43s after the power on; above the settle wait of Operations Center, so its check reads empty
+
+virtual_media:
+  boot_override_once: true          # seq 1578, 1598; accepted in a PATCH, no allowable values published
+  refused_parameters:
+    names: [MediaType]              # seq 1576, 1577
+    error: {status: 400, message_id: Base.1.12.ActionParameterUnknown} # seq 1576
+  delivery: stream                  # seq 13; the BMC reports TransferMethod Stream
+  locations: [systems, managers]    # seq 3, 5, 1577
+  id: "CD"                          # proxy setting; the BMC uses 1, the end to end test of Operations Center inserts into CD
+  stream:
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: [On, ForceOff, ForceRestart, GracefulRestart, GracefulShutdown] # seq 3; PushPowerButton, Nmi and PowerCycle are not supported by the proxy
+  delay: {on: 5s, off: 15s}         # seq 97, 192, 211, 230, 302 and 17 more; On after 0s to 12s, Off after 9s to 10s; off is above the upper bound, so the first poll of OC sees On, as after some recorded resets to Off
+  redundant_reset_errors:
+    off: {status: 409, message_id: IDRAC.2.8.PSU502} # seq 35, 36; refused ForceOff while Off
+  busy_reads:
+    resources: [system, bios, secure_boot] # seq 195, 398, 938, 947, 1197 and 2 more
+    failures: 3                     # seq 195, 398, 938, 947, 1197 and 2 more; a run of 4 refused reads failed the read
+    error: {status: 503, message_id: IDRAC.2.8.SYS518} # seq 193
+
+responses:
+  patch: "200"                      # seq 1578; Base.1.12.Success
