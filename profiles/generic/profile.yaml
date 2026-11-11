@@ -35,6 +35,11 @@ virtual_media:
   oem_action: InsertVirtualMedia    # oem only
   insert_response: "204"            # 204 | 202-task, a PATCH always answers 204
   boot_override_once: false         # true: offer BootSourceOverrideEnabled Once, the next power on drops it
+  delivery: full-fetch              # full-fetch | stream | prefetch, stream and prefetch mount the image through FUSE
+  stream:
+    read_ahead: 4MiB                # size of every range request, plain bytes or KiB, MiB, GiB
+    cache: 64MiB                    # bytes kept in memory
+    fallback: full-fetch            # full-fetch | error, if the server has no range requests
 
 power:
   reset_types: []                   # published as ResetType@Redfish.AllowableValues, empty: not published, all accepted

@@ -85,6 +85,12 @@ func defaults() Profile {
 			OEMVendor:      "Incus",
 			OEMAction:      "InsertVirtualMedia",
 			InsertResponse: InsertResponseNoContent,
+			Delivery:       DeliveryFullFetch,
+			Stream: Stream{
+				ReadAhead: 4 << 20,
+				Cache:     64 << 20,
+				Fallback:  StreamFallbackFullFetch,
+			},
 		},
 		Power: Power{
 			ResetTypes:      []ResetType{},

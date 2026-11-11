@@ -1,0 +1,10 @@
+version: 1
+name: stream-media
+description: Virtual media is streamed with range requests while the server reads it.
+
+virtual_media:
+  delivery: stream
+  stream:
+    read_ahead: 4MiB
+    cache: 64MiB
+    fallback: error
