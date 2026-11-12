@@ -1,4 +1,8 @@
 version: "2"
+run:
+  # Lint the end to end tests as well.
+  build-tags:
+    - e2e
 linters:
   default: none
   enable:

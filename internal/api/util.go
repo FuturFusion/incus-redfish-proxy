@@ -23,3 +23,12 @@ func refNonZero[T comparable](v T) *T {
 
 	return &v
 }
+
+// refNonEmpty returns a pointer to s, or nil if s is empty.
+func refNonEmpty[T any](s []T) *[]T {
+	if len(s) == 0 {
+		return nil
+	}
+
+	return &s
+}

@@ -15,7 +15,15 @@ import (
 
 	incusapi "github.com/lxc/incus/v7/shared/api"
 	"github.com/lxc/incus/v7/shared/uefi"
+
+	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
+
+// secureBootEnableKey holds the SecureBootEnable value requested on a running instance. The next reset applies it.
+const secureBootEnableKey = redfishConfigPrefix + "secureboot.enable"
+
+// resetKeysKey holds the ResetKeysType of a request with applies on_reset. The next reset that powers the instance on applies it.
+const resetKeysKey = redfishConfigPrefix + "secureboot.reset_keys"
 
 // nvramExtension is the Incus API extension providing access to the UEFI variables.
 const nvramExtension = "instance_nvram"
@@ -72,6 +80,9 @@ type signatureRef struct {
 	id        string
 	entry     signatureEntry
 	entryType string
+
+	// hash identifies the content of the entry, whatever the style of the Redfish ID is.
+	hash string
 }
 
 // signatureID derives a content based Redfish ID, the fingerprint for certificates.
@@ -166,6 +177,7 @@ func collectSignatures(lists []signatureList, certificates bool) []signatureRef 
 				id:        id,
 				entry:     entry,
 				entryType: list.Type,
+				hash:      id,
 			})
 		}
 	}
@@ -184,8 +196,8 @@ func lookupSignature(refs []signatureRef, id string) (signatureRef, bool) {
 	return signatureRef{}, false
 }
 
-// removeSignature drops all entries with the given Redfish ID, and lists left empty.
-func removeSignature(lists []signatureList, id string, certificates bool) []signatureList {
+// removeSignature drops all entries with the given content hash, and lists left empty.
+func removeSignature(lists []signatureList, hash string, certificates bool) []signatureList {
 	remaining := make([]signatureList, 0, len(lists))
 
 	for _, list := range lists {
@@ -197,7 +209,7 @@ func removeSignature(lists []signatureList, id string, certificates bool) []sign
 		entries := make([]signatureEntry, 0, len(list.Entries))
 
 		for _, entry := range list.Entries {
-			if signatureID(list.Type, entry.Data) != id {
+			if signatureID(list.Type, entry.Data) != hash {
 				entries = append(entries, entry)
 			}
 		}
@@ -272,6 +284,15 @@ func (s redfishServer) getSignatureDatabase(db secureBootDatabase) ([]signatureL
 
 // putSignatureDatabase writes the signature lists back, deleting the variable once it is empty.
 func (s redfishServer) putSignatureDatabase(db secureBootDatabase, lists []signatureList, variable *incusapi.InstanceNVRAMVariable, etag string) error {
+	err := s.writeSignatureDatabase(db, lists, variable, etag)
+	if err == nil {
+		s.databaseRefresh.written(s.now())
+	}
+
+	return err
+}
+
+func (s redfishServer) writeSignatureDatabase(db secureBootDatabase, lists []signatureList, variable *incusapi.InstanceNVRAMVariable, etag string) error {
 	if len(lists) == 0 {
 		return s.client.DeleteInstanceNVRAMGUIDVar(s.instanceName, db.guid, db.name)
 	}
@@ -299,14 +320,298 @@ func respondNVRAMError(w http.ResponseWriter, err error) {
 	var statusErr *statusError
 
 	if errors.As(err, &statusErr) {
-		responseErrWithMessage(w, statusErr.status, statusErr.Error())
+		respondStatusError(w, err)
 		return
 	}
 
 	status, ok := incusapi.StatusErrorMatch(err, http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound, http.StatusPreconditionFailed)
 	if !ok {
-		status = http.StatusInternalServerError
+		respondStatusError(w, err)
+		return
 	}
 
 	responseErrWithMessage(w, status, err.Error())
+}
+
+// databaseWritable answers the profile's error, if the secure boot databases are read only over Redfish.
+// Callers check it before the NVRAM (non-volatile memory) extension, so the answer does not depend on the Incus version.
+func (s redfishServer) databaseWritable(w http.ResponseWriter) bool {
+	if s.profile.SecureBoot.DatabaseWrite {
+		return true
+	}
+
+	shape := s.profile.SecureBoot.DatabaseWriteError
+	responseRedfishError(w, shape.Status, "the secure boot databases are read only", redfishMessage{MessageID: shape.MessageID, Message: "the secure boot databases are read only"})
+
+	return false
+}
+
+// secureBootPath is the URI of the SecureBoot resource.
+func (s redfishServer) secureBootPath() string {
+	return fmt.Sprintf("/redfish/v1/Systems/%s/SecureBoot", s.instanceName)
+}
+
+// secureBootResponse is the SecureBoot resource, SecureBootV121Actions has no allowable values for the reset keys action.
+type secureBootResponse struct {
+	SecureBootV121SecureBoot
+
+	Actions *secureBootActions `json:"Actions,omitempty"`
+}
+
+type secureBootActions struct {
+	ResetKeys resetKeysAction `json:"#SecureBoot.ResetKeys"`
+}
+
+type resetKeysAction struct {
+	Target          string                  `json:"target"`
+	AllowableValues []profile.ResetKeysType `json:"ResetKeysType@Redfish.AllowableValues"`
+}
+
+// secureBootActions returns the actions of the SecureBoot resource, nil without the reset keys action.
+func (s redfishServer) secureBootActions() *secureBootActions {
+	if !s.profile.SecureBoot.ResetKeys.Supported {
+		return nil
+	}
+
+	return &secureBootActions{
+		ResetKeys: resetKeysAction{
+			Target:          s.secureBootPath() + "/Actions/SecureBoot.ResetKeys",
+			AllowableValues: s.profile.SecureBoot.ResetKeys.Types,
+		},
+	}
+}
+
+// registerSecureBootRoutes adds the reset keys action, which is not part of the generated routes.
+func (s redfishServer) registerSecureBootRoutes(mux *http.ServeMux) {
+	if !s.profile.SecureBoot.ResetKeys.Supported {
+		return
+	}
+
+	mux.HandleFunc("POST /redfish/v1/Systems/{ComputerSystemId}/SecureBoot/Actions/SecureBoot.ResetKeys", func(w http.ResponseWriter, r *http.Request) {
+		s.postSecureBootResetKeys(w, r, r.PathValue("ComputerSystemId"))
+	})
+}
+
+func (s redfishServer) postSecureBootResetKeys(w http.ResponseWriter, r *http.Request, computerSystemID string) {
+	if !s.validateComputerSystemID(w, computerSystemID) {
+		return
+	}
+
+	request := struct {
+		ResetKeysType profile.ResetKeysType `json:"ResetKeysType"`
+	}{}
+
+	err := json.NewDecoder(r.Body).Decode(&request)
+	if err != nil {
+		responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if !slices.Contains(s.profile.SecureBoot.ResetKeys.Types, request.ResetKeysType) {
+		message := fmt.Sprintf("reset keys type %q is not supported", request.ResetKeysType)
+		responseRedfishError(w, http.StatusBadRequest, message, redfishMessage{
+			MessageID:   baseRegistry + "ActionParameterValueNotInList",
+			Message:     message,
+			MessageArgs: []string{string(request.ResetKeysType), "ResetKeysType", "SecureBoot.ResetKeys"},
+		})
+
+		return
+	}
+
+	if !s.hasNVRAMSupport(w) {
+		return
+	}
+
+	message := successMessage()
+	if s.profile.SecureBoot.ResetKeys.Applies == profile.ResetKeysAppliesOnReset {
+		message = s.resetRequiredMessage()
+		err = s.requestResetKeys(request.ResetKeysType)
+	} else {
+		err = s.resetKeys(request.ResetKeysType)
+	}
+
+	if err != nil {
+		respondNVRAMError(w, err)
+		return
+	}
+
+	if s.profile.SecureBoot.ResetKeys.Response == profile.ResetKeysResponseTask {
+		responseAccepted(w, taskMonitorPath(s.tasks.create(s.secureBootPath(), TaskV174TaskStateCompleted)))
+		return
+	}
+
+	responseDone(w, s.profile.SecureBoot.ResetKeys.Response, message)
+}
+
+// resetKeys deletes the key databases of the reset type at once, which puts the firmware into setup mode.
+func (s redfishServer) resetKeys(resetKeysType profile.ResetKeysType) error {
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	// Incus only allows changes to the UEFI variables of a stopped instance.
+	if instance.Status != "Stopped" {
+		return statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+	}
+
+	err = s.deleteKeys(resetKeysType)
+	if err != nil {
+		return err
+	}
+
+	if !s.profile.SecureBoot.ResetKeys.DisablesSecureBoot && !s.profile.SecureBoot.PowerCycle.Triggers(profile.PowerCycleTriggerResetKeys) {
+		return nil
+	}
+
+	return s.updateInstance(func(_ *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		s.afterResetKeys(put)
+
+		return true, nil
+	})
+}
+
+// requestResetKeys stores the reset type for the next reset. DeleteAllKeys covers DeletePK, so a stored DeleteAllKeys stays.
+// It only writes the instance config, so it works on a running instance, like firmware that stores the request.
+func (s redfishServer) requestResetKeys(resetKeysType profile.ResetKeysType) error {
+	return s.updateInstance(func(_ *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		stored := profile.ResetKeysType(put.Config[resetKeysKey])
+		if stored == resetKeysType || stored == profile.ResetKeysTypeDeleteAllKeys {
+			return false, nil
+		}
+
+		if put.Config == nil {
+			put.Config = map[string]string{}
+		}
+
+		put.Config[resetKeysKey] = string(resetKeysType)
+
+		return true, nil
+	})
+}
+
+// applyResetKeys deletes the keys of a stored request, once the instance is stopped.
+// A failed deletion keeps the request, so the next reset tries again.
+func (s redfishServer) applyResetKeys() error {
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	resetKeysType, ok := instance.Config[resetKeysKey]
+	if !ok {
+		return nil
+	}
+
+	err = s.deleteKeys(profile.ResetKeysType(resetKeysType))
+	if err != nil {
+		return err
+	}
+
+	return s.updateInstance(func(_ *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		// A DeleteAllKeys stored in the meantime waits for the next reset.
+		if put.Config[resetKeysKey] != resetKeysType {
+			return false, nil
+		}
+
+		delete(put.Config, resetKeysKey)
+		s.afterResetKeys(put)
+
+		return true, nil
+	})
+}
+
+// deleteKeys deletes the key databases of the reset type and restarts their sequential IDs.
+func (s redfishServer) deleteKeys(resetKeysType profile.ResetKeysType) error {
+	databases := secureBootDatabases
+	if resetKeysType == profile.ResetKeysTypeDeletePK {
+		pk, _ := lookupSecureBootDatabase("PK")
+		databases = []secureBootDatabase{pk}
+	}
+
+	for _, db := range databases {
+		err := s.client.DeleteInstanceNVRAMGUIDVar(s.instanceName, db.guid, db.name)
+		if err != nil && !incusapi.StatusErrorCheck(err, http.StatusNotFound) {
+			return err
+		}
+	}
+
+	err := s.resetSequentialIDs(databases)
+	if err != nil {
+		return err
+	}
+
+	s.unreachableWindow.keysDeleted()
+
+	return nil
+}
+
+// applySecureBootEnable applies the SecureBootEnable requested on a running instance, once the instance is stopped.
+func (s redfishServer) applySecureBootEnable() error {
+	return s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+		enable, ok := put.Config[secureBootEnableKey]
+		if !ok {
+			return false, nil
+		}
+
+		s.markSecureBootEnable(instance, put, enable)
+		put.Config["security.secureboot"] = enable
+		delete(put.Config, secureBootEnableKey)
+
+		return true, nil
+	})
+}
+
+// savedKey is a key database before Incus rebuilds the UEFI variable store. A nil variable means the database was absent.
+type savedKey struct {
+	db       secureBootDatabase
+	variable *incusapi.InstanceNVRAMVariable
+}
+
+// saveKeysAcrossSecureBootChange reads the key databases, if the update changes security.secureboot.
+// Incus then rebuilds the UEFI variable store from its template, while real firmware keeps the keys.
+func (s redfishServer) saveKeysAcrossSecureBootChange(instance *incusapi.Instance, put incusapi.InstancePut) ([]savedKey, error) {
+	if put.Config["security.secureboot"] == instance.Config["security.secureboot"] || !s.client.HasExtension(nvramExtension) {
+		return nil, nil
+	}
+
+	keys := make([]savedKey, 0, len(secureBootDatabases))
+
+	for _, db := range secureBootDatabases {
+		variable, _, err := s.client.GetInstanceNVRAMGUIDVar(s.instanceName, db.guid, db.name)
+		if incusapi.StatusErrorCheck(err, http.StatusNotFound) {
+			keys = append(keys, savedKey{db: db})
+			continue
+		}
+
+		if err != nil {
+			return nil, fmt.Errorf("save UEFI variable %q: %w", db.name, err)
+		}
+
+		keys = append(keys, savedKey{db: db, variable: variable})
+	}
+
+	return keys, nil
+}
+
+// restoreKeys writes the saved key databases back and deletes the ones that were absent.
+func (s redfishServer) restoreKeys(keys []savedKey) error {
+	for _, key := range keys {
+		var err error
+
+		if key.variable == nil {
+			err = s.client.DeleteInstanceNVRAMGUIDVar(s.instanceName, key.db.guid, key.db.name)
+			if incusapi.StatusErrorCheck(err, http.StatusNotFound) {
+				err = nil
+			}
+		} else {
+			err = s.client.UpdateInstanceNVRAMGUIDVar(s.instanceName, key.db.guid, key.db.name, key.variable.InstanceNVRAMVariablePut, "")
+		}
+
+		if err != nil {
+			return fmt.Errorf("restore UEFI variable %q: %w", key.db.name, err)
+		}
+	}
+
+	return nil
 }

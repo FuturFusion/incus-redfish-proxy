@@ -1,0 +1,45 @@
+# Drawn from recording 20261105T140254Z, made by Operations Center 0.10.1.
+# Server model ThinkSystem SR630 V2, BMC firmware AFBT58B 5.70 2025-08-11, BIOS AFE128F.
+version: 1
+name: lenovo-xcc
+description: Like Lenovo XClarity Controller, virtual media is inserted by a PATCH, secure boot keys reset on the next power on, no database write over Redfish.
+
+bios:
+  settings_object: true             # seq 10
+  pending: true                     # seq 10; only OnReset is supported
+  apply_time:
+    supported: [OnReset]            # seq 10
+    default: OnReset                # seq 10; the only supported apply time
+
+secure_boot:
+  database_write: false             # seq 9; the BMC publishes no SecureBootDatabases
+  reset_keys:
+    supported: true                 # seq 9
+    types: [DeleteAllKeys]          # seq 186; allowable values are published through @Redfish.ActionInfo, not recorded
+    response: "200"                 # seq 186; ExtendedError.1.2.RebootRequired
+    applies: on_reset               # seq 186, 199
+    unreachable:
+      after: 1m30s                  # seq 186, 190, 295, 296; the last answer came 1m29s after the power on
+      for: 20s                      # seq 296, 298; the BMC answered no request for at least 1m41s; 20s catches one request of Operations Center, which waits up to 1 minute for it
+
+virtual_media:
+  insert: patch                     # seq 479, 1022
+  boot_override_once: true          # seq 3; published Once, Disabled
+  delivery: stream                  # seq 479; the BMC reports TransferMethod Stream
+  locations: [systems, managers]    # seq 3, 5, 479
+  id: "CD"                          # proxy setting; the BMC uses EXT1, the end to end test of Operations Center inserts into CD
+  stream:
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: [On, GracefulShutdown, GracefulRestart, ForceOn, ForceOff, ForceRestart] # seq 3; Nmi is not supported by the proxy
+  response: "204"                   # seq 53, 190
+  delay: {on: 5s, off: 10s}         # seq 190, 193, 334, 337, 516 and 5 more; On after 0s to 11s, Off after 0s to 11s; off is a proxy setting: OVMF finishes its NVRAM writes before a ForceOff, Incus fails to read a partly written store
+
+responses:
+  patch: "200-resource"             # seq 479, 480, 953
+
+overlay:
+  # The BMC publishes no key databases. Operations Center enrolls the keys from media.
+  "/redfish/v1/Systems/{system}/SecureBoot":
+    SecureBootDatabases: null

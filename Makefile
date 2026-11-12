@@ -40,6 +40,10 @@ build-all-packages:
 test:
 	$(GO) test ./... -v
 
+.PHONY: e2e-test
+e2e-test:
+	cd e2e_tests && $(GO) test -tags e2e -v -count=1 -parallel 3 -timeout 25m -coverpkg=../... -coverprofile=e2e.cover .
+
 .PHONY: static-analysis
 static-analysis: license-check lint
 

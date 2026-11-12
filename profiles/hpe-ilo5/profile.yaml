@@ -1,0 +1,46 @@
+# Drawn from recording 20261109T063453Z, made by Operations Center 0.10.1.
+# Server model ProLiant DL385 Gen10, BMC firmware iLO 5 v3.20, BIOS A40 v3.70 (01/09/2026).
+version: 1
+name: hpe-ilo5
+description: Like HPE iLO 5, success answers inside an error object, secure boot keys reset on the next power on, no database write over Redfish.
+
+bios:
+  settings_object: true             # seq 10
+  pending: true                     # seq 10; a settings object holds the future settings
+
+secure_boot:
+  database_write: false             # seq 9; the BMC publishes no SecureBootDatabases
+  reset_keys:
+    supported: true                 # seq 9
+    types: [DeleteAllKeys]          # seq 96; accepted by the BMC, no allowable values published
+    response: "200-error"           # seq 96; iLO.2.25.SystemResetRequired
+    applies: on_reset               # seq 96, 109
+    disables_secure_boot: true      # seq 95, 96, 174
+  power_cycle:
+    after: [reset_keys, enable]     # seq 96, 100, 168, 181, 187 and 6 more
+    off_after: 2m                   # seq 96, 100, 168, 181, 187 and 6 more; the power off came 1m54s to 2m3s after the power on
+    off_for: 20s                    # seq 96, 100, 168, 181, 187 and 6 more; the system stayed off for 12s to 41s
+
+virtual_media:
+  insert_response: "200-error"      # seq 276, 463; Base.1.18.Success
+  boot_override_once: true          # seq 277, 294; Once is dropped at the next power on
+  refused_parameters:
+    names: [MediaType]              # seq 275, 276
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # seq 275
+  locations: [managers]             # seq 5, 276
+  id: "CD"                          # proxy setting; the BMC uses 2, the end to end test of Operations Center inserts into CD
+
+power:
+  reset_types: [On, ForceOff, GracefulShutdown, ForceRestart, GracefulRestart] # seq 3; Nmi and PushPowerButton are not supported by the proxy
+  response: "200-error"             # seq 100, 214; Base.1.18.Success
+  delay: {on: 20s, off: 5s}         # seq 100, 116, 214, 217, 294 and 9 more; On after 12s to 28s, Off after 0s to 10s; the first poll of OC, about 10s after the reset, still sees the old state at power on only
+  redundant_reset_errors:
+    off: {status: 400, message_id: iLO.2.25.InvalidOperationForSystemState} # seq 36, 37; refused ForceOff while Off
+
+responses:
+  patch: "200-error"                # seq 277, 481
+
+overlay:
+  # The BMC publishes no key databases. Operations Center enrolls the keys from media.
+  "/redfish/v1/Systems/{system}/SecureBoot":
+    SecureBootDatabases: null

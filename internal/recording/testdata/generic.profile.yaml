@@ -1,0 +1,87 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261027T081500Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 1, BMC firmware 1.30.20, BIOS 2.4.1."
+
+bios:
+  patch_response: "204"             # seq 3
+  task_resource: false              # no evidence; no GET answered a task resource
+  settings_object: false            # seq 3
+  pending: false                    # seq 3, 4
+  apply_time:
+    supported: []                   # no evidence
+    default: ""                     # no evidence
+  patch_requires_power_off: true    # no evidence; BIOS PATCHes sent only while the server was off
+  registry:
+    id: DraftBiosAttributeRegistry.v1_0_0 # seq 3; vendor registry IDs are not copied; the attribute registry was not recorded, so the types are guessed
+    attributes:
+      - {name: DraftString, type: String} # seq 3; TODO verify; vendor attributes BootMode
+      - {name: DraftInteger, type: Integer} # seq 3; TODO verify; vendor attributes ProcCores
+      - {name: DraftBoolean, type: Boolean} # seq 3; TODO verify; vendor attributes SriovEnable
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; no write to an unknown attribute was recorded
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center deferred no attribute
+
+secure_boot:
+  database_write: true              # seq 6
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence; no database write was refused
+  database_add_response: "201"      # seq 6
+  database_delete_response: "204"   # no evidence; Operations Center deleted no database entry
+  reset_keys:
+    supported: false                # seq 5
+    types: [DeleteAllKeys, DeletePK] # no evidence
+    response: "204"                 # no evidence; Operations Center sent no ResetKeys
+    applies: immediately            # no evidence; Operations Center sent no ResetKeys
+    disables_secure_boot: false     # no evidence; Operations Center sent no ResetKeys
+    unreachable:
+      after: 0s                     # no evidence; Operations Center sent no ResetKeys
+      for: 0s                       # no evidence; Operations Center sent no ResetKeys
+  certificate_id_style: hash        # seq 7
+  certificate_id_prefix: ""         # no evidence
+  enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+  power_cycle:
+    after: []                       # no evidence; Operations Center changed no secure boot setting
+    off_after: 0s                   # no evidence; Operations Center changed no secure boot setting
+    off_for: 0s                     # no evidence; Operations Center changed no secure boot setting
+  empty_after_power_on:
+    times: 0                        # seq 6; no key database read empty after a power on
+    for: 0s                         # no evidence; no key database read empty after a power on
+
+virtual_media:
+  insert: standard                  # seq 8
+  oem_vendor: Incus                 # proxy setting, never a real vendor
+  oem_action: InsertVirtualMedia    # not used with insert standard
+  insert_response: "204"            # seq 8
+  boot_override_once: false         # seq 1
+  refused_parameters:
+    names: []                       # seq 8; the first insert was accepted
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown} # no evidence; no parameter was refused
+  locations: [managers]             # no evidence; the system and the manager were not read
+  id: "CD1"                         # seq 8
+  delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
+  stream:
+    read_ahead: 4MiB                # proxy setting
+    cache: 64MiB                    # proxy setting
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: [On, ForceOff, GracefulShutdown, ForceRestart] # seq 1; published On, ForceOff, GracefulShutdown, ForceRestart, Nmi, PushPowerButton
+  response: "204"                   # seq 9
+  not_settled_window: 0s            # no evidence; no write was refused after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
+  delay: 0s                         # no evidence
+  redundant_reset_errors:
+    off: null                       # no evidence; Operations Center sent no reset to the current power state
+    on: null                        # no evidence; Operations Center sent no reset to the current power state
+  busy_reads:
+    resources: []                   # no evidence; no read was refused until a retry succeeded
+    failures: 0                     # no evidence; no read was refused until a retry succeeded
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable} # no evidence; no read was refused until a retry succeeded
+
+responses:
+  patch: "204"                      # no evidence; Operations Center sent no PATCH of Systems, SecureBoot or VirtualMedia
+
+timing:
+  scale: 1.0                        # proxy setting

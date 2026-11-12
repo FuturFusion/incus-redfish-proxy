@@ -1,0 +1,10 @@
+version: 1
+name: test-overlay
+description: Responses carry an OEM block and drop a property.
+
+overlay:
+  "/redfish/v1/Systems/{system}":
+    Oem: {Test: {ServerPowerState: "On", Slots: [1, 2]}}
+    SerialNumber: null
+  "/redfish/v1/Managers/{manager}/VirtualMedia/{media}/":
+    Oem: {Test: {Streamed: false}}
