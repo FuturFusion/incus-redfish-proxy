@@ -48,7 +48,7 @@ license-check:
 ifeq ($(shell command -v go-licenses),)
 	(cd / ; $(GO) install -v -x github.com/google/go-licenses@latest)
 endif
-	go-licenses check --disallowed_types=forbidden,unknown,restricted --ignore github.com/rootless-containers/proto/go-proto --ignore github.com/FuturFusion/incus-redfish-proxy ./...
+	$(GO) tool go-licenses check --disallowed_types=forbidden,unknown,restricted --ignore github.com/rootless-containers/proto/go-proto --ignore github.com/FuturFusion/incus-redfish-proxy ./...
 
 .PHONY: lint
 lint:

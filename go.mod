@@ -41,6 +41,9 @@ require (
 	github.com/go-openapi/jsonpointer v0.22.4 // indirect
 	github.com/go-openapi/swag/jsonname v0.25.4 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
+	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/google/go-licenses/v2 v2.0.1 // indirect
+	github.com/google/licenseclassifier/v2 v2.0.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -73,6 +76,7 @@ require (
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/opencontainers/runtime-spec v1.3.0 // indirect
 	github.com/opencontainers/umoci v0.6.1-0.20251213054154-70fc5ee1f4df // indirect
+	github.com/otiai10/copy v1.10.0 // indirect
 	github.com/perimeterx/marshmallow v1.1.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pkg/sftp v1.13.11 // indirect
@@ -81,6 +85,7 @@ require (
 	github.com/rootless-containers/proto/go-proto v0.0.0-20260207013450-f6ee952d53d9 // indirect
 	github.com/rs/zerolog v1.34.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/sergi/go-diff v1.2.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/speakeasy-api/jsonpath v0.6.3 // indirect
 	github.com/speakeasy-api/openapi v1.19.2 // indirect
@@ -94,6 +99,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	github.com/zitadel/oidc/v3 v3.48.1 // indirect
 	github.com/zitadel/schema v1.3.2 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel v1.44.0 // indirect
 	go.opentelemetry.io/otel/metric v1.44.0 // indirect
@@ -111,6 +117,10 @@ require (
 	golang.org/x/text v0.43.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	k8s.io/klog/v2 v2.90.1 // indirect
 )
 
-tool github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+tool (
+	github.com/google/go-licenses/v2
+	github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen
+)
