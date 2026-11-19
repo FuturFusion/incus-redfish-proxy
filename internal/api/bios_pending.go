@@ -143,10 +143,11 @@ func (s redfishServer) applyPendingBIOS(stopped bool) error {
 	return nil
 }
 
-// applyPendingOnReset applies the staged attributes before a reset powers the instance on and returns the instance state action left to do.
-// A restart becomes a stop and a start, if staged attributes need a stopped instance.
+// applyPendingOnReset applies the staged attributes and the requested secure boot setting before a reset powers the instance on.
+// It returns the instance state action left to do. A restart becomes a stop and a start, if a staged change needs a stopped instance.
 func (s redfishServer) applyPendingOnReset(instance *incusapi.Instance, action string, force bool) (string, error) {
 	stopped := instance.Status == "Stopped"
+	stoppedHere := false
 
 	if action == "restart" && !stopped {
 		staged, err := s.bios.pending(instance)
@@ -154,32 +155,48 @@ func (s redfishServer) applyPendingOnReset(instance *incusapi.Instance, action s
 			return "", err
 		}
 
-		if staged != nil && s.bios.requiresStop(staged.Attributes) {
+		_, secureBootRequested := instance.Config[secureBootEnableKey]
+
+		if secureBootRequested || (staged != nil && s.bios.requiresStop(staged.Attributes)) {
 			err = s.changeInstanceState("stop", force)
 			if err != nil {
 				return "", err
 			}
 
 			stopped = true
+			stoppedHere = true
 			action = "start"
 		}
 	}
 
-	return action, s.applyPendingBIOS(stopped)
+	err := s.applyPendingBIOS(stopped)
+	if err == nil && stopped {
+		err = s.applySecureBootEnable()
+	}
+
+	if err == nil || !stoppedHere {
+		return action, err
+	}
+
+	// The client asked for a restart, so the instance must not stay off.
+	startErr := s.changeInstanceState("start", false)
+	if startErr != nil {
+		return "", errors.Join(fmt.Errorf("apply the staged changes, the instance stays stopped: %w", err), startErr)
+	}
+
+	return "", fmt.Errorf("apply the staged changes, the instance restarted without them: %w", err)
 }
 
-// applyPendingOnPowerOn applies the staged attributes after a power on, which the proxy did not issue.
-// Attributes needing a stopped instance stay pending, as the instance already runs.
 func (s redfishServer) applyPendingOnPowerOn(_ context.Context, _ powerEvent) error {
+	// Attributes that need a stopped instance stay pending, as the instance already runs.
 	s.powerMu.Lock()
 	defer s.powerMu.Unlock()
 
 	return s.applyPendingBIOS(false)
 }
 
-// updateInstance changes the instance guarded by its ETag, so a concurrent change fails instead of getting lost.
-// It retries once on such a conflict. change returns false to leave the instance as it is.
 func (s redfishServer) updateInstance(change func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error)) error {
+	// The ETag guards the change, so a concurrent change fails instead of getting lost. Retry once on such a conflict.
 	err := s.updateInstanceOnce(change)
 	if incusapi.StatusErrorCheck(err, http.StatusPreconditionFailed) {
 		err = s.updateInstanceOnce(change)
@@ -201,12 +218,22 @@ func (s redfishServer) updateInstanceOnce(change func(instance *incusapi.Instanc
 		return err
 	}
 
+	keys, err := s.saveKeysAcrossSecureBootChange(instance, put)
+	if err != nil {
+		return err
+	}
+
 	op, err := s.client.UpdateInstance(s.instanceName, put, etag)
 	if err != nil {
 		return err
 	}
 
-	return op.Wait()
+	err = op.Wait()
+	if err != nil {
+		return err
+	}
+
+	return s.restoreKeys(keys)
 }
 
 func (s redfishServer) changeInstanceState(action string, force bool) error {
