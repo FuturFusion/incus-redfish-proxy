@@ -1051,6 +1051,52 @@ func conformancePowerResetTypeRefused(t *testing.T, p profile.Profile) {
 	require.Empty(t, incusClient.UpdateInstanceStateCalls(), "a refused reset type leaves the instance")
 }
 
+func TestProfileConformanceBusyReads(t *testing.T) {
+	t.Parallel()
+
+	profiles := slices.DeleteFunc(conformanceProfiles(t), func(p profile.Profile) bool { return !p.Power.BusyReads.Enabled() })
+	require.NotEmpty(t, profiles, "a profile refuses reads")
+
+	paths := map[profile.BusyResource]string{
+		profile.BusyResourceSystem:     systemPath,
+		profile.BusyResourceBios:       systemPath + "/Bios",
+		profile.BusyResourceSecureBoot: systemPath + "/SecureBoot",
+	}
+
+	for _, p := range profiles {
+		t.Run(p.Name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			p.Power.Delay = profile.PowerDelay{}
+			client := setup(t, fakeIncus(incusapi.Instance{Status: "Stopped"}), api.WithProfile(p))
+
+			resetSystem(t, client, profile.ResetTypeOn)
+
+			want := make([]redfishAnswer, 0, len(p.Power.BusyReads.Resources)*(p.Power.BusyReads.Failures+1))
+			got := make([]redfishAnswer, 0, cap(want))
+
+			// Run test
+			for _, resource := range p.Power.BusyReads.Resources {
+				for range p.Power.BusyReads.Failures {
+					resp, err := client.Get(paths[resource])
+
+					got = append(got, answerOf(t, resp, err))
+					want = append(want, redfishAnswer{status: p.Power.BusyReads.Error.Status, messageID: p.Power.BusyReads.Error.MessageID})
+				}
+
+				resp, err := client.Get(paths[resource])
+
+				got = append(got, answerOf(t, resp, err))
+				want = append(want, redfishAnswer{status: http.StatusOK})
+			}
+
+			// Assert
+			require.Equal(t, want, got, "the first reads of each resource after the power on are refused")
+		})
+	}
+}
+
 func conformancePowerSettle(t *testing.T, p profile.Profile) {
 	t.Helper()
 
