@@ -211,9 +211,12 @@ Operations Center records the Redfish traffic of a deployment. The tool
 
 5. Store the recording next to the profile: unzip it, check that
    `manifest.json` has `final_state: completed`, and gzip `exchanges.jsonl` as
-   `profiles/<name>/recording.jsonl.gz`. Copy `manifest.json` as well. Check the
-   anonymization by hand: no credentials, no host names, no MAC addresses. Ask
-   the maintainers before you commit a recording larger than 10 MB.
+   `profiles/<name>/recording.jsonl.gz`. Copy `manifest.json` as well. Run
+   `go test ./profiles`. The test `TestRecordingsAreAnonymized` finds common
+   leaks: MAC addresses, UUIDs, license keys, time zones, media URL IDs, private
+   IP addresses, host names and email addresses. Then check the anonymization by
+   hand: no credentials, no host names, no MAC addresses. Ask the maintainers
+   before you commit a recording larger than 10 MB.
 
 6. Write `profiles/<name>/README.md` from the template below.
 
