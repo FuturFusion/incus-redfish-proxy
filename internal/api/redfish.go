@@ -110,6 +110,8 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		opt(s)
 	}
 
+	s.bios = biosStore{bios: s.profile.BIOS}
+
 	if s.events != nil {
 		go s.resets.watch(s.ctx, s.events)
 	}
@@ -189,6 +191,7 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 		},
 		Name:           "Root Service",
 		RedfishVersion: ref("1.21.0"),
+		Registries:     s.registriesLink(),
 		// SessionService: &OdataV4IdRef{
 		// 	OdataID: ref("/redfish/v1/SessionService"),
 		// },
@@ -391,6 +394,9 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 type statusError struct {
 	status int
 	err    error
+
+	// messages become @Message.ExtendedInfo of the answer, if set.
+	messages []redfishMessage
 }
 
 func (e *statusError) Error() string {
@@ -410,7 +416,7 @@ func statusErrorf(status int, format string, args ...any) error {
 func respondStatusError(w http.ResponseWriter, err error) {
 	var statusErr *statusError
 	if errors.As(err, &statusErr) {
-		responseErrWithMessage(w, statusErr.status, statusErr.Error())
+		responseRedfishError(w, statusErr.status, statusErr.Error(), statusErr.messages...)
 		return
 	}
 
@@ -1135,11 +1141,12 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDBios(w http.ResponseWr
 				OdataID: ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios/Settings", s.instanceName)),
 			},
 		}),
-		OdataID:    ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
-		OdataType:  ref("#Bios.v1_3_0.Bios"),
-		Attributes: &biosAttributes,
-		ID:         "Bios",
-		Name:       "BIOS Configuration Current Settings",
+		OdataID:           ref(fmt.Sprintf("/redfish/v1/Systems/%s/Bios", s.instanceName)),
+		OdataType:         ref("#Bios.v1_3_0.Bios"),
+		AttributeRegistry: refNonZero(s.profile.BIOS.Registry.ID),
+		Attributes:        &biosAttributes,
+		ID:                "Bios",
+		Name:              "BIOS Configuration Current Settings",
 	})
 }
 

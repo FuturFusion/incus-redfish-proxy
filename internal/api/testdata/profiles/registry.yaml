@@ -1,0 +1,21 @@
+version: 1
+name: test-registry
+description: Synthetic BIOS attributes of every type, applied at once.
+
+bios:
+  registry:
+    id: TestBiosAttributeRegistry.v1_0_0
+    attributes:
+      - {name: Mode, type: Enumeration, values: [Standard, Performance], default: Standard}
+      - {name: Revision, type: String, read_only: true, default: "1.0"}
+      - {name: Label, type: String}
+      - {name: Threshold, type: Integer, min: 0, max: 100, default: 50}
+      - {name: Turbo, type: Boolean, default: true}
+      - name: SecureBootControl
+        type: Enumeration
+        values: [Enabled, Disabled]
+        default: Enabled
+        maps_to: security.secureboot
+        value_map: {Enabled: "true", Disabled: "false"}
+  errors:
+    unknown_attribute: {status: 400, message_id: Test.1.0.AttributeUnknown}
