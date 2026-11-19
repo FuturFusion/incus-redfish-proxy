@@ -34,3 +34,14 @@ virtual_media:
   oem_vendor: Incus                 # oem only, key below Actions.Oem, never a real vendor
   oem_action: InsertVirtualMedia    # oem only
   insert_response: "204"            # 204 | 202-task, a PATCH always answers 204
+  boot_override_once: false         # true: offer BootSourceOverrideEnabled Once, the next power on drops it
+
+power:
+  reset_types: []                   # published as ResetType@Redfish.AllowableValues, empty: not published, all accepted
+  response: "204"                   # 204 | 202-task
+  not_settled_window: 0s            # writes below Systems and Managers are refused for this long after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby}  # OC waits only for IDs ending in ResourceInStandby or UnableToModifyDuringSystemPOST
+  delay: 0s                         # a reset waits this long before it changes the power state
+
+timing:
+  scale: 1.0                        # multiplies every duration of the profile, overridden by --timing-scale
