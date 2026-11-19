@@ -49,7 +49,7 @@ func TestFuseMounter(t *testing.T) {
 func mountOrSkip(t *testing.T, mounter fuseMounter, image string, opts media.Options) MountedMedia {
 	t.Helper()
 
-	mounted, err := mounter.Mount(t.Context(), image, opts)
+	mounted, err := mounter.Mount(t.Context(), image, "boot-media.iso", opts)
 	if err != nil {
 		t.Skipf("FUSE mount refused: %v", err)
 	}

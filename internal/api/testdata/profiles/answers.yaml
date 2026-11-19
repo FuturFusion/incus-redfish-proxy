@@ -1,0 +1,20 @@
+version: 1
+name: test-answers
+description: Actions, PATCHes and database writes answer 200 with messages or with the resource.
+
+secure_boot:
+  database_add_response: "204"
+  database_delete_response: "200"
+  reset_keys:
+    supported: true
+    response: 200-error
+    applies: immediately
+
+virtual_media:
+  insert_response: 200-error
+
+power:
+  response: "200"
+
+responses:
+  patch: 200-resource

@@ -143,9 +143,8 @@ func (s redfishServer) applyPendingBIOS(stopped bool) error {
 	return nil
 }
 
-// applyPendingOnReset applies the staged attributes and the requested secure boot setting before a reset powers the instance on.
-// It returns the instance state action left to do. A restart becomes a stop and a start, if a staged change needs a stopped instance.
 func (s redfishServer) applyPendingOnReset(instance *incusapi.Instance, action string, force bool) (string, error) {
+	// A restart becomes a stop and a start, if a staged change needs a stopped instance.
 	stopped := instance.Status == "Stopped"
 	stoppedHere := false
 
@@ -156,8 +155,9 @@ func (s redfishServer) applyPendingOnReset(instance *incusapi.Instance, action s
 		}
 
 		_, secureBootRequested := instance.Config[secureBootEnableKey]
+		_, resetKeysRequested := instance.Config[resetKeysKey]
 
-		if secureBootRequested || (staged != nil && s.bios.requiresStop(staged.Attributes)) {
+		if secureBootRequested || resetKeysRequested || (staged != nil && s.bios.requiresStop(staged.Attributes)) {
 			err = s.changeInstanceState("stop", force)
 			if err != nil {
 				return "", err
@@ -170,6 +170,10 @@ func (s redfishServer) applyPendingOnReset(instance *incusapi.Instance, action s
 	}
 
 	err := s.applyPendingBIOS(stopped)
+	if err == nil && stopped {
+		err = s.applyResetKeys()
+	}
+
 	if err == nil && stopped {
 		err = s.applySecureBootEnable()
 	}
@@ -237,6 +241,13 @@ func (s redfishServer) updateInstanceOnce(change func(instance *incusapi.Instanc
 }
 
 func (s redfishServer) changeInstanceState(action string, force bool) error {
+	if action == "start" || action == "restart" {
+		err := s.applyPOSTDuration()
+		if err != nil {
+			return err
+		}
+	}
+
 	op, err := s.client.UpdateInstanceState(s.instanceName, incusapi.InstanceStatePut{
 		Action: action,
 		Force:  force,

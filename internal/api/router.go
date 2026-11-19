@@ -23,5 +23,13 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Ha
 	server.registerSecureBootRoutes(mux)
 	server.registerVirtualMediaRoutes(mux)
 
-	return server.settle(server.overlay(HandlerFromMux(server, mux)))
+	return jsonContentType(server.unreachable(server.settle(server.busy(server.overlay(HandlerFromMux(server, mux))))))
+}
+
+func jsonContentType(next http.Handler) http.Handler {
+	// Like a real BMC. Without it, Go guesses text/plain.
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		next.ServeHTTP(w, r)
+	})
 }

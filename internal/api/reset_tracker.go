@@ -36,6 +36,9 @@ type resetTracker struct {
 	// hooks are only registered before the watcher starts, so they need no locking.
 	hooks []powerHook
 
+	// observers learn about each new power on, also about the ones the proxy issued. They run under the lock.
+	observers []func(at time.Time)
+
 	mu            sync.Mutex
 	lastRestartAt time.Time
 	lastPowerOnAt time.Time
@@ -60,17 +63,25 @@ func (t *resetTracker) poweredOn(at time.Time) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 
-	if at.After(t.lastPowerOnAt) {
-		t.lastPowerOnAt = at
+	t.advance(at)
+}
+
+func (t *resetTracker) advance(at time.Time) {
+	if !at.After(t.lastPowerOnAt) {
+		return
+	}
+
+	t.lastPowerOnAt = at
+	for _, observe := range t.observers {
+		observe(at)
 	}
 }
 
-// onPowerOn registers a hook, hooks run in registration order.
 func (t *resetTracker) onPowerOn(hook powerHook) {
+	// The hooks of one event run in registration order, but the events of Incus can overlap.
 	t.hooks = append(t.hooks, hook)
 }
 
-// handle records the event and runs the power on hooks, if it is a start or restart of the tracked instance.
 func (t *resetTracker) handle(ctx context.Context, event incusapi.Event) {
 	if event.Type != incusapi.EventTypeLifecycle {
 		return
@@ -105,9 +116,7 @@ func (t *resetTracker) handle(ctx context.Context, event incusapi.Event) {
 		t.lastRestartAt = event.Timestamp
 	}
 
-	if event.Timestamp.After(t.lastPowerOnAt) {
-		t.lastPowerOnAt = event.Timestamp
-	}
+	t.advance(event.Timestamp)
 
 	t.mu.Unlock()
 
