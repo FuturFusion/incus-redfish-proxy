@@ -228,6 +228,33 @@ func TestLoad_BIOSRegistry(t *testing.T) {
 	}
 }
 
+func TestLoad_BIOSPatchResponse(t *testing.T) {
+	tests := []struct {
+		name string
+		bios string
+
+		assertErr require.ErrorAssertionFunc
+	}{
+		{name: "success - task monitor", bios: "{patch_response: 202-taskmonitor}", assertErr: require.NoError},
+		{name: "success - task", bios: "{patch_response: 202-task, task_resource: true}", assertErr: require.NoError},
+		{name: "success - no content", bios: "{patch_response: \"204\"}", assertErr: require.NoError},
+		{name: "error - task without task resource", bios: "{patch_response: 202-task}", assertErr: require.Error},
+		{name: "error - unknown", bios: "{patch_response: \"201\"}", assertErr: require.Error},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			filename := filepath.Join(t.TempDir(), "profile.yaml")
+
+			err := os.WriteFile(filename, []byte("version: 1\nname: custom\nbios: "+tc.bios+"\n"), 0o600)
+			require.NoError(t, err)
+
+			_, err = profile.Load(filename)
+			tc.assertErr(t, err)
+		})
+	}
+}
+
 func TestErrorShape_Validate(t *testing.T) {
 	tests := []struct {
 		name  string

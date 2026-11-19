@@ -3,6 +3,8 @@ name: generic
 description: Behavior of the proxy without profiles. Every switch holds its default.
 
 bios:
+  patch_response: 202-taskmonitor   # 202-task | 202-taskmonitor | 200 | 204
+  task_resource: false              # expose /redfish/v1/TaskService/Tasks/{id}
   registry:
     id: ""
     attributes: []
