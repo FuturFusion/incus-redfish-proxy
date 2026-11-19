@@ -19,6 +19,7 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Ha
 	})
 
 	server.registerRegistryRoutes(mux)
+	server.registerTaskRoutes(mux)
 
 	return HandlerFromMux(server, mux)
 }
