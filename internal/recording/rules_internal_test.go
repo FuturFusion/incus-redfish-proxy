@@ -1,6 +1,7 @@
 package recording
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
@@ -102,7 +103,7 @@ func TestPowerDelay(t *testing.T) {
 		{
 			name:      "first poll shows the new state",
 			exchanges: []Exchange{system(1, 0, "Off"), reset(2, 1, "On"), system(3, 13, "On")},
-			want:      value{yaml: "0s", seqs: []int64{2, 3}, verify: true, note: "the power state became On 0s to 12s after the reset, bounded by the polls"},
+			want:      value{yaml: "{on: 0s, off: 0s}", seqs: []int64{2, 3}, verify: true, note: "the power state became On 0s to 12s after the reset, bounded by the polls; no reset to Off was polled"},
 		},
 		{
 			name: "polls bound the delay from both sides",
@@ -110,15 +111,15 @@ func TestPowerDelay(t *testing.T) {
 				system(1, 0, "Off"), reset(2, 1, "On"), system(3, 4, "Off"), system(4, 9, "On"),
 				reset(5, 10, "ForceOff"), system(6, 15, "Off"),
 			},
-			want: value{yaml: "3s", seqs: []int64{2, 4, 5, 6}, verify: true, note: "the power state became On 3s to 8s and Off 0s to 5s after the reset, bounded by the polls"},
+			want: value{yaml: "{on: 3s, off: 0s}", seqs: []int64{2, 4, 5, 6}, verify: true, note: "the power state became On 3s to 8s and Off 0s to 5s after the reset, bounded by the polls"},
 		},
 		{
-			name: "power off is faster than the lower bound of power on",
+			name: "power off is faster than power on",
 			exchanges: []Exchange{
 				system(1, 0, "Off"), reset(2, 1, "On"), system(3, 13, "Off"), system(4, 30, "On"),
 				reset(5, 31, "ForceOff"), system(6, 36, "Off"),
 			},
-			want: value{yaml: "5s", seqs: []int64{2, 4, 5, 6}, verify: true, note: "the power state became On 12s to 29s and Off 0s to 5s after the reset, bounded by the polls"},
+			want: value{yaml: "{on: 12s, off: 0s}", seqs: []int64{2, 4, 5, 6}, verify: true, note: "the power state became On 12s to 29s and Off 0s to 5s after the reset, bounded by the polls"},
 		},
 		{
 			name: "the delay differs between resets",
@@ -127,14 +128,14 @@ func TestPowerDelay(t *testing.T) {
 				reset(5, 14, "ForceOff"), system(6, 15, "Off"),
 				reset(7, 20, "On"), system(8, 25, "On"),
 			},
-			want: value{yaml: "1s", seqs: []int64{2, 4, 5, 6, 7, 8}, verify: true, note: "the power state became On 10s to 5s and Off 0s to 1s after the reset, bounded by the polls; the delay differs between resets"},
+			want: value{yaml: "{on: 5s, off: 0s}", seqs: []int64{2, 4, 5, 6, 7, 8}, verify: true, note: "the power state became On 10s to 5s and Off 0s to 1s after the reset, bounded by the polls; the delay differs between resets"},
 		},
 		{
 			name: "transitional state",
 			exchanges: []Exchange{
 				system(1, 0, "Off"), reset(2, 1, "On"), system(3, 13, "Reset"), system(4, 33, "On"),
 			},
-			want: value{yaml: "12s", seqs: []int64{2, 4}, verify: true, note: "the power state became On 12s to 32s after the reset, bounded by the polls; the BMC reported Reset in between"},
+			want: value{yaml: "{on: 12s, off: 0s}", seqs: []int64{2, 4}, verify: true, note: "the power state became On 12s to 32s after the reset, bounded by the polls; no reset to Off was polled; the BMC reported Reset in between"},
 		},
 	}
 
@@ -150,6 +151,103 @@ func TestPowerDelay(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.want, d.values["power.delay"], "power.delay")
+		})
+	}
+}
+
+func TestPostDuration(t *testing.T) {
+	t.Parallel()
+
+	start := time.Date(2026, 11, 9, 12, 0, 0, 0, time.UTC)
+
+	system := func(seq int64, second int, state string) Exchange {
+		return Exchange{
+			Sequence: seq, Timestamp: start.Add(time.Duration(second) * time.Second), Method: "GET",
+			URL: "https://bmc.example.com/redfish/v1/Systems/1", Status: 200, ResponseBody: `{"BootProgress": {"LastState": "` + state + `"}}`,
+		}
+	}
+
+	reset := func(seq int64, second int, resetType string) Exchange {
+		return Exchange{
+			Sequence: seq, Timestamp: start.Add(time.Duration(second) * time.Second), Method: "POST",
+			URL: "https://bmc.example.com/redfish/v1/Systems/1/Actions/ComputerSystem.Reset", RequestBody: `{"ResetType": "` + resetType + `"}`, Status: 204,
+		}
+	}
+
+	tests := []struct {
+		name      string
+		exchanges []Exchange
+
+		want value
+	}{
+		{
+			name:      "no reset",
+			exchanges: []Exchange{system(1, 0, "None")},
+			want:      value{yaml: "0s", reason: "no poll showed BootProgress through a POST"},
+		},
+		{
+			name:      "no POST state polled",
+			exchanges: []Exchange{system(1, 0, "None"), reset(2, 1, "On"), system(3, 20, "OSRunning")},
+			want:      value{yaml: "0s", reason: "no poll showed BootProgress through a POST"},
+		},
+		{
+			name:      "power off",
+			exchanges: []Exchange{system(1, 0, "OSRunning"), reset(2, 1, "ForceOff"), system(3, 20, "OEM"), system(4, 40, "OSRunning")},
+			want:      value{yaml: "0s", reason: "no poll showed BootProgress through a POST"},
+		},
+		{
+			name:      "POST does not end",
+			exchanges: []Exchange{system(1, 0, "None"), reset(2, 1, "On"), system(3, 20, "MemoryInitializationStarted")},
+			want:      value{yaml: "0s", reason: "no poll showed BootProgress through a POST"},
+		},
+		{
+			name:      "POST ends before the next reset",
+			exchanges: []Exchange{reset(1, 0, "On"), system(2, 20, "MemoryInitializationStarted"), reset(3, 21, "ForceOff"), system(4, 40, "OSRunning")},
+			want:      value{yaml: "0s", reason: "no poll showed BootProgress through a POST"},
+		},
+		{
+			name: "lower bound of the POST",
+			exchanges: []Exchange{
+				system(1, 0, "None"), reset(2, 1, "On"), system(3, 11, "OEM"), system(4, 31, "SystemHardwareInitializationComplete"), system(5, 51, "OSRunning"),
+			},
+			want: value{yaml: "30s", seqs: []int64{2, 4, 5}, verify: true, note: "time to the last poll in the POST, a lower bound"},
+		},
+		{
+			name: "restart shows the old operating system first",
+			exchanges: []Exchange{
+				system(1, 0, "OSRunning"), reset(2, 1, "ForceRestart"), system(3, 5, "OSRunning"), system(4, 25, "OEM"), system(5, 45, "OSBootStarted"),
+			},
+			want: value{yaml: "24s", seqs: []int64{2, 4, 5}, verify: true, note: "time to the last poll in the POST, a lower bound"},
+		},
+		{
+			name: "shortest POST of all resets",
+			exchanges: []Exchange{
+				reset(1, 0, "On"), system(2, 40, "OEM"), system(3, 60, "OSRunning"),
+				reset(4, 100, "On"), system(5, 120, "OEM"), system(6, 140, "OSRunning"),
+			},
+			want: value{yaml: "20s", seqs: []int64{1, 2, 3, 4, 5, 6}, verify: true, note: "time to the last poll in the POST, a lower bound"},
+		},
+		{
+			name: "POST longer than QEMU waits",
+			exchanges: []Exchange{
+				reset(1, 0, "On"), system(2, 131, "OEM"), system(3, 151, "OSRunning"),
+			},
+			want: value{yaml: "1m5s", seqs: []int64{1, 2, 3}, verify: true, note: "the POST lasted at least 2m11s, QEMU waits at most 1m5.535s"},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			d := &Draft{values: defaultValues()}
+
+			// Run test
+			d.postDuration(&Recording{Exchanges: tc.exchanges})
+
+			// Assert
+			require.Equal(t, tc.want, d.values["power.post_duration"], "power.post_duration")
 		})
 	}
 }
@@ -233,7 +331,7 @@ func TestSecureBootEnable(t *testing.T) {
 	}
 }
 
-func TestRefusedFirst(t *testing.T) {
+func TestInsertRefusals(t *testing.T) {
 	t.Parallel()
 
 	insert := func(seq int64, status int, body string) Exchange {
@@ -243,26 +341,48 @@ func TestRefusedFirst(t *testing.T) {
 		}
 	}
 
+	patch := Exchange{
+		Sequence: 1, Method: "PATCH", URL: "https://bmc.example.com/redfish/v1/Systems/1/VirtualMedia/EXT1",
+		RequestBody: `{"Image": "x", "Inserted": true}`, Status: 200,
+	}
+
+	defaultError := "{status: 400, message_id: Base.1.18.ActionParameterUnknown}"
+
 	tests := []struct {
 		name      string
 		exchanges []Exchange
 
-		want value
+		wantInsert value
+		wantNames  value
+		wantError  value
 	}{
 		{
-			name:      "accepted at once",
-			exchanges: []Exchange{insert(1, 204, `{"Image": "x"}`)},
-			want:      value{yaml: "standard", seqs: []int64{1}},
+			name:       "accepted at once",
+			exchanges:  []Exchange{insert(1, 204, `{"Image": "x"}`)},
+			wantInsert: value{yaml: "standard", seqs: []int64{1}},
+			wantNames:  value{yaml: "[]", seqs: []int64{1}, note: "the first insert was accepted"},
+			wantError:  value{yaml: defaultError, reason: "no parameter was refused"},
 		},
 		{
-			name:      "refused parameter",
-			exchanges: []Exchange{insert(1, 400, `{"Image": "x", "MediaType": "CD"}`), insert(2, 200, `{"Image": "x"}`)},
-			want:      value{yaml: "standard", seqs: []int64{2, 1}, note: "the BMC refused the parameter MediaType, Base.1.18.ActionParameterUnknown"},
+			name:       "refused parameter",
+			exchanges:  []Exchange{insert(1, 400, `{"Image": "x", "MediaType": "CD"}`), insert(2, 200, `{"Image": "x"}`)},
+			wantInsert: value{yaml: "standard", seqs: []int64{2, 1}},
+			wantNames:  value{yaml: "[MediaType]", seqs: []int64{1, 2}},
+			wantError:  value{yaml: defaultError, seqs: []int64{1}},
 		},
 		{
-			name:      "refused the same request",
-			exchanges: []Exchange{insert(1, 400, `{"Image": "x"}`), insert(2, 204, `{"Image": "x"}`)},
-			want:      value{yaml: "standard", seqs: []int64{2, 1}, note: "the BMC refused a first try, Base.1.18.ActionParameterUnknown"},
+			name:       "refused the same request",
+			exchanges:  []Exchange{insert(1, 400, `{"Image": "x"}`), insert(2, 204, `{"Image": "x"}`)},
+			wantInsert: value{yaml: "standard", seqs: []int64{2, 1}, note: "the BMC refused a first try, Base.1.18.ActionParameterUnknown"},
+			wantNames:  value{yaml: "[]", seqs: []int64{2}, note: "the first insert was accepted"},
+			wantError:  value{yaml: defaultError, reason: "no parameter was refused"},
+		},
+		{
+			name:       "insert with a PATCH",
+			exchanges:  []Exchange{patch},
+			wantInsert: value{yaml: "patch", seqs: []int64{1}},
+			wantNames:  value{yaml: "[]", fixed: true, note: "not used with insert patch"},
+			wantError:  value{yaml: defaultError, fixed: true, note: "not used with insert patch"},
 		},
 	}
 
@@ -271,14 +391,15 @@ func TestRefusedFirst(t *testing.T) {
 			t.Parallel()
 
 			// Setup
-			rec := &Recording{Exchanges: tc.exchanges}
-			accepted := tc.exchanges[len(tc.exchanges)-1]
+			d := &Draft{values: defaultValues()}
 
 			// Run test
-			got := refusedFirst(rec, accepted, observed("standard", accepted))
+			d.virtualMedia(&Recording{Exchanges: tc.exchanges})
 
 			// Assert
-			require.Equal(t, tc.want, got, "virtual_media.insert")
+			require.Equal(t, tc.wantInsert, d.values["virtual_media.insert"], "virtual_media.insert")
+			require.Equal(t, tc.wantNames, d.values["virtual_media.refused_parameters.names"], "virtual_media.refused_parameters.names")
+			require.Equal(t, tc.wantError, d.values["virtual_media.refused_parameters.error"], "virtual_media.refused_parameters.error")
 		})
 	}
 }
@@ -349,6 +470,83 @@ func TestRedundantResets(t *testing.T) {
 			// Assert
 			require.Equal(t, tc.wantOff, d.values["power.redundant_reset_errors.off"], "power.redundant_reset_errors.off")
 			require.Equal(t, tc.wantOn, d.values["power.redundant_reset_errors.on"], "power.redundant_reset_errors.on")
+		})
+	}
+}
+
+func TestBusyReads(t *testing.T) {
+	t.Parallel()
+
+	read := func(seq int64, path string, attempt int, status int) Exchange {
+		body := `{}`
+		if status == http.StatusServiceUnavailable {
+			body = `{"error": {"@Message.ExtendedInfo": [{"MessageId": "IDRAC.2.8.SYS518"}]}}`
+		}
+
+		return Exchange{
+			Sequence: seq, Method: "GET", URL: "https://bmc.example.com/redfish/v1/Systems/System.Embedded.1" + path,
+			Attempt: attempt, Status: status, ResponseBody: body,
+		}
+	}
+
+	const reason = "no read was refused until a retry succeeded"
+
+	tests := []struct {
+		name      string
+		exchanges []Exchange
+
+		wantResources value
+		wantFailures  value
+		wantError     value
+	}{
+		{
+			name: "retries succeed",
+			exchanges: []Exchange{
+				read(1, "/Bios", 0, 503), read(2, "/Bios", 1, 503), read(3, "/Bios", 2, 200),
+				read(4, "", 0, 503), read(5, "", 1, 200),
+				read(6, "/SecureBoot", 0, 200),
+			},
+			wantResources: value{yaml: "[system, bios]", seqs: []int64{5, 3}},
+			wantFailures:  value{yaml: "2", seqs: []int64{5, 3}},
+			wantError:     value{yaml: "{status: 503, message_id: IDRAC.2.8.SYS518}", seqs: []int64{1}},
+		},
+		{
+			name: "a read that fails all retries",
+			exchanges: []Exchange{
+				read(1, "/Bios", 0, 503), read(2, "/Bios", 1, 200),
+				read(3, "/Bios", 0, 503), read(4, "/Bios", 1, 503), read(5, "/Bios", 2, 503),
+				read(6, "/Bios", 0, 200),
+			},
+			wantResources: value{yaml: "[bios]", seqs: []int64{2}},
+			wantFailures:  value{yaml: "1", seqs: []int64{2}, note: "a run of 3 refused reads failed the read"},
+			wantError:     value{yaml: "{status: 503, message_id: IDRAC.2.8.SYS518}", seqs: []int64{1}},
+		},
+		{
+			name: "a refused read without a retry",
+			exchanges: []Exchange{
+				read(1, "/SecureBoot", 0, 500), read(2, "/SecureBoot", 0, 200),
+				read(3, "/Bios", 0, 503), read(4, "/Bios", 0, 200),
+			},
+			wantResources: value{yaml: "[]", reason: reason},
+			wantFailures:  value{yaml: "0", reason: reason},
+			wantError:     value{yaml: "{status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable}", reason: reason},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			d := &Draft{values: defaultValues()}
+
+			// Run test
+			d.busyReads(&Recording{Exchanges: tc.exchanges})
+
+			// Assert
+			require.Equal(t, tc.wantResources, d.values["power.busy_reads.resources"], "power.busy_reads.resources")
+			require.Equal(t, tc.wantFailures, d.values["power.busy_reads.failures"], "power.busy_reads.failures")
+			require.Equal(t, tc.wantError, d.values["power.busy_reads.error"], "power.busy_reads.error")
 		})
 	}
 }
@@ -689,6 +887,55 @@ func TestResetKeysApplies(t *testing.T) {
 
 			// Assert
 			require.Equal(t, tc.want, d.values["secure_boot.reset_keys.applies"], "secure_boot.reset_keys.applies")
+		})
+	}
+}
+
+func TestInsertActionInfo(t *testing.T) {
+	t.Parallel()
+
+	mediaAt := func(seq int64, body string) Exchange {
+		return Exchange{Sequence: seq, Method: "GET", URL: "https://bmc.example.com/redfish/v1/Managers/1/VirtualMedia/2/", Status: 200, ResponseBody: body}
+	}
+
+	tests := []struct {
+		name      string
+		exchanges []Exchange
+
+		want value
+	}{
+		{
+			name:      "no read",
+			exchanges: []Exchange{},
+			want:      value{yaml: "true", reason: "no read of a virtual media device shows the InsertMedia action"},
+		},
+		{
+			name:      "action info like the generic profile",
+			exchanges: []Exchange{mediaAt(1, `{"Actions": {"#VirtualMedia.InsertMedia": {"target": "/x", "@Redfish.ActionInfo": "/x/InsertMediaActionInfo"}}}`)},
+			want:      value{yaml: "true", seqs: []int64{1}},
+		},
+		{
+			name: "no action info like iLO",
+			exchanges: []Exchange{
+				mediaAt(1, `{"Actions": {"#VirtualMedia.EjectMedia": {"target": "/y"}}}`),
+				mediaAt(2, `{"Actions": {"#VirtualMedia.InsertMedia": {"target": "/x"}}}`),
+			},
+			want: value{yaml: "false", seqs: []int64{2}},
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			d := &Draft{values: defaultValues()}
+
+			// Run test
+			d.insertActionInfo(&Recording{Exchanges: tc.exchanges})
+
+			// Assert
+			require.Equal(t, tc.want, d.values["virtual_media.action_info"], "virtual_media.action_info")
 		})
 	}
 }

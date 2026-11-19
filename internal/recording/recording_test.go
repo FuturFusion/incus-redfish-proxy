@@ -330,3 +330,63 @@ func zipped(t *testing.T, files map[string][]byte) []byte {
 
 	return []byte(b.String())
 }
+
+func TestExchange_MessageID(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		body string
+
+		want string
+	}{
+		{name: "inside the error object", body: `{"error": {"code": "Base.1.8.GeneralError", "@Message.ExtendedInfo": [{"MessageId": "Base.1.8.PropertyUnknown"}]}}`, want: "Base.1.8.PropertyUnknown"},
+		{name: "at the top level", body: `{"@Message.ExtendedInfo": [{"MessageId": "Base.1.18.Success"}]}`, want: "Base.1.18.Success"},
+		{name: "error object first", body: `{"error": {"@Message.ExtendedInfo": [{"MessageId": "IDRAC.2.9.SYS011"}]}, "@Message.ExtendedInfo": [{"MessageId": "Base.1.18.Success"}]}`, want: "IDRAC.2.9.SYS011"},
+		{name: "only the error code", body: `{"error": {"code": "Base.1.8.GeneralError"}}`, want: "Base.1.8.GeneralError"},
+		{name: "no message", body: `{"Id": "1"}`, want: ""},
+		{name: "no JSON", body: `not JSON`, want: ""},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Setup
+			e := recording.Exchange{ResponseBody: tc.body}
+
+			// Run test
+			got := e.MessageID()
+
+			// Assert
+			require.Equal(t, tc.want, got, "the first message ID of the answer")
+		})
+	}
+}
+
+func TestFormatSeqs(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		seqs []int64
+
+		want string
+	}{
+		{name: "none", seqs: nil, want: ""},
+		{name: "up to five", seqs: []int64{1, 2, 3, 4, 5}, want: "1, 2, 3, 4, 5"},
+		{name: "more than five", seqs: []int64{1, 2, 3, 4, 5, 6, 7}, want: "1, 2, 3, 4, 5 and 2 more"},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			// Run test
+			got := recording.FormatSeqs(tc.seqs)
+
+			// Assert
+			require.Equal(t, tc.want, got, "at most 5 sequence numbers are named")
+		})
+	}
+}

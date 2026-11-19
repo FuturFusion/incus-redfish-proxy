@@ -220,6 +220,37 @@ func (e Exchange) ResponseJSON(v any) error {
 	return decodeBody(e.ResponseBody, e.ResponseBodyEncoding, e.ResponseTruncated, v)
 }
 
+// MessageID returns the first message ID of the answer. It looks inside the error object first, then at the top level.
+// Without a message, it returns the code of the error object.
+func (e Exchange) MessageID() string {
+	type messages []struct {
+		MessageID string `json:"MessageId"`
+	}
+
+	var body struct {
+		Error struct {
+			Code         string   `json:"code"`
+			ExtendedInfo messages `json:"@Message.ExtendedInfo"`
+		} `json:"error"`
+		ExtendedInfo messages `json:"@Message.ExtendedInfo"`
+	}
+
+	err := e.ResponseJSON(&body)
+	if err != nil {
+		return ""
+	}
+
+	switch {
+	case len(body.Error.ExtendedInfo) > 0:
+		return body.Error.ExtendedInfo[0].MessageID
+
+	case len(body.ExtendedInfo) > 0:
+		return body.ExtendedInfo[0].MessageID
+	}
+
+	return body.Error.Code
+}
+
 // RequestJSON decodes the request body into v.
 func (e Exchange) RequestJSON(v any) error {
 	return decodeBody(e.RequestBody, e.RequestBodyEncoding, e.RequestTruncated, v)

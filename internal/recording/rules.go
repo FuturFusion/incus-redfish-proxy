@@ -94,9 +94,8 @@ func isBIOSPatch(e Exchange) bool { return e.Method == http.MethodPatch && isBIO
 
 func isResetPost(e Exchange) bool { return e.Method == http.MethodPost && isReset(e.Path()) }
 
-// errorShape returns the status and message ID of a Redfish error answer, if they are valid in a profile.
 func errorShape(e Exchange) (string, bool) {
-	messageID := messageID(e)
+	messageID := e.MessageID()
 
 	err := profile.ErrorShape{Status: e.Status, MessageID: messageID}.Validate()
 	if err != nil {
@@ -106,29 +105,6 @@ func errorShape(e Exchange) (string, bool) {
 	return yamlError(e.Status, messageID), true
 }
 
-func messageID(e Exchange) string {
-	var body struct {
-		Error struct {
-			Code         string `json:"code"`
-			ExtendedInfo []struct {
-				MessageID string `json:"MessageId"`
-			} `json:"@Message.ExtendedInfo"`
-		} `json:"error"`
-	}
-
-	err := e.ResponseJSON(&body)
-	if err != nil {
-		return ""
-	}
-
-	if len(body.Error.ExtendedInfo) > 0 {
-		return body.Error.ExtendedInfo[0].MessageID
-	}
-
-	return body.Error.Code
-}
-
-// response draws the answer of an action: 202-task, 204, 200 or 200-error.
 func response(e Exchange) value {
 	if e.Status == http.StatusAccepted {
 		return observed(quote(string(profile.PowerResponseTask)), e)
@@ -137,10 +113,9 @@ func response(e Exchange) value {
 	return doneResponse(e)
 }
 
-// doneResponse draws the answer to a request that is done: 204, or 200 with the messages at the top level or inside an error object.
-// A profile knows no other status, so it becomes 204 with a note. The note names the first message ID.
 func doneResponse(e Exchange) value {
-	id := successMessageID(e)
+	// A profile knows no other status, so it becomes 204 with a note. The note names the first message ID.
+	id := e.MessageID()
 
 	var v value
 
@@ -192,34 +167,6 @@ func patchResponse(e Exchange) value {
 	return doneResponse(e)
 }
 
-// successMessageID returns the first message ID that a successful answer carries.
-// Some BMCs wrap even a success in an error object.
-func successMessageID(e Exchange) string {
-	type extendedInfo []struct {
-		MessageID string `json:"MessageId"`
-	}
-
-	var body struct {
-		ExtendedInfo extendedInfo `json:"@Message.ExtendedInfo"`
-		Error        struct {
-			ExtendedInfo extendedInfo `json:"@Message.ExtendedInfo"`
-		} `json:"error"`
-	}
-
-	err := e.ResponseJSON(&body)
-	if err != nil {
-		return ""
-	}
-
-	for _, info := range []extendedInfo{body.ExtendedInfo, body.Error.ExtendedInfo} {
-		if len(info) > 0 {
-			return info[0].MessageID
-		}
-	}
-
-	return ""
-}
-
 func (d *Draft) bios(rec *Recording) {
 	task, ok := rec.first(isTaskResource)
 	if ok {
@@ -230,11 +177,11 @@ func (d *Draft) bios(rec *Recording) {
 
 	patches := rec.where(func(e Exchange) bool { return isBIOSPatch(e) && e.Succeeded() })
 	if len(patches) == 0 {
-		d.biosApplyTime(rec, Exchange{}, settingsPending)
 		d.explain("Operations Center sent no BIOS PATCH",
 			"bios.patch_response", "bios.task_resource", "bios.settings_object", "bios.pending",
 			"bios.apply_time.supported", "bios.apply_time.default", "bios.patch_requires_power_off",
 			"bios.registry.id", "bios.errors.unknown_attribute", "bios.errors.deferred_rejected")
+		d.biosApplyTime(rec, Exchange{}, settingsPending)
 
 		return
 	}
@@ -418,6 +365,8 @@ func (d *Draft) biosApplyTime(rec *Recording, patch Exchange, pending bool) {
 		return isGET(isBIOS)(e) && e.ResponseJSON(&bios) == nil && len(bios.Settings.SupportedApplyTimes) > 0
 	})
 	if !ok {
+		d.explain("the BMC publishes no SupportedApplyTimes", "bios.apply_time.supported", "bios.apply_time.default")
+
 		return
 	}
 
@@ -554,7 +503,8 @@ func attributeType(value any, entry *registryEntry) profile.AttributeType {
 	return profile.AttributeTypeString
 }
 
-// biosRegistry adds one synthetic attribute per type the PATCHes carry. Vendor names stay in the comments.
+const proxyAttributePrefix = "incus." // The proxy attributes map to the Incus config. They are not attributes of the BMC, so the draft gives them no synthetic attribute.
+
 func (d *Draft) biosRegistry(rec *Recording, patches []Exchange) {
 	registry := recordedRegistry(rec)
 	byType := map[profile.AttributeType]*synthetic{}
@@ -574,6 +524,10 @@ func (d *Draft) biosRegistry(rec *Recording, patches []Exchange) {
 		}
 
 		for _, name := range slices.Sorted(maps.Keys(request.Attributes)) {
+			if strings.HasPrefix(name, proxyAttributePrefix) {
+				continue
+			}
+
 			var entry *registryEntry
 
 			recorded, ok := registry[name]
@@ -631,6 +585,8 @@ func (d *Draft) biosRegistry(rec *Recording, patches []Exchange) {
 
 		d.set("bios.registry.id", v)
 	}
+
+	d.explain("Operations Center patched no vendor attribute", "bios.registry.id")
 }
 
 func (s *synthetic) add(name string, patch Exchange, entry *registryEntry) {
@@ -733,9 +689,13 @@ func (d *Draft) secureBoot(rec *Recording) {
 	d.explain("Operations Center deleted no database entry", "secure_boot.database_delete_response")
 
 	d.secureBootEnable(rec)
+	d.resetKeysDisables(rec)
+	d.powerCycle(rec)
+	d.emptyAfterPowerOn(rec)
+	d.unreachable(rec)
+	d.visibleAfter(rec)
 }
 
-// databaseAnswers draws the answers to the first accepted POST and DELETE of a database entry.
 func (d *Draft) databaseAnswers(rec *Recording) {
 	post, ok := rec.first(func(e Exchange) bool {
 		return e.Method == http.MethodPost && certificatesPathPattern.MatchString(e.Path()) && e.Succeeded()
@@ -785,13 +745,13 @@ func (d *Draft) secureBootEnable(rec *Recording) {
 			return
 		}
 
-		if !profile.IsNotSettledMessageID(messageID(patch)) {
+		if !profile.IsNotSettledMessageID(patch.MessageID()) {
 			refused = append(refused, system, patch)
 		}
 	}
 
 	if len(refused) > 0 {
-		d.set(key, inferred("true", refused...).withNote("refused while the server was on, %s", messageID(refused[1])))
+		d.set(key, inferred("true", refused...).withNote("refused while the server was on, %s", refused[1].MessageID()))
 
 		return
 	}
@@ -901,7 +861,7 @@ func (d *Draft) resetKeysApplies(rec *Recording, post Exchange) {
 		}
 	}
 
-	id := successMessageID(post)
+	id := post.MessageID()
 	for _, suffix := range []string{".ResetRequired", ".RebootRequired", ".SystemResetRequired"} {
 		if strings.HasSuffix(id, suffix) {
 			d.set(key, inferred(string(profile.ResetKeysAppliesOnReset), post).withNote("%s", id))
@@ -1055,9 +1015,14 @@ func (d *Draft) responses(rec *Recording) {
 
 func (d *Draft) virtualMedia(rec *Recording) {
 	insert, ok := rec.first(func(e Exchange) bool { return e.Succeeded() && insertKind(e) != "" })
+	d.mediaLocations(rec, insert, ok)
+	d.mediaTypes(rec, insert, ok)
+	d.insertActionInfo(rec)
+
 	if ok {
 		kind := insertKind(insert)
 		d.set("virtual_media.insert", refusedFirst(rec, insert, observed(string(kind), insert)))
+		d.refusedParameters(rec, insert)
 
 		switch kind {
 		case profile.MediaInsertOEM:
@@ -1082,22 +1047,68 @@ func (d *Draft) virtualMedia(rec *Recording) {
 			v.fixed, v.note = true, "not used with insert "+string(kind)
 			d.set("virtual_media.oem_action", v)
 		}
+
+		if kind != profile.MediaInsertStandard {
+			v := d.values["virtual_media.action_info"]
+			v.fixed, v.note = true, "not used with insert "+string(kind)
+			d.set("virtual_media.action_info", v)
+		}
 	}
+
+	d.explain("Operations Center inserted no media", "virtual_media.refused_parameters.names", "virtual_media.refused_parameters.error")
 
 	d.transferMethod(rec)
 	d.bootOverrideOnce(rec)
 }
 
-// refusedFirst names the parameters of a refused try before the accepted insert.
-func refusedFirst(rec *Recording, insert Exchange, v value) value {
-	refused, ok := rec.lastBefore(insert, func(e Exchange) bool {
-		return e.Method == insert.Method && e.Path() == insert.Path() && e.Status >= http.StatusBadRequest
+func (d *Draft) insertActionInfo(rec *Recording) {
+	// Without an ActionInfo, Operations Center sends MediaType, which some BMCs refuse.
+	const key = "virtual_media.action_info"
+
+	var media struct {
+		Actions struct {
+			InsertMedia *struct {
+				ActionInfo string `json:"@Redfish.ActionInfo"`
+			} `json:"#VirtualMedia.InsertMedia"`
+		} `json:"Actions"`
+	}
+
+	get, ok := rec.first(func(e Exchange) bool {
+		media.Actions.InsertMedia = nil
+
+		return isGET(virtualMediaPathPattern.MatchString)(e) && e.ResponseJSON(&media) == nil && media.Actions.InsertMedia != nil
 	})
+	if !ok {
+		d.explain("no read of a virtual media device shows the InsertMedia action", key)
+
+		return
+	}
+
+	d.set(key, observed(yamlBool(media.Actions.InsertMedia.ActionInfo != ""), get))
+}
+
+func refusedFirst(rec *Recording, insert Exchange, v value) value {
+	refused, dropped, ok := refusedTry(rec, insert)
 	if !ok {
 		return v
 	}
 
 	v.seqs = append(v.seqs, refused.Sequence)
+
+	if len(dropped) == 0 {
+		return v.addNote("the BMC refused a first try, %s", refused.MessageID())
+	}
+
+	return v
+}
+
+func refusedTry(rec *Recording, insert Exchange) (Exchange, []string, bool) {
+	refused, ok := rec.lastBefore(insert, func(e Exchange) bool {
+		return e.Method == insert.Method && e.Path() == insert.Path() && e.Status >= http.StatusBadRequest
+	})
+	if !ok {
+		return Exchange{}, nil, false
+	}
 
 	accepted := requestKeys(insert)
 
@@ -1109,14 +1120,37 @@ func refusedFirst(rec *Recording, insert Exchange, v value) value {
 		}
 	}
 
-	if len(dropped) == 0 {
-		return v.addNote("the BMC refused a first try, %s", messageID(refused))
-	}
-
-	return v.addNote("the BMC refused the parameter %s, %s", strings.Join(dropped, ", "), messageID(refused))
+	return refused, dropped, true
 }
 
-// requestKeys returns the sorted top level keys of the request body.
+func (d *Draft) refusedParameters(rec *Recording, insert Exchange) {
+	kind := insertKind(insert)
+	if kind != profile.MediaInsertStandard {
+		for _, key := range []string{"virtual_media.refused_parameters.names", "virtual_media.refused_parameters.error"} {
+			v := d.values[key]
+			v.fixed, v.note = true, "not used with insert "+string(kind)
+			d.set(key, v)
+		}
+
+		return
+	}
+
+	refused, dropped, ok := refusedTry(rec, insert)
+	if !ok || len(dropped) == 0 {
+		d.set("virtual_media.refused_parameters.names", observed("[]", insert).withNote("the first insert was accepted"))
+		d.explain("no parameter was refused", "virtual_media.refused_parameters.error")
+
+		return
+	}
+
+	d.set("virtual_media.refused_parameters.names", observed(yamlList(dropped), refused, insert))
+
+	shape, ok := errorShape(refused)
+	if ok {
+		d.set("virtual_media.refused_parameters.error", observed(shape, refused))
+	}
+}
+
 func requestKeys(e Exchange) []string {
 	var request map[string]any
 
@@ -1256,19 +1290,106 @@ func (d *Draft) power(rec *Recording) {
 	}
 
 	d.redundantResets(rec)
+	d.busyReads(rec)
 	d.notSettled(rec)
 	d.powerDelay(rec)
+	d.postDuration(rec)
 }
 
-// redundantResetKeys are the profile keys of a reset to the power state the server has already, by target power state.
+var busyResources = []struct {
+	resource profile.BusyResource
+	match    func(string) bool
+}{
+	{profile.BusyResourceSystem, isSystem},
+	{profile.BusyResourceBios, isBIOS},
+	{profile.BusyResourceSecureBoot, isSecureBoot},
+}
+
+func isTransient(status int) bool {
+	switch status {
+	case http.StatusTooManyRequests, http.StatusBadGateway, http.StatusServiceUnavailable, http.StatusGatewayTimeout:
+		return true
+	}
+
+	return false
+}
+
+func (d *Draft) busyReads(rec *Recording) {
+	// The failures are the longest run of refused reads of one request that a successful retry ends.
+	var resources []string
+
+	var evidence []Exchange
+
+	var first *Exchange
+
+	failures, unended := 0, 0
+
+	for _, busy := range busyResources {
+		run := 0
+		seen := false
+
+		for _, e := range rec.where(func(e Exchange) bool { return e.Method == http.MethodGet && busy.match(e.Path()) }) {
+			// A new request starts a new run, a retry of it has an attempt above 0.
+			if e.Attempt == 0 {
+				unended = max(unended, run)
+				run = 0
+			}
+
+			switch {
+			case isTransient(e.Status):
+				if first == nil || e.Sequence < first.Sequence {
+					first = &e
+				}
+
+				run++
+
+			case e.Succeeded() && run > 0:
+				failures = max(failures, run)
+				evidence = append(evidence, e)
+				seen = true
+				run = 0
+
+			default:
+				unended = max(unended, run)
+				run = 0
+			}
+		}
+
+		unended = max(unended, run)
+
+		if seen {
+			resources = append(resources, string(busy.resource))
+		}
+	}
+
+	if len(resources) == 0 {
+		d.explain("no read was refused until a retry succeeded", "power.busy_reads.resources", "power.busy_reads.failures", "power.busy_reads.error")
+
+		return
+	}
+
+	d.set("power.busy_reads.resources", observed(yamlList(resources), evidence...))
+
+	v := observed(strconv.Itoa(failures), evidence...)
+	if unended > failures {
+		v = v.withNote("a run of %d refused reads failed the read", unended)
+	}
+
+	d.set("power.busy_reads.failures", v)
+
+	shape, ok := errorShape(*first)
+	if ok {
+		d.set("power.busy_reads.error", observed(shape, *first))
+	}
+}
+
 var redundantResetKeys = map[string]string{
 	"Off": "power.redundant_reset_errors.off",
 	"On":  "power.redundant_reset_errors.on",
 }
 
-// redundantResets draws the answer to a reset to the power state the server has already.
-// An accepted reset gives null, a refused one its error shape.
 func (d *Draft) redundantResets(rec *Recording) {
+	// An accepted reset gives null, a refused one its error shape.
 	for _, e := range rec.where(isResetPost) {
 		target := targetPowerState(e)
 
@@ -1334,7 +1455,7 @@ func (d *Draft) notSettled(rec *Recording) {
 
 	var refusal Exchange
 
-	for _, e := range rec.where(func(e Exchange) bool { return e.Status >= 400 && profile.IsNotSettledMessageID(messageID(e)) }) {
+	for _, e := range rec.where(func(e Exchange) bool { return e.Status >= 400 && profile.IsNotSettledMessageID(e.MessageID()) }) {
 		powerOn, ok := rec.lastBefore(e, isPowerOn)
 		if !ok {
 			continue
@@ -1384,6 +1505,76 @@ func targetPowerState(e Exchange) string {
 	}
 
 	return ""
+}
+
+func bootProgress(e Exchange) string {
+	var system struct {
+		BootProgress struct {
+			LastState string `json:"LastState"`
+		} `json:"BootProgress"`
+	}
+
+	err := e.ResponseJSON(&system)
+	if err != nil {
+		return ""
+	}
+
+	return system.BootProgress.LastState
+}
+
+// The BootProgress states, that tell the POST ended.
+var postEndedStates = []string{"OSBootStarted", "OSRunning", "SetupEntered"}
+
+func (d *Draft) postDuration(rec *Recording) {
+	// The POST of a reset lasts at least until the last poll, that still shows a POST state.
+	// The first polls after a restart can still show the operating system from before the reset, so they do not end the POST.
+	var shortest time.Duration
+
+	var evidence []Exchange
+
+	for _, post := range rec.where(func(e Exchange) bool { return isResetPost(e) && e.Succeeded() && powersOn(e) }) {
+		var lastPOST *Exchange
+
+		for _, e := range rec.Exchanges {
+			if e.Sequence <= post.Sequence || !isGET(isSystem)(e) && !isResetPost(e) {
+				continue
+			}
+
+			if isResetPost(e) {
+				break
+			}
+
+			state := bootProgress(e)
+			if slices.Contains(postEndedStates, state) && lastPOST != nil {
+				elapsed := lastPOST.Timestamp.Sub(post.Timestamp)
+				if len(evidence) == 0 || elapsed < shortest {
+					shortest = elapsed
+				}
+
+				evidence = append(evidence, post, *lastPOST, e)
+
+				break
+			}
+
+			if state != "" && state != "None" && !slices.Contains(postEndedStates, state) {
+				lastPOST = &e
+			}
+		}
+	}
+
+	if len(evidence) == 0 {
+		d.explain("no poll showed BootProgress through a POST", "power.post_duration")
+
+		return
+	}
+
+	v := inferred(shortest.Truncate(time.Second).String(), evidence...).withNote("time to the last poll in the POST, a lower bound")
+	if shortest > profile.MaxPostDuration {
+		v = inferred(profile.MaxPostDuration.Truncate(time.Second).String(), evidence...).
+			withNote("the POST lasted at least %s, QEMU waits at most %s", shortest.Truncate(time.Second), profile.MaxPostDuration)
+	}
+
+	d.set("power.post_duration", v)
 }
 
 type delayBounds struct {
@@ -1442,33 +1633,37 @@ func (d *Draft) powerDelay(rec *Recording) {
 		return
 	}
 
-	// The profile has one delay. The largest lower bound fits every power state, unless it exceeds an upper bound.
-	var lower time.Duration
+	// Each power state gets its lower bound, the last poll that still showed the old state, unless it exceeds the upper bound.
+	delays := map[string]time.Duration{}
 
-	upper := time.Duration(math.MaxInt64)
-
-	var ranges []string
+	var ranges, unseen []string
 
 	differs := false
 
 	for _, target := range []string{"On", "Off"} {
 		b, ok := bounds[target]
 		if !ok {
+			unseen = append(unseen, target)
+
 			continue
 		}
 
 		b.lower = b.lower.Truncate(time.Second)
 		b.upper = time.Duration(math.Ceil(b.upper.Seconds())) * time.Second
-		lower, upper = max(lower, b.lower), min(upper, b.upper)
+		delays[target] = min(b.lower, b.upper)
 		differs = differs || b.lower > b.upper
 		ranges = append(ranges, fmt.Sprintf("%s %s to %s", target, b.lower, b.upper))
 	}
 
-	v := inferred(min(lower, upper).String(), evidence...).
+	v := inferred(fmt.Sprintf("{on: %s, off: %s}", delays["On"], delays["Off"]), evidence...).
 		withNote("the power state became %s after the reset, bounded by the polls", strings.Join(ranges, " and "))
 
 	if differs {
 		v = v.addNote("the delay differs between resets")
+	}
+
+	if len(unseen) > 0 {
+		v = v.addNote("no reset to %s was polled", strings.Join(unseen, ", "))
 	}
 
 	if len(transitional) > 0 {
