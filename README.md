@@ -84,16 +84,21 @@ always fail the insert.
 
 ## Known limitations
 
-- BIOS attributes, which need a stopped instance, stay pending after a restart
+- BIOS attributes that need a stopped instance stay pending after a restart
   from within the guest. Only a reset through the proxy applies them.
 - Enabling secure boot on a running instance applies only on a reset through
   the proxy.
+- Incus copies new UEFI (Unified Extensible Firmware Interface) variables from
+  the firmware template whenever `security.secureboot` changes.
+  `SecureBootEnable` therefore drops the certificates and signatures added over
+  Redfish. Enable secure boot first, then add the keys.
 - `BootSourceOverrideEnabled: Once` sets the boot priority of the virtual media
-  like `Continuous` and marks it as one time. The next power on, that Incus
-  reports as `instance-started`, drops both. Incus applies a changed boot order
-  only when the instance starts (`volatile.vm.needs_reset`), so the dropped
-  priority takes effect on the start after that, not on a reboot from within
-  the guest.
+  like `Continuous` and marks it as one time. The next power on drops both. A
+  power on is a reset through the proxy, or an `instance-started` or
+  `instance-restarted` event of Incus. The running instance keeps its boot
+  order. Incus marks the instance with `volatile.vm.needs_reset`, so the next
+  reboot from within the guest becomes a full restart. That restart no longer
+  boots the virtual media.
 - Streamed media requires the proxy to run on the Incus host, see above.
 
 ## Library
@@ -115,3 +120,41 @@ the end to end tests of Operations Center. `redfishproxy.NewHandler` takes a
 - `cmd/redfish-profile-draft` drafts a profile from a BMC recording of
   Operations Center, see [profiles/README.md](profiles/README.md).
 - `cmd/redfish-scraper` downloads every resource of a Redfish service.
+
+## End to end tests
+
+The end to end tests in `e2e_tests` run the proxy in process against a real
+Incus server. They create virtual machines, so they need KVM. The build tag
+`e2e` keeps them out of `go test ./...`. Run them with:
+
+```sh
+make e2e-test
+```
+
+The tests check the preconditions first and list every missing one:
+
+| Requirement                                                                        | Reason                                                                                  |
+|------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------|
+| Linux with `/dev/kvm`                                                              | Incus needs KVM for virtual machines.                                                   |
+| A current stable Incus release, for example from the Zabbly packages               | The proxy needs the API extension `instance_nvram`. Incus 6.0 of Ubuntu 24.04 lacks it. |
+| The user is in the group `incus-admin`, or `IRP_E2E_REMOTE` names a trusted remote | The tests create a project, virtual machines and volumes.                               |
+| A storage pool named `default`                                                     | The full fetch of virtual media imports into it.                                        |
+| `/dev/fuse` and the package `fuse3`                                                | Streamed media is a FUSE mount.                                                         |
+| `user_allow_other` in `/etc/fuse.conf`, unless the tests run as root               | QEMU runs as an unprivileged user and reads the mount.                                  |
+| Internet access                                                                    | The stream tests download a pinned Alpine Linux image once.                             |
+
+The tests run in the project `irp-e2e-<random>` and delete it at the end.
+Environment variables change the defaults:
+
+| Variable                 | Default                            | Meaning                                                                                                                                       |
+|--------------------------|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------|
+| `IRP_E2E_REMOTE`         | default remote of the Incus client | Incus remote to test against.                                                                                                                 |
+| `IRP_E2E_POOL`           | `default`                          | Storage pool of the root disks.                                                                                                               |
+| `IRP_E2E_MEDIA_DIR`      | `~/.cache/irp-e2e/media`           | Directory for streamed media. QEMU must be able to reach it, so a home directory with mode 0700 does not work. `/var/lib/irp-e2e/media` does. |
+| `IRP_E2E_CACHE`          | `~/.cache/irp-e2e/images`          | Cache for the downloaded boot image.                                                                                                          |
+| `IRP_E2E_LOG_DIR`        | `e2e_tests/logs`                   | Proxy log, and the config and logs of every instance of a failed test.                                                                        |
+| `IRP_E2E_KEEP`           | empty                              | Any value keeps the project and its instances for debugging.                                                                                  |
+| `IRP_E2E_TIMEOUT_FACTOR` | `1`                                | Multiplies every timeout, for slow machines.                                                                                                  |
+
+The GitHub workflow `.github/workflows/e2e.yml` runs the tests on a hosted
+runner. Its setup steps show a complete installation.
