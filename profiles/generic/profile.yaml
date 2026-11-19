@@ -4,7 +4,13 @@ description: Behavior of the proxy without profiles. Every switch holds its defa
 
 bios:
   patch_response: 202-taskmonitor   # 202-task | 202-taskmonitor | 200 | 204
-  task_resource: false              # expose /redfish/v1/TaskService/Tasks/{id}
+  task_resource: false              # expose /redfish/v1/TaskService and its collection
+  settings_object: false            # true: Bios/Settings is a separate resource holding the pending attributes
+  pending: false                    # true: a PATCH stages the attributes, the next reset applies them
+  apply_time:
+    supported: []                   # Immediate | OnReset, published as @Redfish.Settings.SupportedApplyTimes
+    default: ""                     # empty: OnReset with pending, Immediate otherwise
+  patch_requires_power_off: true    # false: stage attributes on a running instance
   registry:
     id: ""
     attributes: []
