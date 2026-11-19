@@ -23,5 +23,5 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Ha
 	server.registerSecureBootRoutes(mux)
 	server.registerVirtualMediaRoutes(mux)
 
-	return HandlerFromMux(server, mux)
+	return server.settle(HandlerFromMux(server, mux))
 }

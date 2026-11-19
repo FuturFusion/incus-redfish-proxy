@@ -2,7 +2,10 @@ package api
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
+	"strconv"
+	"time"
 )
 
 func response(w http.ResponseWriter, resp any) {
@@ -88,4 +91,8 @@ func responseRedfishError(w http.ResponseWriter, statusCode int, message string,
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	_ = enc.Encode(e)
+}
+
+func retryAfterSeconds(d time.Duration) string {
+	return strconv.Itoa(int(math.Ceil(d.Seconds())))
 }
