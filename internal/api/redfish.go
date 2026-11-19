@@ -1449,7 +1449,7 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 
 // reset waits the delay of the profile and changes the power state, unless the instance is in noopStatus already.
 func (s redfishServer) reset(ctx context.Context, action string, force bool, noopStatus string) error {
-	err := s.wait(ctx, s.profile.Scaled(s.profile.Power.Delay))
+	err := s.wait(ctx, s.profile.Scaled(max(s.profile.Power.Delay.On, s.profile.Power.Delay.Off)))
 	if err != nil {
 		return err
 	}

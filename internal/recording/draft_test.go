@@ -125,7 +125,7 @@ func TestDraft(t *testing.T) {
 				require.Equal(t, profile.ResetKeysResponseNoContent, p.SecureBoot.ResetKeys.Response, "secure_boot.reset_keys.response for a 200 answer")
 				require.Equal(t, profile.MediaInsertPatch, p.VirtualMedia.Insert, "virtual_media.insert")
 				require.Equal(t, profile.DeliveryStream, p.VirtualMedia.Delivery, "virtual_media.delivery from TransferMethod")
-				require.Equal(t, 3*time.Second, p.Power.Delay, "power.delay, the lower bound of the polls")
+				require.Equal(t, profile.PowerDelay{On: 3 * time.Second, Off: 3 * time.Second}, p.Power.Delay, "power.delay, the lower bound of the polls")
 			},
 			wantGaps: 13,
 			wantGap:  recording.Gap{Key: "secure_boot.database_write", Reason: "keys enrolled from media, no database write"},
@@ -141,7 +141,7 @@ func TestDraft(t *testing.T) {
 				require.Empty(t, p.BIOS.ApplyTime.Supported, "bios.apply_time.supported, none published")
 				require.Equal(t, profile.MediaInsertStandard, p.VirtualMedia.Insert, "virtual_media.insert after a refused first try")
 				require.True(t, p.VirtualMedia.BootOverrideOnce, "virtual_media.boot_override_once from the accepted PATCH")
-				require.Equal(t, 9*time.Second, p.Power.Delay, "power.delay, the upper bound of the power off is below the lower bound of the power on")
+				require.Equal(t, profile.PowerDelay{On: 9 * time.Second, Off: 9 * time.Second}, p.Power.Delay, "power.delay, the upper bound of the power off is below the lower bound of the power on")
 			},
 			wantGaps: 17,
 			wantGap:  recording.Gap{Key: "secure_boot.enable_requires_power_off", Reason: "changed only while the server was off"},

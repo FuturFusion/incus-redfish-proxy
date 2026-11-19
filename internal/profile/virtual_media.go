@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"slices"
+	"strings"
 )
 
 // MediaInsert is how virtual media is inserted.
@@ -26,6 +28,10 @@ const (
 	InsertResponseNoContent InsertResponse = "204"
 	// InsertResponseTask answers 202 with a task monitor and inserts in the background.
 	InsertResponseTask InsertResponse = "202-task"
+	// InsertResponseOK inserts before it answers 200 with a top level @Message.ExtendedInfo.
+	InsertResponseOK InsertResponse = AnswerOK
+	// InsertResponseOKError inserts before it answers 200 with the messages inside an error object.
+	InsertResponseOKError InsertResponse = AnswerOKError
 )
 
 // Delivery is how inserted media reaches the instance.
@@ -65,7 +71,7 @@ type VirtualMedia struct {
 	OEMVendor string `yaml:"oem_vendor"`
 	OEMAction string `yaml:"oem_action"`
 
-	// InsertResponse applies to the insert actions. A PATCH always answers 204.
+	// InsertResponse applies to the insert and eject actions. The answer to a PATCH is Responses.Patch.
 	InsertResponse InsertResponse `yaml:"insert_response"`
 
 	// BootOverrideOnce also offers BootSourceOverrideEnabled Once. Without it, the proxy offers Disabled and Continuous, as before profiles existed.
@@ -73,9 +79,68 @@ type VirtualMedia struct {
 
 	Delivery Delivery `yaml:"delivery"`
 	Stream   Stream   `yaml:"stream"`
+
+	// ActionInfo publishes the @Redfish.ActionInfo of InsertMedia. Without it, a client guesses the parameters, like on HPE iLO and Dell iDRAC.
+	ActionInfo bool `yaml:"action_info"`
+
+	// RefusedParameters are InsertMedia parameters the BMC does not know. A client must send the insert again without them.
+	RefusedParameters RefusedParameters `yaml:"refused_parameters"`
+
+	// Locations are the collections that show the virtual media device. All of them show the same device.
+	Locations []MediaLocation `yaml:"locations"`
+
+	// ID is the member ID of the virtual media device, like CD on the proxy or 1 on iDRAC.
+	ID string `yaml:"id"`
+
+	// MediaTypes are the media types the device offers. A CD or DVD is attached as an optical drive, a USBStick as a disk.
+	MediaTypes []MediaType `yaml:"media_types"`
 }
 
-// minReadAhead is the smallest size of a range request.
+// MediaType is a media type of the virtual media device, as named by the Redfish VirtualMedia schema.
+type MediaType string
+
+const (
+	MediaTypeCD       MediaType = "CD"
+	MediaTypeDVD      MediaType = "DVD"
+	MediaTypeUSBStick MediaType = "USBStick"
+)
+
+// IsOptical reports whether the instance sees the media as an optical drive.
+func (m MediaType) IsOptical() bool {
+	return m == MediaTypeCD || m == MediaTypeDVD
+}
+
+// HasMediaType reports whether the device offers the media type.
+func (v VirtualMedia) HasMediaType(mediaType MediaType) bool {
+	return slices.Contains(v.MediaTypes, mediaType)
+}
+
+// MediaLocation is a collection that shows the virtual media device.
+type MediaLocation string
+
+const (
+	// MediaLocationManagers shows the device below /redfish/v1/Managers/{manager}/VirtualMedia.
+	MediaLocationManagers MediaLocation = "managers"
+
+	// MediaLocationSystems shows the device below /redfish/v1/Systems/{system}/VirtualMedia.
+	MediaLocationSystems MediaLocation = "systems"
+)
+
+var mediaIDPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9_.-]*$`)
+
+// HasLocation reports whether the collection shows the virtual media device.
+func (v VirtualMedia) HasLocation(location MediaLocation) bool {
+	return slices.Contains(v.Locations, location)
+}
+
+// RefusedParameters refuse an InsertMedia request that holds one of the names.
+type RefusedParameters struct {
+	Names []string   `yaml:"names"`
+	Error ErrorShape `yaml:"error"`
+}
+
+var insertMediaParameters = []string{"Inserted", "MediaType", "Password", "TransferMethod", "TransferProtocolType", "UserName", "WriteProtected"} // Image is required, so a profile can not refuse it.
+
 const minReadAhead = 4 << 10
 
 // Stream configures the stream and prefetch delivery.
@@ -105,7 +170,7 @@ func (v VirtualMedia) validate() error {
 	}
 
 	switch v.InsertResponse {
-	case InsertResponseNoContent, InsertResponseTask:
+	case InsertResponseNoContent, InsertResponseTask, InsertResponseOK, InsertResponseOKError:
 
 	default:
 		return fmt.Errorf("unknown virtual_media.insert_response %q", v.InsertResponse)
@@ -116,6 +181,49 @@ func (v VirtualMedia) validate() error {
 
 	default:
 		return fmt.Errorf("unknown virtual_media.delivery %q", v.Delivery)
+	}
+
+	if len(v.Locations) == 0 {
+		return errors.New("virtual_media.locations must not be empty")
+	}
+
+	for _, location := range v.Locations {
+		switch location {
+		case MediaLocationManagers, MediaLocationSystems:
+
+		default:
+			return fmt.Errorf("unknown virtual_media.locations entry %q", location)
+		}
+	}
+
+	if len(v.MediaTypes) == 0 {
+		return errors.New("virtual_media.media_types must not be empty")
+	}
+
+	for _, mediaType := range v.MediaTypes {
+		switch mediaType {
+		case MediaTypeCD, MediaTypeDVD, MediaTypeUSBStick:
+
+		default:
+			return fmt.Errorf("unknown virtual_media.media_types entry %q", mediaType)
+		}
+	}
+
+	if !mediaIDPattern.MatchString(v.ID) {
+		return fmt.Errorf("virtual_media.id %q must start with a letter or digit and contain only letters, digits, dots, dashes and underscores", v.ID)
+	}
+
+	for _, name := range v.RefusedParameters.Names {
+		if !slices.Contains(insertMediaParameters, name) {
+			return fmt.Errorf("virtual_media.refused_parameters.names entry %q is not one of %s", name, strings.Join(insertMediaParameters, ", "))
+		}
+	}
+
+	if len(v.RefusedParameters.Names) > 0 {
+		err := v.RefusedParameters.Error.Validate()
+		if err != nil {
+			return fmt.Errorf("virtual_media.refused_parameters.error: %w", err)
+		}
 	}
 
 	return v.Stream.validate()

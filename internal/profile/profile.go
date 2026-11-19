@@ -37,6 +37,7 @@ type Profile struct {
 	SecureBoot   SecureBoot   `yaml:"secure_boot"`
 	VirtualMedia VirtualMedia `yaml:"virtual_media"`
 	Power        Power        `yaml:"power"`
+	Responses    Responses    `yaml:"responses"`
 	Timing       Timing       `yaml:"timing"`
 	Overlay      Overlay      `yaml:"overlay"`
 }
@@ -68,31 +69,52 @@ func defaults() Profile {
 			},
 		},
 		SecureBoot: SecureBoot{
-			DatabaseWrite:      true,
-			DatabaseWriteError: ErrorShape{Status: 405, MessageID: "Base.1.18.ActionNotSupported"},
+			DatabaseWrite:          true,
+			DatabaseWriteError:     ErrorShape{Status: 405, MessageID: "Base.1.18.ActionNotSupported"},
+			DatabaseAddResponse:    DatabaseAddResponseCreated,
+			DatabaseDeleteResponse: DatabaseDeleteResponseNoContent,
 			ResetKeys: ResetKeys{
 				Types:    []ResetKeysType{ResetKeysTypeDeleteAllKeys, ResetKeysTypeDeletePK},
 				Response: ResetKeysResponseNoContent,
+				Applies:  ResetKeysAppliesImmediately,
 			},
 			CertificateIDStyle:     CertificateIDStyleHash,
 			EnableRequiresPowerOff: true,
+			PowerCycle: PowerCycle{
+				After: []PowerCycleTrigger{},
+			},
 		},
 		VirtualMedia: VirtualMedia{
 			Insert:         MediaInsertStandard,
 			OEMVendor:      "Incus",
 			OEMAction:      "InsertVirtualMedia",
 			InsertResponse: InsertResponseNoContent,
+			ActionInfo:     true,
 			Delivery:       DeliveryFullFetch,
 			Stream: Stream{
 				ReadAhead: 4 << 20,
 				Cache:     64 << 20,
 				Fallback:  StreamFallbackFullFetch,
 			},
+			RefusedParameters: RefusedParameters{
+				Names: []string{},
+				Error: ErrorShape{Status: 400, MessageID: "Base.1.18.ActionParameterUnknown"},
+			},
+			Locations:  []MediaLocation{MediaLocationManagers},
+			ID:         "CD",
+			MediaTypes: []MediaType{MediaTypeCD, MediaTypeDVD},
 		},
 		Power: Power{
 			ResetTypes:      []ResetType{},
 			Response:        PowerResponseNoContent,
 			NotSettledError: ErrorShape{Status: 400, MessageID: "Base.1.18.ResourceInStandby"},
+			BusyReads: BusyReads{
+				Resources: []BusyResource{},
+				Error:     ErrorShape{Status: 503, MessageID: "Base.1.18.ServiceTemporarilyUnavailable"},
+			},
+		},
+		Responses: Responses{
+			Patch: ResourcePatchResponseNoContent,
 		},
 		Timing: Timing{
 			Scale: 1,
@@ -227,9 +249,19 @@ func (p Profile) Validate() error {
 		return err
 	}
 
+	err = p.Responses.validate()
+	if err != nil {
+		return err
+	}
+
 	err = p.Timing.validate()
 	if err != nil {
 		return err
+	}
+
+	// The scale is known only here. The proxy can change it after the profile is parsed.
+	if p.Scaled(p.Power.PostDuration) > MaxPostDuration {
+		return fmt.Errorf("power.post_duration %s multiplied by timing.scale %v must not exceed %s", p.Power.PostDuration, p.Timing.Scale, MaxPostDuration)
 	}
 
 	return p.Overlay.validate()
