@@ -1,7 +1,10 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -10,7 +13,8 @@ import (
 )
 
 func TestResetTracker_handle(t *testing.T) {
-	restartedAt := time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC)
+	startedAt := time.Date(2026, 10, 6, 12, 0, 0, 0, time.UTC)
+	restartedAt := startedAt.Add(time.Hour)
 
 	event := func(action string, source string, timestamp time.Time) incusapi.Event {
 		metadata, err := json.Marshal(incusapi.EventLifecycle{Action: action, Source: source})
@@ -19,14 +23,34 @@ func TestResetTracker_handle(t *testing.T) {
 		return incusapi.Event{Type: incusapi.EventTypeLifecycle, Timestamp: timestamp, Metadata: metadata}
 	}
 
+	var seen []string
+
 	tracker := &resetTracker{instanceName: "test-instance"}
+	tracker.onPowerOn(func(ctx context.Context, e powerEvent) error {
+		seen = append(seen, fmt.Sprintf("first %t %s", e.Restart, e.At.Format(time.TimeOnly)))
+		return nil
+	})
+	tracker.onPowerOn(func(ctx context.Context, e powerEvent) error {
+		seen = append(seen, "second")
+		return errors.New("boom")
+	})
 
-	tracker.handle(event(incusapi.EventLifecycleInstanceRestarted, "/1.0/instances/other?project=foo", restartedAt))
-	tracker.handle(event(incusapi.EventLifecycleInstanceUpdated, "/1.0/instances/test-instance?project=foo", restartedAt))
+	tracker.handle(t.Context(), event(incusapi.EventLifecycleInstanceRestarted, "/1.0/instances/other?project=foo", restartedAt))
+	tracker.handle(t.Context(), event(incusapi.EventLifecycleInstanceUpdated, "/1.0/instances/test-instance?project=foo", restartedAt))
+	tracker.handle(t.Context(), event(incusapi.EventLifecycleInstanceStopped, "/1.0/instances/test-instance?project=foo", restartedAt))
 	require.Zero(t, tracker.last())
+	require.Zero(t, tracker.lastPowerOn())
+	require.Empty(t, seen)
 
-	tracker.handle(event(incusapi.EventLifecycleInstanceRestarted, "/1.0/instances/test-instance?project=foo", restartedAt))
+	tracker.handle(t.Context(), event(incusapi.EventLifecycleInstanceStarted, "/1.0/instances/test-instance?project=foo", startedAt))
+	require.Zero(t, tracker.last())
+	require.Equal(t, startedAt, tracker.lastPowerOn())
+	require.Equal(t, []string{"first false 12:00:00", "second"}, seen)
+
+	tracker.handle(t.Context(), event(incusapi.EventLifecycleInstanceRestarted, "/1.0/instances/test-instance?project=foo", restartedAt))
 	require.Equal(t, restartedAt, tracker.last())
+	require.Equal(t, restartedAt, tracker.lastPowerOn())
+	require.Equal(t, []string{"first false 12:00:00", "second", "first true 13:00:00", "second"}, seen)
 }
 
 type instanceStateClient struct {
