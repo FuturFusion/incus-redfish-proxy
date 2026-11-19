@@ -13,6 +13,7 @@ bios:
   patch_requires_power_off: true    # false: stage attributes on a running instance
   registry:
     id: ""
-    attributes: []
+    attributes: []                  # an attribute with requires: {attribute, value} is hidden and refused until that value is in effect
   errors:
     unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown}
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown}  # write to an attribute, whose requirement is not in effect

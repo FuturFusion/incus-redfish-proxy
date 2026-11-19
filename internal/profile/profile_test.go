@@ -211,6 +211,36 @@ func TestLoad_BIOSRegistry(t *testing.T) {
 
 			assertErr: require.Error,
 		},
+		{
+			name:     "success - requires",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M, value: B}}]\n",
+
+			assertErr: require.NoError,
+		},
+		{
+			name:     "error - requires unknown attribute",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: O, type: Boolean, requires: {attribute: M, value: B}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - chained requirement",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M, value: B}}, {name: P, type: String, requires: {attribute: O, value: true}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - requires without value",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M}}]\n",
+
+			assertErr: require.Error,
+		},
+		{
+			name:     "error - requires invalid value",
+			registry: "    id: T.v1_0_0\n    attributes: [{name: M, type: Enumeration, values: [A, B]}, {name: O, type: Boolean, requires: {attribute: M, value: C}}]\n",
+
+			assertErr: require.Error,
+		},
 	}
 
 	for _, tc := range tests {
@@ -250,6 +280,7 @@ func TestLoad_BIOS(t *testing.T) {
 		{name: "error - apply time not implemented", bios: "{apply_time: {supported: [AtMaintenanceWindowStart]}}", assertErr: require.Error},
 		{name: "error - unknown apply time", bios: "{apply_time: {supported: [Later]}}", assertErr: require.Error},
 		{name: "error - default not supported", bios: "{settings_object: true, pending: true, apply_time: {supported: [OnReset], default: Immediate}}", assertErr: require.Error},
+		{name: "error - resolved default not supported", bios: "{settings_object: true, pending: true, apply_time: {supported: [Immediate]}}", assertErr: require.Error},
 	}
 
 	for _, tc := range tests {
