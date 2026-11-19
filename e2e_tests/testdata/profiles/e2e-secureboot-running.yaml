@@ -1,0 +1,6 @@
+version: 1
+name: e2e-secureboot-running
+description: SecureBootEnable on a running VM is staged, the next reset through the proxy applies it.
+
+secure_boot:
+  enable_requires_power_off: false

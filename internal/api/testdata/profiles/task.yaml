@@ -1,0 +1,7 @@
+version: 1
+name: test-task
+description: BIOS changes are answered with a task resource.
+
+bios:
+  patch_response: 202-task
+  task_resource: true

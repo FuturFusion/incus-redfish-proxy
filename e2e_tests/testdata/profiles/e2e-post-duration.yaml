@@ -1,0 +1,6 @@
+version: 1
+name: e2e-post-duration
+description: The firmware waits for the POST duration after every power on and reset, before it boots.
+
+power:
+  post_duration: 30s

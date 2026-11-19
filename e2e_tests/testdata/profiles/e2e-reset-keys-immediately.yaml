@@ -1,0 +1,9 @@
+version: 1
+name: e2e-reset-keys-immediately
+description: Secure boot databases are read only over Redfish, a reset of the keys takes effect at once.
+
+secure_boot:
+  database_write: false
+  reset_keys:
+    supported: true
+    applies: immediately

@@ -5,11 +5,14 @@ package redfishproxy
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
+	"path/filepath"
 
 	config "github.com/lxc/incus/v7/shared/cliconfig"
 
 	"github.com/FuturFusion/incus-redfish-proxy/internal/api"
+	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
 
 // Config holds the settings required to build a Redfish proxy handler for a
@@ -31,6 +34,23 @@ type Config struct {
 
 	// Context stops the Incus event watcher goroutine once done, short lived callers (e.g. tests) should set it.
 	Context context.Context
+
+	// Profile is the name of an embedded profile or the path of a profile file. If empty, the proxy uses "generic".
+	Profile string
+
+	// TimingScale replaces timing.scale of the profile, if not zero.
+	TimingScale float64
+
+	// MediaDir holds the streamed media, if empty the proxy uses DefaultMediaDir. The proxy must run on the Incus host, as incusd reads the media from there.
+	MediaDir string
+}
+
+// DefaultMediaDir is the directory for streamed media, if Config.MediaDir is empty.
+const DefaultMediaDir = "/var/lib/incus-redfish-proxy/media"
+
+// Profiles returns the names of the embedded profiles.
+func Profiles() []string {
+	return profile.List()
 }
 
 // NewHandler builds a ready to use http.Handler serving the Redfish API for
@@ -39,6 +59,24 @@ type Config struct {
 func NewHandler(cfg Config) (http.Handler, error) {
 	if cfg.InstanceName == "" {
 		return nil, fmt.Errorf("instance name must not be empty")
+	}
+
+	p, err := profile.Load(cfg.Profile)
+	if err != nil {
+		return nil, fmt.Errorf("load profile: %w", err)
+	}
+
+	if cfg.TimingScale != 0 {
+		p.Timing.Scale = cfg.TimingScale
+
+		err = p.Validate()
+		if err != nil {
+			return nil, fmt.Errorf("profile %q: %w", p.Name, err)
+		}
+	}
+
+	for _, warning := range p.Warnings() {
+		log.Printf("profile %q: %s", p.Name, warning)
 	}
 
 	incusCfg, err := config.LoadConfig("")
@@ -66,5 +104,13 @@ func NewHandler(cfg Config) (http.Handler, error) {
 	// The event source needs its own client, as the Incus client shares one event connection, including its type filter, per client.
 	events := client.UseProject(project)
 
-	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events)), nil
+	mediaDir := cfg.MediaDir
+	if mediaDir == "" {
+		mediaDir = DefaultMediaDir
+	}
+
+	// The project is part of the name, so equally named instances of different projects do not share a directory.
+	mediaDir = filepath.Join(mediaDir, filepath.Base(project)+"_"+filepath.Base(cfg.InstanceName))
+
+	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events), api.WithProfile(p), api.WithMediaDir(mediaDir)), nil
 }

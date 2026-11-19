@@ -23,3 +23,11 @@ func refNonZero[T comparable](v T) *T {
 
 	return &v
 }
+
+func refNonEmpty[T any](s []T) *[]T {
+	if len(s) == 0 {
+		return nil
+	}
+
+	return &s
+}

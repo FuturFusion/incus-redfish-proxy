@@ -1,0 +1,21 @@
+{
+  "format_version": 1,
+  "server": "server01",
+  "recording_id": "20261027T081500Z",
+  "operations_center_version": "0.11.0",
+  "started_at": "2026-10-27T08:15:00Z",
+  "final_state": "completed",
+  "request": {},
+  "bmc_data": {
+    "bmc_vendor": "Example",
+    "bmc_firmware_version": "1.30.20",
+    "server_model": "Example Server 1",
+    "server_bios_version": "2.4.1",
+    "server_serial_number": "SERIAL123",
+    "system_uuid": "4c4c4544-0000"
+  },
+  "bmc_endpoint": "https://bmc.example.com",
+  "exchanges": 0,
+  "bytes": 0,
+  "truncated_exchanges": 0
+}

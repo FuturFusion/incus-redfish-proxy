@@ -1,0 +1,6 @@
+version: 1
+name: e2e-prefetch
+description: Virtual media is downloaded in order into a local file while the server reads it.
+
+virtual_media:
+  delivery: prefetch
