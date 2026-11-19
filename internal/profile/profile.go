@@ -116,7 +116,7 @@ func Load(nameOrPath string) (Profile, error) {
 		return Profile{}, fmt.Errorf("read profile: %w", err)
 	}
 
-	p, err := decode(data)
+	p, err := Parse(data)
 	if err != nil {
 		return Profile{}, fmt.Errorf("profile %q: %w", nameOrPath, err)
 	}
@@ -135,7 +135,7 @@ func loadEmbedded(name string) (Profile, error) {
 		return Profile{}, fmt.Errorf("read embedded profile %q: %w", name, err)
 	}
 
-	p, err := decode(data)
+	p, err := Parse(data)
 	if err != nil {
 		return Profile{}, fmt.Errorf("embedded profile %q: %w", name, err)
 	}
@@ -147,8 +147,8 @@ func loadEmbedded(name string) (Profile, error) {
 	return p, nil
 }
 
-// decode reads a profile over the defaults and validates it.
-func decode(data []byte) (Profile, error) {
+// Parse reads the content of a profile file over the defaults and validates it.
+func Parse(data []byte) (Profile, error) {
 	p := defaults()
 
 	dec := yaml.NewDecoder(bytes.NewReader(data))
