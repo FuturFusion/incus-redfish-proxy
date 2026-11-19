@@ -1179,7 +1179,7 @@ func TestRedfishServer_BIOSProfileProperties(t *testing.T) {
 
 	// BIOSProfileMatch.Manufacturer / .Model
 	require.Equal(t, "linuxcontainers.org", system.Manufacturer)
-	require.Equal(t, "Incus", system.Model)
+	require.Equal(t, "Incus (generic)", system.Model)
 
 	// BIOSProfileMatch.BIOSVersion, a semver constraint.
 	require.Equal(t, "7.3.0", system.BiosVersion)

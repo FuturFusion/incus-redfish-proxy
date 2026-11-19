@@ -20,6 +20,8 @@ import (
 	incusapi "github.com/lxc/incus/v7/shared/api"
 	"github.com/lxc/incus/v7/shared/uefi"
 	incusutil "github.com/lxc/incus/v7/shared/util"
+
+	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
 
 type IncusClient interface {
@@ -52,6 +54,7 @@ type redfishServer struct {
 	events       EventSource
 	resets       *resetTracker
 	tasks        *taskRegistry
+	profile      profile.Profile
 }
 
 // Option customizes the Redfish server.
@@ -82,6 +85,13 @@ func WithContext(ctx context.Context) Option {
 	}
 }
 
+// WithProfile sets the profile describing the behavior of the server, defaults to the generic profile.
+func WithProfile(p profile.Profile) Option {
+	return func(s *redfishServer) {
+		s.profile = p
+	}
+}
+
 var _ ServerInterface = (*redfishServer)(nil)
 
 func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *redfishServer {
@@ -92,6 +102,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		ctx:          context.Background(),
 		resets:       &resetTracker{instanceName: instanceName},
 		tasks:        &taskRegistry{},
+		profile:      profile.Default(),
 	}
 
 	for _, opt := range opts {
@@ -852,7 +863,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 		Manufacturer:  ref("linuxcontainers.org"),
 		// TODO: add memory summary
 		// MemorySummary: &ComputerSystemV1290MemorySummary{},
-		Model:      ref("Incus"),
+		Model:      ref("Incus (" + s.profile.Name + ")"),
 		Name:       s.instanceName,
 		PowerState: &powerState,
 		// Every vCPU is exposed as its own processor, so the number of vCPUs is
