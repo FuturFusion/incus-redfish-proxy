@@ -1,0 +1,54 @@
+{{range .Header}}# {{.}}
+{{end -}}
+version: 1
+name: {{.Name}}
+description: {{quote .Description}}
+
+bios:
+{{field "bios.patch_response"}}
+{{field "bios.task_resource"}}
+{{field "bios.settings_object"}}
+{{field "bios.pending"}}
+  apply_time:
+{{field "bios.apply_time.supported"}}
+{{field "bios.apply_time.default"}}
+{{field "bios.patch_requires_power_off"}}
+  registry:
+{{field "bios.registry.id"}}
+{{attributes}}
+  errors:
+{{field "bios.errors.unknown_attribute"}}
+{{field "bios.errors.deferred_rejected"}}
+
+secure_boot:
+{{field "secure_boot.database_write"}}
+{{field "secure_boot.database_write_error"}}
+  reset_keys:
+{{field "secure_boot.reset_keys.supported"}}
+{{field "secure_boot.reset_keys.types"}}
+{{field "secure_boot.reset_keys.response"}}
+{{field "secure_boot.certificate_id_style"}}
+{{field "secure_boot.certificate_id_prefix"}}
+{{field "secure_boot.enable_requires_power_off"}}
+
+virtual_media:
+{{field "virtual_media.insert"}}
+{{field "virtual_media.oem_vendor"}}
+{{field "virtual_media.oem_action"}}
+{{field "virtual_media.insert_response"}}
+{{field "virtual_media.boot_override_once"}}
+{{field "virtual_media.delivery"}}
+  stream:
+{{field "virtual_media.stream.read_ahead"}}
+{{field "virtual_media.stream.cache"}}
+{{field "virtual_media.stream.fallback"}}
+
+power:
+{{field "power.reset_types"}}
+{{field "power.response"}}
+{{field "power.not_settled_window"}}
+{{field "power.not_settled_error"}}
+{{field "power.delay"}}
+
+timing:
+{{field "timing.scale"}}

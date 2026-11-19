@@ -1,0 +1,58 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261109T122950Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 4, BMC firmware 7.00, BIOS 2.27.0.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 4, BMC firmware 7.00, BIOS 2.27.0."
+
+bios:
+  patch_response: 202-taskmonitor   # seq 7, 9; the task URI answers like a task monitor, without a task body
+  task_resource: false              # no evidence; no GET answered a task resource
+  settings_object: true             # seq 7
+  pending: true                     # seq 2; TODO verify; a settings object holds the future settings
+  apply_time:
+    supported: [OnReset]            # seq 2; TODO verify; dropped AtMaintenanceWindowStart, InMaintenanceWindowOnReset, the proxy knows only Immediate and OnReset
+    default: OnReset                # seq 7; as asked for by Operations Center
+  patch_requires_power_off: true    # no evidence; BIOS PATCHes sent only while the server was off
+  registry:
+    id: DraftBiosAttributeRegistry.v1_0_0 # seq 4, 7, 14; vendor registry IDs are not copied
+    attributes:
+      - {name: DraftEnumeration, type: Enumeration, values: ["Enabled", "Disabled"]} # seq 4, 7; vendor attributes SecureBoot
+      - {name: DraftRequirement, type: Enumeration, values: ["Standard", "Performance"], default: "Standard"} # seq 4, 14; TODO verify; stands for the attribute the deferred ones depend on
+      - {name: DraftDeferred, type: Enumeration, values: ["SHA1", "SHA256"], requires: {attribute: DraftRequirement, value: Performance}} # seq 4, 14; TODO verify; vendor attributes Tpm2Algorithm
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; no write to an unknown attribute was recorded
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; no deferred attribute was refused
+
+secure_boot:
+  database_write: true              # seq 18
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence; no database write was refused
+  reset_keys:
+    supported: false                # no evidence
+    types: [DeleteAllKeys, DeletePK] # no evidence
+    response: "204"                 # no evidence
+  certificate_id_style: sequential  # seq 15, 16, 19, 20
+  certificate_id_prefix: "CustPolicy." # seq 15, 16, 19, 20
+  enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
+
+virtual_media:
+  insert: standard                  # no evidence
+  oem_vendor: Incus                 # proxy setting, never a real vendor
+  oem_action: InsertVirtualMedia    # no evidence
+  insert_response: "204"            # no evidence
+  boot_override_once: false         # no evidence; no allowable values published, no PATCH with Once
+  delivery: full-fetch              # no evidence; TODO verify; range requests against the media URL are not recorded
+  stream:
+    read_ahead: 4MiB                # proxy setting
+    cache: 64MiB                    # proxy setting
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: []                   # no evidence
+  response: "204"                   # seq 5, 8; refused ForceOff while Off with 409, IDRAC.2.8.PSU502
+  not_settled_window: 0s            # no evidence; no write was refused after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
+  delay: 0s                         # seq 8, 11, 12, 13; TODO verify; the power state became On 0s to 21s and Off 0s to 9s after the reset, bounded by the polls
+
+timing:
+  scale: 1.0                        # proxy setting

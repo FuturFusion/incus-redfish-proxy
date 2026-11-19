@@ -1,0 +1,55 @@
+# Draft profile from a BMC recording. Review every value and resolve each TODO verify.
+# Recording 20261105T140000Z, made by Operations Center 0.11.0.
+# Recorded with server model Example Server 2, BMC firmware 5.70, BIOS 1.28.
+version: 1
+name: draft
+description: "Draft from a BMC recording of server model Example Server 2, BMC firmware 5.70, BIOS 1.28."
+
+bios:
+  patch_response: 202-taskmonitor   # no evidence; Operations Center sent no BIOS PATCH
+  task_resource: false              # no evidence; Operations Center sent no BIOS PATCH
+  settings_object: true             # seq 3
+  pending: true                     # seq 3; TODO verify; only OnReset is supported
+  apply_time:
+    supported: [OnReset]            # seq 3
+    default: OnReset                # seq 3; TODO verify; the only supported apply time
+  patch_requires_power_off: true    # no evidence; Operations Center sent no BIOS PATCH
+  registry:
+    id: ""                          # no evidence; Operations Center sent no BIOS PATCH
+    attributes: []
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center sent no BIOS PATCH
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown} # no evidence; Operations Center sent no BIOS PATCH
+
+secure_boot:
+  database_write: true              # no evidence; keys enrolled from media, no database write
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence; keys enrolled from media, no database write
+  reset_keys:
+    supported: true                 # seq 2
+    types: [DeleteAllKeys]          # seq 4; TODO verify; accepted by the BMC, allowable values published through @Redfish.ActionInfo, not recorded
+    response: "204"                 # seq 4; TODO verify; answered 200, ExtendedError.1.2.RebootRequired
+  certificate_id_style: hash        # no evidence; keys enrolled from media, no database write
+  certificate_id_prefix: ""         # no evidence; keys enrolled from media, no database write
+  enable_requires_power_off: true   # no evidence; secure boot already enabled
+
+virtual_media:
+  insert: patch                     # seq 13
+  oem_vendor: Incus                 # proxy setting, never a real vendor
+  oem_action: InsertVirtualMedia    # not used with insert patch
+  insert_response: "204"            # not used with insert patch, the BMC answered 200
+  boot_override_once: true          # seq 1; published Once, Disabled
+  delivery: stream                  # seq 13; TODO verify; BMC reports TransferMethod Stream
+  stream:
+    read_ahead: 4MiB                # proxy setting
+    cache: 64MiB                    # proxy setting
+    fallback: full-fetch            # proxy setting
+
+power:
+  reset_types: [On, ForceOff, GracefulShutdown] # seq 1; published On, Nmi, ForceOff, GracefulShutdown
+  response: "204"                   # seq 6
+  not_settled_window: 0s            # no evidence; no write was refused after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby} # no evidence; no write was refused after a power on
+  delay: 3s                         # seq 6, 8, 11, 12, 16 and 1 more; TODO verify; the power state became On 3s to 4s and Off 0s to 5s after the reset, bounded by the polls
+
+timing:
+  scale: 1.0                        # proxy setting
