@@ -8,4 +8,11 @@ secure_boot:
   reset_keys:
     supported: true
     types: [DeleteAllKeys, DeletePK]
-    response: "204"
+    response: "200"                 # like Lenovo XCC
+    applies: on_reset               # like Lenovo XCC and HPE iLO 5
+
+power:
+  response: 200-error               # like HPE iLO 5
+
+responses:
+  patch: "200"                      # like Dell iDRAC 9
