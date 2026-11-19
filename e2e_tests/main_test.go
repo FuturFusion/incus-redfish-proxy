@@ -34,6 +34,7 @@ var env struct {
 	project       string
 	pool          string
 	mediaDir      string
+	cacheDir      string
 	logDir        string
 	keep          bool
 	timeoutFactor float64
@@ -105,6 +106,13 @@ func setup() error {
 	err = os.MkdirAll(env.mediaDir, 0o755)
 	if err != nil {
 		problems = append(problems, fmt.Errorf("media dir: %w", err))
+	}
+
+	env.cacheDir = getenv("IRP_E2E_CACHE", filepath.Join(home, ".cache", "irp-e2e", "images"))
+
+	err = os.MkdirAll(env.cacheDir, 0o755)
+	if err != nil {
+		problems = append(problems, fmt.Errorf("cache dir: %w", err))
 	}
 
 	err = os.MkdirAll(env.logDir, 0o755)
