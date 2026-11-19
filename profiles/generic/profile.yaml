@@ -28,3 +28,9 @@ secure_boot:
   certificate_id_style: hash        # hash | sequential
   certificate_id_prefix: ""         # sequential only, "Certificate" gives Certificate1
   enable_requires_power_off: true   # false: SecureBootEnable on a running instance applies on the next reset
+
+virtual_media:
+  insert: standard                  # standard | oem | patch
+  oem_vendor: Incus                 # oem only, key below Actions.Oem, never a real vendor
+  oem_action: InsertVirtualMedia    # oem only
+  insert_response: "204"            # 204 | 202-task, a PATCH always answers 204

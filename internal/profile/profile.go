@@ -24,19 +24,18 @@ const SchemaVersion = 1
 // DefaultName is the profile the proxy uses when the user names none.
 const DefaultName = "generic"
 
-// profileFile is the name of the profile within its directory.
 const profileFile = "profile.yaml"
 
-// namePattern keeps profile names usable in the model string and as directory names.
-var namePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`)
+var namePattern = regexp.MustCompile(`^[a-z0-9][a-z0-9-]*$`) // Profile names must be usable in the model string and as directory names.
 
 // Profile describes how the proxy behaves towards a Redfish client.
 type Profile struct {
-	Version     int        `yaml:"version"`
-	Name        string     `yaml:"name"`
-	Description string     `yaml:"description"`
-	BIOS        BIOS       `yaml:"bios"`
-	SecureBoot  SecureBoot `yaml:"secure_boot"`
+	Version      int          `yaml:"version"`
+	Name         string       `yaml:"name"`
+	Description  string       `yaml:"description"`
+	BIOS         BIOS         `yaml:"bios"`
+	SecureBoot   SecureBoot   `yaml:"secure_boot"`
+	VirtualMedia VirtualMedia `yaml:"virtual_media"`
 }
 
 // Default returns the generic profile, which reproduces the behavior of the proxy before profiles existed.
@@ -74,6 +73,12 @@ func defaults() Profile {
 			},
 			CertificateIDStyle:     CertificateIDStyleHash,
 			EnableRequiresPowerOff: true,
+		},
+		VirtualMedia: VirtualMedia{
+			Insert:         MediaInsertStandard,
+			OEMVendor:      "Incus",
+			OEMAction:      "InsertVirtualMedia",
+			InsertResponse: InsertResponseNoContent,
 		},
 	}
 }
@@ -184,5 +189,10 @@ func (p Profile) Validate() error {
 		return err
 	}
 
-	return p.SecureBoot.validate()
+	err = p.SecureBoot.validate()
+	if err != nil {
+		return err
+	}
+
+	return p.VirtualMedia.validate()
 }
