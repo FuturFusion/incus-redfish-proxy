@@ -60,6 +60,9 @@ type redfishServer struct {
 
 	// powerMu serializes the resets and the power hooks, which apply the staged BIOS attributes.
 	powerMu *sync.Mutex
+
+	// insertMu is held while virtual media is inserted in the background.
+	insertMu *sync.Mutex
 }
 
 // Option customizes the Redfish server.
@@ -109,6 +112,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		tasks:        &taskRegistry{},
 		profile:      profile.Default(),
 		powerMu:      &sync.Mutex{},
+		insertMu:     &sync.Mutex{},
 	}
 
 	for _, opt := range opts {
@@ -331,16 +335,108 @@ func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w
 			WriteProtected:    ref(true),
 			VerifyCertificate: ref(false),
 		},
-		Actions: &virtualMediaActions{
-			HashVirtualMediaEjectMedia: virtualMediaActionTarget{
-				Target: base + "/Actions/VirtualMedia.EjectMedia",
-			},
-			HashVirtualMediaInsertMedia: virtualMediaActionTarget{
-				Target:     base + "/Actions/VirtualMedia.InsertMedia",
-				ActionInfo: base + "/InsertMediaActionInfo",
-			},
-		},
+		Actions: s.virtualMediaActions(base),
 	})
+}
+
+// virtualMediaActions returns the actions of the virtual media resource. An insert variant hides the variants Operations Center prefers to it.
+func (s redfishServer) virtualMediaActions(base string) *virtualMediaActions {
+	actions := &virtualMediaActions{
+		HashVirtualMediaEjectMedia: virtualMediaActionTarget{
+			Target: base + "/Actions/VirtualMedia.EjectMedia",
+		},
+	}
+
+	switch s.profile.VirtualMedia.Insert {
+	case profile.MediaInsertStandard:
+		actions.HashVirtualMediaInsertMedia = &virtualMediaActionTarget{
+			Target:     base + "/Actions/VirtualMedia.InsertMedia",
+			ActionInfo: base + "/InsertMediaActionInfo",
+		}
+
+	case profile.MediaInsertOEM:
+		vendor := s.profile.VirtualMedia.OEMVendor
+		actions.Oem = map[string]any{
+			vendor: map[string]any{
+				"#" + s.oemInsertAction(): virtualMediaActionTarget{Target: base + "/Actions/Oem/" + s.oemInsertAction()},
+			},
+		}
+	}
+
+	return actions
+}
+
+// oemInsertAction is the name of the OEM insert action, like IncusVirtualMedia.InsertVirtualMedia.
+func (s redfishServer) oemInsertAction() string {
+	return s.profile.VirtualMedia.OEMVendor + "VirtualMedia." + s.profile.VirtualMedia.OEMAction
+}
+
+// registerVirtualMediaRoutes adds the OEM insert action, which is not part of the generated routes.
+func (s redfishServer) registerVirtualMediaRoutes(mux *http.ServeMux) {
+	if s.profile.VirtualMedia.Insert != profile.MediaInsertOEM {
+		return
+	}
+
+	mux.HandleFunc("POST /redfish/v1/Managers/{ManagerId}/VirtualMedia/{VirtualMediaId}/Actions/Oem/"+s.oemInsertAction(), func(w http.ResponseWriter, r *http.Request) {
+		if !validateVirtualMediaID(w, r.PathValue("ManagerId"), r.PathValue("VirtualMediaId")) {
+			return
+		}
+
+		// OEM actions predate the other parameters of the standard action, so only the image counts.
+		request := struct {
+			Image string `json:"Image"`
+		}{}
+
+		err := json.NewDecoder(r.Body).Decode(&request)
+		if err != nil {
+			responseErrWithMessage(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		if request.Image == "" {
+			responseErrWithMessage(w, http.StatusBadRequest, "virtual media image is required")
+			return
+		}
+
+		s.insertAndRespond(w, r, request.Image)
+	})
+}
+
+// insertAndRespond inserts the image of an insert action and answers the way the profile asks for.
+func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, image string) {
+	if s.profile.VirtualMedia.InsertResponse != profile.InsertResponseTask {
+		err := s.insertVirtualMedia(r.Context(), image)
+		if err != nil {
+			respondStatusError(w, err)
+			return
+		}
+
+		responseNoContent(w)
+
+		return
+	}
+
+	if !s.insertMu.TryLock() {
+		responseErrWithMessage(w, http.StatusConflict, "virtual media is being inserted")
+		return
+	}
+
+	taskID := s.tasks.create(fmt.Sprintf("/redfish/v1/Managers/%s/VirtualMedia/%s", managerName, virtualMediaName), TaskV174TaskStateRunning)
+
+	// The insert outlives the request, so it stops with the server context.
+	go func() {
+		defer s.insertMu.Unlock()
+
+		err := s.insertVirtualMedia(s.ctx, image)
+		if err != nil {
+			s.tasks.fail(taskID, errorMessages(err)...)
+			return
+		}
+
+		s.tasks.complete(taskID)
+	}()
+
+	responseAccepted(w, taskMonitorPath(taskID))
 }
 
 // virtualMediaGetResponse overrides the Actions field of the generated
@@ -356,8 +452,9 @@ type virtualMediaActionTarget struct {
 }
 
 type virtualMediaActions struct {
-	HashVirtualMediaEjectMedia  virtualMediaActionTarget `json:"#VirtualMedia.EjectMedia"`
-	HashVirtualMediaInsertMedia virtualMediaActionTarget `json:"#VirtualMedia.InsertMedia"`
+	HashVirtualMediaEjectMedia  virtualMediaActionTarget  `json:"#VirtualMedia.EjectMedia"`
+	HashVirtualMediaInsertMedia *virtualMediaActionTarget `json:"#VirtualMedia.InsertMedia,omitempty"`
+	Oem                         map[string]any            `json:"Oem,omitempty"`
 }
 
 func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
@@ -393,7 +490,7 @@ func (s redfishServer) PatchRedfishV1ManagersManagerIDVirtualMediaVirtualMediaID
 		return
 	}
 
-	err = s.insertVirtualMedia(deref(request.Image))
+	err = s.insertVirtualMedia(r.Context(), deref(request.Image))
 	if err != nil {
 		respondStatusError(w, err)
 		return
@@ -469,7 +566,7 @@ func (s redfishServer) ejectVirtualMedia() error {
 	return nil
 }
 
-func (s redfishServer) insertVirtualMedia(image string) error {
+func (s redfishServer) insertVirtualMedia(ctx context.Context, image string) error {
 	instance, etag, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
 		return err
@@ -480,7 +577,12 @@ func (s redfishServer) insertVirtualMedia(image string) error {
 		return statusErrorf(http.StatusConflict, "virtual media is already inserted")
 	}
 
-	resp, err := s.httpClient.Get(image)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, image, nil)
+	if err != nil {
+		return statusErrorf(http.StatusBadRequest, "%s", err.Error())
+	}
+
+	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		return statusErrorf(http.StatusBadRequest, "%s", err.Error())
 	}
@@ -592,6 +694,12 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 		return
 	}
 
+	// The route is generated, so it answers like an absent one for the other variants.
+	if s.profile.VirtualMedia.Insert != profile.MediaInsertStandard {
+		responseErr(w, http.StatusNotFound)
+		return
+	}
+
 	request := VirtualMediaV170InsertMediaRequestBody{}
 	err := json.NewDecoder(r.Body).Decode(&request)
 	if err != nil {
@@ -609,13 +717,7 @@ func (s redfishServer) PostRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDA
 		return
 	}
 
-	err = s.insertVirtualMedia(request.Image)
-	if err != nil {
-		respondStatusError(w, err)
-		return
-	}
-
-	responseNoContent(w)
+	s.insertAndRespond(w, r, request.Image)
 }
 
 // actionInfo and actionInfoParameter mirror the Redfish ActionInfo schema
@@ -645,6 +747,11 @@ type actionInfoParameter struct {
 // ServerInterface, NewHandler registers it directly.
 func (s redfishServer) GetRedfishV1ManagersManagerIDVirtualMediaVirtualMediaIDInsertMediaActionInfo(w http.ResponseWriter, r *http.Request, managerID string, virtualMediaID string) {
 	if !validateVirtualMediaID(w, managerID, virtualMediaID) {
+		return
+	}
+
+	if s.profile.VirtualMedia.Insert != profile.MediaInsertStandard {
+		responseErr(w, http.StatusNotFound)
 		return
 	}
 
