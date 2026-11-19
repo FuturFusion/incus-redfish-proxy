@@ -24,10 +24,13 @@ bios:
 secure_boot:
   database_write: true              # no evidence
   database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported} # no evidence
+  database_add_response: "201"      # no evidence; Operations Center added no database entry
+  database_delete_response: "204"   # no evidence; Operations Center deleted no database entry
   reset_keys:
     supported: false                # no evidence
     types: [DeleteAllKeys, DeletePK] # no evidence
     response: "204"                 # no evidence
+    applies: immediately            # no evidence
   certificate_id_style: hash        # no evidence
   certificate_id_prefix: ""         # no evidence
   enable_requires_power_off: true   # no evidence; Operations Center did not change SecureBootEnable
@@ -50,6 +53,12 @@ power:
   not_settled_window: 19s           # seq 3, 4, 5; TODO verify; time to the last refusal, a lower bound
   not_settled_error: {status: 400, message_id: Vendor.1.0.UnableToModifyDuringSystemPOST} # seq 5
   delay: 0s                         # no evidence
+  redundant_reset_errors:
+    off: null                       # no evidence; Operations Center sent no reset to the current power state
+    on: null                        # no evidence; Operations Center sent no reset to the current power state
+
+responses:
+  patch: "204"                      # seq 6
 
 timing:
   scale: 1.0                        # proxy setting

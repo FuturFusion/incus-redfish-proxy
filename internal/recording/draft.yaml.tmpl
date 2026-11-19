@@ -23,10 +23,13 @@ bios:
 secure_boot:
 {{field "secure_boot.database_write"}}
 {{field "secure_boot.database_write_error"}}
+{{field "secure_boot.database_add_response"}}
+{{field "secure_boot.database_delete_response"}}
   reset_keys:
 {{field "secure_boot.reset_keys.supported"}}
 {{field "secure_boot.reset_keys.types"}}
 {{field "secure_boot.reset_keys.response"}}
+{{field "secure_boot.reset_keys.applies"}}
 {{field "secure_boot.certificate_id_style"}}
 {{field "secure_boot.certificate_id_prefix"}}
 {{field "secure_boot.enable_requires_power_off"}}
@@ -49,6 +52,12 @@ power:
 {{field "power.not_settled_window"}}
 {{field "power.not_settled_error"}}
 {{field "power.delay"}}
+  redundant_reset_errors:
+{{field "power.redundant_reset_errors.off"}}
+{{field "power.redundant_reset_errors.on"}}
+
+responses:
+{{field "responses.patch"}}
 
 timing:
 {{field "timing.scale"}}

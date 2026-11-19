@@ -17,20 +17,18 @@ import (
 	"github.com/FuturFusion/incus-redfish-proxy/internal/profile"
 )
 
-// deferredState is the deployment state, in which Operations Center writes the deferred BIOS attributes.
 const deferredState = "apply-bios-deferred"
 
-// draftRegistryID names the registry of the synthetic attributes. Vendor registry IDs are not copied.
 const draftRegistryID = "DraftBiosAttributeRegistry.v1_0_0"
 
 var (
-	systemPathPattern       = regexp.MustCompile(`^/redfish/v1/systems/[^/]+$`)
-	certificatesPathPattern = regexp.MustCompile(`/securebootdatabases/[^/]+/(certificates|signatures)$`)
-	virtualMediaPathPattern = regexp.MustCompile(`/virtualmedia/[^/]+$`)
-	sequentialIDPattern     = regexp.MustCompile(`^([A-Za-z_.-]*?)([0-9]+)$`)
+	systemPathPattern        = regexp.MustCompile(`^/redfish/v1/systems/[^/]+$`)
+	certificatesPathPattern  = regexp.MustCompile(`/securebootdatabases/[^/]+/(certificates|signatures)$`)
+	databaseEntryPathPattern = regexp.MustCompile(`/securebootdatabases/[^/]+/(certificates|signatures)/[^/]+$`)
+	virtualMediaPathPattern  = regexp.MustCompile(`/virtualmedia/[^/]+$`)
+	sequentialIDPattern      = regexp.MustCompile(`^([A-Za-z_.-]*?)([0-9]+)$`)
 )
 
-// where returns the exchanges that match.
 func (r *Recording) where(match func(Exchange) bool) []Exchange {
 	var exchanges []Exchange
 
@@ -52,7 +50,10 @@ func (r *Recording) first(match func(Exchange) bool) (Exchange, bool) {
 	return r.Exchanges[index], true
 }
 
-// lastBefore returns the last exchange before e that matches.
+func (r *Recording) firstAfter(e Exchange, match func(Exchange) bool) (Exchange, bool) {
+	return r.first(func(candidate Exchange) bool { return candidate.Sequence > e.Sequence && match(candidate) })
+}
+
 func (r *Recording) lastBefore(e Exchange, match func(Exchange) bool) (Exchange, bool) {
 	var found Exchange
 
@@ -127,25 +128,68 @@ func messageID(e Exchange) string {
 	return body.Error.Code
 }
 
-// response draws the answer of an action. A profile knows only 204 and 202-task, so any other status
-// becomes 204 with a note.
+// response draws the answer of an action: 202-task, 204, 200 or 200-error.
 func response(e Exchange) value {
-	switch e.Status {
-	case http.StatusAccepted:
-		return observed(quote("202-task"), e)
-
-	case http.StatusNoContent:
-		return observed(quote("204"), e)
+	if e.Status == http.StatusAccepted {
+		return observed(quote(string(profile.PowerResponseTask)), e)
 	}
 
-	v := inferred(quote("204"), e).withNote("answered %d", e.Status)
+	return doneResponse(e)
+}
 
+// doneResponse draws the answer to a request that is done: 204, or 200 with the messages at the top level or inside an error object.
+// A profile knows no other status, so it becomes 204 with a note. The note names the first message ID.
+func doneResponse(e Exchange) value {
 	id := successMessageID(e)
+
+	var v value
+
+	switch e.Status {
+	case http.StatusNoContent:
+		return observed(quote(string(profile.PowerResponseNoContent)), e)
+
+	case http.StatusOK:
+		v = observed(quote(okResponse(e)), e)
+		if id != "" {
+			v = v.withNote("%s", id)
+		}
+
+		return v
+	}
+
+	v = inferred(quote(string(profile.PowerResponseNoContent)), e).withNote("answered %d", e.Status)
 	if id != "" {
 		v.note += ", " + id
 	}
 
 	return v
+}
+
+func okResponse(e Exchange) string {
+	var body struct {
+		Error *struct{} `json:"error"`
+	}
+
+	err := e.ResponseJSON(&body)
+	if err == nil && body.Error != nil {
+		return profile.AnswerOKError
+	}
+
+	return profile.AnswerOK
+}
+
+func patchResponse(e Exchange) value {
+	var resource struct {
+		ODataID string `json:"@odata.id"`
+		ID      string `json:"Id"`
+	}
+
+	err := e.ResponseJSON(&resource)
+	if e.Status == http.StatusOK && err == nil && (resource.ODataID != "" || resource.ID != "") {
+		return observed(quote(string(profile.ResourcePatchResponseResource)), e)
+	}
+
+	return doneResponse(e)
 }
 
 // successMessageID returns the first message ID that a successful answer carries.
@@ -667,11 +711,13 @@ func (d *Draft) secureBoot(rec *Recording) {
 		}
 	}
 
+	d.databaseAnswers(rec)
 	d.resetKeys(rec)
 	d.certificateIDs(rec)
 
 	databaseKeys := []string{
 		"secure_boot.database_write", "secure_boot.database_write_error",
+		"secure_boot.database_add_response", "secure_boot.database_delete_response",
 		"secure_boot.certificate_id_style", "secure_boot.certificate_id_prefix",
 	}
 
@@ -683,10 +729,36 @@ func (d *Draft) secureBoot(rec *Recording) {
 		d.explain("certificates skipped by the deployment request", databaseKeys...)
 	}
 
+	d.explain("Operations Center added no database entry", "secure_boot.database_add_response")
+	d.explain("Operations Center deleted no database entry", "secure_boot.database_delete_response")
+
 	d.secureBootEnable(rec)
 }
 
-// secureBootEnable draws enable_requires_power_off from the SecureBootEnable PATCHes sent while the server was on.
+// databaseAnswers draws the answers to the first accepted POST and DELETE of a database entry.
+func (d *Draft) databaseAnswers(rec *Recording) {
+	post, ok := rec.first(func(e Exchange) bool {
+		return e.Method == http.MethodPost && certificatesPathPattern.MatchString(e.Path()) && e.Succeeded()
+	})
+	if ok {
+		v := inferred(quote(string(profile.DatabaseAddResponseCreated)), post).withNote("answered %d", post.Status)
+
+		switch post.Status {
+		case http.StatusCreated, http.StatusNoContent:
+			v = observed(quote(strconv.Itoa(post.Status)), post)
+		}
+
+		d.set("secure_boot.database_add_response", v)
+	}
+
+	deleted, ok := rec.first(func(e Exchange) bool {
+		return e.Method == http.MethodDelete && databaseEntryPathPattern.MatchString(e.Path()) && e.Succeeded()
+	})
+	if ok {
+		d.set("secure_boot.database_delete_response", doneResponse(deleted))
+	}
+}
+
 func (d *Draft) secureBootEnable(rec *Recording) {
 	const key = "secure_boot.enable_requires_power_off"
 
@@ -786,19 +858,70 @@ func (d *Draft) resetKeys(rec *Recording) {
 		return e.Method == http.MethodPost && strings.HasSuffix(e.Path(), "/actions/secureboot.resetkeys") && e.Succeeded()
 	})
 	if len(posts) == 0 {
-		d.explain("Operations Center sent no ResetKeys", "secure_boot.reset_keys.response")
+		d.explain("Operations Center sent no ResetKeys", "secure_boot.reset_keys.response", "secure_boot.reset_keys.applies")
 
 		return
 	}
 
 	d.set("secure_boot.reset_keys.response", response(posts[0]))
 
+	// A profile with applies on_reset needs supported.
+	if action.Target != "" {
+		d.resetKeysApplies(rec, posts[0])
+	}
+
 	if len(action.AllowableValues) == 0 {
 		d.usedResetKeysTypes(posts, action.ActionInfo != "")
 	}
 }
 
-// usedResetKeysTypes draws the reset keys types from the requests the BMC accepted, if it publishes none.
+func (d *Draft) resetKeysApplies(rec *Recording, post Exchange) {
+	const key = "secure_boot.reset_keys.applies"
+
+	var secureBoot struct {
+		SecureBootMode string `json:"SecureBootMode"`
+	}
+
+	get, ok := rec.firstAfter(post, func(e Exchange) bool { return isGET(isSecureBoot)(e) && e.ResponseJSON(&secureBoot) == nil })
+	if ok {
+		_, poweredOn := rec.firstAfter(post, func(e Exchange) bool {
+			return e.Sequence < get.Sequence && isResetPost(e) && e.Succeeded() && powersOn(e)
+		})
+
+		switch {
+		case secureBoot.SecureBootMode == "UserMode":
+			d.set(key, observed(string(profile.ResetKeysAppliesOnReset), post, get))
+
+			return
+
+		case secureBoot.SecureBootMode == "SetupMode" && !poweredOn:
+			d.set(key, observed(string(profile.ResetKeysAppliesImmediately), post, get))
+
+			return
+		}
+	}
+
+	id := successMessageID(post)
+	for _, suffix := range []string{".ResetRequired", ".RebootRequired", ".SystemResetRequired"} {
+		if strings.HasSuffix(id, suffix) {
+			d.set(key, inferred(string(profile.ResetKeysAppliesOnReset), post).withNote("%s", id))
+
+			return
+		}
+	}
+
+	d.explain("no read of SecureBoot shows when the reset takes effect", key)
+}
+
+func powersOn(e Exchange) bool {
+	switch resetType(e) {
+	case profile.ResetTypeOn, profile.ResetTypeForceOn, profile.ResetTypeGracefulRestart, profile.ResetTypeForceRestart:
+		return true
+	}
+
+	return false
+}
+
 func (d *Draft) usedResetKeysTypes(posts []Exchange, actionInfo bool) {
 	var types []string
 
@@ -913,6 +1036,21 @@ func (d *Draft) certificateIDs(rec *Recording) {
 
 	d.set("secure_boot.certificate_id_style", style)
 	d.set("secure_boot.certificate_id_prefix", observed(quote(prefix), seqs...))
+}
+
+func (d *Draft) responses(rec *Recording) {
+	patch, ok := rec.first(func(e Exchange) bool {
+		p := e.Path()
+
+		return e.Method == http.MethodPatch && e.Succeeded() && (isSystem(p) || isSecureBoot(p) || virtualMediaPathPattern.MatchString(p))
+	})
+	if !ok {
+		d.explain("Operations Center sent no PATCH of Systems, SecureBoot or VirtualMedia", "responses.patch")
+
+		return
+	}
+
+	d.set("responses.patch", patchResponse(patch))
 }
 
 func (d *Draft) virtualMedia(rec *Recording) {
@@ -1114,31 +1252,49 @@ func (d *Draft) power(rec *Recording) {
 
 	post, ok := rec.first(func(e Exchange) bool { return isResetPost(e) && e.Succeeded() })
 	if ok {
-		d.set("power.response", redundantReset(rec, response(post)))
+		d.set("power.response", response(post))
 	}
 
+	d.redundantResets(rec)
 	d.notSettled(rec)
 	d.powerDelay(rec)
 }
 
-// redundantReset notes a reset the BMC refused, because the server already had the target power state.
-func redundantReset(rec *Recording, v value) value {
-	refused, ok := rec.first(func(e Exchange) bool {
-		if !isResetPost(e) || e.Status < http.StatusBadRequest || targetPowerState(e) == "" {
-			return false
+// redundantResetKeys are the profile keys of a reset to the power state the server has already, by target power state.
+var redundantResetKeys = map[string]string{
+	"Off": "power.redundant_reset_errors.off",
+	"On":  "power.redundant_reset_errors.on",
+}
+
+// redundantResets draws the answer to a reset to the power state the server has already.
+// An accepted reset gives null, a refused one its error shape.
+func (d *Draft) redundantResets(rec *Recording) {
+	for _, e := range rec.where(isResetPost) {
+		target := targetPowerState(e)
+
+		key, ok := redundantResetKeys[target]
+		if !ok || e.Status == 0 || len(d.values[key].seqs) > 0 {
+			continue
 		}
 
 		system, ok := rec.lastBefore(e, isGET(isSystem))
+		if !ok || powerState(system) != target {
+			continue
+		}
 
-		return ok && powerState(system) == targetPowerState(e)
-	})
-	if !ok {
-		return v
+		if e.Succeeded() {
+			d.set(key, observed("null", system, e).withNote("accepted %s while %s", resetType(e), target))
+
+			continue
+		}
+
+		shape, ok := errorShape(e)
+		if ok {
+			d.set(key, observed(shape, system, e).withNote("refused %s while %s", resetType(e), target))
+		}
 	}
 
-	v.seqs = append(v.seqs, refused.Sequence)
-
-	return v.addNote("refused %s while %s with %d, %s", resetType(refused), targetPowerState(refused), refused.Status, messageID(refused))
+	d.explain("Operations Center sent no reset to the current power state", slices.Sorted(maps.Values(redundantResetKeys))...)
 }
 
 func (d *Draft) resetTypes(get Exchange, published []string) {
