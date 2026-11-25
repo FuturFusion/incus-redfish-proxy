@@ -1,0 +1,91 @@
+version: 1
+name: generic
+description: Behavior of the proxy without profiles. Every switch holds its default.
+
+bios:
+  patch_response: 202-taskmonitor   # 202-task | 202-taskmonitor | 200 | 204
+  task_resource: false              # expose /redfish/v1/TaskService and its collection
+  settings_object: false            # true: Bios/Settings is a separate resource holding the pending attributes
+  pending: false                    # true: a PATCH stages the attributes, the next reset applies them
+  apply_time:
+    supported: []                   # Immediate | OnReset, published as @Redfish.Settings.SupportedApplyTimes
+    default: ""                     # empty: OnReset with pending, Immediate otherwise
+  patch_requires_power_off: true    # false: stage attributes on a running instance
+  registry:
+    id: ""
+    attributes: []                  # an attribute with requires: {attribute, value} is hidden and refused until that value is in effect
+  errors:
+    unknown_attribute: {status: 400, message_id: Base.1.18.PropertyUnknown}
+    deferred_rejected: {status: 400, message_id: Base.1.18.PropertyUnknown}  # write to an attribute, whose requirement is not in effect
+
+secure_boot:
+  database_write: true              # false: certificates and signatures are read only over Redfish
+  database_write_error: {status: 405, message_id: Base.1.18.ActionNotSupported}
+  database_add_response: "201"      # 201 | 204, 204 has no Location and no body
+  database_delete_response: "204"   # 204 | 200 | 200-error
+  reset_keys:
+    supported: false                # true: publish the #SecureBoot.ResetKeys action
+    types: [DeleteAllKeys, DeletePK]
+    response: "204"                 # 204 | 202-task | 200 | 200-error
+    applies: immediately            # immediately | on_reset, on_reset deletes the keys on the next reset that powers on
+    disables_secure_boot: false     # true: the deletion of the keys switches SecureBootEnable off
+    unreachable:
+      after: 0s                     # time from the power on that deletes the keys to the start of a window without answers
+      for: 0s                       # length of the window, a request in it gets no answer
+    visible_after: 0s               # on_reset only, time from the power on that deletes the keys until SecureBoot shows it
+  certificate_id_style: hash        # hash | sequential
+  certificate_id_prefix: ""         # sequential only, "Certificate" gives Certificate1
+  enable_requires_power_off: true   # false: SecureBootEnable on a running instance applies on the next reset
+  power_cycle:
+    after: []                       # reset_keys | enable, the system powers itself off and on again during the boot that applies it
+    off_after: 0s                   # time from the power on to the power off of the cycle
+    off_for: 0s                     # time the system stays off
+  empty_after_power_on:
+    times: 0                        # power ons after a write to a key database, after which the collections read empty
+    for: 0s                         # how long they read empty after such a power on
+
+virtual_media:
+  insert: standard                  # standard | oem | patch
+  oem_vendor: Incus                 # oem only, key below Actions.Oem, never a real vendor
+  oem_action: InsertVirtualMedia    # oem only
+  insert_response: "204"            # 204 | 202-task | 200 | 200-error, also the eject actions
+  boot_override_once: false         # true: offer BootSourceOverrideEnabled Once, the next power on drops it
+  action_info: true                 # false: publish no @Redfish.ActionInfo for InsertMedia
+  refused_parameters:
+    names: []                       # InsertMedia parameters the BMC refuses, like MediaType
+    error: {status: 400, message_id: Base.1.18.ActionParameterUnknown}
+  locations: [managers]             # managers | systems, the collections that show the device
+  id: "CD"                          # member ID of the device
+  media_types: [CD, DVD]            # CD | DVD | USBStick, a USB stick image is a disk, not an optical drive
+  delivery: full-fetch              # full-fetch | stream | prefetch, stream and prefetch mount the image through FUSE
+  stream:
+    read_ahead: 4MiB                # size of every range request, plain bytes or KiB, MiB, GiB
+    cache: 64MiB                    # bytes kept in memory
+    fallback: full-fetch            # full-fetch | error, if the server has no range requests
+
+power:
+  reset_types: []                   # published as ResetType@Redfish.AllowableValues, empty: not published, all accepted
+  response: "204"                   # 204 | 202-task | 200 | 200-error
+  not_settled_window: 0s            # writes below Systems and Managers are refused for this long after a power on
+  not_settled_error: {status: 400, message_id: Base.1.18.ResourceInStandby}  # OC waits only for IDs ending in ResourceInStandby or UnableToModifyDuringSystemPOST
+  delay: {on: 0s, off: 0s}          # a reset waits this long before it changes the power state, one duration sets both
+  post_duration: 0s                 # the firmware waits this long after every power on and reset, before it boots, at most 65535ms after scaling
+  redundant_reset_errors:
+    off: null                       # error shape for a power off of a system that is off, null accepts it
+    on: null                        # error shape for a power on of a system that is on, null accepts it
+  busy_reads:
+    resources: []                   # system | bios | secure_boot, reads refused after a power on
+    failures: 0                     # refused reads of each resource after every power on
+    error: {status: 503, message_id: Base.1.18.ServiceTemporarilyUnavailable}
+
+responses:
+  patch: "204"                      # 204 | 200-resource | 200 | 200-error, PATCH of Systems, SecureBoot and VirtualMedia
+
+timing:
+  scale: 1.0                        # multiplies every duration of the profile, overridden by --timing-scale
+
+overlay: {}                         # path: JSON merge patch (RFC 7386) for the GET response, placeholders {system}, {manager}, {media}
+# Example:
+# overlay:
+#   "/redfish/v1/Systems/{system}":
+#     Oem: {Incus: {ServerPowerState: "On"}}

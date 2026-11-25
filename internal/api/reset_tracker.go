@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"log"
 	"net/url"
 	"sync"
 	"time"
@@ -19,12 +21,27 @@ type EventSource interface {
 	GetEventsByType(eventTypes []string) (listener *incusclient.EventListener, err error)
 }
 
-// resetTracker records instance restarts, as Incus resets a guest in place when no full restart is needed, leaving StartedAt unchanged.
+type powerEvent struct {
+	// Restart is set for an in place restart, unset for a start from stopped.
+	Restart bool
+	At      time.Time
+}
+
+type powerHook func(ctx context.Context, event powerEvent) error
+
 type resetTracker struct {
+	// Incus resets a guest in place when no full restart is needed. This leaves StartedAt unchanged.
 	instanceName string
+
+	// hooks are only registered before the watcher starts, so they need no locking.
+	hooks []powerHook
+
+	// observers learn about each new power on, also about the ones the proxy issued. They run under the lock.
+	observers []func(at time.Time)
 
 	mu            sync.Mutex
 	lastRestartAt time.Time
+	lastPowerOnAt time.Time
 }
 
 // last returns the time of the last restart observed.
@@ -35,8 +52,37 @@ func (t *resetTracker) last() time.Time {
 	return t.lastRestartAt
 }
 
-// handle records the event, if it is a restart of the tracked instance.
-func (t *resetTracker) handle(event incusapi.Event) {
+func (t *resetTracker) lastPowerOn() time.Time {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	return t.lastPowerOnAt
+}
+
+func (t *resetTracker) poweredOn(at time.Time) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
+	t.advance(at)
+}
+
+func (t *resetTracker) advance(at time.Time) {
+	if !at.After(t.lastPowerOnAt) {
+		return
+	}
+
+	t.lastPowerOnAt = at
+	for _, observe := range t.observers {
+		observe(at)
+	}
+}
+
+func (t *resetTracker) onPowerOn(hook powerHook) {
+	// The hooks of one event run in registration order, but the events of Incus can overlap.
+	t.hooks = append(t.hooks, hook)
+}
+
+func (t *resetTracker) handle(ctx context.Context, event incusapi.Event) {
 	if event.Type != incusapi.EventTypeLifecycle {
 		return
 	}
@@ -48,7 +94,7 @@ func (t *resetTracker) handle(event incusapi.Event) {
 		return
 	}
 
-	if lifecycle.Action != incusapi.EventLifecycleInstanceRestarted {
+	if lifecycle.Action != incusapi.EventLifecycleInstanceRestarted && lifecycle.Action != incusapi.EventLifecycleInstanceStarted {
 		return
 	}
 
@@ -62,29 +108,37 @@ func (t *resetTracker) handle(event incusapi.Event) {
 		return
 	}
 
-	t.mu.Lock()
-	defer t.mu.Unlock()
+	restart := lifecycle.Action == incusapi.EventLifecycleInstanceRestarted
 
-	if event.Timestamp.After(t.lastRestartAt) {
+	t.mu.Lock()
+
+	if restart && event.Timestamp.After(t.lastRestartAt) {
 		t.lastRestartAt = event.Timestamp
+	}
+
+	t.advance(event.Timestamp)
+
+	t.mu.Unlock()
+
+	// Hooks run outside the lock, they may talk to Incus.
+	for _, hook := range t.hooks {
+		err := hook(ctx, powerEvent{Restart: restart, At: event.Timestamp})
+		if err != nil {
+			log.Printf("power on hook of instance %q failed: %v", t.instanceName, err)
+		}
 	}
 }
 
 // watch feeds the lifecycle events of the source to the tracker, until the context is done.
 func (t *resetTracker) watch(ctx context.Context, source EventSource) {
 	for {
-		listener, err := source.GetEventsByType([]string{incusapi.EventTypeLifecycle})
-		if err == nil {
-			stop := context.AfterFunc(ctx, listener.Disconnect)
-
-			_, err = listener.AddHandler([]string{incusapi.EventTypeLifecycle}, t.handle)
-			if err == nil {
-				_ = listener.Wait()
-			}
-
-			stop()
-			listener.Disconnect()
+		err := t.listen(ctx, source)
+		if ctx.Err() != nil {
+			return
 		}
+
+		// The power on hooks miss the events until the reconnect.
+		log.Printf("event stream of instance %q failed, reconnect in %s: %v", t.instanceName, eventRetryDelay, err)
 
 		select {
 		case <-ctx.Done():
@@ -93,4 +147,30 @@ func (t *resetTracker) watch(ctx context.Context, source EventSource) {
 		case <-time.After(eventRetryDelay):
 		}
 	}
+}
+
+func (t *resetTracker) listen(ctx context.Context, source EventSource) error {
+	listener, err := source.GetEventsByType([]string{incusapi.EventTypeLifecycle})
+	if err != nil {
+		return err
+	}
+
+	defer listener.Disconnect()
+
+	stop := context.AfterFunc(ctx, listener.Disconnect)
+	defer stop()
+
+	_, err = listener.AddHandler([]string{incusapi.EventTypeLifecycle}, func(event incusapi.Event) {
+		t.handle(ctx, event)
+	})
+	if err != nil {
+		return err
+	}
+
+	err = listener.Wait()
+	if err == nil {
+		err = errors.New("connection closed")
+	}
+
+	return err
 }
