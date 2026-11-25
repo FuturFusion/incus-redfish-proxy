@@ -2,15 +2,20 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"slices"
 	"sort"
 	"strconv"
 	"strings"
+	"syscall"
+	"time"
 
 	"github.com/spf13/pflag"
 	"github.com/stmcginnis/gofish"
@@ -39,272 +44,386 @@ var commands = []string{
 	"get-secureboot-signatures",
 }
 
+var requiredArguments = map[string]string{
+	"insert-virtual-media":          "file to insert as boot media",
+	"set-secureboot":                "enabled state",
+	"get-secureboot-certificate":    "certificate name",
+	"add-secureboot-certificate":    "certificate file",
+	"delete-secureboot-certificate": "certificate name",
+}
+
 func main() {
-	var debug bool
-	var endpoint string
-	var user string
-	var password string
-
-	pflag.Usage = usage
-	pflag.BoolVar(&debug, "debug", false, "debug output")
-	pflag.StringVar(&endpoint, "endpoint", "http://localhost:8080", "Redfish API base URL")
-	pflag.StringVar(&user, "user", "", "Redfish API user name")
-	pflag.StringVar(&password, "password", "", "Redfish API password")
-
-	pflag.Parse()
-
-	if len(pflag.Args()) < 1 || !slices.Contains(commands, pflag.Arg(0)) {
-		usage()
+	err := run(os.Args[1:], os.Stdout, os.Stderr)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
 
-	command := pflag.Arg(0)
+func run(args []string, stdout io.Writer, stderr io.Writer) error {
+	flags := pflag.NewFlagSet("incus-redfish", pflag.ContinueOnError)
+	flags.SetOutput(stderr)
+	flags.Usage = func() { usage(flags, stderr) }
+
+	debug := flags.Bool("debug", false, "debug output")
+	endpoint := flags.String("endpoint", "http://localhost:8080", "Redfish API base URL")
+	user := flags.String("user", "", "Redfish API user name")
+	password := flags.String("password", "", "Redfish API password")
+	help := flags.BoolP("help", "h", false, "show this help and exit")
+
+	err := flags.Parse(args)
+	if err != nil {
+		flags.Usage()
+
+		return err
+	}
+
+	if *help {
+		usage(flags, stdout)
+
+		return nil
+	}
+
+	if flags.NArg() < 1 {
+		flags.Usage()
+
+		return errors.New("missing argument: command")
+	}
+
+	command := flags.Arg(0)
+	if !slices.Contains(commands, command) {
+		flags.Usage()
+
+		return fmt.Errorf("unknown command %q", command)
+	}
+
+	argument, ok := requiredArguments[command]
+	if ok && flags.NArg() < 2 {
+		flags.Usage()
+
+		return fmt.Errorf("missing argument: %s", argument)
+	}
 
 	dumpWriter := io.Writer(nil)
-	if debug {
-		dumpWriter = os.Stdout
+	if *debug {
+		dumpWriter = stdout
 	}
 
 	c, err := gofish.Connect(gofish.ClientConfig{
-		Endpoint: endpoint,
-		Username: user,
-		Password: password,
+		Endpoint: *endpoint,
+		Username: *user,
+		Password: *password,
 		Insecure: true,
 
 		ReuseConnections: true,
 
 		DumpWriter: dumpWriter,
 	})
-	die(err)
+	if err != nil {
+		return fmt.Errorf("connect to %q: %w", *endpoint, err)
+	}
+
 	defer c.Logout()
 
-	enc := yaml.NewEncoder(os.Stdout)
+	enc := yaml.NewEncoder(stdout)
 	enc.SetIndent(2)
 
 	switch command {
 	case "info":
-		system := getSystem(c)
+		system, err := getSystem(c)
+		if err != nil {
+			return err
+		}
 
 		system.RawData = nil
 
-		err = enc.Encode(system.Entity)
-		die(err)
+		return enc.Encode(system.Entity)
 
 	case "start":
-		_, err := getSystem(c).Reset(schemas.ForceOnResetType)
-		die(err)
+		return reset(c, schemas.ForceOnResetType)
 
 	case "stop":
-		_, err := getSystem(c).Reset(schemas.ForceOffResetType)
-		die(err)
+		return reset(c, schemas.ForceOffResetType)
 
 	case "restart":
-		_, err := getSystem(c).Reset(schemas.ForceRestartResetType)
-		die(err)
+		return reset(c, schemas.ForceRestartResetType)
 
 	case "get-bios-settings":
-		bios, err := getSystem(c).Bios()
-		die(err)
-
-		err = enc.Encode(bios.Attributes)
-		die(err)
-
-	case "add-tpm":
-		bios, err := getSystem(c).Bios()
-		die(err)
-
-		bios.Attributes["incus.devices.vtpm"] = `{"type": "tpm"}`
-
-		err = bios.UpdateBiosAttributesApplyAt(bios.Attributes, schemas.OnResetSettingsApplyTime)
-		die(err)
-
-	case "remove-tpm":
-		bios, err := getSystem(c).Bios()
-		die(err)
-
-		bios.Attributes["incus.devices.vtpm"] = ""
-
-		err = bios.UpdateBiosAttributesApplyAt(bios.Attributes, schemas.OnResetSettingsApplyTime)
-		die(err)
-
-	case "get-virtual-media":
-		virtualMedia := getManagerVirtualMedia(c)
-
-		err = enc.Encode(virtualMedia.Entity)
-		die(err)
-
-	case "insert-virtual-media":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: file to insert as boot media missing")
-			usage()
-			os.Exit(1)
+		bios, err := getBios(c)
+		if err != nil {
+			return err
 		}
 
-		virtualMedia := getManagerVirtualMedia(c)
+		return enc.Encode(bios.Attributes)
 
-		address, shutdown := serveFileOnce(pflag.Arg(1))
-		defer shutdown()
+	case "add-tpm":
+		return setBiosAttribute(c, "incus.devices.vtpm", `{"type": "tpm"}`)
 
-		taskMonitor, err := virtualMedia.InsertMedia(&schemas.VirtualMediaInsertMediaParameters{
-			Image:                address,
+	case "remove-tpm":
+		return setBiosAttribute(c, "incus.devices.vtpm", "")
+
+	case "get-virtual-media":
+		virtualMedia, err := getManagerVirtualMedia(c)
+		if err != nil {
+			return err
+		}
+
+		return enc.Encode(virtualMedia.Entity)
+
+	case "insert-virtual-media":
+		virtualMedia, err := getManagerVirtualMedia(c)
+		if err != nil {
+			return err
+		}
+
+		ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+		defer stop()
+
+		fs, err := serveFile(flags.Arg(1), stderr)
+		if err != nil {
+			return err
+		}
+
+		_, err = virtualMedia.InsertMedia(&schemas.VirtualMediaInsertMediaParameters{
+			Image:                fs.address,
 			Inserted:             ref(true),
 			TransferMethod:       ref(schemas.StreamTransferMethod),
 			TransferProtocolType: ref(schemas.HTTPTransferProtocolType),
 			WriteProtected:       ref(true),
 		})
-		die(err)
+		if err != nil {
+			return errors.Join(fmt.Errorf("insert virtual media: %w", err), fs.close())
+		}
 
-		_ = taskMonitor
+		// The proxy reads the media on demand, so the file must stay available.
+		_, _ = fmt.Fprintf(stderr, "serve %s at %s, press Ctrl-C to stop\n", flags.Arg(1), fs.address)
+
+		return fs.serveUntil(ctx)
 
 	case "eject-virtual-media":
-		virtualMedia := getManagerVirtualMedia(c)
+		virtualMedia, err := getManagerVirtualMedia(c)
+		if err != nil {
+			return err
+		}
 
-		taskMonitor, err := virtualMedia.EjectMedia()
-		die(err)
-
-		_ = taskMonitor
+		_, err = virtualMedia.EjectMedia()
+		if err != nil {
+			return fmt.Errorf("eject virtual media: %w", err)
+		}
 
 	case "get-secureboot":
-		secureBoot, err := getSystem(c).SecureBoot()
-		die(err)
+		secureBoot, err := getSecureBoot(c)
+		if err != nil {
+			return err
+		}
 
 		secureBoot.RawData = nil
 
-		err = enc.Encode(secureBoot)
-		die(err)
+		return enc.Encode(secureBoot)
 
 	case "set-secureboot":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: enabled state missing")
-			usage()
-			os.Exit(1)
+		enabled, err := strconv.ParseBool(flags.Arg(1))
+		if err != nil {
+			return fmt.Errorf("parse enabled state: %w", err)
 		}
 
-		enabled, err := strconv.ParseBool(pflag.Arg(1))
-		die(err)
-
-		secureBoot, err := getSystem(c).SecureBoot()
-		die(err)
+		secureBoot, err := getSecureBoot(c)
+		if err != nil {
+			return err
+		}
 
 		secureBoot.SecureBootEnable = enabled
 
 		err = secureBoot.Update()
-		die(err)
+		if err != nil {
+			return fmt.Errorf("update secure boot: %w", err)
+		}
 
 	case "get-secureboot-databases":
-		for _, database := range getSecureBootDatabases(c) {
-			fmt.Printf("%s, %s\n", database.ID, database.Name)
+		databases, err := getSecureBootDatabases(c)
+		if err != nil {
+			return err
 		}
 
-	case "get-secureboot-certificates":
-		for _, certificate := range getSecureBootCertificates(c, pflag.Arg(1)) {
-			fmt.Printf("%s, %s\n", certificate.ID, certificate.Subject.CommonName)
-		}
-
-	case "get-secureboot-certificate":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: certificate name missing")
-			usage()
-			os.Exit(1)
-		}
-
-		certificateID := pflag.Arg(1)
-		var certificate *schemas.Certificate
-
-		found := false
-		for _, certificate = range getSecureBootCertificates(c, pflag.Arg(2)) {
-			if certificate.ID == certificateID {
-				found = true
-				break
+		for _, database := range databases {
+			_, err = fmt.Fprintf(stdout, "%s, %s\n", database.ID, database.Name)
+			if err != nil {
+				return fmt.Errorf("write output: %w", err)
 			}
 		}
 
-		if !found {
-			fmt.Printf("certificate ID %s not found", certificateID)
-			os.Exit(1)
+	case "get-secureboot-certificates":
+		certificates, err := getSecureBootCertificates(c, flags.Arg(1))
+		if err != nil {
+			return err
 		}
 
+		for _, certificate := range certificates {
+			_, err = fmt.Fprintf(stdout, "%s, %s\n", certificate.ID, certificate.Subject.CommonName)
+			if err != nil {
+				return fmt.Errorf("write output: %w", err)
+			}
+		}
+
+	case "get-secureboot-certificate":
+		certificateID := flags.Arg(1)
+
+		certificates, err := getSecureBootCertificates(c, flags.Arg(2))
+		if err != nil {
+			return err
+		}
+
+		i := slices.IndexFunc(certificates, func(certificate *schemas.Certificate) bool { return certificate.ID == certificateID })
+		if i < 0 {
+			return fmt.Errorf("certificate ID %s not found", certificateID)
+		}
+
+		certificate := certificates[i]
 		certificate.RawData = nil
 
-		err = enc.Encode(certificate)
-		die(err)
+		return enc.Encode(certificate)
 
 	case "add-secureboot-certificate":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: certificate file missing")
-			usage()
-			os.Exit(1)
+		certificate, err := os.ReadFile(flags.Arg(1))
+		if err != nil {
+			return err
 		}
 
-		certificate, err := os.ReadFile(pflag.Arg(1))
-		die(err)
-
-		database := getSecureBootDatabase(c, pflag.Arg(2))
+		database, err := getSecureBootDatabase(c, flags.Arg(2))
+		if err != nil {
+			return err
+		}
 
 		payload := map[string]string{
 			"CertificateString": string(certificate),
 			"CertificateType":   string(schemas.PEMCertificateType),
 		}
 
-		if pflag.Arg(3) != "" {
-			payload["UefiSignatureOwner"] = pflag.Arg(3)
+		if flags.Arg(3) != "" {
+			payload["UefiSignatureOwner"] = flags.Arg(3)
 		}
 
 		resp, err := c.Post(database.ODataID+"/Certificates", payload)
-		die(err)
-		defer resp.Body.Close()
-
-		fmt.Println(resp.Header.Get("Location"))
-
-	case "delete-secureboot-certificate":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: certificate name missing")
-			usage()
-			os.Exit(1)
+		if err != nil {
+			return fmt.Errorf("add certificate: %w", err)
 		}
 
-		database := getSecureBootDatabase(c, pflag.Arg(2))
+		defer resp.Body.Close()
 
-		resp, err := c.Delete(fmt.Sprintf("%s/Certificates/%s", database.ODataID, pflag.Arg(1)))
-		die(err)
+		_, err = fmt.Fprintln(stdout, resp.Header.Get("Location"))
+		if err != nil {
+			return fmt.Errorf("write output: %w", err)
+		}
+
+	case "delete-secureboot-certificate":
+		database, err := getSecureBootDatabase(c, flags.Arg(2))
+		if err != nil {
+			return err
+		}
+
+		resp, err := c.Delete(fmt.Sprintf("%s/Certificates/%s", database.ODataID, flags.Arg(1)))
+		if err != nil {
+			return fmt.Errorf("delete certificate: %w", err)
+		}
+
 		defer resp.Body.Close()
 
 	case "get-secureboot-signatures":
-		database := pflag.Arg(1)
-		if database == "" {
-			database = "dbx"
+		databaseID := flags.Arg(1)
+		if databaseID == "" {
+			databaseID = "dbx"
 		}
 
-		signatures, err := getSecureBootDatabase(c, database).Signatures()
-		die(err)
+		database, err := getSecureBootDatabase(c, databaseID)
+		if err != nil {
+			return err
+		}
+
+		signatures, err := database.Signatures()
+		if err != nil {
+			return fmt.Errorf("get signatures: %w", err)
+		}
 
 		sort.Slice(signatures, func(i, j int) bool { return signatures[i].ID < signatures[j].ID })
 
 		for _, signature := range signatures {
-			fmt.Printf("%s, %s, %s\n", signature.ID, signature.SignatureType, signature.SignatureString)
+			_, err = fmt.Fprintf(stdout, "%s, %s, %s\n", signature.ID, signature.SignatureType, signature.SignatureString)
+			if err != nil {
+				return fmt.Errorf("write output: %w", err)
+			}
 		}
 	}
+
+	return nil
 }
 
-func getSystem(c *gofish.APIClient) *schemas.ComputerSystem {
+func getSystem(c *gofish.APIClient) (*schemas.ComputerSystem, error) {
 	systems, err := c.Service.Systems()
-	die(err)
+	if err != nil {
+		return nil, fmt.Errorf("get systems: %w", err)
+	}
 
 	if len(systems) < 1 {
-		die(fmt.Errorf("no system found"))
+		return nil, errors.New("no system found")
 	}
 
 	sort.Slice(systems, func(i, j int) bool { return systems[i].ID < systems[j].ID })
 
-	return systems[0]
+	return systems[0], nil
 }
 
-func getManagerVirtualMedia(c *gofish.APIClient) *schemas.VirtualMedia {
+func reset(c *gofish.APIClient, resetType schemas.ResetType) error {
+	system, err := getSystem(c)
+	if err != nil {
+		return err
+	}
+
+	_, err = system.Reset(resetType)
+	if err != nil {
+		return fmt.Errorf("reset system: %w", err)
+	}
+
+	return nil
+}
+
+func getBios(c *gofish.APIClient) (*schemas.Bios, error) {
+	system, err := getSystem(c)
+	if err != nil {
+		return nil, err
+	}
+
+	bios, err := system.Bios()
+	if err != nil {
+		return nil, fmt.Errorf("get bios: %w", err)
+	}
+
+	return bios, nil
+}
+
+func setBiosAttribute(c *gofish.APIClient, name string, value string) error {
+	bios, err := getBios(c)
+	if err != nil {
+		return err
+	}
+
+	bios.Attributes[name] = value
+
+	err = bios.UpdateBiosAttributesApplyAt(bios.Attributes, schemas.OnResetSettingsApplyTime)
+	if err != nil {
+		return fmt.Errorf("update bios attributes: %w", err)
+	}
+
+	return nil
+}
+
+func getManagerVirtualMedia(c *gofish.APIClient) (*schemas.VirtualMedia, error) {
 	managers, err := c.Service.Managers()
-	die(err)
+	if err != nil {
+		return nil, fmt.Errorf("get managers: %w", err)
+	}
 
 	if len(managers) < 1 {
-		die(fmt.Errorf("no manager found"))
+		return nil, errors.New("no manager found")
 	}
 
 	sort.Slice(managers, func(i, j int) bool { return managers[i].ID < managers[j].ID })
@@ -312,103 +431,169 @@ func getManagerVirtualMedia(c *gofish.APIClient) *schemas.VirtualMedia {
 	manager := managers[0]
 
 	virtualMedias, err := manager.VirtualMedia()
-	die(err)
+	if err != nil {
+		return nil, fmt.Errorf("get virtual media: %w", err)
+	}
 
 	if len(virtualMedias) < 1 {
-		die(fmt.Errorf("no virtual media found"))
+		return nil, errors.New("no virtual media found")
 	}
 
 	sort.Slice(virtualMedias, func(i, j int) bool { return virtualMedias[i].ID < virtualMedias[j].ID })
 
-	return virtualMedias[0]
+	return virtualMedias[0], nil
 }
 
-func getSecureBootDatabases(c *gofish.APIClient) []*schemas.SecureBootDatabase {
-	secureboot, err := getSystem(c).SecureBoot()
-	die(err)
+func getSecureBoot(c *gofish.APIClient) (*schemas.SecureBoot, error) {
+	system, err := getSystem(c)
+	if err != nil {
+		return nil, err
+	}
 
-	secureBootDBs, err := secureboot.SecureBootDatabases()
-	die(err)
+	secureBoot, err := system.SecureBoot()
+	if err != nil {
+		return nil, fmt.Errorf("get secure boot: %w", err)
+	}
+
+	return secureBoot, nil
+}
+
+func getSecureBootDatabases(c *gofish.APIClient) ([]*schemas.SecureBootDatabase, error) {
+	secureBoot, err := getSecureBoot(c)
+	if err != nil {
+		return nil, err
+	}
+
+	secureBootDBs, err := secureBoot.SecureBootDatabases()
+	if err != nil {
+		return nil, fmt.Errorf("get secure boot databases: %w", err)
+	}
 
 	if len(secureBootDBs) < 1 {
-		die(fmt.Errorf("no secure boot database found"))
+		return nil, errors.New("no secure boot database found")
 	}
 
 	sort.Slice(secureBootDBs, func(i, j int) bool { return secureBootDBs[i].ID < secureBootDBs[j].ID })
 
-	return secureBootDBs
+	return secureBootDBs, nil
 }
 
-func getSecureBootDatabase(c *gofish.APIClient, databaseID string) *schemas.SecureBootDatabase {
+func getSecureBootDatabase(c *gofish.APIClient, databaseID string) (*schemas.SecureBootDatabase, error) {
 	if databaseID == "" {
 		databaseID = "db"
 	}
 
-	for _, database := range getSecureBootDatabases(c) {
+	databases, err := getSecureBootDatabases(c)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, database := range databases {
 		if strings.EqualFold(database.ID, databaseID) {
-			return database
+			return database, nil
 		}
 	}
 
-	die(fmt.Errorf("secure boot database %q not found", databaseID))
-
-	return nil
+	return nil, fmt.Errorf("secure boot database %q not found", databaseID)
 }
 
-func getSecureBootCertificates(c *gofish.APIClient, databaseID string) []*schemas.Certificate {
-	certificates, err := getSecureBootDatabase(c, databaseID).Certificates()
-	die(err)
+func getSecureBootCertificates(c *gofish.APIClient, databaseID string) ([]*schemas.Certificate, error) {
+	database, err := getSecureBootDatabase(c, databaseID)
+	if err != nil {
+		return nil, err
+	}
+
+	certificates, err := database.Certificates()
+	if err != nil {
+		return nil, fmt.Errorf("get certificates: %w", err)
+	}
 
 	sort.Slice(certificates, func(i, j int) bool { return certificates[i].ID < certificates[j].ID })
 
-	return certificates
+	return certificates, nil
 }
 
-func serveFileOnce(filename string) (string, func()) {
-	ln, err := net.Listen("tcp", ":0")
-	die(err)
+type fileServer struct {
+	address  string
+	srv      *http.Server
+	serveErr chan error
+}
 
-	srv := &http.Server{}
-	done := make(chan struct{})
+const shutdownTimeout = 5 * time.Second
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		defer close(done)
+func serveFile(filename string, errorLog io.Writer) (*fileServer, error) {
+	ln, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return nil, fmt.Errorf("listen: %w", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, filename)
 	})
 
-	port := ln.Addr().(*net.TCPAddr).Port
-	address := fmt.Sprintf("http://localhost:%d/", port)
-
-	shutdown := func() {
-		<-done
-		err = srv.Shutdown(context.Background())
-		die(err)
+	fs := &fileServer{
+		address: fmt.Sprintf("http://127.0.0.1:%d/", ln.Addr().(*net.TCPAddr).Port),
+		srv: &http.Server{
+			Handler:  mux,
+			ErrorLog: log.New(errorLog, "", log.LstdFlags),
+		},
+		serveErr: make(chan error, 1),
 	}
 
 	go func() {
-		err = srv.Serve(ln)
-		if err != http.ErrServerClosed {
-			die(err)
+		err := fs.srv.Serve(ln)
+		if errors.Is(err, http.ErrServerClosed) {
+			err = nil
 		}
+
+		fs.serveErr <- err
 	}()
 
-	return address, shutdown
+	return fs, nil
+}
+
+func (fs *fileServer) serveUntil(ctx context.Context) error {
+	select {
+	case <-ctx.Done():
+		return fs.close()
+
+	case err := <-fs.serveErr:
+		return fmt.Errorf("serve file: %w", err)
+	}
+}
+
+func (fs *fileServer) close() error {
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout)
+	defer cancel()
+
+	var err error
+
+	shutdownErr := fs.srv.Shutdown(ctx)
+	if shutdownErr != nil {
+		err = errors.Join(fmt.Errorf("stop file server: %w", shutdownErr), fs.srv.Close())
+	}
+
+	serveErr := <-fs.serveErr
+	if serveErr != nil {
+		err = errors.Join(err, fmt.Errorf("serve file: %w", serveErr))
+	}
+
+	return err
 }
 
 func ref[T any](v T) *T {
 	return &v
 }
 
-func usage() {
-	fmt.Println("Usage: redfish-incus <command>")
-	fmt.Println("Commands:")
+func usage(flags *pflag.FlagSet, w io.Writer) {
+	_, _ = fmt.Fprintln(w, "Usage: incus-redfish [flags] <command> [arguments]")
+	_, _ = fmt.Fprintln(w, "Commands:")
 	for _, cmd := range commands {
-		fmt.Printf("  * %s\n", cmd)
+		_, _ = fmt.Fprintf(w, "  * %s\n", cmd)
 	}
-}
 
-func die(err error) {
-	if err != nil {
-		panic(err)
-	}
+	_, _ = fmt.Fprintln(w, "Flags:")
+	flags.SetOutput(w)
+	flags.PrintDefaults()
 }

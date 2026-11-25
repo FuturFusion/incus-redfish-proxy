@@ -11,7 +11,7 @@ require (
 	github.com/oapi-codegen/runtime v1.4.2
 	github.com/quasilyte/go-ruleguard/dsl v0.3.23
 	github.com/spf13/pflag v1.0.10
-	github.com/stmcginnis/gofish v0.22.0
+	github.com/stmcginnis/gofish v0.28.0
 	github.com/stretchr/testify v1.11.1
 	github.com/vektra/mockery/v3 v3.8.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
