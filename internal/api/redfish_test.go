@@ -680,6 +680,12 @@ func TestRedfishServer_GetAndPatchBiosSettings(t *testing.T) {
 						Status: "Started",
 					},
 				},
+				// Retry of the update, gofish retries a 412 answer without If-Match.
+				{
+					Value: &incusapi.Instance{
+						Status: "Started",
+					},
+				},
 			},
 
 			assertErr: func(tt require.TestingT, err error, a ...any) {
