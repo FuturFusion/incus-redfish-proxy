@@ -39,36 +39,67 @@ var commands = []string{
 	"get-secureboot-signatures",
 }
 
+var requiredArguments = map[string]string{
+	"insert-virtual-media":          "file to insert as boot media",
+	"set-secureboot":                "enabled state",
+	"get-secureboot-certificate":    "certificate name",
+	"add-secureboot-certificate":    "certificate file",
+	"delete-secureboot-certificate": "certificate name",
+}
+
 func main() {
-	var debug bool
-	var endpoint string
-	var user string
-	var password string
-
-	pflag.Usage = usage
-	pflag.BoolVar(&debug, "debug", false, "debug output")
-	pflag.StringVar(&endpoint, "endpoint", "http://localhost:8080", "Redfish API base URL")
-	pflag.StringVar(&user, "user", "", "Redfish API user name")
-	pflag.StringVar(&password, "password", "", "Redfish API password")
-
-	pflag.Parse()
-
-	if len(pflag.Args()) < 1 || !slices.Contains(commands, pflag.Arg(0)) {
-		usage()
+	err := run(os.Args[1:], os.Stdout, os.Stderr)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
 
-	command := pflag.Arg(0)
+func run(args []string, stdout io.Writer, stderr io.Writer) error {
+	flags := pflag.NewFlagSet("incus-redfish", pflag.ContinueOnError)
+	flags.SetOutput(stderr)
+	flags.Usage = func() { usage(flags, stderr) }
+
+	debug := flags.Bool("debug", false, "debug output")
+	endpoint := flags.String("endpoint", "http://localhost:8080", "Redfish API base URL")
+	user := flags.String("user", "", "Redfish API user name")
+	password := flags.String("password", "", "Redfish API password")
+	help := flags.BoolP("help", "h", false, "show this help and exit")
+
+	err := flags.Parse(args)
+	if err != nil {
+		return err
+	}
+
+	if *help {
+		usage(flags, stdout)
+
+		return nil
+	}
+
+	command := flags.Arg(0)
+	if !slices.Contains(commands, command) {
+		flags.Usage()
+
+		return fmt.Errorf("unknown command %q", command)
+	}
+
+	argument, ok := requiredArguments[command]
+	if ok && flags.NArg() < 2 {
+		flags.Usage()
+
+		return fmt.Errorf("missing argument: %s", argument)
+	}
 
 	dumpWriter := io.Writer(nil)
-	if debug {
-		dumpWriter = os.Stdout
+	if *debug {
+		dumpWriter = stdout
 	}
 
 	c, err := gofish.Connect(gofish.ClientConfig{
-		Endpoint: endpoint,
-		Username: user,
-		Password: password,
+		Endpoint: *endpoint,
+		Username: *user,
+		Password: *password,
 		Insecure: true,
 
 		ReuseConnections: true,
@@ -78,7 +109,7 @@ func main() {
 	die(err)
 	defer c.Logout()
 
-	enc := yaml.NewEncoder(os.Stdout)
+	enc := yaml.NewEncoder(stdout)
 	enc.SetIndent(2)
 
 	switch command {
@@ -134,15 +165,9 @@ func main() {
 		die(err)
 
 	case "insert-virtual-media":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: file to insert as boot media missing")
-			usage()
-			os.Exit(1)
-		}
-
 		virtualMedia := getManagerVirtualMedia(c)
 
-		address, shutdown := serveFileOnce(pflag.Arg(1))
+		address, shutdown := serveFileOnce(flags.Arg(1))
 		defer shutdown()
 
 		taskMonitor, err := virtualMedia.InsertMedia(&schemas.VirtualMediaInsertMediaParameters{
@@ -174,13 +199,7 @@ func main() {
 		die(err)
 
 	case "set-secureboot":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: enabled state missing")
-			usage()
-			os.Exit(1)
-		}
-
-		enabled, err := strconv.ParseBool(pflag.Arg(1))
+		enabled, err := strconv.ParseBool(flags.Arg(1))
 		die(err)
 
 		secureBoot, err := getSystem(c).SecureBoot()
@@ -193,26 +212,20 @@ func main() {
 
 	case "get-secureboot-databases":
 		for _, database := range getSecureBootDatabases(c) {
-			fmt.Printf("%s, %s\n", database.ID, database.Name)
+			_, _ = fmt.Fprintf(stdout, "%s, %s\n", database.ID, database.Name)
 		}
 
 	case "get-secureboot-certificates":
-		for _, certificate := range getSecureBootCertificates(c, pflag.Arg(1)) {
-			fmt.Printf("%s, %s\n", certificate.ID, certificate.Subject.CommonName)
+		for _, certificate := range getSecureBootCertificates(c, flags.Arg(1)) {
+			_, _ = fmt.Fprintf(stdout, "%s, %s\n", certificate.ID, certificate.Subject.CommonName)
 		}
 
 	case "get-secureboot-certificate":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: certificate name missing")
-			usage()
-			os.Exit(1)
-		}
-
-		certificateID := pflag.Arg(1)
+		certificateID := flags.Arg(1)
 		var certificate *schemas.Certificate
 
 		found := false
-		for _, certificate = range getSecureBootCertificates(c, pflag.Arg(2)) {
+		for _, certificate = range getSecureBootCertificates(c, flags.Arg(2)) {
 			if certificate.ID == certificateID {
 				found = true
 				break
@@ -220,8 +233,7 @@ func main() {
 		}
 
 		if !found {
-			fmt.Printf("certificate ID %s not found", certificateID)
-			os.Exit(1)
+			return fmt.Errorf("certificate ID %s not found", certificateID)
 		}
 
 		certificate.RawData = nil
@@ -230,47 +242,35 @@ func main() {
 		die(err)
 
 	case "add-secureboot-certificate":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: certificate file missing")
-			usage()
-			os.Exit(1)
-		}
-
-		certificate, err := os.ReadFile(pflag.Arg(1))
+		certificate, err := os.ReadFile(flags.Arg(1))
 		die(err)
 
-		database := getSecureBootDatabase(c, pflag.Arg(2))
+		database := getSecureBootDatabase(c, flags.Arg(2))
 
 		payload := map[string]string{
 			"CertificateString": string(certificate),
 			"CertificateType":   string(schemas.PEMCertificateType),
 		}
 
-		if pflag.Arg(3) != "" {
-			payload["UefiSignatureOwner"] = pflag.Arg(3)
+		if flags.Arg(3) != "" {
+			payload["UefiSignatureOwner"] = flags.Arg(3)
 		}
 
 		resp, err := c.Post(database.ODataID+"/Certificates", payload)
 		die(err)
 		defer resp.Body.Close()
 
-		fmt.Println(resp.Header.Get("Location"))
+		_, _ = fmt.Fprintln(stdout, resp.Header.Get("Location"))
 
 	case "delete-secureboot-certificate":
-		if len(pflag.Args()) < 2 {
-			fmt.Println("error: certificate name missing")
-			usage()
-			os.Exit(1)
-		}
+		database := getSecureBootDatabase(c, flags.Arg(2))
 
-		database := getSecureBootDatabase(c, pflag.Arg(2))
-
-		resp, err := c.Delete(fmt.Sprintf("%s/Certificates/%s", database.ODataID, pflag.Arg(1)))
+		resp, err := c.Delete(fmt.Sprintf("%s/Certificates/%s", database.ODataID, flags.Arg(1)))
 		die(err)
 		defer resp.Body.Close()
 
 	case "get-secureboot-signatures":
-		database := pflag.Arg(1)
+		database := flags.Arg(1)
 		if database == "" {
 			database = "dbx"
 		}
@@ -281,9 +281,11 @@ func main() {
 		sort.Slice(signatures, func(i, j int) bool { return signatures[i].ID < signatures[j].ID })
 
 		for _, signature := range signatures {
-			fmt.Printf("%s, %s, %s\n", signature.ID, signature.SignatureType, signature.SignatureString)
+			_, _ = fmt.Fprintf(stdout, "%s, %s, %s\n", signature.ID, signature.SignatureType, signature.SignatureString)
 		}
 	}
+
+	return nil
 }
 
 func getSystem(c *gofish.APIClient) *schemas.ComputerSystem {
@@ -399,12 +401,16 @@ func ref[T any](v T) *T {
 	return &v
 }
 
-func usage() {
-	fmt.Println("Usage: redfish-incus <command>")
-	fmt.Println("Commands:")
+func usage(flags *pflag.FlagSet, w io.Writer) {
+	_, _ = fmt.Fprintln(w, "Usage: incus-redfish [flags] <command> [arguments]")
+	_, _ = fmt.Fprintln(w, "Commands:")
 	for _, cmd := range commands {
-		fmt.Printf("  * %s\n", cmd)
+		_, _ = fmt.Fprintf(w, "  * %s\n", cmd)
 	}
+
+	_, _ = fmt.Fprintln(w, "Flags:")
+	flags.SetOutput(w)
+	flags.PrintDefaults()
 }
 
 func die(err error) {
