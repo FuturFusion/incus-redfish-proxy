@@ -1,7 +1,9 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -13,73 +15,96 @@ import (
 )
 
 func main() {
-	var remote string
-	var project string
-	var listenAddr string
-	var profileName string
-	var listProfiles bool
-	var timingScale float64
-	var mediaDir string
-
-	pflag.Usage = usage
-	pflag.StringVar(&remote, "remote", "", "incus remote to connect to")
-	pflag.StringVar(&project, "project", "default", "incus project to connect to")
-	pflag.StringVar(&listenAddr, "listen", "0.0.0.0:8080", "address to listen on")
-	pflag.StringVar(&profileName, "profile", profile.DefaultName, "name of an embedded profile or path of a profile file")
-	pflag.BoolVar(&listProfiles, "list-profiles", false, "list the embedded profiles and exit")
-	pflag.StringVar(&mediaDir, "media-dir", redfishproxy.DefaultMediaDir, "directory for streamed media, must be visible to incusd")
-	pflag.Float64Var(&timingScale, "timing-scale", 0, "multiply every duration of the profile, replaces timing.scale of the profile if set")
-
-	pflag.Parse()
-
-	if listProfiles {
-		printProfiles()
-		return
-	}
-
-	if len(pflag.Args()) < 1 {
-		fmt.Println("missing argument: instance-name")
-		usage()
+	err := run(os.Args[1:], os.Stdout, os.Stderr)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
+}
 
-	instanceName := pflag.Arg(0)
+func run(args []string, stdout io.Writer, stderr io.Writer) error {
+	flags := pflag.NewFlagSet("incus-redfish-proxy", pflag.ContinueOnError)
+	flags.SetOutput(stderr)
+	flags.Usage = func() { usage(flags, stderr) }
+
+	remote := flags.String("remote", "", "incus remote to connect to")
+	project := flags.String("project", "default", "incus project to connect to")
+	listenAddr := flags.String("listen", "0.0.0.0:8080", "address to listen on")
+	profileName := flags.String("profile", profile.DefaultName, "name of an embedded profile or path of a profile file")
+	listProfiles := flags.Bool("list-profiles", false, "list the embedded profiles and exit")
+	mediaDir := flags.String("media-dir", redfishproxy.DefaultMediaDir, "directory for streamed media, must be visible to incusd")
+	timingScale := flags.Float64("timing-scale", 0, "multiply every duration of the profile, replaces timing.scale of the profile if set")
+	help := flags.BoolP("help", "h", false, "show this help and exit")
+
+	err := flags.Parse(args)
+	if err != nil {
+		flags.Usage()
+
+		return err
+	}
+
+	if *help {
+		usage(flags, stdout)
+
+		return nil
+	}
+
+	if *listProfiles {
+		return printProfiles(stdout)
+	}
+
+	if flags.NArg() < 1 {
+		flags.Usage()
+
+		return errors.New("missing argument: instance-name")
+	}
 
 	h, err := redfishproxy.NewHandler(redfishproxy.Config{
-		InstanceName: instanceName,
-		Remote:       remote,
-		Project:      project,
-		Profile:      profileName,
-		TimingScale:  timingScale,
-		MediaDir:     mediaDir,
+		InstanceName: flags.Arg(0),
+		Remote:       *remote,
+		Project:      *project,
+		Profile:      *profileName,
+		TimingScale:  *timingScale,
+		MediaDir:     *mediaDir,
 	})
-	die(err)
+	if err != nil {
+		return err
+	}
 
 	s := &http.Server{
 		Handler: h,
-		Addr:    listenAddr,
+		Addr:    *listenAddr,
 	}
 
-	log.Printf("listen on %q with profile %q", listenAddr, profileName)
-	log.Fatal(s.ListenAndServe())
+	logger := log.New(stderr, "", log.LstdFlags)
+	logger.Printf("listen on %q with profile %q", *listenAddr, *profileName)
+
+	err = s.ListenAndServe()
+	if errors.Is(err, http.ErrServerClosed) {
+		return nil
+	}
+
+	return fmt.Errorf("serve: %w", err)
 }
 
-func printProfiles() {
+func printProfiles(w io.Writer) error {
 	for _, name := range redfishproxy.Profiles() {
 		p, err := profile.Load(name)
-		die(err)
+		if err != nil {
+			return err
+		}
 
-		fmt.Printf("%s\t%s\n", p.Name, p.Description)
+		_, err = fmt.Fprintf(w, "%s\t%s\n", p.Name, p.Description)
+		if err != nil {
+			return err
+		}
 	}
+
+	return nil
 }
 
-func usage() {
-	fmt.Println("Usage: redfish-incus-proxy <instance-name>")
-	pflag.PrintDefaults()
-}
-
-func die(err error) {
-	if err != nil {
-		panic(err)
-	}
+func usage(flags *pflag.FlagSet, w io.Writer) {
+	_, _ = fmt.Fprintln(w, "Usage: incus-redfish-proxy [flags] <instance-name>")
+	flags.SetOutput(w)
+	flags.PrintDefaults()
 }
