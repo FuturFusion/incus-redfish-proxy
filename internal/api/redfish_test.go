@@ -680,16 +680,14 @@ func TestRedfishServer_GetAndPatchBiosSettings(t *testing.T) {
 						Status: "Started",
 					},
 				},
-				// Retry of the update, gofish retries a 412 answer without If-Match.
-				{
-					Value: &incusapi.Instance{
-						Status: "Started",
-					},
-				},
 			},
 
 			assertErr: func(tt require.TestingT, err error, a ...any) {
 				require.ErrorContains(tt, err, `instance \"test-instance\" is not stopped`)
+
+				redfishErr := &schemas.Error{}
+				require.ErrorAs(tt, err, &redfishErr, "the PATCH fails with a Redfish error")
+				require.Equal(tt, http.StatusConflict, redfishErr.HTTPReturnedStatusCode, "a running instance refuses the PATCH")
 			},
 		},
 		{
@@ -1372,7 +1370,7 @@ func TestRedfishServer_SecureBootResetKeys(t *testing.T) {
 			status:        "Running",
 			resetKeysType: "DeleteAllKeys",
 
-			wantStatus: http.StatusPreconditionFailed,
+			wantStatus: http.StatusConflict,
 			wantKept:   []string{"PK", "KEK", "db"},
 		},
 	}
@@ -1767,25 +1765,29 @@ func TestRedfishServer_PatchSecureBoot(t *testing.T) {
 		instanceStatus string
 		body           string
 
-		wantErr    bool
-		wantConfig string
+		wantStatus  int
+		wantConfigs []string
 	}{
 		{
 			name:           "success",
 			instanceStatus: "Stopped",
 			body:           `{"SecureBootEnable": false}`,
-			wantConfig:     "false",
+			wantStatus:     http.StatusNoContent,
+			wantConfigs:    []string{"false"},
 		},
 		{
 			name:           "no op without SecureBootEnable",
 			instanceStatus: "Stopped",
 			body:           `{}`,
+			wantStatus:     http.StatusNoContent,
+			wantConfigs:    []string{},
 		},
 		{
 			name:           "error - instance is running",
 			instanceStatus: "Running",
 			body:           `{"SecureBootEnable": true}`,
-			wantErr:        true,
+			wantStatus:     http.StatusConflict,
+			wantConfigs:    []string{},
 		},
 	}
 
@@ -1807,28 +1809,18 @@ func TestRedfishServer_PatchSecureBoot(t *testing.T) {
 
 			client := setup(t, incusClient)
 
+			// Run test
 			resp, err := client.RunRawRequestWithHeaders(http.MethodPatch, "/redfish/v1/Systems/test-instance/SecureBoot", strings.NewReader(tc.body), "", nil)
-			if resp != nil {
-				resp.Body.Close()
+			answer := answerOf(t, resp, err)
+
+			// Assert
+			configs := []string{}
+			for _, call := range incusClient.UpdateInstanceCalls() {
+				configs = append(configs, call.Instance.Config["security.secureboot"])
 			}
 
-			if tc.wantErr {
-				require.Error(t, err)
-				require.Empty(t, incusClient.UpdateInstanceCalls())
-
-				return
-			}
-
-			require.NoError(t, err)
-
-			if tc.wantConfig == "" {
-				require.Empty(t, incusClient.UpdateInstanceCalls())
-
-				return
-			}
-
-			require.Len(t, incusClient.UpdateInstanceCalls(), 1)
-			require.Equal(t, tc.wantConfig, incusClient.UpdateInstanceCalls()[0].Instance.Config["security.secureboot"])
+			require.Equal(t, tc.wantStatus, answer.status, "status of the PATCH")
+			require.Equal(t, tc.wantConfigs, configs, "only an accepted PATCH with SecureBootEnable writes the instance")
 		})
 	}
 }
@@ -2061,7 +2053,7 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 			hasExtension:   true,
 			instanceStatus: "Running",
 			body:           fmt.Sprintf(`{"CertificateString": %q}`, addedPEM),
-			wantErrMsg:     "412",
+			wantErrMsg:     "409",
 		},
 		{
 			name:           "error - missing API extension",
@@ -2967,10 +2959,11 @@ func TestRedfishServer_PatchBiosAttributes_Pending(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
-		name   string
-		path   string
-		body   string
-		status string
+		name                  string
+		path                  string
+		body                  string
+		status                string
+		patchRequiresPowerOff bool
 
 		wantStatus    int
 		wantMessageID string
@@ -3012,7 +3005,17 @@ func TestRedfishServer_PatchBiosAttributes_Pending(t *testing.T) {
 			body:   `{"Attributes":{"SecureBootControl":"Disabled"},"@Redfish.SettingsApplyTime":{"ApplyTime":"Immediate"}}`,
 			status: "Running",
 
-			wantStatus: http.StatusPreconditionFailed,
+			wantStatus: http.StatusConflict,
+			wantConfig: incusapi.ConfigMap{},
+		},
+		{
+			name:                  "error - on reset needs a stopped instance",
+			path:                  "/redfish/v1/Systems/test-instance/Bios/Settings",
+			body:                  `{"Attributes":{"SecureBootControl":"Disabled"},"@Redfish.SettingsApplyTime":{"ApplyTime":"OnReset"}}`,
+			status:                "Running",
+			patchRequiresPowerOff: true,
+
+			wantStatus: http.StatusConflict,
 			wantConfig: incusapi.ConfigMap{},
 		},
 		{
@@ -3032,6 +3035,8 @@ func TestRedfishServer_PatchBiosAttributes_Pending(t *testing.T) {
 
 			p, err := profile.Load("testdata/profiles/pending.yaml")
 			require.NoError(t, err, "load the profile")
+
+			p.BIOS.PatchRequiresPowerOff = tc.patchRequiresPowerOff
 
 			incusClient := fakeIncus(incusapi.Instance{Status: tc.status, InstancePut: incusapi.InstancePut{Config: map[string]string{}}})
 			client := setup(t, incusClient, api.WithProfile(p))

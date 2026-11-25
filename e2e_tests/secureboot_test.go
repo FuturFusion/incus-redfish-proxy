@@ -146,8 +146,8 @@ func TestSecureBoot_Generic(t *testing.T) {
 	enableResp := p.enableSecureBoot(t)
 
 	// Assert
-	require.Equal(t, http.StatusPreconditionFailed, addResp.status, "POST on a running VM: %s", addResp.body)
-	require.Equal(t, http.StatusPreconditionFailed, enableResp.status, "SecureBootEnable on a running VM: %s", enableResp.body)
+	require.Equal(t, http.StatusConflict, addResp.status, "POST on a running VM: %s", addResp.body)
+	require.Equal(t, http.StatusConflict, enableResp.status, "SecureBootEnable on a running VM: %s", enableResp.body)
 	require.Equal(t, "false", instanceConfig(t, vm)["security.secureboot"], "the refused SecureBootEnable changes nothing")
 
 	// Run test: enable secure boot on the stopped VM, with a certificate in db.
@@ -196,7 +196,7 @@ func TestSecureBoot_NoDatabaseWrite(t *testing.T) {
 	resp = p.resetKeys(t, "DeletePK")
 
 	// Assert
-	require.Equal(t, http.StatusPreconditionFailed, resp.status, "ResetKeys on a running VM: %s", resp.body)
+	require.Equal(t, http.StatusConflict, resp.status, "ResetKeys on a running VM: %s", resp.body)
 
 	// Run test: DeletePK keeps the other databases.
 	require.Equal(t, http.StatusNoContent, p.reset(t, "ForceOff").status, "power off")

@@ -22,7 +22,7 @@ func (s redfishServer) stageBIOS(attributes map[string]any, applyTime profile.Ap
 
 	err := s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
 		if s.profile.BIOS.PatchRequiresPowerOff && s.bios.requiresStop(attributes) && instance.Status != "Stopped" {
-			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+			return false, statusErrorf(http.StatusConflict, "instance %q is not stopped", s.instanceName)
 		}
 
 		staged, err := s.bios.pending(instance)

@@ -97,7 +97,7 @@ func TestBIOS_Generic(t *testing.T) {
 	resp = p.do(t, http.MethodPatch, p.biosPath(), map[string]any{"Attributes": map[string]any{"incus.config.limits.memory": "1GiB"}})
 
 	// Assert
-	require.Equal(t, http.StatusPreconditionFailed, resp.status, "PATCH of a running VM: %s", resp.body)
+	require.Equal(t, http.StatusConflict, resp.status, "PATCH of a running VM: %s", resp.body)
 	require.Equal(t, "768MiB", instanceConfig(t, vm)["limits.memory"], "the refused write changes nothing")
 }
 
