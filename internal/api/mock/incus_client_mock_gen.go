@@ -5,6 +5,7 @@
 package mock
 
 import (
+	"io"
 	"sync"
 
 	"github.com/lxc/incus/v7/client"
@@ -34,6 +35,9 @@ var _ api0.IncusClient = &IncusClientMock{}
 //			},
 //			GetInstanceFunc: func(name string) (*api.Instance, string, error) {
 //				panic("mock out the GetInstance method")
+//			},
+//			GetInstanceLogfileFunc: func(name string, filename string) (io.ReadCloser, error) {
+//				panic("mock out the GetInstanceLogfile method")
 //			},
 //			GetInstanceNVRAMGUIDFunc: func(name string, guid string) (map[string]*api.InstanceNVRAMVariable, error) {
 //				panic("mock out the GetInstanceNVRAMGUID method")
@@ -83,6 +87,9 @@ type IncusClientMock struct {
 
 	// GetInstanceFunc mocks the GetInstance method.
 	GetInstanceFunc func(name string) (*api.Instance, string, error)
+
+	// GetInstanceLogfileFunc mocks the GetInstanceLogfile method.
+	GetInstanceLogfileFunc func(name string, filename string) (io.ReadCloser, error)
 
 	// GetInstanceNVRAMGUIDFunc mocks the GetInstanceNVRAMGUID method.
 	GetInstanceNVRAMGUIDFunc func(name string, guid string) (map[string]*api.InstanceNVRAMVariable, error)
@@ -145,6 +152,13 @@ type IncusClientMock struct {
 		GetInstance []struct {
 			// Name is the name argument value.
 			Name string
+		}
+		// GetInstanceLogfile holds details about calls to the GetInstanceLogfile method.
+		GetInstanceLogfile []struct {
+			// Name is the name argument value.
+			Name string
+			// Filename is the filename argument value.
+			Filename string
 		}
 		// GetInstanceNVRAMGUID holds details about calls to the GetInstanceNVRAMGUID method.
 		GetInstanceNVRAMGUID []struct {
@@ -219,6 +233,7 @@ type IncusClientMock struct {
 	lockDeleteInstanceNVRAMGUIDVar     sync.RWMutex
 	lockDeleteStoragePoolVolume        sync.RWMutex
 	lockGetInstance                    sync.RWMutex
+	lockGetInstanceLogfile             sync.RWMutex
 	lockGetInstanceNVRAMGUID           sync.RWMutex
 	lockGetInstanceNVRAMGUIDVar        sync.RWMutex
 	lockGetInstanceState               sync.RWMutex
@@ -376,6 +391,42 @@ func (mock *IncusClientMock) GetInstanceCalls() []struct {
 	mock.lockGetInstance.RLock()
 	calls = mock.calls.GetInstance
 	mock.lockGetInstance.RUnlock()
+	return calls
+}
+
+// GetInstanceLogfile calls GetInstanceLogfileFunc.
+func (mock *IncusClientMock) GetInstanceLogfile(name string, filename string) (io.ReadCloser, error) {
+	if mock.GetInstanceLogfileFunc == nil {
+		panic("IncusClientMock.GetInstanceLogfileFunc: method is nil but IncusClient.GetInstanceLogfile was just called")
+	}
+	callInfo := struct {
+		Name     string
+		Filename string
+	}{
+		Name:     name,
+		Filename: filename,
+	}
+	mock.lockGetInstanceLogfile.Lock()
+	mock.calls.GetInstanceLogfile = append(mock.calls.GetInstanceLogfile, callInfo)
+	mock.lockGetInstanceLogfile.Unlock()
+	return mock.GetInstanceLogfileFunc(name, filename)
+}
+
+// GetInstanceLogfileCalls gets all the calls that were made to GetInstanceLogfile.
+// Check the length with:
+//
+//	len(mockedIncusClient.GetInstanceLogfileCalls())
+func (mock *IncusClientMock) GetInstanceLogfileCalls() []struct {
+	Name     string
+	Filename string
+} {
+	var calls []struct {
+		Name     string
+		Filename string
+	}
+	mock.lockGetInstanceLogfile.RLock()
+	calls = mock.calls.GetInstanceLogfile
+	mock.lockGetInstanceLogfile.RUnlock()
 	return calls
 }
 

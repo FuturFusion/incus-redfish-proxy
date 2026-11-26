@@ -33,7 +33,10 @@ func (s redfishServer) logServicesPath() string {
 }
 
 func (s redfishServer) logServices() []logService {
-	return []logService{s.eventLog}
+	return []logService{
+		s.eventLog,
+		hypervisorLog{instanceName: s.instanceName, client: s.client},
+	}
 }
 
 func (s redfishServer) lookupLogService(w http.ResponseWriter, computerSystemID string, logServiceID string) (logService, string, bool) {

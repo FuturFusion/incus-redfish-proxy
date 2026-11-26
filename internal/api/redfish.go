@@ -40,6 +40,7 @@ type IncusClient interface {
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
 	GetInstanceState(name string) (*incusapi.InstanceState, string, error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
+	GetInstanceLogfile(name string, filename string) (content io.ReadCloser, err error)
 
 	GetInstanceNVRAMGUID(name string, guid string) (vars map[string]*incusapi.InstanceNVRAMVariable, err error)
 	GetInstanceNVRAMGUIDVar(name string, guid string, varName string) (resp *incusapi.InstanceNVRAMVariable, ETag string, err error)
