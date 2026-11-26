@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"log"
 	"net/url"
 	"path"
@@ -199,13 +198,17 @@ func (l *systemEventLog) entries(_ string) ([]LogEntryV1220LogEntry, error) {
 		severity := LogEntryV1220LogEntry_Severity{}
 		_ = severity.FromLogEntryV1220EventSeverity(record.message.eventSeverity())
 
+		id := strconv.FormatUint(record.id, 10)
+
 		entries = append(entries, LogEntryV1220LogEntry{
-			ID:        strconv.FormatUint(record.id, 10),
-			Name:      fmt.Sprintf("Event Log Entry %d", record.id),
-			EntryType: LogEntryV1220LogEntryTypeEvent,
-			Created:   ref(record.at),
-			Message:   ref(record.message.format(record.args)),
-			Severity:  &severity,
+			ID:          id,
+			Name:        "Event Log Entry " + id,
+			EntryType:   LogEntryV1220LogEntryTypeEvent,
+			Created:     ref(record.at),
+			Message:     ref(record.message.format(record.args)),
+			MessageArgs: refNonEmpty(record.args),
+			MessageID:   ref(lifecycleMessagePrefix + record.message.key),
+			Severity:    &severity,
 		})
 	}
 

@@ -31,31 +31,31 @@ func TestSystemEventLog_record(t *testing.T) {
 			name:      "start with requestor",
 			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceStarted, Source: "/1.0/instances/test-instance?project=foo", Requestor: alice},
 
-			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The instance was started by alice over tls.", LogEntryV1220EventSeverityOK)},
+			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The instance was started by alice over tls.", LogEntryV1220EventSeverityOK, "IncusLifecycle.1.0.InstanceStarted", "alice over tls")},
 		},
 		{
 			name:      "shutdown without requestor",
 			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceShutdown, Source: "/1.0/instances/test-instance"},
 
-			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The instance was shut down by an unknown requestor.", LogEntryV1220EventSeverityWarning)},
+			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The instance was shut down by an unknown requestor.", LogEntryV1220EventSeverityWarning, "IncusLifecycle.1.0.InstanceShutdown", "an unknown requestor")},
 		},
 		{
 			name:      "requestor without protocol and address",
 			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceStopped, Source: "/1.0/instances/test-instance", Requestor: &incusapi.EventLifecycleRequestor{Username: "bob"}},
 
-			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The instance was stopped by bob.", LogEntryV1220EventSeverityOK)},
+			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The instance was stopped by bob.", LogEntryV1220EventSeverityOK, "IncusLifecycle.1.0.InstanceStopped", "bob")},
 		},
 		{
 			name:      "snapshot of the instance",
 			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceSnapshotCreated, Source: "/1.0/instances/test-instance/snapshots/snap0", Requestor: alice},
 
-			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The snapshot snap0 was created by alice over tls.", LogEntryV1220EventSeverityOK)},
+			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The snapshot snap0 was created by alice over tls.", LogEntryV1220EventSeverityOK, "IncusLifecycle.1.0.SnapshotCreated", "snap0", "alice over tls")},
 		},
 		{
 			name:      "action without requestor argument",
 			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceAgentStarted, Source: "/1.0/instances/test-instance"},
 
-			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The guest agent started.", LogEntryV1220EventSeverityOK)},
+			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The guest agent started.", LogEntryV1220EventSeverityOK, "IncusLifecycle.1.0.AgentStarted")},
 		},
 		{
 			name:      "other instance",
@@ -68,6 +68,12 @@ func TestSystemEventLog_record(t *testing.T) {
 			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceLogRetrieved, Source: "/1.0/instances/test-instance/logs/qemu.qmp.log"},
 
 			wantEntries: []LogEntryV1220LogEntry{},
+		},
+		{
+			name:      "snapshot name with a placeholder",
+			lifecycle: incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceSnapshotCreated, Source: "/1.0/instances/test-instance/snapshots/x%252", Requestor: alice},
+
+			wantEntries: []LogEntryV1220LogEntry{eventEntry(t, at, "The snapshot x%2 was created by alice over tls.", LogEntryV1220EventSeverityOK, "IncusLifecycle.1.0.SnapshotCreated", "x%2", "alice over tls")},
 		},
 		{
 			name:      "invalid source",
@@ -285,13 +291,14 @@ func TestRedfishServer_EventLog(t *testing.T) {
 		"EntryType": "Event",
 		"Id": "1",
 		"Message": "The instance was started by an unknown requestor.",
+		"MessageArgs": ["an unknown requestor"],
+		"MessageId": "IncusLifecycle.1.0.InstanceStarted",
 		"Name": "Event Log Entry 1",
 		"Severity": "OK"
 	}`, string(body), "the entry has the fields of a Redfish event")
 }
 
-// eventEntry builds the first entry of the event log.
-func eventEntry(t *testing.T, at time.Time, message string, severity LogEntryV1220EventSeverity) LogEntryV1220LogEntry {
+func eventEntry(t *testing.T, at time.Time, message string, severity LogEntryV1220EventSeverity, messageID string, args ...string) LogEntryV1220LogEntry {
 	t.Helper()
 
 	entrySeverity := LogEntryV1220LogEntry_Severity{}
@@ -299,11 +306,66 @@ func eventEntry(t *testing.T, at time.Time, message string, severity LogEntryV12
 	require.NoError(t, err, "set the severity")
 
 	return LogEntryV1220LogEntry{
-		ID:        "1",
-		Name:      "Event Log Entry 1",
-		EntryType: LogEntryV1220LogEntryTypeEvent,
-		Created:   ref(at.UTC()),
-		Message:   ref(message),
-		Severity:  &entrySeverity,
+		ID:          "1",
+		Name:        "Event Log Entry 1",
+		EntryType:   LogEntryV1220LogEntryTypeEvent,
+		Created:     ref(at.UTC()),
+		Message:     ref(message),
+		MessageArgs: refNonEmpty(args),
+		MessageID:   ref(messageID),
+		Severity:    &entrySeverity,
 	}
+}
+
+func TestRedfishServer_LifecycleRegistry(t *testing.T) {
+	t.Parallel()
+
+	alice := &incusapi.EventLifecycleRequestor{Username: "alice", Protocol: "unix"}
+	lifecycle := incusapi.EventLifecycle{Action: incusapi.EventLifecycleInstanceSnapshotCreated, Source: "/1.0/instances/test-instance/snapshots/snap0", Requestor: alice}
+
+	service := NewHandler("test-instance", instanceStateClient{state: &incusapi.InstanceState{}})
+	service.server.eventLog.record(time.Now(), lifecycle)
+
+	httpserver := httptest.NewServer(service)
+	t.Cleanup(httpserver.Close)
+
+	client, err := gofish.Connect(gofish.ClientConfig{Endpoint: httpserver.URL, HTTPClient: httpserver.Client()})
+	require.NoError(t, err, "connect to the proxy")
+
+	logService, err := schemas.GetObject[schemas.LogService](client, "/redfish/v1/Systems/test-instance/LogServices/EventLog")
+	require.NoError(t, err, "get the event log")
+
+	entries, err := logService.Entries()
+	require.NoError(t, err, "get the entries of the event log")
+	require.Len(t, entries, 1, "the event log holds the snapshot event")
+
+	message, err := schemas.GetMessageFromMessageRegistryByLanguage(client, "/redfish/v1/Registries", entries[0].MessageID, "en")
+	require.NoError(t, err, "resolve the MessageId of the entry")
+
+	registries, err := schemas.ListReferencedMessageRegistries(client, "/redfish/v1/Registries")
+	require.NoError(t, err, "list the message registries")
+
+	files, err := client.Service.Registries()
+	require.NoError(t, err, "list the registry files of the service root")
+
+	registry, err := schemas.GetMessageRegistryByLanguage(client, "/redfish/v1/Registries", "IncusLifecycle.1.0", "en")
+	require.NoError(t, err, "get the lifecycle registry")
+
+	require.Equal(t, "IncusLifecycle.1.0.SnapshotCreated", entries[0].MessageID, "the entry names its message")
+	require.Equal(t, []string{"snap0", "alice over unix"}, entries[0].MessageArgs, "the entry has the arguments of its message")
+	require.Equal(t, "The snapshot %1 was created by %2.", message.Message, "the registry has the message of the entry")
+	require.Equal(t, uint(2), message.NumberOfArgs, "the message has the arguments of the entry")
+	require.Len(t, registries, 1, "without a BIOS registry, the lifecycle registry is the only one")
+	require.Equal(t, []string{"IncusLifecycle.1.0.0"}, registryFileIDs(files), "the service root links the lifecycle registry")
+	require.Equal(t, "IncusLifecycle", registry.RegistryPrefix, "the registry prefix starts the MessageId")
+	require.Len(t, registry.Messages, len(lifecycleMessages), "the registry has a message for every recorded action")
+}
+
+func registryFileIDs(files []*schemas.MessageRegistryFile) []string {
+	ids := make([]string, 0, len(files))
+	for _, file := range files {
+		ids = append(ids, file.ID)
+	}
+
+	return ids
 }

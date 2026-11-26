@@ -333,7 +333,7 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 		},
 		Name:           "Root Service",
 		RedfishVersion: ref("1.21.0"),
-		Registries:     s.registriesLink(),
+		Registries:     &OdataV4IdRef{OdataID: ref(registriesPath)},
 		Tasks:          s.tasksLink(),
 		// SessionService: &OdataV4IdRef{
 		// 	OdataID: ref("/redfish/v1/SessionService"),

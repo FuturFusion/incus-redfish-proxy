@@ -399,6 +399,16 @@ func conformanceBIOSRegistry(t *testing.T, p profile.Profile) {
 	bios := getBIOS(t, client)
 	require.Equal(t, p.BIOS.Registry.ID, bios.AttributeRegistry, "Bios names the registry of the profile")
 
+	files, err := client.Service.Registries()
+	require.NoError(t, err, "list the registry files of the service root")
+
+	ids := make([]string, 0, len(files))
+	for _, file := range files {
+		ids = append(ids, file.ID)
+	}
+
+	require.ElementsMatch(t, []string{"IncusLifecycle.1.0.0", p.BIOS.Registry.ID}, ids, "the service root links the lifecycle and the BIOS registry")
+
 	published := registryAttributes(t, client, bios.AttributeRegistry)
 
 	for _, attribute := range p.BIOS.Registry.Attributes {

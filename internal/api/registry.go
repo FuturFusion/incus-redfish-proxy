@@ -65,14 +65,6 @@ type attributeRegistryValue struct {
 	ValueDisplayName string `json:"ValueDisplayName"`
 }
 
-func (s redfishServer) registriesLink() *OdataV4IdRef {
-	if s.profile.BIOS.Registry.ID == "" {
-		return nil
-	}
-
-	return &OdataV4IdRef{OdataID: ref(registriesPath)}
-}
-
 func (s redfishServer) registryFilePath() string {
 	return registriesPath + "/" + s.profile.BIOS.Registry.ID
 }
@@ -82,22 +74,30 @@ func (s redfishServer) attributeRegistryPath() string {
 }
 
 func (s redfishServer) registerRegistryRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET "+registriesPath, s.getRegistries)
+	mux.HandleFunc("GET "+lifecycleRegistryFilePath, getLifecycleRegistryFile)
+	mux.HandleFunc("GET "+lifecycleRegistryPath, getLifecycleRegistry)
+
 	if s.profile.BIOS.Registry.ID == "" {
 		return
 	}
 
-	mux.HandleFunc("GET "+registriesPath, s.getRegistries)
 	mux.HandleFunc("GET "+s.registryFilePath(), s.getRegistryFile)
 	mux.HandleFunc("GET "+s.attributeRegistryPath(), s.getAttributeRegistry)
 }
 
 func (s redfishServer) getRegistries(w http.ResponseWriter, r *http.Request) {
+	members := []OdataV4IdRef{{OdataID: ref(lifecycleRegistryFilePath)}}
+	if s.profile.BIOS.Registry.ID != "" {
+		members = append(members, OdataV4IdRef{OdataID: ref(s.registryFilePath())})
+	}
+
 	response(w, resourceCollection{
 		OdataID:           registriesPath,
 		OdataType:         "#MessageRegistryFileCollection.MessageRegistryFileCollection",
 		Name:              "Registry File Collection",
-		Members:           []OdataV4IdRef{{OdataID: ref(s.registryFilePath())}},
-		MembersOdataCount: 1,
+		Members:           members,
+		MembersOdataCount: len(members),
 	})
 }
 
