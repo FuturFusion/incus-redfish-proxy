@@ -824,6 +824,17 @@ func respondStatusError(w http.ResponseWriter, err error) {
 	responseRedfishError(w, http.StatusInternalServerError, err.Error(), redfishMessage{MessageID: "Base.1.18.InternalError", Message: err.Error()})
 }
 
+// respondLogError keeps a 403 of Incus. Redfish clients can then tell missing permissions from a failure.
+func respondLogError(w http.ResponseWriter, err error) {
+	status, ok := incusapi.StatusErrorMatch(err, http.StatusForbidden)
+	if !ok {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseErrWithMessage(w, status, err.Error())
+}
+
 func (s redfishServer) ejectVirtualMedia() error {
 	instance, etag, err := s.client.GetInstance(s.instanceName)
 	if err != nil {
@@ -1478,6 +1489,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 
 		ID:            s.instanceName,
 		LastResetTime: lastResetTime,
+		LogServices:   &OdataV4IdRef{OdataID: ref(s.logServicesPath())},
 		Manufacturer:  ref("linuxcontainers.org"),
 		// TODO: add memory summary
 		// MemorySummary: &ComputerSystemV1290MemorySummary{},
