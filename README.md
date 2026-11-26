@@ -96,6 +96,30 @@ imports an image as a storage volume for an optical drive. So the full fetch
 downloads a USB stick image into a file below `--media-dir` and attaches the
 file. The eject removes it.
 
+## Shutdown
+
+On SIGINT or SIGTERM, the proxy stops in this order:
+
+1. It stops accepting connections. It ends the requests that the unreachable
+   window of the profile holds.
+2. It waits up to 30 seconds for the open requests. Then it closes the
+   connections that are still open.
+3. It waits up to 30 seconds for the background work, for example a reset.
+   Then it cancels the background work and waits until it stops.
+4. It ejects streamed media: it removes the device from the instance, also if
+   the instance runs, and removes the mount and the prefetch files in
+   `--media-dir`. Media in a storage volume or a downloaded file stays
+   inserted.
+
+The 30 seconds of step 3 do not limit the whole shutdown. A canceled Incus
+operation and the eject can take longer. A request or a reset that arrives
+during the shutdown fails with 503 Service Unavailable. A power cycle after a
+secure boot change waits for the next power on.
+
+A second signal ends the proxy at once. A crash or SIGKILL skips the shutdown.
+The next start then mounts the streamed media again, see
+[Lazy virtual media](#lazy-virtual-media).
+
 ## Known limitations
 
 - BIOS attributes that need a stopped instance stay pending after a restart
@@ -126,6 +150,18 @@ the end to end tests of Operations Center. `redfishproxy.NewHandler` takes a
 - `TimingScale`: replaces `timing.scale` of the profile, if not zero.
 - `MediaDir`: the directory for streamed media. Empty means
   `redfishproxy.DefaultMediaDir`.
+- `CloseTimeout`: the time `Close` waits for the background work. Then
+  `Close` cancels it. Zero or less means `api.DefaultCloseTimeout`
+  (30 seconds). Tests can set a shorter time.
+- `Context`: its end aborts the proxy. The proxy unmounts the streamed media
+  but keeps the device, like after a crash. A `Handler.Close` after the abort
+  still removes the streamed media device.
+
+`Handler.Close` stops the proxy in order, like the shutdown on a signal. Call
+it after the HTTP server stopped serving requests. Register
+`Handler.ReleaseHeld` with `http.Server.RegisterOnShutdown`, so the shutdown
+of the HTTP server does not wait for the requests that the unreachable window
+holds.
 
 `redfishproxy.Profiles()` returns the names of the embedded profiles.
 
