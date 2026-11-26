@@ -327,6 +327,11 @@ func respondNVRAMError(w http.ResponseWriter, err error) {
 		return
 	}
 
+	// The failed condition belongs to the proxy's Incus request, so report a conflict.
+	if status == http.StatusPreconditionFailed {
+		status = http.StatusConflict
+	}
+
 	responseErrWithMessage(w, status, err.Error())
 }
 
