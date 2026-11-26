@@ -2006,6 +2006,8 @@ func TestRedfishServer_SecureBootCertificates_Errors(t *testing.T) {
 }
 
 func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
+	t.Parallel()
+
 	existingDER, existingPEM := testCertificate(t, "existing")
 	addedDER, addedPEM := testCertificate(t, "added")
 
@@ -2014,58 +2016,79 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 		hasExtension   bool
 		instanceStatus string
 		body           string
+		updateErr      error
 
-		wantErrMsg   string
-		wantListLen  int
-		wantEntryLen int
+		wantErrStatus   int
+		wantUpdateCalls int
+		wantListLen     int
+		wantEntryLen    int
 	}{
 		{
 			name:           "success",
 			hasExtension:   true,
 			instanceStatus: "Stopped",
 			body:           fmt.Sprintf(`{"CertificateString": %q, "CertificateType": "PEM"}`, addedPEM),
-			wantListLen:    2,
-			wantEntryLen:   1,
+
+			wantUpdateCalls: 1,
+			wantListLen:     2,
+			wantEntryLen:    1,
 		},
 		{
 			name:           "error - not a certificate",
 			hasExtension:   true,
 			instanceStatus: "Stopped",
 			body:           `{"CertificateString": "not a certificate"}`,
-			wantErrMsg:     "400",
+
+			wantErrStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "error - unsupported certificate type",
 			hasExtension:   true,
 			instanceStatus: "Stopped",
 			body:           fmt.Sprintf(`{"CertificateString": %q, "CertificateType": "PKCS7"}`, addedPEM),
-			wantErrMsg:     "400",
+
+			wantErrStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "error - certificate already present",
 			hasExtension:   true,
 			instanceStatus: "Stopped",
 			body:           fmt.Sprintf(`{"CertificateString": %q}`, existingPEM),
-			wantErrMsg:     "409",
+
+			wantErrStatus: http.StatusConflict,
 		},
 		{
 			name:           "error - instance is running",
 			hasExtension:   true,
 			instanceStatus: "Running",
 			body:           fmt.Sprintf(`{"CertificateString": %q}`, addedPEM),
-			wantErrMsg:     "409",
+
+			wantErrStatus: http.StatusConflict,
 		},
 		{
 			name:           "error - missing API extension",
 			hasExtension:   false,
 			instanceStatus: "Stopped",
 			body:           fmt.Sprintf(`{"CertificateString": %q}`, addedPEM),
-			wantErrMsg:     "501",
+
+			wantErrStatus: http.StatusNotImplemented,
+		},
+		{
+			name:           "error - failed Incus ETag check",
+			hasExtension:   true,
+			instanceStatus: "Stopped",
+			body:           fmt.Sprintf(`{"CertificateString": %q}`, addedPEM),
+			updateErr:      incusapi.StatusErrorf(http.StatusPreconditionFailed, "ETag doesn't match"),
+
+			wantErrStatus:   http.StatusConflict,
+			wantUpdateCalls: 1,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			incusClient := &mock.IncusClientMock{
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return &incusapi.Instance{Status: tc.instanceStatus}, "", nil
@@ -2077,7 +2100,7 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 					return nvramSignatureDatabase(t, "x509", existingDER), "etag", nil
 				},
 				UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
-					return nil
+					return tc.updateErr
 				},
 			}
 
@@ -2088,16 +2111,18 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 				resp.Body.Close()
 			}
 
-			if tc.wantErrMsg != "" {
-				require.ErrorContains(t, err, tc.wantErrMsg)
-				require.Empty(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls())
+			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), tc.wantUpdateCalls, "NVRAM writes")
+
+			if tc.wantErrStatus != 0 {
+				redfishErr := &schemas.Error{}
+				require.ErrorAs(t, err, &redfishErr, "the POST fails with a Redfish error")
+				require.Equal(t, tc.wantErrStatus, redfishErr.HTTPReturnedStatusCode, "status")
 
 				return
 			}
 
 			require.NoError(t, err)
 			require.Equal(t, "/redfish/v1/Systems/test-instance/SecureBoot/SecureBootDatabases/db/Certificates/"+hexSHA256(addedDER), resp.Header.Get("Location"))
-			require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), 1)
 
 			call := incusClient.UpdateInstanceNVRAMGUIDVarCalls()[0]
 			require.Equal(t, "test-instance", call.Name)
@@ -2131,6 +2156,8 @@ func TestRedfishServer_PostSecureBootCertificate(t *testing.T) {
 }
 
 func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
+	t.Parallel()
+
 	firstDER, _ := testCertificate(t, "first")
 	secondDER, _ := testCertificate(t, "second")
 	hash := sha256.Sum256([]byte("forbidden binary"))
@@ -2140,10 +2167,12 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 		certificates  [][]byte
 		hashes        [][]byte
 		certificateID string
+		updateErr     error
 
-		wantErrMsg    string
-		wantDelete    bool
-		wantRemaining [][]byte
+		wantErrStatus   int
+		wantUpdateCalls int
+		wantDelete      bool
+		wantRemaining   [][]byte
 	}{
 		{
 			name:          "remove first of two certificates",
@@ -2174,12 +2203,24 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 			name:          "error - unknown certificate",
 			certificates:  [][]byte{firstDER},
 			certificateID: hexSHA256(secondDER),
-			wantErrMsg:    "404",
+
+			wantErrStatus: http.StatusNotFound,
+		},
+		{
+			name:          "error - failed Incus ETag check",
+			certificates:  [][]byte{firstDER, secondDER},
+			certificateID: hexSHA256(firstDER),
+			updateErr:     incusapi.StatusErrorf(http.StatusPreconditionFailed, "ETag doesn't match"),
+
+			wantErrStatus:   http.StatusConflict,
+			wantUpdateCalls: 1,
 		},
 	}
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
 			incusClient := &mock.IncusClientMock{
 				GetInstanceFunc: func(name string) (*incusapi.Instance, string, error) {
 					return &incusapi.Instance{Status: "Stopped"}, "", nil
@@ -2195,7 +2236,7 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 					return variable, "etag", nil
 				},
 				UpdateInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string, data incusapi.InstanceNVRAMVariablePut, ETag string) error {
-					return nil
+					return tc.updateErr
 				},
 				DeleteInstanceNVRAMGUIDVarFunc: func(name string, guid string, varName string) error {
 					return nil
@@ -2211,8 +2252,11 @@ func TestRedfishServer_DeleteSecureBootCertificate(t *testing.T) {
 				resp.Body.Close()
 			}
 
-			if tc.wantErrMsg != "" {
-				require.ErrorContains(t, err, tc.wantErrMsg)
+			if tc.wantErrStatus != 0 {
+				redfishErr := &schemas.Error{}
+				require.ErrorAs(t, err, &redfishErr, "the DELETE fails with a Redfish error")
+				require.Equal(t, tc.wantErrStatus, redfishErr.HTTPReturnedStatusCode, "status")
+				require.Len(t, incusClient.UpdateInstanceNVRAMGUIDVarCalls(), tc.wantUpdateCalls, "NVRAM writes")
 
 				return
 			}

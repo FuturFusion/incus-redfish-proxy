@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -234,6 +235,20 @@ func TestRespondNVRAMError(t *testing.T) {
 
 			wantStatus: http.StatusNotFound,
 			wantBody:   `"message": "not found"`,
+		},
+		{
+			name: "failed Incus ETag check becomes a conflict",
+			err:  incusapi.StatusErrorf(http.StatusPreconditionFailed, "ETag doesn't match"),
+
+			wantStatus: http.StatusConflict,
+			wantBody:   `"message": "ETag doesn't match"`,
+		},
+		{
+			name: "wrapped failed Incus ETag check becomes a conflict",
+			err:  fmt.Errorf("save UEFI variable %q: %w", "db", incusapi.StatusErrorf(http.StatusPreconditionFailed, "ETag doesn't match")),
+
+			wantStatus: http.StatusConflict,
+			wantBody:   `ETag doesn't match`,
 		},
 		{
 			name: "any other error",
