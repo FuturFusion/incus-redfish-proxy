@@ -1,0 +1,7 @@
+version: 1
+name: e2e-usb-full-fetch
+description: Virtual media is a USB stick. The proxy downloads the image in full into a file.
+
+virtual_media:
+  media_types: [USBStick]
+  delivery: full-fetch

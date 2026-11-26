@@ -90,6 +90,21 @@ func (m *mountedMedia) close() error {
 	return current.Close()
 }
 
+func (m *mountedMedia) release() error {
+	m.mu.Lock()
+	current := m.current
+	m.current = nil
+	m.mu.Unlock()
+
+	// The device of a downloaded file stays at shutdown and abort, so the file must stay too.
+	_, downloaded := current.(downloadedMedia)
+	if current == nil || downloaded {
+		return nil
+	}
+
+	return current.Close()
+}
+
 const restoreProbeTimeout = 30 * time.Second
 
 func (s redfishServer) mediaOptions(delivery profile.Delivery) media.Options {

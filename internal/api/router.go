@@ -5,8 +5,9 @@ import "net/http"
 // NewHandler builds the HTTP handler for the Redfish API: the routes
 // generated from the DMTF Redfish OpenAPI schema, plus routes for resources
 // the schema does not enumerate because their URI is service-defined rather
-// than fixed.
-func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Handler {
+// than fixed. The caller must call Service.Close after the HTTP server
+// stopped serving requests.
+func NewHandler(instanceName string, client IncusClient, opts ...Option) *Service {
 	server := NewRedfishServer(instanceName, client, opts...)
 
 	mux := http.NewServeMux()
@@ -23,7 +24,10 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) http.Ha
 	server.registerSecureBootRoutes(mux)
 	server.registerVirtualMediaRoutes(mux)
 
-	return jsonContentType(server.unreachable(server.settle(server.busy(server.overlay(HandlerFromMux(server, mux))))))
+	return &Service{
+		Handler: jsonContentType(server.unreachable(server.settle(server.busy(server.overlay(HandlerFromMux(server, mux)))))),
+		server:  server,
+	}
 }
 
 func jsonContentType(next http.Handler) http.Handler {

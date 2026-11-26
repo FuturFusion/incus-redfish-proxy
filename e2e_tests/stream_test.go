@@ -166,6 +166,27 @@ func TestStream_Boot(t *testing.T) {
 	require.Equal(t, "Running", instanceStatus(t, vm), "the VM keeps running")
 }
 
+func TestStream_Close(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	vm := newVM(t)
+	p := startProxy(t, vm, "stream-media")
+	images := newImageServer(t, "alpine.iso", alpineImage(t))
+	mountPath := mountPoint(vm)
+
+	resp := p.insert(t, images.url)
+	require.Equal(t, http.StatusNoContent, resp.status, "insert: %s", resp.body)
+	require.Equal(t, 1, mounts(t, mountPath), "the image is mounted")
+
+	// Run test
+	p.close(t)
+
+	// Assert
+	require.Nil(t, bootMediaDevice(t, vm), "close removes the device")
+	require.Equal(t, 0, mounts(t, mountPath), "close unmounts the image")
+}
+
 func TestStream_Prefetch(t *testing.T) {
 	t.Parallel()
 

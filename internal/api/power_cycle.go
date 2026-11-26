@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"time"
 
@@ -52,9 +53,61 @@ func (s redfishServer) afterResetKeys(put *incusapi.InstancePut) {
 }
 
 func (s redfishServer) startPowerCycle() error {
+	instance, _, err := s.client.GetInstance(s.instanceName)
+	if err != nil {
+		return err
+	}
+
+	_, marked := instance.Config[powerCycleKey]
+	if !marked {
+		return nil
+	}
+
+	// The marker stays until the admitted work takes it, so a refused power cycle runs after the next power on.
+	admitted := s.goBackground(s.powerCycle)
+	if !admitted {
+		return fmt.Errorf("keep the marker for the next power on: %w", errShuttingDown)
+	}
+
+	return nil
+}
+
+func (s redfishServer) powerCycle() {
+	marked, err := s.takePowerCycleMarker()
+	if err != nil {
+		log.Printf("power cycle of instance %q after a secure boot change: %v", s.instanceName, err)
+		return
+	}
+
+	if !marked {
+		return
+	}
+
+	cycle := s.profile.SecureBoot.PowerCycle
+
+	err = s.powerCycleStep(s.profile.Scaled(cycle.OffAfter), "Running", "stop")
+	if err == nil {
+		err = s.powerCycleStep(s.profile.Scaled(cycle.OffFor), "Stopped", "start")
+	}
+
+	if err != nil {
+		log.Printf("power cycle of instance %q after a secure boot change ended: %v", s.instanceName, err)
+	}
+}
+
+func (s redfishServer) takePowerCycleMarker() (bool, error) {
+	s.powerMu.Lock()
+	defer s.powerMu.Unlock()
+
+	// A canceled shutdown keeps the marker for the next power on.
+	err := s.ctx.Err()
+	if err != nil {
+		return false, err
+	}
+
 	marked := false
 
-	err := s.updateInstance(func(_ *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
+	err = s.updateInstance(func(_ *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
 		_, marked = put.Config[powerCycleKey]
 		if !marked {
 			return false, nil
@@ -64,24 +117,8 @@ func (s redfishServer) startPowerCycle() error {
 
 		return true, nil
 	})
-	if err != nil || !marked {
-		return err
-	}
 
-	go func() {
-		cycle := s.profile.SecureBoot.PowerCycle
-
-		err := s.powerCycleStep(s.profile.Scaled(cycle.OffAfter), "Running", "stop")
-		if err == nil {
-			err = s.powerCycleStep(s.profile.Scaled(cycle.OffFor), "Stopped", "start")
-		}
-
-		if err != nil {
-			log.Printf("power cycle of instance %q after a secure boot change ended: %v", s.instanceName, err)
-		}
-	}()
-
-	return nil
+	return marked, err
 }
 
 func (s redfishServer) powerCycleStep(d time.Duration, from string, action string) error {

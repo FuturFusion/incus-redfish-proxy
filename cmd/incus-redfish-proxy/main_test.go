@@ -50,7 +50,7 @@ func TestRun(t *testing.T) {
 		},
 		{
 			name: "empty instance name",
-			args: []string{""},
+			args: []string{"--listen", "127.0.0.1:0", ""},
 			assertErr: func(tt require.TestingT, err error, a ...any) {
 				require.ErrorContains(tt, err, "instance name must not be empty", a...)
 			},
@@ -77,7 +77,7 @@ func TestRun(t *testing.T) {
 		},
 		{
 			name: "negative timing scale",
-			args: []string{"--timing-scale", "-1", "instance"},
+			args: []string{"--listen", "127.0.0.1:0", "--timing-scale", "-1", "instance"},
 			assertErr: func(tt require.TestingT, err error, a ...any) {
 				require.ErrorContains(tt, err, "timing.scale -1 must be a finite number greater than 0", a...)
 			},
@@ -86,9 +86,18 @@ func TestRun(t *testing.T) {
 		},
 		{
 			name: "unknown profile",
-			args: []string{"--profile", "unknown", "instance"},
+			args: []string{"--listen", "127.0.0.1:0", "--profile", "unknown", "instance"},
 			assertErr: func(tt require.TestingT, err error, a ...any) {
 				require.ErrorContains(tt, err, "load profile", a...)
+			},
+			assertStdout: empty,
+			assertStderr: empty,
+		},
+		{
+			name: "invalid listen address",
+			args: []string{"--listen", "invalid", "instance"},
+			assertErr: func(tt require.TestingT, err error, a ...any) {
+				require.ErrorContains(tt, err, "listen: ", a...)
 			},
 			assertStdout: empty,
 			assertStderr: empty,
@@ -103,7 +112,7 @@ func TestRun(t *testing.T) {
 			var stdout, stderr strings.Builder
 
 			// Run test
-			err := run(tc.args, &stdout, &stderr)
+			err := run(t.Context(), tc.args, &stdout, &stderr)
 
 			// Assert
 			tc.assertErr(t, err, "the error of run")

@@ -75,3 +75,38 @@ func TestUnreachableWindow_poweredOn(t *testing.T) {
 	require.True(t, window.contains(poweredOn.Add(90*time.Second)), "the first power on after the key reset opens the window")
 	require.False(t, window.contains(poweredOn.Add(time.Hour+90*time.Second)), "a later power on opens no window")
 }
+
+func TestService_ReleaseHeld(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	poweredOn := time.Date(2026, 11, 9, 14, 4, 36, 0, time.UTC)
+	p := profile.Default()
+	p.SecureBoot.ResetKeys.Unreachable = profile.Unreachable{For: time.Hour}
+
+	service := NewHandler("test-instance", instanceStateClient{state: &incusapi.InstanceState{}}, WithProfile(p), WithClock(func() time.Time { return poweredOn }))
+	service.server.unreachableWindow.keysDeleted()
+	service.server.openUnreachable(poweredOn)
+
+	held := make(chan struct{})
+
+	go func() {
+		service.ServeHTTP(httptest.NewRecorder(), httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/redfish/v1/", nil))
+		close(held)
+	}()
+
+	// Run test
+	service.ReleaseHeld()
+
+	// Assert
+	require.Eventually(t, func() bool {
+		select {
+		case <-held:
+			return true
+
+		default:
+			return false
+		}
+	}, 5*time.Second, time.Millisecond, "release ends the held request without the client timeout")
+	require.NoError(t, service.server.ctx.Err(), "release does not cancel the background work")
+}
