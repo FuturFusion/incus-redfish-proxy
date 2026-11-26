@@ -120,6 +120,38 @@ A second signal ends the proxy at once. A crash or SIGKILL skips the shutdown.
 The next start then mounts the streamed media again, see
 [Lazy virtual media](#lazy-virtual-media).
 
+## System logs
+
+The system has three log services below
+`/redfish/v1/Systems/<instance>/LogServices`. All of them are read only.
+
+| Log service     | Source                                    | Entries                                                                                                                                                                                                                                                 |
+|-----------------|-------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `EventLog`      | Lifecycle events of Incus                 | One entry per recorded lifecycle event, for example start, stop, or snapshot. The `MessageId` is from the `IncusLifecycle.1.0.0` message registry below `/redfish/v1/Registries`.                                                                       |
+| `HypervisorLog` | `qemu.qmp.log` of the instance            | One entry per QMP (QEMU Machine Protocol) event, for example `SHUTDOWN` or `GUEST_PANICKED`.                                                                                                                                                            |
+| `Diagnostic`    | Console log, `qemu.log`, `qemu.early.log` | One entry per log. The message contains up to 4 KiB from the end of the log. Truncated messages omit the first partial line when possible and include a link to the full log. Invalid UTF-8 bytes are removed. `AdditionalDataURI` serves the full log. |
+
+The event log and the hypervisor log list the newest entry first. The
+collection of entries contains the full entries, so a client needs only one
+request per log.
+
+Limitations:
+
+- Incus keeps no history of its events. The event log only holds the events
+  since the start of the proxy. It keeps the latest 1000 events.
+- The event log misses the events while the proxy reconnects to the Incus
+  event stream. The entry Ids start again at 1 when the proxy restarts.
+- Without an event source, the event log is disabled and stays empty.
+- The event log names the Incus user that caused an event, but not the address
+  of the Incus client.
+- Incus creates `qemu.qmp.log`, `qemu.log`, and the console log again on each
+  start of the instance. The hypervisor log and the diagnostic log cover the
+  latest instance start, including later in-place guest resets. The
+  hypervisor log shows the latest 1000 events.
+- Hypervisor log entry Ids are line numbers in `qemu.qmp.log`. Incus recreates
+  this file on each instance start, so an Id can refer to a different event
+  after a restart.
+
 ## Known limitations
 
 - BIOS attributes that need a stopped instance stay pending after a restart

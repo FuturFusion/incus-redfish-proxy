@@ -40,6 +40,8 @@ type IncusClient interface {
 	UpdateInstance(name string, instance incusapi.InstancePut, ETag string) (op incusclient.Operation, err error)
 	GetInstanceState(name string) (*incusapi.InstanceState, string, error)
 	UpdateInstanceState(name string, state incusapi.InstanceStatePut, ETag string) (op incusclient.Operation, err error)
+	GetInstanceLogfile(name string, filename string) (content io.ReadCloser, err error)
+	GetInstanceConsoleLog(instanceName string, args *incusclient.InstanceConsoleLogArgs) (content io.ReadCloser, err error)
 
 	GetInstanceNVRAMGUID(name string, guid string) (vars map[string]*incusapi.InstanceNVRAMVariable, err error)
 	GetInstanceNVRAMGUIDVar(name string, guid string, varName string) (resp *incusapi.InstanceNVRAMVariable, ETag string, err error)
@@ -59,6 +61,7 @@ type redfishServer struct {
 	ctx          context.Context
 	events       EventSource
 	resets       *resetTracker
+	eventLog     *systemEventLog
 	busyReads    *busyCounter
 
 	databaseRefresh *databaseRefresh
@@ -100,6 +103,7 @@ func WithHTTPClient(client *http.Client) Option {
 }
 
 // WithEventSource sets the Incus event stream, which must not be the client used for requests, watched in the background until the context of WithContext is done.
+// The source must be scoped to the same Incus project as the request client.
 func WithEventSource(source EventSource) Option {
 	return func(s *redfishServer) {
 		s.events = source
@@ -142,6 +146,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		httpClient:   http.DefaultClient,
 		ctx:          context.Background(),
 		resets:       &resetTracker{instanceName: instanceName},
+		eventLog:     &systemEventLog{instanceName: instanceName},
 		busyReads:    &busyCounter{},
 
 		databaseRefresh: &databaseRefresh{},
@@ -194,6 +199,8 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	}
 
 	s.resets.observers = append(s.resets.observers, s.databaseRefresh.poweredOn)
+	s.resets.lifecycleObservers = append(s.resets.lifecycleObservers, s.eventLog.record)
+	s.eventLog.watched = s.events != nil
 
 	if s.profile.BIOS.Pending {
 		s.resets.onPowerOn(s.applyPendingOnPowerOn)
@@ -328,7 +335,7 @@ func (s redfishServer) GetRedfishV1(w http.ResponseWriter, r *http.Request) {
 		},
 		Name:           "Root Service",
 		RedfishVersion: ref("1.21.0"),
-		Registries:     s.registriesLink(),
+		Registries:     &OdataV4IdRef{OdataID: ref(registriesPath)},
 		Tasks:          s.tasksLink(),
 		// SessionService: &OdataV4IdRef{
 		// 	OdataID: ref("/redfish/v1/SessionService"),
@@ -448,7 +455,7 @@ func (s redfishServer) getVirtualMedia(w http.ResponseWriter, slot mediaSlot) {
 	}
 
 	connectedViaURI := VirtualMediaV170VirtualMedia_ConnectedVia{}
-	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(URI)
+	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(VirtualMediaV170ConnectedViaURI)
 
 	transferMethod, transferProtocol := transferOfMedia(device, image)
 
@@ -822,6 +829,17 @@ func respondStatusError(w http.ResponseWriter, err error) {
 	}
 
 	responseRedfishError(w, http.StatusInternalServerError, err.Error(), redfishMessage{MessageID: "Base.1.18.InternalError", Message: err.Error()})
+}
+
+// respondLogError keeps a 403 of Incus. Redfish clients can then tell missing permissions from a failure.
+func respondLogError(w http.ResponseWriter, err error) {
+	status, ok := incusapi.StatusErrorMatch(err, http.StatusForbidden)
+	if !ok {
+		respondStatusError(w, err)
+		return
+	}
+
+	responseErrWithMessage(w, status, err.Error())
 }
 
 func (s redfishServer) ejectVirtualMedia() error {
@@ -1478,6 +1496,7 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemID(w http.ResponseWriter
 
 		ID:            s.instanceName,
 		LastResetTime: lastResetTime,
+		LogServices:   &OdataV4IdRef{OdataID: ref(s.logServicesPath())},
 		Manufacturer:  ref("linuxcontainers.org"),
 		// TODO: add memory summary
 		// MemorySummary: &ComputerSystemV1290MemorySummary{},

@@ -39,6 +39,9 @@ type resetTracker struct {
 	// observers learn about each new power on, also about the ones the proxy issued. They run under the lock.
 	observers []func(at time.Time)
 
+	// lifecycleObservers see all lifecycle events, also of other instances. Registered before the watcher starts, they run outside the lock.
+	lifecycleObservers []func(at time.Time, lifecycle incusapi.EventLifecycle)
+
 	mu            sync.Mutex
 	lastRestartAt time.Time
 	lastPowerOnAt time.Time
@@ -91,7 +94,12 @@ func (t *resetTracker) handle(ctx context.Context, event incusapi.Event) {
 
 	err := json.Unmarshal(event.Metadata, &lifecycle)
 	if err != nil {
+		log.Printf("lifecycle event of instance %q has bad metadata, skip it: %v", t.instanceName, err)
 		return
+	}
+
+	for _, observe := range t.lifecycleObservers {
+		observe(event.Timestamp, lifecycle)
 	}
 
 	if lifecycle.Action != incusapi.EventLifecycleInstanceRestarted && lifecycle.Action != incusapi.EventLifecycleInstanceStarted {
@@ -137,7 +145,7 @@ func (t *resetTracker) watch(ctx context.Context, source EventSource) {
 			return
 		}
 
-		// The power on hooks miss the events until the reconnect.
+		// The power on hooks and the event log miss the events until the reconnect.
 		log.Printf("event stream of instance %q failed, reconnect in %s: %v", t.instanceName, eventRetryDelay, err)
 
 		select {
