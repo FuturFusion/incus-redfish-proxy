@@ -4,6 +4,8 @@ package e2e_test
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -226,4 +228,25 @@ func TestMedia_BootOverrideOnce(t *testing.T) {
 	enabled, _ = p.bootOverride(t)
 	require.Equal(t, "Continuous", enabled, "Continuous stays")
 	require.Equal(t, "10", bootMediaDevice(t, vm)["boot.priority"], "the media still boots first")
+}
+
+func TestMedia_CloseKeepsDownloadedFile(t *testing.T) {
+	t.Parallel()
+
+	// Setup
+	vm := newVM(t)
+	p := startProxy(t, vm, "testdata/profiles/e2e-usb-full-fetch.yaml")
+	images := newImageServer(t, "install.img", randomImage(t))
+	file := filepath.Join(env.mediaDir, env.project+"_"+vm, "boot-media.img")
+
+	resp := p.insert(t, images.url)
+	require.Equal(t, http.StatusNoContent, resp.status, "insert: %s", resp.body)
+
+	// Run test
+	p.close(t)
+
+	// Assert
+	require.Equal(t, file, bootMediaDevice(t, vm)["source"], "close keeps the device of the downloaded file")
+	require.FileExists(t, file, "close keeps the downloaded file")
+	require.NoError(t, os.Remove(file), "remove the downloaded file")
 }

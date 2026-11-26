@@ -190,7 +190,7 @@ func TestPower_POSTDuration(t *testing.T) {
 	resp = p.reset(t, "ForceOff")
 	require.Equal(t, http.StatusNoContent, resp.status, "power off: %s", resp.body)
 
-	p.stop()
+	p.close(t)
 
 	generic := startProxy(t, vm, "generic")
 	resp = generic.reset(t, "On")

@@ -159,8 +159,13 @@ type proxy struct {
 	profile string
 	url     string
 	client  *http.Client
-	stop    func()
+
+	server  *httptest.Server
+	handler *redfishproxy.Handler
+	cancel  context.CancelFunc
 }
+
+const closeTimeout = 5 * time.Second
 
 func startProxy(t *testing.T, vm string, profileName string) *proxy {
 	t.Helper()
@@ -168,7 +173,7 @@ func startProxy(t *testing.T, vm string, profileName string) *proxy {
 	p := &proxy{vm: vm, profile: profileName}
 	p.start(t)
 
-	t.Cleanup(func() { p.stop() })
+	t.Cleanup(func() { p.close(t) })
 
 	return p
 }
@@ -185,23 +190,35 @@ func (p *proxy) start(t *testing.T) {
 		Profile:      p.profile,
 		MediaDir:     env.mediaDir,
 		Context:      ctx,
+		CloseTimeout: closeTimeout,
 	})
 	require.NoError(t, err, "start the proxy with the profile %s", p.profile)
 
-	server := httptest.NewServer(handler)
+	p.server, p.handler, p.cancel = httptest.NewServer(handler), handler, cancel
+	p.url, p.client = p.server.URL, p.server.Client()
+}
 
-	p.url, p.client = server.URL, server.Client()
-	p.stop = func() {
-		server.Close()
-		cancel()
-	}
+func (p *proxy) close(t *testing.T) {
+	t.Helper()
+
+	p.server.Close()
+	err := p.handler.Close()
+	p.cancel()
+
+	require.NoError(t, err, "close the proxy")
+}
+
+func (p *proxy) abort() {
+	// The device stays, so the next start mounts the media again.
+	p.server.Close()
+	p.cancel()
 }
 
 func (p *proxy) restart(t *testing.T) {
 	// Wait for the old mount to go. Its unmount goes by path and would detach the new mount.
 	t.Helper()
 
-	p.stop()
+	p.abort()
 
 	eventually(t, 30*time.Second, func() bool { return mounts(t, mountPoint(p.vm)) == 0 }, "the old proxy unmounts the media")
 
