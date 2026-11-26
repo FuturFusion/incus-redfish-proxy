@@ -67,7 +67,7 @@ func (s redfishServer) unreachable(next http.Handler) http.Handler {
 
 		select {
 		case <-r.Context().Done():
-		case <-s.ctx.Done():
+		case <-s.shutdown.hold.Done():
 		}
 	})
 }

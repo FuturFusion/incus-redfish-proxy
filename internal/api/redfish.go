@@ -82,6 +82,8 @@ type redfishServer struct {
 	mounter  MediaMounter
 	mounted  *mountedMedia
 
+	shutdown *shutdown
+
 	now func() time.Time
 }
 
@@ -104,7 +106,9 @@ func WithEventSource(source EventSource) Option {
 	}
 }
 
-// WithContext sets the context stopping the event stream watcher, which otherwise runs for the lifetime of the process.
+// WithContext sets the context that aborts the server. Its end stops the event watcher and the background work.
+// It also unmounts streamed media. The device stays, so the next start mounts the media again.
+// A Service.Close after the abort still removes the streamed media device.
 func WithContext(ctx context.Context) Option {
 	return func(s *redfishServer) {
 		if ctx != nil {
@@ -150,12 +154,18 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		mediaMu:           &sync.Mutex{},
 		resetMu:           &sync.Mutex{},
 		mounted:           &mountedMedia{},
+		shutdown:          newShutdown(),
 		now:               time.Now,
 	}
 
 	for _, opt := range opts {
 		opt(s)
 	}
+
+	// Canceling the outer context aborts. Close never cancels the outer one. It cancels the inner one to stop the background work and the watcher.
+	outer := s.ctx
+	s.ctx, s.shutdown.cancel = context.WithCancel(outer)
+	s.shutdown.hold, s.shutdown.release = context.WithCancel(s.ctx)
 
 	s.bios = biosStore{bios: s.profile.BIOS}
 
@@ -166,12 +176,21 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	if s.profile.VirtualMedia.Delivery != profile.DeliveryFullFetch {
 		s.restoreMedia()
 
-		context.AfterFunc(s.ctx, func() {
-			err := s.mounted.close()
+		aborted := make(chan struct{})
+		stop := context.AfterFunc(outer, func() {
+			defer close(aborted)
+
+			err := s.mounted.release()
 			if err != nil {
 				log.Printf("remove the media of instance %q: %v", s.instanceName, err)
 			}
 		})
+
+		s.shutdown.stopAbort = func() {
+			if !stop() {
+				<-aborted
+			}
+		}
 	}
 
 	s.resets.observers = append(s.resets.observers, s.databaseRefresh.poweredOn)
@@ -185,7 +204,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	}
 
 	if s.events != nil {
-		go s.resets.watch(s.ctx, s.events)
+		s.shutdown.watcher.Go(func() { s.resets.watch(s.ctx, s.events) })
 	}
 
 	return s
@@ -645,7 +664,7 @@ func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, 
 	taskID := s.tasks.create(s.firstMediaSlot().path(), TaskV174TaskStateRunning)
 
 	// The insert outlives the request, so it stops with the server context.
-	go func() {
+	admitted := s.goBackground(func() {
 		defer s.mediaMu.Unlock()
 
 		err := s.insertVirtualMedia(s.ctx, image, mediaType)
@@ -655,7 +674,14 @@ func (s redfishServer) insertAndRespond(w http.ResponseWriter, r *http.Request, 
 		}
 
 		s.tasks.complete(taskID)
-	}()
+	})
+	if !admitted {
+		s.mediaMu.Unlock()
+		s.tasks.fail(taskID, errorMessages(errShuttingDown)...)
+		s.respondShuttingDown(w, "insert")
+
+		return
+	}
 
 	responseAccepted(w, taskMonitorPath(taskID))
 }
@@ -1764,14 +1790,20 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	if s.profile.Power.Response != profile.PowerResponseTask {
 		// Like a real BMC, the answer comes at once and the power state changes after the delay.
 		// So a client that polls right after the answer still sees the old power state.
-		go func() {
+		admitted := s.goBackground(func() {
 			defer s.resetMu.Unlock()
 
 			err := s.reset(s.ctx, action, force, noopStatus)
 			if err != nil {
 				log.Printf("reset of instance %q failed after the answer: %v", s.instanceName, err)
 			}
-		}()
+		})
+		if !admitted {
+			s.resetMu.Unlock()
+			s.respondShuttingDown(w, "reset")
+
+			return
+		}
 
 		responseDone(w, s.profile.Power.Response, successMessage())
 
@@ -1781,7 +1813,7 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 	taskID := s.tasks.create(fmt.Sprintf("/redfish/v1/Systems/%s", s.instanceName), TaskV174TaskStateRunning)
 
 	// The reset outlives the request, so it stops with the server context.
-	go func() {
+	admitted := s.goBackground(func() {
 		defer s.resetMu.Unlock()
 
 		err := s.reset(s.ctx, action, force, noopStatus)
@@ -1791,7 +1823,14 @@ func (s redfishServer) PostRedfishV1SystemsComputerSystemIDActionsComputerSystem
 		}
 
 		s.tasks.complete(taskID)
-	}()
+	})
+	if !admitted {
+		s.resetMu.Unlock()
+		s.tasks.fail(taskID, errorMessages(errShuttingDown)...)
+		s.respondShuttingDown(w, "reset")
+
+		return
+	}
 
 	responseAccepted(w, taskMonitorPath(taskID))
 }
