@@ -36,6 +36,7 @@ func (s redfishServer) logServices() []logService {
 	return []logService{
 		s.eventLog,
 		hypervisorLog{instanceName: s.instanceName, client: s.client},
+		diagnosticLog{instanceName: s.instanceName, client: s.client},
 	}
 }
 

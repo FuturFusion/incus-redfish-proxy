@@ -23,6 +23,7 @@ func NewHandler(instanceName string, client IncusClient, opts ...Option) *Servic
 	server.registerTaskRoutes(mux)
 	server.registerSecureBootRoutes(mux)
 	server.registerVirtualMediaRoutes(mux)
+	server.registerDiagnosticLogRoutes(mux)
 
 	return &Service{
 		Handler: jsonContentType(server.unreachable(server.settle(server.busy(server.overlay(HandlerFromMux(server, mux)))))),
