@@ -448,7 +448,7 @@ func (s redfishServer) getVirtualMedia(w http.ResponseWriter, slot mediaSlot) {
 	}
 
 	connectedViaURI := VirtualMediaV170VirtualMedia_ConnectedVia{}
-	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(URI)
+	_ = connectedViaURI.FromVirtualMediaV170ConnectedVia(VirtualMediaV170ConnectedViaURI)
 
 	transferMethod, transferProtocol := transferOfMedia(device, image)
 

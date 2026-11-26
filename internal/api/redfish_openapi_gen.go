@@ -694,31 +694,31 @@ func (e ComputerSystemV1290StopBootOnFault) Valid() bool {
 
 // Defines values for ComputerSystemV1290SystemType.
 const (
-	Composed              ComputerSystemV1290SystemType = "Composed"
-	DPU                   ComputerSystemV1290SystemType = "DPU"
-	OS                    ComputerSystemV1290SystemType = "OS"
-	Physical              ComputerSystemV1290SystemType = "Physical"
-	PhysicallyPartitioned ComputerSystemV1290SystemType = "PhysicallyPartitioned"
-	Virtual               ComputerSystemV1290SystemType = "Virtual"
-	VirtuallyPartitioned  ComputerSystemV1290SystemType = "VirtuallyPartitioned"
+	ComputerSystemV1290SystemTypeComposed              ComputerSystemV1290SystemType = "Composed"
+	ComputerSystemV1290SystemTypeDPU                   ComputerSystemV1290SystemType = "DPU"
+	ComputerSystemV1290SystemTypeOS                    ComputerSystemV1290SystemType = "OS"
+	ComputerSystemV1290SystemTypePhysical              ComputerSystemV1290SystemType = "Physical"
+	ComputerSystemV1290SystemTypePhysicallyPartitioned ComputerSystemV1290SystemType = "PhysicallyPartitioned"
+	ComputerSystemV1290SystemTypeVirtual               ComputerSystemV1290SystemType = "Virtual"
+	ComputerSystemV1290SystemTypeVirtuallyPartitioned  ComputerSystemV1290SystemType = "VirtuallyPartitioned"
 )
 
 // Valid indicates whether the value is a known member of the ComputerSystemV1290SystemType enum.
 func (e ComputerSystemV1290SystemType) Valid() bool {
 	switch e {
-	case Composed:
+	case ComputerSystemV1290SystemTypeComposed:
 		return true
-	case DPU:
+	case ComputerSystemV1290SystemTypeDPU:
 		return true
-	case OS:
+	case ComputerSystemV1290SystemTypeOS:
 		return true
-	case Physical:
+	case ComputerSystemV1290SystemTypePhysical:
 		return true
-	case PhysicallyPartitioned:
+	case ComputerSystemV1290SystemTypePhysicallyPartitioned:
 		return true
-	case Virtual:
+	case ComputerSystemV1290SystemTypeVirtual:
 		return true
-	case VirtuallyPartitioned:
+	case ComputerSystemV1290SystemTypeVirtuallyPartitioned:
 		return true
 	default:
 		return false
@@ -824,6 +824,753 @@ func (e ControlV181ControlMode) Valid() bool {
 	}
 }
 
+// Defines values for EventEventType.
+const (
+	EventEventTypeAlert           EventEventType = "Alert"
+	EventEventTypeMetricReport    EventEventType = "MetricReport"
+	EventEventTypeOther           EventEventType = "Other"
+	EventEventTypeResourceAdded   EventEventType = "ResourceAdded"
+	EventEventTypeResourceRemoved EventEventType = "ResourceRemoved"
+	EventEventTypeResourceUpdated EventEventType = "ResourceUpdated"
+	EventEventTypeStatusChange    EventEventType = "StatusChange"
+)
+
+// Valid indicates whether the value is a known member of the EventEventType enum.
+func (e EventEventType) Valid() bool {
+	switch e {
+	case EventEventTypeAlert:
+		return true
+	case EventEventTypeMetricReport:
+		return true
+	case EventEventTypeOther:
+		return true
+	case EventEventTypeResourceAdded:
+		return true
+	case EventEventTypeResourceRemoved:
+		return true
+	case EventEventTypeResourceUpdated:
+		return true
+	case EventEventTypeStatusChange:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220CXLEntryType.
+const (
+	LogEntryV1220CXLEntryTypeDynamicCapacity LogEntryV1220CXLEntryType = "DynamicCapacity"
+	LogEntryV1220CXLEntryTypeFailure         LogEntryV1220CXLEntryType = "Failure"
+	LogEntryV1220CXLEntryTypeFatal           LogEntryV1220CXLEntryType = "Fatal"
+	LogEntryV1220CXLEntryTypeInformational   LogEntryV1220CXLEntryType = "Informational"
+	LogEntryV1220CXLEntryTypeWarning         LogEntryV1220CXLEntryType = "Warning"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220CXLEntryType enum.
+func (e LogEntryV1220CXLEntryType) Valid() bool {
+	switch e {
+	case LogEntryV1220CXLEntryTypeDynamicCapacity:
+		return true
+	case LogEntryV1220CXLEntryTypeFailure:
+		return true
+	case LogEntryV1220CXLEntryTypeFatal:
+		return true
+	case LogEntryV1220CXLEntryTypeInformational:
+		return true
+	case LogEntryV1220CXLEntryTypeWarning:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220EventSeverity.
+const (
+	LogEntryV1220EventSeverityCritical LogEntryV1220EventSeverity = "Critical"
+	LogEntryV1220EventSeverityOK       LogEntryV1220EventSeverity = "OK"
+	LogEntryV1220EventSeverityWarning  LogEntryV1220EventSeverity = "Warning"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220EventSeverity enum.
+func (e LogEntryV1220EventSeverity) Valid() bool {
+	switch e {
+	case LogEntryV1220EventSeverityCritical:
+		return true
+	case LogEntryV1220EventSeverityOK:
+		return true
+	case LogEntryV1220EventSeverityWarning:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220LogDiagnosticDataTypes.
+const (
+	LogEntryV1220LogDiagnosticDataTypesCPER        LogEntryV1220LogDiagnosticDataTypes = "CPER"
+	LogEntryV1220LogDiagnosticDataTypesCPERSection LogEntryV1220LogDiagnosticDataTypes = "CPERSection"
+	LogEntryV1220LogDiagnosticDataTypesDevice      LogEntryV1220LogDiagnosticDataTypes = "Device"
+	LogEntryV1220LogDiagnosticDataTypesManager     LogEntryV1220LogDiagnosticDataTypes = "Manager"
+	LogEntryV1220LogDiagnosticDataTypesOEM         LogEntryV1220LogDiagnosticDataTypes = "OEM"
+	LogEntryV1220LogDiagnosticDataTypesOS          LogEntryV1220LogDiagnosticDataTypes = "OS"
+	LogEntryV1220LogDiagnosticDataTypesPreOS       LogEntryV1220LogDiagnosticDataTypes = "PreOS"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220LogDiagnosticDataTypes enum.
+func (e LogEntryV1220LogDiagnosticDataTypes) Valid() bool {
+	switch e {
+	case LogEntryV1220LogDiagnosticDataTypesCPER:
+		return true
+	case LogEntryV1220LogDiagnosticDataTypesCPERSection:
+		return true
+	case LogEntryV1220LogDiagnosticDataTypesDevice:
+		return true
+	case LogEntryV1220LogDiagnosticDataTypesManager:
+		return true
+	case LogEntryV1220LogDiagnosticDataTypesOEM:
+		return true
+	case LogEntryV1220LogDiagnosticDataTypesOS:
+		return true
+	case LogEntryV1220LogDiagnosticDataTypesPreOS:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220LogEntryCode.
+const (
+	LogEntryV1220LogEntryCodeAssert                                                   LogEntryV1220LogEntryCode = "Assert"
+	LogEntryV1220LogEntryCodeD0PowerState                                             LogEntryV1220LogEntryCode = "D0 Power State"
+	LogEntryV1220LogEntryCodeD1PowerState                                             LogEntryV1220LogEntryCode = "D1 Power State"
+	LogEntryV1220LogEntryCodeD2PowerState                                             LogEntryV1220LogEntryCode = "D2 Power State"
+	LogEntryV1220LogEntryCodeD3PowerState                                             LogEntryV1220LogEntryCode = "D3 Power State"
+	LogEntryV1220LogEntryCodeDeassert                                                 LogEntryV1220LogEntryCode = "Deassert"
+	LogEntryV1220LogEntryCodeDeviceDisabled                                           LogEntryV1220LogEntryCode = "Device Disabled"
+	LogEntryV1220LogEntryCodeDeviceEnabled                                            LogEntryV1220LogEntryCode = "Device Enabled"
+	LogEntryV1220LogEntryCodeDeviceInsertedDevicePresent                              LogEntryV1220LogEntryCode = "Device Inserted / Device Present"
+	LogEntryV1220LogEntryCodeDeviceRemovedDeviceAbsent                                LogEntryV1220LogEntryCode = "Device Removed / Device Absent"
+	LogEntryV1220LogEntryCodeFullyRedundant                                           LogEntryV1220LogEntryCode = "Fully Redundant"
+	LogEntryV1220LogEntryCodeInformational                                            LogEntryV1220LogEntryCode = "Informational"
+	LogEntryV1220LogEntryCodeInstallError                                             LogEntryV1220LogEntryCode = "Install Error"
+	LogEntryV1220LogEntryCodeLimitExceeded                                            LogEntryV1220LogEntryCode = "Limit Exceeded"
+	LogEntryV1220LogEntryCodeLimitNotExceeded                                         LogEntryV1220LogEntryCode = "Limit Not Exceeded"
+	LogEntryV1220LogEntryCodeLowerCriticalGoingHigh                                   LogEntryV1220LogEntryCode = "Lower Critical - going high"
+	LogEntryV1220LogEntryCodeLowerCriticalGoingLow                                    LogEntryV1220LogEntryCode = "Lower Critical - going low"
+	LogEntryV1220LogEntryCodeLowerNonCriticalGoingHigh                                LogEntryV1220LogEntryCode = "Lower Non-critical - going high"
+	LogEntryV1220LogEntryCodeLowerNonCriticalGoingLow                                 LogEntryV1220LogEntryCode = "Lower Non-critical - going low"
+	LogEntryV1220LogEntryCodeLowerNonRecoverableGoingHigh                             LogEntryV1220LogEntryCode = "Lower Non-recoverable - going high"
+	LogEntryV1220LogEntryCodeLowerNonRecoverableGoingLow                              LogEntryV1220LogEntryCode = "Lower Non-recoverable - going low"
+	LogEntryV1220LogEntryCodeMonitor                                                  LogEntryV1220LogEntryCode = "Monitor"
+	LogEntryV1220LogEntryCodeNonRedundantInsufficientResources                        LogEntryV1220LogEntryCode = "Non-redundant:Insufficient Resources"
+	LogEntryV1220LogEntryCodeNonRedundantSufficientResourcesFromInsufficientResources LogEntryV1220LogEntryCode = "Non-redundant:Sufficient Resources from Insufficient Resources"
+	LogEntryV1220LogEntryCodeNonRedundantSufficientResourcesFromRedundant             LogEntryV1220LogEntryCode = "Non-redundant:Sufficient Resources from Redundant"
+	LogEntryV1220LogEntryCodeOEM                                                      LogEntryV1220LogEntryCode = "OEM"
+	LogEntryV1220LogEntryCodePerformanceLags                                          LogEntryV1220LogEntryCode = "Performance Lags"
+	LogEntryV1220LogEntryCodePerformanceMet                                           LogEntryV1220LogEntryCode = "Performance Met"
+	LogEntryV1220LogEntryCodePredictiveFailureAsserted                                LogEntryV1220LogEntryCode = "Predictive Failure asserted"
+	LogEntryV1220LogEntryCodePredictiveFailureDeasserted                              LogEntryV1220LogEntryCode = "Predictive Failure deasserted"
+	LogEntryV1220LogEntryCodeRedundancyDegraded                                       LogEntryV1220LogEntryCode = "Redundancy Degraded"
+	LogEntryV1220LogEntryCodeRedundancyDegradedFromFullyRedundant                     LogEntryV1220LogEntryCode = "Redundancy Degraded from Fully Redundant"
+	LogEntryV1220LogEntryCodeRedundancyDegradedFromNonRedundant                       LogEntryV1220LogEntryCode = "Redundancy Degraded from Non-redundant"
+	LogEntryV1220LogEntryCodeRedundancyLost                                           LogEntryV1220LogEntryCode = "Redundancy Lost"
+	LogEntryV1220LogEntryCodeStateAsserted                                            LogEntryV1220LogEntryCode = "State Asserted"
+	LogEntryV1220LogEntryCodeStateDeasserted                                          LogEntryV1220LogEntryCode = "State Deasserted"
+	LogEntryV1220LogEntryCodeTransitionToActive                                       LogEntryV1220LogEntryCode = "Transition to Active"
+	LogEntryV1220LogEntryCodeTransitionToBusy                                         LogEntryV1220LogEntryCode = "Transition to Busy"
+	LogEntryV1220LogEntryCodeTransitionToCriticalFromLessSevere                       LogEntryV1220LogEntryCode = "Transition to Critical from less severe"
+	LogEntryV1220LogEntryCodeTransitionToCriticalFromNonRecoverable                   LogEntryV1220LogEntryCode = "Transition to Critical from Non-recoverable"
+	LogEntryV1220LogEntryCodeTransitionToDegraded                                     LogEntryV1220LogEntryCode = "Transition to Degraded"
+	LogEntryV1220LogEntryCodeTransitionToIdle                                         LogEntryV1220LogEntryCode = "Transition to Idle"
+	LogEntryV1220LogEntryCodeTransitionToInTest                                       LogEntryV1220LogEntryCode = "Transition to In Test"
+	LogEntryV1220LogEntryCodeTransitionToNonCriticalFromMoreSevere                    LogEntryV1220LogEntryCode = "Transition to Non-Critical from more severe"
+	LogEntryV1220LogEntryCodeTransitionToNonCriticalFromOK                            LogEntryV1220LogEntryCode = "Transition to Non-Critical from OK"
+	LogEntryV1220LogEntryCodeTransitionToNonRecoverable                               LogEntryV1220LogEntryCode = "Transition to Non-recoverable"
+	LogEntryV1220LogEntryCodeTransitionToNonRecoverableFromLessSevere                 LogEntryV1220LogEntryCode = "Transition to Non-recoverable from less severe"
+	LogEntryV1220LogEntryCodeTransitionToOK                                           LogEntryV1220LogEntryCode = "Transition to OK"
+	LogEntryV1220LogEntryCodeTransitionToOffDuty                                      LogEntryV1220LogEntryCode = "Transition to Off Duty"
+	LogEntryV1220LogEntryCodeTransitionToOffLine                                      LogEntryV1220LogEntryCode = "Transition to Off Line"
+	LogEntryV1220LogEntryCodeTransitionToOnLine                                       LogEntryV1220LogEntryCode = "Transition to On Line"
+	LogEntryV1220LogEntryCodeTransitionToPowerOff                                     LogEntryV1220LogEntryCode = "Transition to Power Off"
+	LogEntryV1220LogEntryCodeTransitionToPowerSave                                    LogEntryV1220LogEntryCode = "Transition to Power Save"
+	LogEntryV1220LogEntryCodeTransitionToRunning                                      LogEntryV1220LogEntryCode = "Transition to Running"
+	LogEntryV1220LogEntryCodeUpperCriticalGoingHigh                                   LogEntryV1220LogEntryCode = "Upper Critical - going high"
+	LogEntryV1220LogEntryCodeUpperCriticalGoingLow                                    LogEntryV1220LogEntryCode = "Upper Critical - going low"
+	LogEntryV1220LogEntryCodeUpperNonCriticalGoingHigh                                LogEntryV1220LogEntryCode = "Upper Non-critical - going high"
+	LogEntryV1220LogEntryCodeUpperNonCriticalGoingLow                                 LogEntryV1220LogEntryCode = "Upper Non-critical - going low"
+	LogEntryV1220LogEntryCodeUpperNonRecoverableGoingHigh                             LogEntryV1220LogEntryCode = "Upper Non-recoverable - going high"
+	LogEntryV1220LogEntryCodeUpperNonRecoverableGoingLow                              LogEntryV1220LogEntryCode = "Upper Non-recoverable - going low"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220LogEntryCode enum.
+func (e LogEntryV1220LogEntryCode) Valid() bool {
+	switch e {
+	case LogEntryV1220LogEntryCodeAssert:
+		return true
+	case LogEntryV1220LogEntryCodeD0PowerState:
+		return true
+	case LogEntryV1220LogEntryCodeD1PowerState:
+		return true
+	case LogEntryV1220LogEntryCodeD2PowerState:
+		return true
+	case LogEntryV1220LogEntryCodeD3PowerState:
+		return true
+	case LogEntryV1220LogEntryCodeDeassert:
+		return true
+	case LogEntryV1220LogEntryCodeDeviceDisabled:
+		return true
+	case LogEntryV1220LogEntryCodeDeviceEnabled:
+		return true
+	case LogEntryV1220LogEntryCodeDeviceInsertedDevicePresent:
+		return true
+	case LogEntryV1220LogEntryCodeDeviceRemovedDeviceAbsent:
+		return true
+	case LogEntryV1220LogEntryCodeFullyRedundant:
+		return true
+	case LogEntryV1220LogEntryCodeInformational:
+		return true
+	case LogEntryV1220LogEntryCodeInstallError:
+		return true
+	case LogEntryV1220LogEntryCodeLimitExceeded:
+		return true
+	case LogEntryV1220LogEntryCodeLimitNotExceeded:
+		return true
+	case LogEntryV1220LogEntryCodeLowerCriticalGoingHigh:
+		return true
+	case LogEntryV1220LogEntryCodeLowerCriticalGoingLow:
+		return true
+	case LogEntryV1220LogEntryCodeLowerNonCriticalGoingHigh:
+		return true
+	case LogEntryV1220LogEntryCodeLowerNonCriticalGoingLow:
+		return true
+	case LogEntryV1220LogEntryCodeLowerNonRecoverableGoingHigh:
+		return true
+	case LogEntryV1220LogEntryCodeLowerNonRecoverableGoingLow:
+		return true
+	case LogEntryV1220LogEntryCodeMonitor:
+		return true
+	case LogEntryV1220LogEntryCodeNonRedundantInsufficientResources:
+		return true
+	case LogEntryV1220LogEntryCodeNonRedundantSufficientResourcesFromInsufficientResources:
+		return true
+	case LogEntryV1220LogEntryCodeNonRedundantSufficientResourcesFromRedundant:
+		return true
+	case LogEntryV1220LogEntryCodeOEM:
+		return true
+	case LogEntryV1220LogEntryCodePerformanceLags:
+		return true
+	case LogEntryV1220LogEntryCodePerformanceMet:
+		return true
+	case LogEntryV1220LogEntryCodePredictiveFailureAsserted:
+		return true
+	case LogEntryV1220LogEntryCodePredictiveFailureDeasserted:
+		return true
+	case LogEntryV1220LogEntryCodeRedundancyDegraded:
+		return true
+	case LogEntryV1220LogEntryCodeRedundancyDegradedFromFullyRedundant:
+		return true
+	case LogEntryV1220LogEntryCodeRedundancyDegradedFromNonRedundant:
+		return true
+	case LogEntryV1220LogEntryCodeRedundancyLost:
+		return true
+	case LogEntryV1220LogEntryCodeStateAsserted:
+		return true
+	case LogEntryV1220LogEntryCodeStateDeasserted:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToActive:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToBusy:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToCriticalFromLessSevere:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToCriticalFromNonRecoverable:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToDegraded:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToIdle:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToInTest:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToNonCriticalFromMoreSevere:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToNonCriticalFromOK:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToNonRecoverable:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToNonRecoverableFromLessSevere:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToOK:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToOffDuty:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToOffLine:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToOnLine:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToPowerOff:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToPowerSave:
+		return true
+	case LogEntryV1220LogEntryCodeTransitionToRunning:
+		return true
+	case LogEntryV1220LogEntryCodeUpperCriticalGoingHigh:
+		return true
+	case LogEntryV1220LogEntryCodeUpperCriticalGoingLow:
+		return true
+	case LogEntryV1220LogEntryCodeUpperNonCriticalGoingHigh:
+		return true
+	case LogEntryV1220LogEntryCodeUpperNonCriticalGoingLow:
+		return true
+	case LogEntryV1220LogEntryCodeUpperNonRecoverableGoingHigh:
+		return true
+	case LogEntryV1220LogEntryCodeUpperNonRecoverableGoingLow:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220LogEntryType.
+const (
+	LogEntryV1220LogEntryTypeCXL   LogEntryV1220LogEntryType = "CXL"
+	LogEntryV1220LogEntryTypeEvent LogEntryV1220LogEntryType = "Event"
+	LogEntryV1220LogEntryTypeOem   LogEntryV1220LogEntryType = "Oem"
+	LogEntryV1220LogEntryTypeSEL   LogEntryV1220LogEntryType = "SEL"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220LogEntryType enum.
+func (e LogEntryV1220LogEntryType) Valid() bool {
+	switch e {
+	case LogEntryV1220LogEntryTypeCXL:
+		return true
+	case LogEntryV1220LogEntryTypeEvent:
+		return true
+	case LogEntryV1220LogEntryTypeOem:
+		return true
+	case LogEntryV1220LogEntryTypeSEL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220OriginatorTypes.
+const (
+	Client            LogEntryV1220OriginatorTypes = "Client"
+	Internal          LogEntryV1220OriginatorTypes = "Internal"
+	SupportingService LogEntryV1220OriginatorTypes = "SupportingService"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220OriginatorTypes enum.
+func (e LogEntryV1220OriginatorTypes) Valid() bool {
+	switch e {
+	case Client:
+		return true
+	case Internal:
+		return true
+	case SupportingService:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogEntryV1220SensorType.
+const (
+	LogEntryV1220SensorTypeAddInCard                        LogEntryV1220SensorType = "Add-in Card"
+	LogEntryV1220SensorTypeBaseOSBootInstallationStatus     LogEntryV1220SensorType = "BaseOSBoot/InstallationStatus"
+	LogEntryV1220SensorTypeBattery                          LogEntryV1220SensorType = "Battery"
+	LogEntryV1220SensorTypeBootError                        LogEntryV1220SensorType = "Boot Error"
+	LogEntryV1220SensorTypeButtonSwitch                     LogEntryV1220SensorType = "Button/Switch"
+	LogEntryV1220SensorTypeCableInterconnect                LogEntryV1220SensorType = "Cable/Interconnect"
+	LogEntryV1220SensorTypeChassis                          LogEntryV1220SensorType = "Chassis"
+	LogEntryV1220SensorTypeChipSet                          LogEntryV1220SensorType = "ChipSet"
+	LogEntryV1220SensorTypeCoolingDevice                    LogEntryV1220SensorType = "CoolingDevice"
+	LogEntryV1220SensorTypeCriticalInterrupt                LogEntryV1220SensorType = "Critical Interrupt"
+	LogEntryV1220SensorTypeCurrent                          LogEntryV1220SensorType = "Current"
+	LogEntryV1220SensorTypeDriveSlotBay                     LogEntryV1220SensorType = "Drive Slot/Bay"
+	LogEntryV1220SensorTypeEntityPresence                   LogEntryV1220SensorType = "Entity Presence"
+	LogEntryV1220SensorTypeEventLoggingDisabled             LogEntryV1220SensorType = "Event Logging Disabled"
+	LogEntryV1220SensorTypeFRUState                         LogEntryV1220SensorType = "FRUState"
+	LogEntryV1220SensorTypeFan                              LogEntryV1220SensorType = "Fan"
+	LogEntryV1220SensorTypeLAN                              LogEntryV1220SensorType = "LAN"
+	LogEntryV1220SensorTypeManagementSubsystemHealth        LogEntryV1220SensorType = "Management Subsystem Health"
+	LogEntryV1220SensorTypeMemory                           LogEntryV1220SensorType = "Memory"
+	LogEntryV1220SensorTypeMicrocontrollerCoprocessor       LogEntryV1220SensorType = "Microcontroller/Coprocessor"
+	LogEntryV1220SensorTypeModuleBoard                      LogEntryV1220SensorType = "Module/Board"
+	LogEntryV1220SensorTypeMonitorASICIC                    LogEntryV1220SensorType = "Monitor ASIC/IC"
+	LogEntryV1220SensorTypeOEM                              LogEntryV1220SensorType = "OEM"
+	LogEntryV1220SensorTypeOSStopShutdown                   LogEntryV1220SensorType = "OS Stop/Shutdown"
+	LogEntryV1220SensorTypeOtherFRU                         LogEntryV1220SensorType = "Other FRU"
+	LogEntryV1220SensorTypeOtherUnitsBasedSensor            LogEntryV1220SensorType = "Other Units-based Sensor"
+	LogEntryV1220SensorTypePOSTMemoryResize                 LogEntryV1220SensorType = "POST Memory Resize"
+	LogEntryV1220SensorTypePhysicalChassisSecurity          LogEntryV1220SensorType = "Physical Chassis Security"
+	LogEntryV1220SensorTypePlatformAlert                    LogEntryV1220SensorType = "Platform Alert"
+	LogEntryV1220SensorTypePlatformSecurityViolationAttempt LogEntryV1220SensorType = "Platform Security Violation Attempt"
+	LogEntryV1220SensorTypePowerSupplyConverter             LogEntryV1220SensorType = "Power Supply / Converter"
+	LogEntryV1220SensorTypePowerUnit                        LogEntryV1220SensorType = "PowerUnit"
+	LogEntryV1220SensorTypeProcessor                        LogEntryV1220SensorType = "Processor"
+	LogEntryV1220SensorTypeSessionAudit                     LogEntryV1220SensorType = "Session Audit"
+	LogEntryV1220SensorTypeSlotConnector                    LogEntryV1220SensorType = "Slot/Connector"
+	LogEntryV1220SensorTypeSystemACPIPowerState             LogEntryV1220SensorType = "System ACPI PowerState"
+	LogEntryV1220SensorTypeSystemBootRestart                LogEntryV1220SensorType = "SystemBoot/Restart"
+	LogEntryV1220SensorTypeSystemEvent                      LogEntryV1220SensorType = "System Event"
+	LogEntryV1220SensorTypeSystemFirmwareProgress           LogEntryV1220SensorType = "System Firmware Progress"
+	LogEntryV1220SensorTypeTemperature                      LogEntryV1220SensorType = "Temperature"
+	LogEntryV1220SensorTypeTerminator                       LogEntryV1220SensorType = "Terminator"
+	LogEntryV1220SensorTypeVersionChange                    LogEntryV1220SensorType = "Version Change"
+	LogEntryV1220SensorTypeVoltage                          LogEntryV1220SensorType = "Voltage"
+	LogEntryV1220SensorTypeWatchdog                         LogEntryV1220SensorType = "Watchdog"
+)
+
+// Valid indicates whether the value is a known member of the LogEntryV1220SensorType enum.
+func (e LogEntryV1220SensorType) Valid() bool {
+	switch e {
+	case LogEntryV1220SensorTypeAddInCard:
+		return true
+	case LogEntryV1220SensorTypeBaseOSBootInstallationStatus:
+		return true
+	case LogEntryV1220SensorTypeBattery:
+		return true
+	case LogEntryV1220SensorTypeBootError:
+		return true
+	case LogEntryV1220SensorTypeButtonSwitch:
+		return true
+	case LogEntryV1220SensorTypeCableInterconnect:
+		return true
+	case LogEntryV1220SensorTypeChassis:
+		return true
+	case LogEntryV1220SensorTypeChipSet:
+		return true
+	case LogEntryV1220SensorTypeCoolingDevice:
+		return true
+	case LogEntryV1220SensorTypeCriticalInterrupt:
+		return true
+	case LogEntryV1220SensorTypeCurrent:
+		return true
+	case LogEntryV1220SensorTypeDriveSlotBay:
+		return true
+	case LogEntryV1220SensorTypeEntityPresence:
+		return true
+	case LogEntryV1220SensorTypeEventLoggingDisabled:
+		return true
+	case LogEntryV1220SensorTypeFRUState:
+		return true
+	case LogEntryV1220SensorTypeFan:
+		return true
+	case LogEntryV1220SensorTypeLAN:
+		return true
+	case LogEntryV1220SensorTypeManagementSubsystemHealth:
+		return true
+	case LogEntryV1220SensorTypeMemory:
+		return true
+	case LogEntryV1220SensorTypeMicrocontrollerCoprocessor:
+		return true
+	case LogEntryV1220SensorTypeModuleBoard:
+		return true
+	case LogEntryV1220SensorTypeMonitorASICIC:
+		return true
+	case LogEntryV1220SensorTypeOEM:
+		return true
+	case LogEntryV1220SensorTypeOSStopShutdown:
+		return true
+	case LogEntryV1220SensorTypeOtherFRU:
+		return true
+	case LogEntryV1220SensorTypeOtherUnitsBasedSensor:
+		return true
+	case LogEntryV1220SensorTypePOSTMemoryResize:
+		return true
+	case LogEntryV1220SensorTypePhysicalChassisSecurity:
+		return true
+	case LogEntryV1220SensorTypePlatformAlert:
+		return true
+	case LogEntryV1220SensorTypePlatformSecurityViolationAttempt:
+		return true
+	case LogEntryV1220SensorTypePowerSupplyConverter:
+		return true
+	case LogEntryV1220SensorTypePowerUnit:
+		return true
+	case LogEntryV1220SensorTypeProcessor:
+		return true
+	case LogEntryV1220SensorTypeSessionAudit:
+		return true
+	case LogEntryV1220SensorTypeSlotConnector:
+		return true
+	case LogEntryV1220SensorTypeSystemACPIPowerState:
+		return true
+	case LogEntryV1220SensorTypeSystemBootRestart:
+		return true
+	case LogEntryV1220SensorTypeSystemEvent:
+		return true
+	case LogEntryV1220SensorTypeSystemFirmwareProgress:
+		return true
+	case LogEntryV1220SensorTypeTemperature:
+		return true
+	case LogEntryV1220SensorTypeTerminator:
+		return true
+	case LogEntryV1220SensorTypeVersionChange:
+		return true
+	case LogEntryV1220SensorTypeVoltage:
+		return true
+	case LogEntryV1220SensorTypeWatchdog:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190AutoClearResolvedEntries.
+const (
+	ClearEventGroup              LogServiceV190AutoClearResolvedEntries = "ClearEventGroup"
+	None                         LogServiceV190AutoClearResolvedEntries = "None"
+	RetainCauseResolutionEntries LogServiceV190AutoClearResolvedEntries = "RetainCauseResolutionEntries"
+	UpdateCauseEntry             LogServiceV190AutoClearResolvedEntries = "UpdateCauseEntry"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190AutoClearResolvedEntries enum.
+func (e LogServiceV190AutoClearResolvedEntries) Valid() bool {
+	switch e {
+	case ClearEventGroup:
+		return true
+	case None:
+		return true
+	case RetainCauseResolutionEntries:
+		return true
+	case UpdateCauseEntry:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190LogDiagnosticDataTypes.
+const (
+	LogServiceV190LogDiagnosticDataTypesDevice  LogServiceV190LogDiagnosticDataTypes = "Device"
+	LogServiceV190LogDiagnosticDataTypesManager LogServiceV190LogDiagnosticDataTypes = "Manager"
+	LogServiceV190LogDiagnosticDataTypesOEM     LogServiceV190LogDiagnosticDataTypes = "OEM"
+	LogServiceV190LogDiagnosticDataTypesOS      LogServiceV190LogDiagnosticDataTypes = "OS"
+	LogServiceV190LogDiagnosticDataTypesPreOS   LogServiceV190LogDiagnosticDataTypes = "PreOS"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190LogDiagnosticDataTypes enum.
+func (e LogServiceV190LogDiagnosticDataTypes) Valid() bool {
+	switch e {
+	case LogServiceV190LogDiagnosticDataTypesDevice:
+		return true
+	case LogServiceV190LogDiagnosticDataTypesManager:
+		return true
+	case LogServiceV190LogDiagnosticDataTypesOEM:
+		return true
+	case LogServiceV190LogDiagnosticDataTypesOS:
+		return true
+	case LogServiceV190LogDiagnosticDataTypesPreOS:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190LogEntryTypes.
+const (
+	LogServiceV190LogEntryTypesCXL      LogServiceV190LogEntryTypes = "CXL"
+	LogServiceV190LogEntryTypesEvent    LogServiceV190LogEntryTypes = "Event"
+	LogServiceV190LogEntryTypesMultiple LogServiceV190LogEntryTypes = "Multiple"
+	LogServiceV190LogEntryTypesOEM      LogServiceV190LogEntryTypes = "OEM"
+	LogServiceV190LogEntryTypesSEL      LogServiceV190LogEntryTypes = "SEL"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190LogEntryTypes enum.
+func (e LogServiceV190LogEntryTypes) Valid() bool {
+	switch e {
+	case LogServiceV190LogEntryTypesCXL:
+		return true
+	case LogServiceV190LogEntryTypesEvent:
+		return true
+	case LogServiceV190LogEntryTypesMultiple:
+		return true
+	case LogServiceV190LogEntryTypesOEM:
+		return true
+	case LogServiceV190LogEntryTypesSEL:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190LogPurpose.
+const (
+	LogServiceV190LogPurposeDiagnostic     LogServiceV190LogPurpose = "Diagnostic"
+	LogServiceV190LogPurposeExternalEntity LogServiceV190LogPurpose = "ExternalEntity"
+	LogServiceV190LogPurposeOEM            LogServiceV190LogPurpose = "OEM"
+	LogServiceV190LogPurposeOperations     LogServiceV190LogPurpose = "Operations"
+	LogServiceV190LogPurposeSecurity       LogServiceV190LogPurpose = "Security"
+	LogServiceV190LogPurposeTelemetry      LogServiceV190LogPurpose = "Telemetry"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190LogPurpose enum.
+func (e LogServiceV190LogPurpose) Valid() bool {
+	switch e {
+	case LogServiceV190LogPurposeDiagnostic:
+		return true
+	case LogServiceV190LogPurposeExternalEntity:
+		return true
+	case LogServiceV190LogPurposeOEM:
+		return true
+	case LogServiceV190LogPurposeOperations:
+		return true
+	case LogServiceV190LogPurposeSecurity:
+		return true
+	case LogServiceV190LogPurposeTelemetry:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190OverWritePolicy.
+const (
+	LogServiceV190OverWritePolicyNeverOverWrites LogServiceV190OverWritePolicy = "NeverOverWrites"
+	LogServiceV190OverWritePolicyUnknown         LogServiceV190OverWritePolicy = "Unknown"
+	LogServiceV190OverWritePolicyWrapsWhenFull   LogServiceV190OverWritePolicy = "WrapsWhenFull"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190OverWritePolicy enum.
+func (e LogServiceV190OverWritePolicy) Valid() bool {
+	switch e {
+	case LogServiceV190OverWritePolicyNeverOverWrites:
+		return true
+	case LogServiceV190OverWritePolicyUnknown:
+		return true
+	case LogServiceV190OverWritePolicyWrapsWhenFull:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190SyslogFacility.
+const (
+	LogServiceV190SyslogFacilityAuth        LogServiceV190SyslogFacility = "Auth"
+	LogServiceV190SyslogFacilityAuthpriv    LogServiceV190SyslogFacility = "Authpriv"
+	LogServiceV190SyslogFacilityConsole     LogServiceV190SyslogFacility = "Console"
+	LogServiceV190SyslogFacilityCron        LogServiceV190SyslogFacility = "Cron"
+	LogServiceV190SyslogFacilityDaemon      LogServiceV190SyslogFacility = "Daemon"
+	LogServiceV190SyslogFacilityFTP         LogServiceV190SyslogFacility = "FTP"
+	LogServiceV190SyslogFacilityKern        LogServiceV190SyslogFacility = "Kern"
+	LogServiceV190SyslogFacilityLPR         LogServiceV190SyslogFacility = "LPR"
+	LogServiceV190SyslogFacilityLocal0      LogServiceV190SyslogFacility = "Local0"
+	LogServiceV190SyslogFacilityLocal1      LogServiceV190SyslogFacility = "Local1"
+	LogServiceV190SyslogFacilityLocal2      LogServiceV190SyslogFacility = "Local2"
+	LogServiceV190SyslogFacilityLocal3      LogServiceV190SyslogFacility = "Local3"
+	LogServiceV190SyslogFacilityLocal4      LogServiceV190SyslogFacility = "Local4"
+	LogServiceV190SyslogFacilityLocal5      LogServiceV190SyslogFacility = "Local5"
+	LogServiceV190SyslogFacilityLocal6      LogServiceV190SyslogFacility = "Local6"
+	LogServiceV190SyslogFacilityLocal7      LogServiceV190SyslogFacility = "Local7"
+	LogServiceV190SyslogFacilityMail        LogServiceV190SyslogFacility = "Mail"
+	LogServiceV190SyslogFacilityNTP         LogServiceV190SyslogFacility = "NTP"
+	LogServiceV190SyslogFacilityNews        LogServiceV190SyslogFacility = "News"
+	LogServiceV190SyslogFacilitySecurity    LogServiceV190SyslogFacility = "Security"
+	LogServiceV190SyslogFacilitySolarisCron LogServiceV190SyslogFacility = "SolarisCron"
+	LogServiceV190SyslogFacilitySyslog      LogServiceV190SyslogFacility = "Syslog"
+	LogServiceV190SyslogFacilityUUCP        LogServiceV190SyslogFacility = "UUCP"
+	LogServiceV190SyslogFacilityUser        LogServiceV190SyslogFacility = "User"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190SyslogFacility enum.
+func (e LogServiceV190SyslogFacility) Valid() bool {
+	switch e {
+	case LogServiceV190SyslogFacilityAuth:
+		return true
+	case LogServiceV190SyslogFacilityAuthpriv:
+		return true
+	case LogServiceV190SyslogFacilityConsole:
+		return true
+	case LogServiceV190SyslogFacilityCron:
+		return true
+	case LogServiceV190SyslogFacilityDaemon:
+		return true
+	case LogServiceV190SyslogFacilityFTP:
+		return true
+	case LogServiceV190SyslogFacilityKern:
+		return true
+	case LogServiceV190SyslogFacilityLPR:
+		return true
+	case LogServiceV190SyslogFacilityLocal0:
+		return true
+	case LogServiceV190SyslogFacilityLocal1:
+		return true
+	case LogServiceV190SyslogFacilityLocal2:
+		return true
+	case LogServiceV190SyslogFacilityLocal3:
+		return true
+	case LogServiceV190SyslogFacilityLocal4:
+		return true
+	case LogServiceV190SyslogFacilityLocal5:
+		return true
+	case LogServiceV190SyslogFacilityLocal6:
+		return true
+	case LogServiceV190SyslogFacilityLocal7:
+		return true
+	case LogServiceV190SyslogFacilityMail:
+		return true
+	case LogServiceV190SyslogFacilityNTP:
+		return true
+	case LogServiceV190SyslogFacilityNews:
+		return true
+	case LogServiceV190SyslogFacilitySecurity:
+		return true
+	case LogServiceV190SyslogFacilitySolarisCron:
+		return true
+	case LogServiceV190SyslogFacilitySyslog:
+		return true
+	case LogServiceV190SyslogFacilityUUCP:
+		return true
+	case LogServiceV190SyslogFacilityUser:
+		return true
+	default:
+		return false
+	}
+}
+
+// Defines values for LogServiceV190SyslogSeverity.
+const (
+	LogServiceV190SyslogSeverityAlert         LogServiceV190SyslogSeverity = "Alert"
+	LogServiceV190SyslogSeverityAll           LogServiceV190SyslogSeverity = "All"
+	LogServiceV190SyslogSeverityCritical      LogServiceV190SyslogSeverity = "Critical"
+	LogServiceV190SyslogSeverityDebug         LogServiceV190SyslogSeverity = "Debug"
+	LogServiceV190SyslogSeverityEmergency     LogServiceV190SyslogSeverity = "Emergency"
+	LogServiceV190SyslogSeverityError         LogServiceV190SyslogSeverity = "Error"
+	LogServiceV190SyslogSeverityInformational LogServiceV190SyslogSeverity = "Informational"
+	LogServiceV190SyslogSeverityNotice        LogServiceV190SyslogSeverity = "Notice"
+	LogServiceV190SyslogSeverityWarning       LogServiceV190SyslogSeverity = "Warning"
+)
+
+// Valid indicates whether the value is a known member of the LogServiceV190SyslogSeverity enum.
+func (e LogServiceV190SyslogSeverity) Valid() bool {
+	switch e {
+	case LogServiceV190SyslogSeverityAlert:
+		return true
+	case LogServiceV190SyslogSeverityAll:
+		return true
+	case LogServiceV190SyslogSeverityCritical:
+		return true
+	case LogServiceV190SyslogSeverityDebug:
+		return true
+	case LogServiceV190SyslogSeverityEmergency:
+		return true
+	case LogServiceV190SyslogSeverityError:
+		return true
+	case LogServiceV190SyslogSeverityInformational:
+		return true
+	case LogServiceV190SyslogSeverityNotice:
+		return true
+	case LogServiceV190SyslogSeverityWarning:
+		return true
+	default:
+		return false
+	}
+}
+
 // Defines values for ManagerV1250CommandConnectTypesSupported.
 const (
 	ManagerV1250CommandConnectTypesSupportedIPMI   ManagerV1250CommandConnectTypesSupported = "IPMI"
@@ -850,28 +1597,28 @@ func (e ManagerV1250CommandConnectTypesSupported) Valid() bool {
 
 // Defines values for ManagerV1250DateTimeSource.
 const (
-	DHCP     ManagerV1250DateTimeSource = "DHCP"
-	Firmware ManagerV1250DateTimeSource = "Firmware"
-	Host     ManagerV1250DateTimeSource = "Host"
-	NTP      ManagerV1250DateTimeSource = "NTP"
-	PTP      ManagerV1250DateTimeSource = "PTP"
-	RTC      ManagerV1250DateTimeSource = "RTC"
+	ManagerV1250DateTimeSourceDHCP     ManagerV1250DateTimeSource = "DHCP"
+	ManagerV1250DateTimeSourceFirmware ManagerV1250DateTimeSource = "Firmware"
+	ManagerV1250DateTimeSourceHost     ManagerV1250DateTimeSource = "Host"
+	ManagerV1250DateTimeSourceNTP      ManagerV1250DateTimeSource = "NTP"
+	ManagerV1250DateTimeSourcePTP      ManagerV1250DateTimeSource = "PTP"
+	ManagerV1250DateTimeSourceRTC      ManagerV1250DateTimeSource = "RTC"
 )
 
 // Valid indicates whether the value is a known member of the ManagerV1250DateTimeSource enum.
 func (e ManagerV1250DateTimeSource) Valid() bool {
 	switch e {
-	case DHCP:
+	case ManagerV1250DateTimeSourceDHCP:
 		return true
-	case Firmware:
+	case ManagerV1250DateTimeSourceFirmware:
 		return true
-	case Host:
+	case ManagerV1250DateTimeSourceHost:
 		return true
-	case NTP:
+	case ManagerV1250DateTimeSourceNTP:
 		return true
-	case PTP:
+	case ManagerV1250DateTimeSourcePTP:
 		return true
-	case RTC:
+	case ManagerV1250DateTimeSourceRTC:
 		return true
 	default:
 		return false
@@ -1858,22 +2605,22 @@ func (e TaskV174TaskState) Valid() bool {
 
 // Defines values for VirtualMediaV170ConnectedVia.
 const (
-	Applet       VirtualMediaV170ConnectedVia = "Applet"
-	NotConnected VirtualMediaV170ConnectedVia = "NotConnected"
-	Oem          VirtualMediaV170ConnectedVia = "Oem"
-	URI          VirtualMediaV170ConnectedVia = "URI"
+	VirtualMediaV170ConnectedViaApplet       VirtualMediaV170ConnectedVia = "Applet"
+	VirtualMediaV170ConnectedViaNotConnected VirtualMediaV170ConnectedVia = "NotConnected"
+	VirtualMediaV170ConnectedViaOem          VirtualMediaV170ConnectedVia = "Oem"
+	VirtualMediaV170ConnectedViaURI          VirtualMediaV170ConnectedVia = "URI"
 )
 
 // Valid indicates whether the value is a known member of the VirtualMediaV170ConnectedVia enum.
 func (e VirtualMediaV170ConnectedVia) Valid() bool {
 	switch e {
-	case Applet:
+	case VirtualMediaV170ConnectedViaApplet:
 		return true
-	case NotConnected:
+	case VirtualMediaV170ConnectedViaNotConnected:
 		return true
-	case Oem:
+	case VirtualMediaV170ConnectedViaOem:
 		return true
-	case URI:
+	case VirtualMediaV170ConnectedViaURI:
 		return true
 	default:
 		return false
@@ -3675,6 +4422,591 @@ type ControlV181ControlRangeExcerptControlMode1 = interface{}
 type ControlV181ControlRangeExcerpt_ControlMode struct {
 	union json.RawMessage
 }
+
+// EventEventType defines model for Event_EventType.
+type EventEventType string
+
+// LogEntryCollectionLogEntryCollection The collection of `LogEntry` resource instances.
+type LogEntryCollectionLogEntryCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                      `json:"@odata.type,omitempty"`
+	Description *LogEntryCollectionLogEntryCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]LogEntryV1220LogEntry `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// LogEntryCollectionLogEntryCollectionDescription1 defines model for .
+type LogEntryCollectionLogEntryCollectionDescription1 = interface{}
+
+// LogEntryCollectionLogEntryCollection_Description defines model for LogEntryCollectionLogEntryCollection.Description.
+type LogEntryCollectionLogEntryCollection_Description struct {
+	union json.RawMessage
+}
+
+// LogEntryV1220Actions The available actions for this resource.
+type LogEntryV1220Actions struct {
+	// Oem The available OEM-specific actions for this resource.
+	Oem *LogEntryV1220OemActions `json:"Oem,omitempty"`
+}
+
+// LogEntryV1220CPER Details for a CPER section or record associated with a log entry.
+type LogEntryV1220CPER struct {
+	// NotificationType The CPER Notification Type for a CPER record.
+	NotificationType *string `json:"NotificationType,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// SectionType The CPER Section Type.
+	SectionType *string `json:"SectionType,omitempty"`
+}
+
+// LogEntryV1220CXLEntryType defines model for LogEntry_v1_22_0_CXLEntryType.
+type LogEntryV1220CXLEntryType string
+
+// LogEntryV1220EventSeverity defines model for LogEntry_v1_22_0_EventSeverity.
+type LogEntryV1220EventSeverity string
+
+// LogEntryV1220Links The links to other resources that are related to this resource.
+type LogEntryV1220Links struct {
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// OriginOfCondition A reference to a resource.
+	OriginOfCondition *OdataV4IdRef `json:"OriginOfCondition,omitempty"`
+
+	// RelatedItem An array of links to resources associated with this log entry.
+	RelatedItem *[]OdataV4IdRef `json:"RelatedItem,omitempty"`
+
+	// RelatedItemOdataCount The number of items in a collection.
+	RelatedItemOdataCount *OdataV4Count `json:"RelatedItem@odata.count,omitempty"`
+
+	// RelatedLogEntries An array of links to other log entries that are related to this log entry.
+	RelatedLogEntries *[]OdataV4IdRef `json:"RelatedLogEntries,omitempty"`
+
+	// RelatedLogEntriesOdataCount The number of items in a collection.
+	RelatedLogEntriesOdataCount *OdataV4Count `json:"RelatedLogEntries@odata.count,omitempty"`
+}
+
+// LogEntryV1220LogDiagnosticDataTypes defines model for LogEntry_v1_22_0_LogDiagnosticDataTypes.
+type LogEntryV1220LogDiagnosticDataTypes string
+
+// LogEntryV1220LogEntry The `LogEntry` schema defines the record format for a log.  It is designed for Redfish event logs, which utilize messages defined in a Message Registry and referenced by a `MessageId`.  For standard message definitions, see DSP2065.  Other log formats, including OEM-specific definitions and the IPMI System Event Log (SEL) are also supported.  The `EntryType` field indicates the type of log and the resource includes several additional properties dependent on the `EntryType`.
+type LogEntryV1220LogEntry struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *LogEntryV1220Actions `json:"Actions,omitempty"`
+
+	// AdditionalDataSizeBytes The size of the additional data for this log entry.
+	AdditionalDataSizeBytes *int64 `json:"AdditionalDataSizeBytes,omitempty"`
+
+	// AdditionalDataURI The URI at which to access the additional data for this log entry, such as diagnostic data, image captures, or other files.
+	AdditionalDataURI *string `json:"AdditionalDataURI,omitempty"`
+
+	// CPER Details for a CPER section or record associated with a log entry.
+	CPER         *LogEntryV1220CPER         `json:"CPER,omitempty"`
+	CXLEntryType *LogEntryV1220CXLEntryType `json:"CXLEntryType,omitempty"`
+
+	// Created The date and time when the log entry was created.
+	Created     *time.Time                         `json:"Created,omitempty"`
+	Description *LogEntryV1220LogEntry_Description `json:"Description,omitempty"`
+
+	// DiagnosticData A Base64-encoded set of diagnostic data associated with this log entry.
+	DiagnosticData *string `json:"DiagnosticData,omitempty"`
+
+	// DiagnosticDataType The type of data available in the `DiagnosticData` property or retrieved from the URI specified by the `AdditionalDataURI` property.
+	DiagnosticDataType *LogEntryV1220LogEntry_DiagnosticDataType `json:"DiagnosticDataType,omitempty"`
+
+	// EntryCode The entry code for the log entry if the entry type is `SEL`.
+	EntryCode *LogEntryV1220LogEntry_EntryCode `json:"EntryCode,omitempty"`
+	EntryType LogEntryV1220LogEntryType        `json:"EntryType"`
+
+	// EventGroupID An identifier that correlates events with the same cause.
+	EventGroupID *int64 `json:"EventGroupId,omitempty"`
+
+	// EventID The unique instance identifier for an event.
+	EventID *string `json:"EventId,omitempty"`
+
+	// EventTimestamp The date and time when the event occurred.
+	EventTimestamp *time.Time `json:"EventTimestamp,omitempty"`
+	// Deprecated: this property has been marked as deprecated upstream, but no `x-deprecated-reason` was set
+	EventType *EventEventType `json:"EventType,omitempty"`
+
+	// FirstOverflowTimestamp The timestamp of the first overflow captured after this log entry.
+	FirstOverflowTimestamp *time.Time `json:"FirstOverflowTimestamp,omitempty"`
+
+	// GeneratorID An identifier of the device that has generated the IPMI SEL Event Record.
+	GeneratorID *string `json:"GeneratorId,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// LastOverflowTimestamp The timestamp of the last overflow captured after this log entry.
+	LastOverflowTimestamp *time.Time `json:"LastOverflowTimestamp,omitempty"`
+
+	// Links The links to other resources that are related to this resource.
+	Links *LogEntryV1220Links `json:"Links,omitempty"`
+
+	// Message The message of the log entry.  This property decodes from the entry type.  If the entry type is `Event`, this property contains a message.  If the entry type is `SEL`, this property contains an SEL-specific message.  If the entry type is `CXL`, this property contains a CXL event record.  Otherwise, this property contains an OEM-specific log entry.  In most cases, this property contains the actual log entry.
+	Message *string `json:"Message,omitempty"`
+
+	// MessageArgs An array of message arguments that are substituted for the arguments in the message when looked up in the message registry.
+	MessageArgs *[]string `json:"MessageArgs,omitempty"`
+
+	// MessageID The `MessageId`, event data, or OEM-specific information.  This property decodes from the entry type.  If the entry type is `Event`, this property contains a Redfish Specification-defined `MessageId`.  If the entry type is `SEL`, this property contains the Event Data.  Otherwise, this property contains OEM-specific information.
+	MessageID *string `json:"MessageId,omitempty"`
+
+	// Modified The date and time when the log entry was last modified.
+	Modified *time.Time `json:"Modified,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// OEMDiagnosticDataType The OEM-defined type of data available in the `DiagnosticData` property or retrieved from the URI specified by the `AdditionalDataURI` property.
+	OEMDiagnosticDataType *string `json:"OEMDiagnosticDataType,omitempty"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+
+	// OemLogEntryCode The OEM-specific entry code, if the `LogEntryCode` type is `OEM`.
+	OemLogEntryCode *string `json:"OemLogEntryCode,omitempty"`
+
+	// OemRecordFormat The OEM-specific format of the entry.  If the entry type is `Oem`, this property contains more information about the record format from the OEM.
+	OemRecordFormat *string `json:"OemRecordFormat,omitempty"`
+
+	// OemSensorType The OEM-specific sensor type if the sensor type is `OEM`.
+	OemSensorType *string `json:"OemSensorType,omitempty"`
+
+	// OriginAddress The IP address, with scheme, of the user associated with the log entry.
+	OriginAddress *string `json:"OriginAddress,omitempty"`
+
+	// OriginOfConditionUnavailable Indicates whether the `OriginOfCondition` link is unavailable, such as after the deletion of the resource.
+	OriginOfConditionUnavailable *bool `json:"OriginOfConditionUnavailable,omitempty"`
+
+	// Originator The source of the log entry.
+	Originator     *string                       `json:"Originator,omitempty"`
+	OriginatorType *LogEntryV1220OriginatorTypes `json:"OriginatorType,omitempty"`
+
+	// OverflowErrorCount The count of overflow errors that occurred after this log entry.
+	OverflowErrorCount *int64 `json:"OverflowErrorCount,omitempty"`
+
+	// PartNumber The part number associated with the source of this log entry.
+	PartNumber *string `json:"PartNumber,omitempty"`
+
+	// Persistency Indicates whether the log entry is persistent across a cold reset of the device.
+	Persistency *bool `json:"Persistency,omitempty"`
+
+	// Resolution Used to provide suggestions on how to resolve the situation that caused the log entry.
+	Resolution *string `json:"Resolution,omitempty"`
+
+	// ResolutionSteps The list of recommended steps to resolve the cause of the log entry.
+	ResolutionSteps *[]ResolutionStepV110ResolutionStep `json:"ResolutionSteps,omitempty"`
+
+	// Resolved Indicates if the cause of the log entry has been resolved or repaired.
+	Resolved *bool `json:"Resolved,omitempty"`
+
+	// SensorNumber The IPMI-defined sensor number.
+	SensorNumber *int64 `json:"SensorNumber,omitempty"`
+
+	// SensorType The sensor type to which the log entry pertains if the entry type is `SEL`.
+	SensorType *LogEntryV1220LogEntry_SensorType `json:"SensorType,omitempty"`
+
+	// SerialNumber The serial number associated with the source of this log entry.
+	SerialNumber *string `json:"SerialNumber,omitempty"`
+
+	// ServiceProviderNotified Indicates if the log entry has been sent to the service provider.
+	ServiceProviderNotified *bool `json:"ServiceProviderNotified,omitempty"`
+
+	// Severity The severity of the log entry.
+	Severity *LogEntryV1220LogEntry_Severity `json:"Severity,omitempty"`
+
+	// SpecificEventExistsInGroup Indicates this log entry is equivalent to a more specific log entry within the same `EventGroupId`.
+	SpecificEventExistsInGroup *bool `json:"SpecificEventExistsInGroup,omitempty"`
+
+	// UserAuthenticationSource The source of authentication for the user associated with the log entry.
+	UserAuthenticationSource *string `json:"UserAuthenticationSource,omitempty"`
+
+	// Username The username of the account associated with the log entry.
+	Username *string `json:"Username,omitempty"`
+
+	// VendorCode The vendor-defined code used to identify this log entry.
+	VendorCode *string `json:"VendorCode,omitempty"`
+}
+
+// LogEntryV1220LogEntryDescription1 defines model for .
+type LogEntryV1220LogEntryDescription1 = interface{}
+
+// LogEntryV1220LogEntry_Description defines model for LogEntryV1220LogEntry.Description.
+type LogEntryV1220LogEntry_Description struct {
+	union json.RawMessage
+}
+
+// LogEntryV1220LogEntryDiagnosticDataType1 defines model for .
+type LogEntryV1220LogEntryDiagnosticDataType1 = interface{}
+
+// LogEntryV1220LogEntry_DiagnosticDataType The type of data available in the `DiagnosticData` property or retrieved from the URI specified by the `AdditionalDataURI` property.
+type LogEntryV1220LogEntry_DiagnosticDataType struct {
+	union json.RawMessage
+}
+
+// LogEntryV1220LogEntryEntryCode1 defines model for .
+type LogEntryV1220LogEntryEntryCode1 = interface{}
+
+// LogEntryV1220LogEntry_EntryCode The entry code for the log entry if the entry type is `SEL`.
+type LogEntryV1220LogEntry_EntryCode struct {
+	union json.RawMessage
+}
+
+// LogEntryV1220LogEntrySensorType1 defines model for .
+type LogEntryV1220LogEntrySensorType1 = interface{}
+
+// LogEntryV1220LogEntry_SensorType The sensor type to which the log entry pertains if the entry type is `SEL`.
+type LogEntryV1220LogEntry_SensorType struct {
+	union json.RawMessage
+}
+
+// LogEntryV1220LogEntrySeverity1 defines model for .
+type LogEntryV1220LogEntrySeverity1 = interface{}
+
+// LogEntryV1220LogEntry_Severity The severity of the log entry.
+type LogEntryV1220LogEntry_Severity struct {
+	union json.RawMessage
+}
+
+// LogEntryV1220LogEntryCode defines model for LogEntry_v1_22_0_LogEntryCode.
+type LogEntryV1220LogEntryCode string
+
+// LogEntryV1220LogEntryType defines model for LogEntry_v1_22_0_LogEntryType.
+type LogEntryV1220LogEntryType string
+
+// LogEntryV1220OemActions The available OEM-specific actions for this resource.
+type LogEntryV1220OemActions map[string]interface{}
+
+// LogEntryV1220OriginatorTypes defines model for LogEntry_v1_22_0_OriginatorTypes.
+type LogEntryV1220OriginatorTypes string
+
+// LogEntryV1220SensorType defines model for LogEntry_v1_22_0_SensorType.
+type LogEntryV1220SensorType string
+
+// LogServiceCollectionLogServiceCollection The collection of `LogService` resource instances.
+type LogServiceCollectionLogServiceCollection struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType   *OdataV4Type                                          `json:"@odata.type,omitempty"`
+	Description *LogServiceCollectionLogServiceCollection_Description `json:"Description,omitempty"`
+
+	// Members The members of this collection.
+	Members *[]OdataV4IdRef `json:"Members,omitempty"`
+
+	// MembersOdataCount The number of items in a collection.
+	MembersOdataCount *OdataV4Count `json:"Members@odata.count,omitempty"`
+
+	// MembersOdataNextLink The URI to the resource containing the next set of partial members.
+	MembersOdataNextLink *OdataV4NextLink `json:"Members@odata.nextLink,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// Oem The OEM extension.
+	Oem *ResourceOem `json:"Oem,omitempty"`
+}
+
+// LogServiceCollectionLogServiceCollectionDescription1 defines model for .
+type LogServiceCollectionLogServiceCollectionDescription1 = interface{}
+
+// LogServiceCollectionLogServiceCollection_Description defines model for LogServiceCollectionLogServiceCollection.Description.
+type LogServiceCollectionLogServiceCollection_Description struct {
+	union json.RawMessage
+}
+
+// LogServiceV190Actions The available actions for this resource.
+type LogServiceV190Actions struct {
+	// HashLogServiceClearLog The action to clear the log for this log service.
+	HashLogServiceClearLog *LogServiceV190ClearLog `json:"#LogService.ClearLog,omitempty"`
+
+	// HashLogServiceCollectDiagnosticData The action to collect the diagnostic data for the given type.  When the diagnostic data is collected, a new log entry will be created and the additional data referenced by the new log entry will contain the diagnostic data.
+	HashLogServiceCollectDiagnosticData *LogServiceV190CollectDiagnosticData `json:"#LogService.CollectDiagnosticData,omitempty"`
+
+	// HashLogServiceDownloadRawLog The action to download a raw log for this log service.
+	HashLogServiceDownloadRawLog *LogServiceV190DownloadRawLog `json:"#LogService.DownloadRawLog,omitempty"`
+
+	// HashLogServicePushDiagnosticData The action to push an existing diagnostic data to a target URI.
+	HashLogServicePushDiagnosticData *LogServiceV190PushDiagnosticData `json:"#LogService.PushDiagnosticData,omitempty"`
+
+	// Oem The available OEM-specific actions for this resource.
+	Oem *LogServiceV190OemActions `json:"Oem,omitempty"`
+}
+
+// LogServiceV190AutoClearResolvedEntries defines model for LogService_v1_9_0_AutoClearResolvedEntries.
+type LogServiceV190AutoClearResolvedEntries string
+
+// LogServiceV190ClearLog The action to clear the log for this log service.
+type LogServiceV190ClearLog struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// LogServiceV190CollectDiagnosticData The action to collect the diagnostic data for the given type.  When the diagnostic data is collected, a new log entry will be created and the additional data referenced by the new log entry will contain the diagnostic data.
+type LogServiceV190CollectDiagnosticData struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// LogServiceV190DiagnosticDataDetails The detailed information for the data collected with the `CollectDiagnosticData` action for a type of diagnostic data.
+type LogServiceV190DiagnosticDataDetails struct {
+	// DiagnosticDataType The type of diagnostic data to collect with the `CollectDiagnosticData` action.
+	DiagnosticDataType *LogServiceV190DiagnosticDataDetails_DiagnosticDataType `json:"DiagnosticDataType,omitempty"`
+
+	// EstimatedDuration The estimated total time required to generate the data with the `CollectDiagnosticData` action.
+	EstimatedDuration *string `json:"EstimatedDuration,omitempty"`
+
+	// EstimatedSizeBytes The estimated size of the data collected by `CollectDiagnosticData` action.
+	EstimatedSizeBytes *int64 `json:"EstimatedSizeBytes,omitempty"`
+
+	// OEMDiagnosticDataType The OEM-defined type of diagnostic data to collect with the `CollectDiagnosticData` action.
+	OEMDiagnosticDataType *string `json:"OEMDiagnosticDataType,omitempty"`
+}
+
+// LogServiceV190DiagnosticDataDetailsDiagnosticDataType1 defines model for .
+type LogServiceV190DiagnosticDataDetailsDiagnosticDataType1 = interface{}
+
+// LogServiceV190DiagnosticDataDetails_DiagnosticDataType The type of diagnostic data to collect with the `CollectDiagnosticData` action.
+type LogServiceV190DiagnosticDataDetails_DiagnosticDataType struct {
+	union json.RawMessage
+}
+
+// LogServiceV190DownloadRawLog The action to download a raw log for this log service.
+type LogServiceV190DownloadRawLog struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// LogServiceV190LogDiagnosticDataTypes defines model for LogService_v1_9_0_LogDiagnosticDataTypes.
+type LogServiceV190LogDiagnosticDataTypes string
+
+// LogServiceV190LogEntryTypes defines model for LogService_v1_9_0_LogEntryTypes.
+type LogServiceV190LogEntryTypes string
+
+// LogServiceV190LogPurpose defines model for LogService_v1_9_0_LogPurpose.
+type LogServiceV190LogPurpose string
+
+// LogServiceV190LogService The `LogService` schema contains properties for monitoring and configuring a log service.  When the `Id` property contains `DeviceLog`, the log contains device-resident log entries that follow the physical device when moved from system-to-system, and not a replication or subset of a system event log.
+type LogServiceV190LogService struct {
+	// OdataContext The OData description of a payload.
+	OdataContext *OdataV4Context `json:"@odata.context,omitempty"`
+
+	// OdataEtag The current ETag of the resource.
+	OdataEtag *OdataV4Etag `json:"@odata.etag,omitempty"`
+
+	// OdataID The unique identifier for a resource.
+	OdataID *OdataV4Id `json:"@odata.id,omitempty"`
+
+	// OdataType The type of a resource.
+	OdataType *OdataV4Type `json:"@odata.type,omitempty"`
+
+	// Actions The available actions for this resource.
+	Actions *LogServiceV190Actions `json:"Actions,omitempty"`
+
+	// AutoClearResolvedEntries Indicates if this log service automatically clears the resolved log entries.
+	AutoClearResolvedEntries *LogServiceV190LogService_AutoClearResolvedEntries `json:"AutoClearResolvedEntries,omitempty"`
+
+	// AutoDSTEnabled An indication of whether the log service is configured for automatic Daylight Saving Time (DST) adjustment.
+	AutoDSTEnabled *bool `json:"AutoDSTEnabled,omitempty"`
+
+	// DateTime The current date and time with UTC offset of the log service.
+	DateTime *time.Time `json:"DateTime,omitempty"`
+
+	// DateTimeLocalOffset The time offset from UTC that the `DateTime` property is in `+HH:MM` format.
+	DateTimeLocalOffset *string                               `json:"DateTimeLocalOffset,omitempty"`
+	Description         *LogServiceV190LogService_Description `json:"Description,omitempty"`
+
+	// DiagnosticDataDetails The detailed information for the data collected with the `CollectDiagnosticData` action.
+	DiagnosticDataDetails *[]LogServiceV190LogService_DiagnosticDataDetails_Item `json:"DiagnosticDataDetails,omitempty"`
+
+	// Entries A reference to a resource.
+	Entries *OdataV4IdRef `json:"Entries,omitempty"`
+
+	// ID The unique identifier for this resource within the collection of similar resources.
+	ID ResourceID `json:"Id"`
+
+	// LogEntryType The format of the log entries.
+	LogEntryType *LogServiceV190LogService_LogEntryType `json:"LogEntryType,omitempty"`
+
+	// LogPurposes The purposes of the log.
+	LogPurposes *[]LogServiceV190LogService_LogPurposes_Item `json:"LogPurposes,omitempty"`
+
+	// MaxNumberOfRecords The maximum number of log entries that this service can have.
+	MaxNumberOfRecords *int64 `json:"MaxNumberOfRecords,omitempty"`
+
+	// Name The name of the resource or array member.
+	Name ResourceName `json:"Name"`
+
+	// OEMLogPurpose The OEM-specified purpose of the log if `LogPurposes` contains `OEM`.
+	OEMLogPurpose *string `json:"OEMLogPurpose,omitempty"`
+
+	// Oem The OEM extension.
+	Oem             *ResourceOem                   `json:"Oem,omitempty"`
+	OverWritePolicy *LogServiceV190OverWritePolicy `json:"OverWritePolicy,omitempty"`
+
+	// Overflow Indicates whether the log service has overflowed.
+	Overflow *bool `json:"Overflow,omitempty"`
+
+	// Persistency Indicates whether the log service is persistent across a cold reset.
+	Persistency *bool `json:"Persistency,omitempty"`
+
+	// ServiceEnabled An indication of whether this service is enabled.
+	ServiceEnabled *bool `json:"ServiceEnabled,omitempty"`
+
+	// Status The status and health of a resource and its children.
+	Status *ResourceStatus `json:"Status,omitempty"`
+
+	// SyslogFilters A list of syslog message filters to be logged locally.
+	SyslogFilters *[]LogServiceV190LogService_SyslogFilters_Item `json:"SyslogFilters,omitempty"`
+}
+
+// LogServiceV190LogServiceAutoClearResolvedEntries1 defines model for .
+type LogServiceV190LogServiceAutoClearResolvedEntries1 = interface{}
+
+// LogServiceV190LogService_AutoClearResolvedEntries Indicates if this log service automatically clears the resolved log entries.
+type LogServiceV190LogService_AutoClearResolvedEntries struct {
+	union json.RawMessage
+}
+
+// LogServiceV190LogServiceDescription1 defines model for .
+type LogServiceV190LogServiceDescription1 = interface{}
+
+// LogServiceV190LogService_Description defines model for LogServiceV190LogService.Description.
+type LogServiceV190LogService_Description struct {
+	union json.RawMessage
+}
+
+// LogServiceV190LogServiceDiagnosticDataDetails1 defines model for .
+type LogServiceV190LogServiceDiagnosticDataDetails1 = interface{}
+
+// LogServiceV190LogService_DiagnosticDataDetails_Item defines model for LogService_v1_9_0_LogService.DiagnosticDataDetails.Item.
+type LogServiceV190LogService_DiagnosticDataDetails_Item struct {
+	union json.RawMessage
+}
+
+// LogServiceV190LogServiceLogEntryType1 defines model for .
+type LogServiceV190LogServiceLogEntryType1 = interface{}
+
+// LogServiceV190LogService_LogEntryType The format of the log entries.
+type LogServiceV190LogService_LogEntryType struct {
+	union json.RawMessage
+}
+
+// LogServiceV190LogServiceLogPurposes1 defines model for .
+type LogServiceV190LogServiceLogPurposes1 = interface{}
+
+// LogServiceV190LogService_LogPurposes_Item defines model for LogService_v1_9_0_LogService.LogPurposes.Item.
+type LogServiceV190LogService_LogPurposes_Item struct {
+	union json.RawMessage
+}
+
+// LogServiceV190LogServiceSyslogFilters1 defines model for .
+type LogServiceV190LogServiceSyslogFilters1 = interface{}
+
+// LogServiceV190LogService_SyslogFilters_Item defines model for LogService_v1_9_0_LogService.SyslogFilters.Item.
+type LogServiceV190LogService_SyslogFilters_Item struct {
+	union json.RawMessage
+}
+
+// LogServiceV190OemActions The available OEM-specific actions for this resource.
+type LogServiceV190OemActions map[string]interface{}
+
+// LogServiceV190OverWritePolicy defines model for LogService_v1_9_0_OverWritePolicy.
+type LogServiceV190OverWritePolicy string
+
+// LogServiceV190PushDiagnosticData The action to push an existing diagnostic data to a target URI.
+type LogServiceV190PushDiagnosticData struct {
+	// Target Link to invoke action
+	Target *string `json:"target,omitempty"`
+
+	// Title Friendly action name
+	Title *string `json:"title,omitempty"`
+}
+
+// LogServiceV190SyslogFacility The syslog facility code is an enumeration of program types.
+type LogServiceV190SyslogFacility string
+
+// LogServiceV190SyslogFilter A syslog filter.
+type LogServiceV190SyslogFilter struct {
+	// LogFacilities The types of programs that can log messages.
+	LogFacilities *[]LogServiceV190SyslogFilter_LogFacilities_Item `json:"LogFacilities,omitempty"`
+
+	// LowestSeverity The lowest severity level message that will be logged.
+	LowestSeverity *LogServiceV190SyslogFilter_LowestSeverity `json:"LowestSeverity,omitempty"`
+}
+
+// LogServiceV190SyslogFilterLogFacilities1 defines model for .
+type LogServiceV190SyslogFilterLogFacilities1 = interface{}
+
+// LogServiceV190SyslogFilter_LogFacilities_Item defines model for LogService_v1_9_0_SyslogFilter.LogFacilities.Item.
+type LogServiceV190SyslogFilter_LogFacilities_Item struct {
+	union json.RawMessage
+}
+
+// LogServiceV190SyslogFilterLowestSeverity1 defines model for .
+type LogServiceV190SyslogFilterLowestSeverity1 = interface{}
+
+// LogServiceV190SyslogFilter_LowestSeverity The lowest severity level message that will be logged.
+type LogServiceV190SyslogFilter_LowestSeverity struct {
+	union json.RawMessage
+}
+
+// LogServiceV190SyslogSeverity The syslog severity is an application-specific rating used to describe the urgency of the message.
+type LogServiceV190SyslogSeverity string
 
 // ManagerCollectionManagerCollection The collection of `Manager` resource instances.
 type ManagerCollectionManagerCollection struct {
@@ -6497,6 +7829,21 @@ type PatchRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130
 // PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDBiosSettings for application/json ContentType.
 type PutRedfishV1SystemsComputerSystemIDBiosSettingsJSONRequestBody = BiosV130Bios
 
+// PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceID for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDJSONRequestBody = LogServiceV190LogService
+
+// PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceID for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDJSONRequestBody = LogServiceV190LogService
+
+// PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesJSONRequestBody defines body for PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries for application/json ContentType.
+type PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesJSONRequestBody = LogEntryV1220LogEntry
+
+// PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID for application/json ContentType.
+type PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryIDJSONRequestBody = LogEntryV1220LogEntry
+
+// PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryIDJSONRequestBody defines body for PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID for application/json ContentType.
+type PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryIDJSONRequestBody = LogEntryV1220LogEntry
+
 // PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody defines body for PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID for application/json ContentType.
 type PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorIDJSONRequestBody = ProcessorV1240Processor
 
@@ -9183,6 +10530,998 @@ func (t ControlV181ControlRangeExcerpt_ControlMode) MarshalJSON() ([]byte, error
 }
 
 func (t *ControlV181ControlRangeExcerpt_ControlMode) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the LogEntryCollectionLogEntryCollection_Description as a ResourceDescription
+func (t LogEntryCollectionLogEntryCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the LogEntryCollectionLogEntryCollection_Description as the provided ResourceDescription
+func (t *LogEntryCollectionLogEntryCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the LogEntryCollectionLogEntryCollection_Description, using the provided ResourceDescription
+func (t *LogEntryCollectionLogEntryCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogEntryCollectionLogEntryCollectionDescription1 returns the union data inside the LogEntryCollectionLogEntryCollection_Description as a LogEntryCollectionLogEntryCollectionDescription1
+func (t LogEntryCollectionLogEntryCollection_Description) AsLogEntryCollectionLogEntryCollectionDescription1() (LogEntryCollectionLogEntryCollectionDescription1, error) {
+	var body LogEntryCollectionLogEntryCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryCollectionLogEntryCollectionDescription1 overwrites any union data inside the LogEntryCollectionLogEntryCollection_Description as the provided LogEntryCollectionLogEntryCollectionDescription1
+func (t *LogEntryCollectionLogEntryCollection_Description) FromLogEntryCollectionLogEntryCollectionDescription1(v LogEntryCollectionLogEntryCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryCollectionLogEntryCollectionDescription1 performs a merge with any union data inside the LogEntryCollectionLogEntryCollection_Description, using the provided LogEntryCollectionLogEntryCollectionDescription1
+func (t *LogEntryCollectionLogEntryCollection_Description) MergeLogEntryCollectionLogEntryCollectionDescription1(v LogEntryCollectionLogEntryCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogEntryCollectionLogEntryCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogEntryCollectionLogEntryCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the LogEntryV1220LogEntry_Description as a ResourceDescription
+func (t LogEntryV1220LogEntry_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the LogEntryV1220LogEntry_Description as the provided ResourceDescription
+func (t *LogEntryV1220LogEntry_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the LogEntryV1220LogEntry_Description, using the provided ResourceDescription
+func (t *LogEntryV1220LogEntry_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogEntryV1220LogEntryDescription1 returns the union data inside the LogEntryV1220LogEntry_Description as a LogEntryV1220LogEntryDescription1
+func (t LogEntryV1220LogEntry_Description) AsLogEntryV1220LogEntryDescription1() (LogEntryV1220LogEntryDescription1, error) {
+	var body LogEntryV1220LogEntryDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogEntryDescription1 overwrites any union data inside the LogEntryV1220LogEntry_Description as the provided LogEntryV1220LogEntryDescription1
+func (t *LogEntryV1220LogEntry_Description) FromLogEntryV1220LogEntryDescription1(v LogEntryV1220LogEntryDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogEntryDescription1 performs a merge with any union data inside the LogEntryV1220LogEntry_Description, using the provided LogEntryV1220LogEntryDescription1
+func (t *LogEntryV1220LogEntry_Description) MergeLogEntryV1220LogEntryDescription1(v LogEntryV1220LogEntryDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogEntryV1220LogEntry_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogEntryV1220LogEntry_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogEntryV1220LogDiagnosticDataTypes returns the union data inside the LogEntryV1220LogEntry_DiagnosticDataType as a LogEntryV1220LogDiagnosticDataTypes
+func (t LogEntryV1220LogEntry_DiagnosticDataType) AsLogEntryV1220LogDiagnosticDataTypes() (LogEntryV1220LogDiagnosticDataTypes, error) {
+	var body LogEntryV1220LogDiagnosticDataTypes
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogDiagnosticDataTypes overwrites any union data inside the LogEntryV1220LogEntry_DiagnosticDataType as the provided LogEntryV1220LogDiagnosticDataTypes
+func (t *LogEntryV1220LogEntry_DiagnosticDataType) FromLogEntryV1220LogDiagnosticDataTypes(v LogEntryV1220LogDiagnosticDataTypes) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogDiagnosticDataTypes performs a merge with any union data inside the LogEntryV1220LogEntry_DiagnosticDataType, using the provided LogEntryV1220LogDiagnosticDataTypes
+func (t *LogEntryV1220LogEntry_DiagnosticDataType) MergeLogEntryV1220LogDiagnosticDataTypes(v LogEntryV1220LogDiagnosticDataTypes) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogEntryV1220LogEntryDiagnosticDataType1 returns the union data inside the LogEntryV1220LogEntry_DiagnosticDataType as a LogEntryV1220LogEntryDiagnosticDataType1
+func (t LogEntryV1220LogEntry_DiagnosticDataType) AsLogEntryV1220LogEntryDiagnosticDataType1() (LogEntryV1220LogEntryDiagnosticDataType1, error) {
+	var body LogEntryV1220LogEntryDiagnosticDataType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogEntryDiagnosticDataType1 overwrites any union data inside the LogEntryV1220LogEntry_DiagnosticDataType as the provided LogEntryV1220LogEntryDiagnosticDataType1
+func (t *LogEntryV1220LogEntry_DiagnosticDataType) FromLogEntryV1220LogEntryDiagnosticDataType1(v LogEntryV1220LogEntryDiagnosticDataType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogEntryDiagnosticDataType1 performs a merge with any union data inside the LogEntryV1220LogEntry_DiagnosticDataType, using the provided LogEntryV1220LogEntryDiagnosticDataType1
+func (t *LogEntryV1220LogEntry_DiagnosticDataType) MergeLogEntryV1220LogEntryDiagnosticDataType1(v LogEntryV1220LogEntryDiagnosticDataType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogEntryV1220LogEntry_DiagnosticDataType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogEntryV1220LogEntry_DiagnosticDataType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogEntryV1220LogEntryCode returns the union data inside the LogEntryV1220LogEntry_EntryCode as a LogEntryV1220LogEntryCode
+func (t LogEntryV1220LogEntry_EntryCode) AsLogEntryV1220LogEntryCode() (LogEntryV1220LogEntryCode, error) {
+	var body LogEntryV1220LogEntryCode
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogEntryCode overwrites any union data inside the LogEntryV1220LogEntry_EntryCode as the provided LogEntryV1220LogEntryCode
+func (t *LogEntryV1220LogEntry_EntryCode) FromLogEntryV1220LogEntryCode(v LogEntryV1220LogEntryCode) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogEntryCode performs a merge with any union data inside the LogEntryV1220LogEntry_EntryCode, using the provided LogEntryV1220LogEntryCode
+func (t *LogEntryV1220LogEntry_EntryCode) MergeLogEntryV1220LogEntryCode(v LogEntryV1220LogEntryCode) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogEntryV1220LogEntryEntryCode1 returns the union data inside the LogEntryV1220LogEntry_EntryCode as a LogEntryV1220LogEntryEntryCode1
+func (t LogEntryV1220LogEntry_EntryCode) AsLogEntryV1220LogEntryEntryCode1() (LogEntryV1220LogEntryEntryCode1, error) {
+	var body LogEntryV1220LogEntryEntryCode1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogEntryEntryCode1 overwrites any union data inside the LogEntryV1220LogEntry_EntryCode as the provided LogEntryV1220LogEntryEntryCode1
+func (t *LogEntryV1220LogEntry_EntryCode) FromLogEntryV1220LogEntryEntryCode1(v LogEntryV1220LogEntryEntryCode1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogEntryEntryCode1 performs a merge with any union data inside the LogEntryV1220LogEntry_EntryCode, using the provided LogEntryV1220LogEntryEntryCode1
+func (t *LogEntryV1220LogEntry_EntryCode) MergeLogEntryV1220LogEntryEntryCode1(v LogEntryV1220LogEntryEntryCode1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogEntryV1220LogEntry_EntryCode) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogEntryV1220LogEntry_EntryCode) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogEntryV1220SensorType returns the union data inside the LogEntryV1220LogEntry_SensorType as a LogEntryV1220SensorType
+func (t LogEntryV1220LogEntry_SensorType) AsLogEntryV1220SensorType() (LogEntryV1220SensorType, error) {
+	var body LogEntryV1220SensorType
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220SensorType overwrites any union data inside the LogEntryV1220LogEntry_SensorType as the provided LogEntryV1220SensorType
+func (t *LogEntryV1220LogEntry_SensorType) FromLogEntryV1220SensorType(v LogEntryV1220SensorType) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220SensorType performs a merge with any union data inside the LogEntryV1220LogEntry_SensorType, using the provided LogEntryV1220SensorType
+func (t *LogEntryV1220LogEntry_SensorType) MergeLogEntryV1220SensorType(v LogEntryV1220SensorType) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogEntryV1220LogEntrySensorType1 returns the union data inside the LogEntryV1220LogEntry_SensorType as a LogEntryV1220LogEntrySensorType1
+func (t LogEntryV1220LogEntry_SensorType) AsLogEntryV1220LogEntrySensorType1() (LogEntryV1220LogEntrySensorType1, error) {
+	var body LogEntryV1220LogEntrySensorType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogEntrySensorType1 overwrites any union data inside the LogEntryV1220LogEntry_SensorType as the provided LogEntryV1220LogEntrySensorType1
+func (t *LogEntryV1220LogEntry_SensorType) FromLogEntryV1220LogEntrySensorType1(v LogEntryV1220LogEntrySensorType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogEntrySensorType1 performs a merge with any union data inside the LogEntryV1220LogEntry_SensorType, using the provided LogEntryV1220LogEntrySensorType1
+func (t *LogEntryV1220LogEntry_SensorType) MergeLogEntryV1220LogEntrySensorType1(v LogEntryV1220LogEntrySensorType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogEntryV1220LogEntry_SensorType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogEntryV1220LogEntry_SensorType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogEntryV1220EventSeverity returns the union data inside the LogEntryV1220LogEntry_Severity as a LogEntryV1220EventSeverity
+func (t LogEntryV1220LogEntry_Severity) AsLogEntryV1220EventSeverity() (LogEntryV1220EventSeverity, error) {
+	var body LogEntryV1220EventSeverity
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220EventSeverity overwrites any union data inside the LogEntryV1220LogEntry_Severity as the provided LogEntryV1220EventSeverity
+func (t *LogEntryV1220LogEntry_Severity) FromLogEntryV1220EventSeverity(v LogEntryV1220EventSeverity) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220EventSeverity performs a merge with any union data inside the LogEntryV1220LogEntry_Severity, using the provided LogEntryV1220EventSeverity
+func (t *LogEntryV1220LogEntry_Severity) MergeLogEntryV1220EventSeverity(v LogEntryV1220EventSeverity) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogEntryV1220LogEntrySeverity1 returns the union data inside the LogEntryV1220LogEntry_Severity as a LogEntryV1220LogEntrySeverity1
+func (t LogEntryV1220LogEntry_Severity) AsLogEntryV1220LogEntrySeverity1() (LogEntryV1220LogEntrySeverity1, error) {
+	var body LogEntryV1220LogEntrySeverity1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogEntryV1220LogEntrySeverity1 overwrites any union data inside the LogEntryV1220LogEntry_Severity as the provided LogEntryV1220LogEntrySeverity1
+func (t *LogEntryV1220LogEntry_Severity) FromLogEntryV1220LogEntrySeverity1(v LogEntryV1220LogEntrySeverity1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogEntryV1220LogEntrySeverity1 performs a merge with any union data inside the LogEntryV1220LogEntry_Severity, using the provided LogEntryV1220LogEntrySeverity1
+func (t *LogEntryV1220LogEntry_Severity) MergeLogEntryV1220LogEntrySeverity1(v LogEntryV1220LogEntrySeverity1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogEntryV1220LogEntry_Severity) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogEntryV1220LogEntry_Severity) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the LogServiceCollectionLogServiceCollection_Description as a ResourceDescription
+func (t LogServiceCollectionLogServiceCollection_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the LogServiceCollectionLogServiceCollection_Description as the provided ResourceDescription
+func (t *LogServiceCollectionLogServiceCollection_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the LogServiceCollectionLogServiceCollection_Description, using the provided ResourceDescription
+func (t *LogServiceCollectionLogServiceCollection_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceCollectionLogServiceCollectionDescription1 returns the union data inside the LogServiceCollectionLogServiceCollection_Description as a LogServiceCollectionLogServiceCollectionDescription1
+func (t LogServiceCollectionLogServiceCollection_Description) AsLogServiceCollectionLogServiceCollectionDescription1() (LogServiceCollectionLogServiceCollectionDescription1, error) {
+	var body LogServiceCollectionLogServiceCollectionDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceCollectionLogServiceCollectionDescription1 overwrites any union data inside the LogServiceCollectionLogServiceCollection_Description as the provided LogServiceCollectionLogServiceCollectionDescription1
+func (t *LogServiceCollectionLogServiceCollection_Description) FromLogServiceCollectionLogServiceCollectionDescription1(v LogServiceCollectionLogServiceCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceCollectionLogServiceCollectionDescription1 performs a merge with any union data inside the LogServiceCollectionLogServiceCollection_Description, using the provided LogServiceCollectionLogServiceCollectionDescription1
+func (t *LogServiceCollectionLogServiceCollection_Description) MergeLogServiceCollectionLogServiceCollectionDescription1(v LogServiceCollectionLogServiceCollectionDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceCollectionLogServiceCollection_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceCollectionLogServiceCollection_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190LogDiagnosticDataTypes returns the union data inside the LogServiceV190DiagnosticDataDetails_DiagnosticDataType as a LogServiceV190LogDiagnosticDataTypes
+func (t LogServiceV190DiagnosticDataDetails_DiagnosticDataType) AsLogServiceV190LogDiagnosticDataTypes() (LogServiceV190LogDiagnosticDataTypes, error) {
+	var body LogServiceV190LogDiagnosticDataTypes
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogDiagnosticDataTypes overwrites any union data inside the LogServiceV190DiagnosticDataDetails_DiagnosticDataType as the provided LogServiceV190LogDiagnosticDataTypes
+func (t *LogServiceV190DiagnosticDataDetails_DiagnosticDataType) FromLogServiceV190LogDiagnosticDataTypes(v LogServiceV190LogDiagnosticDataTypes) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogDiagnosticDataTypes performs a merge with any union data inside the LogServiceV190DiagnosticDataDetails_DiagnosticDataType, using the provided LogServiceV190LogDiagnosticDataTypes
+func (t *LogServiceV190DiagnosticDataDetails_DiagnosticDataType) MergeLogServiceV190LogDiagnosticDataTypes(v LogServiceV190LogDiagnosticDataTypes) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190DiagnosticDataDetailsDiagnosticDataType1 returns the union data inside the LogServiceV190DiagnosticDataDetails_DiagnosticDataType as a LogServiceV190DiagnosticDataDetailsDiagnosticDataType1
+func (t LogServiceV190DiagnosticDataDetails_DiagnosticDataType) AsLogServiceV190DiagnosticDataDetailsDiagnosticDataType1() (LogServiceV190DiagnosticDataDetailsDiagnosticDataType1, error) {
+	var body LogServiceV190DiagnosticDataDetailsDiagnosticDataType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190DiagnosticDataDetailsDiagnosticDataType1 overwrites any union data inside the LogServiceV190DiagnosticDataDetails_DiagnosticDataType as the provided LogServiceV190DiagnosticDataDetailsDiagnosticDataType1
+func (t *LogServiceV190DiagnosticDataDetails_DiagnosticDataType) FromLogServiceV190DiagnosticDataDetailsDiagnosticDataType1(v LogServiceV190DiagnosticDataDetailsDiagnosticDataType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190DiagnosticDataDetailsDiagnosticDataType1 performs a merge with any union data inside the LogServiceV190DiagnosticDataDetails_DiagnosticDataType, using the provided LogServiceV190DiagnosticDataDetailsDiagnosticDataType1
+func (t *LogServiceV190DiagnosticDataDetails_DiagnosticDataType) MergeLogServiceV190DiagnosticDataDetailsDiagnosticDataType1(v LogServiceV190DiagnosticDataDetailsDiagnosticDataType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190DiagnosticDataDetails_DiagnosticDataType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190DiagnosticDataDetails_DiagnosticDataType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190AutoClearResolvedEntries returns the union data inside the LogServiceV190LogService_AutoClearResolvedEntries as a LogServiceV190AutoClearResolvedEntries
+func (t LogServiceV190LogService_AutoClearResolvedEntries) AsLogServiceV190AutoClearResolvedEntries() (LogServiceV190AutoClearResolvedEntries, error) {
+	var body LogServiceV190AutoClearResolvedEntries
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190AutoClearResolvedEntries overwrites any union data inside the LogServiceV190LogService_AutoClearResolvedEntries as the provided LogServiceV190AutoClearResolvedEntries
+func (t *LogServiceV190LogService_AutoClearResolvedEntries) FromLogServiceV190AutoClearResolvedEntries(v LogServiceV190AutoClearResolvedEntries) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190AutoClearResolvedEntries performs a merge with any union data inside the LogServiceV190LogService_AutoClearResolvedEntries, using the provided LogServiceV190AutoClearResolvedEntries
+func (t *LogServiceV190LogService_AutoClearResolvedEntries) MergeLogServiceV190AutoClearResolvedEntries(v LogServiceV190AutoClearResolvedEntries) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190LogServiceAutoClearResolvedEntries1 returns the union data inside the LogServiceV190LogService_AutoClearResolvedEntries as a LogServiceV190LogServiceAutoClearResolvedEntries1
+func (t LogServiceV190LogService_AutoClearResolvedEntries) AsLogServiceV190LogServiceAutoClearResolvedEntries1() (LogServiceV190LogServiceAutoClearResolvedEntries1, error) {
+	var body LogServiceV190LogServiceAutoClearResolvedEntries1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogServiceAutoClearResolvedEntries1 overwrites any union data inside the LogServiceV190LogService_AutoClearResolvedEntries as the provided LogServiceV190LogServiceAutoClearResolvedEntries1
+func (t *LogServiceV190LogService_AutoClearResolvedEntries) FromLogServiceV190LogServiceAutoClearResolvedEntries1(v LogServiceV190LogServiceAutoClearResolvedEntries1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogServiceAutoClearResolvedEntries1 performs a merge with any union data inside the LogServiceV190LogService_AutoClearResolvedEntries, using the provided LogServiceV190LogServiceAutoClearResolvedEntries1
+func (t *LogServiceV190LogService_AutoClearResolvedEntries) MergeLogServiceV190LogServiceAutoClearResolvedEntries1(v LogServiceV190LogServiceAutoClearResolvedEntries1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190LogService_AutoClearResolvedEntries) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190LogService_AutoClearResolvedEntries) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsResourceDescription returns the union data inside the LogServiceV190LogService_Description as a ResourceDescription
+func (t LogServiceV190LogService_Description) AsResourceDescription() (ResourceDescription, error) {
+	var body ResourceDescription
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromResourceDescription overwrites any union data inside the LogServiceV190LogService_Description as the provided ResourceDescription
+func (t *LogServiceV190LogService_Description) FromResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeResourceDescription performs a merge with any union data inside the LogServiceV190LogService_Description, using the provided ResourceDescription
+func (t *LogServiceV190LogService_Description) MergeResourceDescription(v ResourceDescription) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190LogServiceDescription1 returns the union data inside the LogServiceV190LogService_Description as a LogServiceV190LogServiceDescription1
+func (t LogServiceV190LogService_Description) AsLogServiceV190LogServiceDescription1() (LogServiceV190LogServiceDescription1, error) {
+	var body LogServiceV190LogServiceDescription1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogServiceDescription1 overwrites any union data inside the LogServiceV190LogService_Description as the provided LogServiceV190LogServiceDescription1
+func (t *LogServiceV190LogService_Description) FromLogServiceV190LogServiceDescription1(v LogServiceV190LogServiceDescription1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogServiceDescription1 performs a merge with any union data inside the LogServiceV190LogService_Description, using the provided LogServiceV190LogServiceDescription1
+func (t *LogServiceV190LogService_Description) MergeLogServiceV190LogServiceDescription1(v LogServiceV190LogServiceDescription1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190LogService_Description) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190LogService_Description) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190DiagnosticDataDetails returns the union data inside the LogServiceV190LogService_DiagnosticDataDetails_Item as a LogServiceV190DiagnosticDataDetails
+func (t LogServiceV190LogService_DiagnosticDataDetails_Item) AsLogServiceV190DiagnosticDataDetails() (LogServiceV190DiagnosticDataDetails, error) {
+	var body LogServiceV190DiagnosticDataDetails
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190DiagnosticDataDetails overwrites any union data inside the LogServiceV190LogService_DiagnosticDataDetails_Item as the provided LogServiceV190DiagnosticDataDetails
+func (t *LogServiceV190LogService_DiagnosticDataDetails_Item) FromLogServiceV190DiagnosticDataDetails(v LogServiceV190DiagnosticDataDetails) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190DiagnosticDataDetails performs a merge with any union data inside the LogServiceV190LogService_DiagnosticDataDetails_Item, using the provided LogServiceV190DiagnosticDataDetails
+func (t *LogServiceV190LogService_DiagnosticDataDetails_Item) MergeLogServiceV190DiagnosticDataDetails(v LogServiceV190DiagnosticDataDetails) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190LogServiceDiagnosticDataDetails1 returns the union data inside the LogServiceV190LogService_DiagnosticDataDetails_Item as a LogServiceV190LogServiceDiagnosticDataDetails1
+func (t LogServiceV190LogService_DiagnosticDataDetails_Item) AsLogServiceV190LogServiceDiagnosticDataDetails1() (LogServiceV190LogServiceDiagnosticDataDetails1, error) {
+	var body LogServiceV190LogServiceDiagnosticDataDetails1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogServiceDiagnosticDataDetails1 overwrites any union data inside the LogServiceV190LogService_DiagnosticDataDetails_Item as the provided LogServiceV190LogServiceDiagnosticDataDetails1
+func (t *LogServiceV190LogService_DiagnosticDataDetails_Item) FromLogServiceV190LogServiceDiagnosticDataDetails1(v LogServiceV190LogServiceDiagnosticDataDetails1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogServiceDiagnosticDataDetails1 performs a merge with any union data inside the LogServiceV190LogService_DiagnosticDataDetails_Item, using the provided LogServiceV190LogServiceDiagnosticDataDetails1
+func (t *LogServiceV190LogService_DiagnosticDataDetails_Item) MergeLogServiceV190LogServiceDiagnosticDataDetails1(v LogServiceV190LogServiceDiagnosticDataDetails1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190LogService_DiagnosticDataDetails_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190LogService_DiagnosticDataDetails_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190LogEntryTypes returns the union data inside the LogServiceV190LogService_LogEntryType as a LogServiceV190LogEntryTypes
+func (t LogServiceV190LogService_LogEntryType) AsLogServiceV190LogEntryTypes() (LogServiceV190LogEntryTypes, error) {
+	var body LogServiceV190LogEntryTypes
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogEntryTypes overwrites any union data inside the LogServiceV190LogService_LogEntryType as the provided LogServiceV190LogEntryTypes
+func (t *LogServiceV190LogService_LogEntryType) FromLogServiceV190LogEntryTypes(v LogServiceV190LogEntryTypes) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogEntryTypes performs a merge with any union data inside the LogServiceV190LogService_LogEntryType, using the provided LogServiceV190LogEntryTypes
+func (t *LogServiceV190LogService_LogEntryType) MergeLogServiceV190LogEntryTypes(v LogServiceV190LogEntryTypes) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190LogServiceLogEntryType1 returns the union data inside the LogServiceV190LogService_LogEntryType as a LogServiceV190LogServiceLogEntryType1
+func (t LogServiceV190LogService_LogEntryType) AsLogServiceV190LogServiceLogEntryType1() (LogServiceV190LogServiceLogEntryType1, error) {
+	var body LogServiceV190LogServiceLogEntryType1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogServiceLogEntryType1 overwrites any union data inside the LogServiceV190LogService_LogEntryType as the provided LogServiceV190LogServiceLogEntryType1
+func (t *LogServiceV190LogService_LogEntryType) FromLogServiceV190LogServiceLogEntryType1(v LogServiceV190LogServiceLogEntryType1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogServiceLogEntryType1 performs a merge with any union data inside the LogServiceV190LogService_LogEntryType, using the provided LogServiceV190LogServiceLogEntryType1
+func (t *LogServiceV190LogService_LogEntryType) MergeLogServiceV190LogServiceLogEntryType1(v LogServiceV190LogServiceLogEntryType1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190LogService_LogEntryType) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190LogService_LogEntryType) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190LogPurpose returns the union data inside the LogServiceV190LogService_LogPurposes_Item as a LogServiceV190LogPurpose
+func (t LogServiceV190LogService_LogPurposes_Item) AsLogServiceV190LogPurpose() (LogServiceV190LogPurpose, error) {
+	var body LogServiceV190LogPurpose
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogPurpose overwrites any union data inside the LogServiceV190LogService_LogPurposes_Item as the provided LogServiceV190LogPurpose
+func (t *LogServiceV190LogService_LogPurposes_Item) FromLogServiceV190LogPurpose(v LogServiceV190LogPurpose) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogPurpose performs a merge with any union data inside the LogServiceV190LogService_LogPurposes_Item, using the provided LogServiceV190LogPurpose
+func (t *LogServiceV190LogService_LogPurposes_Item) MergeLogServiceV190LogPurpose(v LogServiceV190LogPurpose) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190LogServiceLogPurposes1 returns the union data inside the LogServiceV190LogService_LogPurposes_Item as a LogServiceV190LogServiceLogPurposes1
+func (t LogServiceV190LogService_LogPurposes_Item) AsLogServiceV190LogServiceLogPurposes1() (LogServiceV190LogServiceLogPurposes1, error) {
+	var body LogServiceV190LogServiceLogPurposes1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogServiceLogPurposes1 overwrites any union data inside the LogServiceV190LogService_LogPurposes_Item as the provided LogServiceV190LogServiceLogPurposes1
+func (t *LogServiceV190LogService_LogPurposes_Item) FromLogServiceV190LogServiceLogPurposes1(v LogServiceV190LogServiceLogPurposes1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogServiceLogPurposes1 performs a merge with any union data inside the LogServiceV190LogService_LogPurposes_Item, using the provided LogServiceV190LogServiceLogPurposes1
+func (t *LogServiceV190LogService_LogPurposes_Item) MergeLogServiceV190LogServiceLogPurposes1(v LogServiceV190LogServiceLogPurposes1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190LogService_LogPurposes_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190LogService_LogPurposes_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190SyslogFilter returns the union data inside the LogServiceV190LogService_SyslogFilters_Item as a LogServiceV190SyslogFilter
+func (t LogServiceV190LogService_SyslogFilters_Item) AsLogServiceV190SyslogFilter() (LogServiceV190SyslogFilter, error) {
+	var body LogServiceV190SyslogFilter
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190SyslogFilter overwrites any union data inside the LogServiceV190LogService_SyslogFilters_Item as the provided LogServiceV190SyslogFilter
+func (t *LogServiceV190LogService_SyslogFilters_Item) FromLogServiceV190SyslogFilter(v LogServiceV190SyslogFilter) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190SyslogFilter performs a merge with any union data inside the LogServiceV190LogService_SyslogFilters_Item, using the provided LogServiceV190SyslogFilter
+func (t *LogServiceV190LogService_SyslogFilters_Item) MergeLogServiceV190SyslogFilter(v LogServiceV190SyslogFilter) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190LogServiceSyslogFilters1 returns the union data inside the LogServiceV190LogService_SyslogFilters_Item as a LogServiceV190LogServiceSyslogFilters1
+func (t LogServiceV190LogService_SyslogFilters_Item) AsLogServiceV190LogServiceSyslogFilters1() (LogServiceV190LogServiceSyslogFilters1, error) {
+	var body LogServiceV190LogServiceSyslogFilters1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190LogServiceSyslogFilters1 overwrites any union data inside the LogServiceV190LogService_SyslogFilters_Item as the provided LogServiceV190LogServiceSyslogFilters1
+func (t *LogServiceV190LogService_SyslogFilters_Item) FromLogServiceV190LogServiceSyslogFilters1(v LogServiceV190LogServiceSyslogFilters1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190LogServiceSyslogFilters1 performs a merge with any union data inside the LogServiceV190LogService_SyslogFilters_Item, using the provided LogServiceV190LogServiceSyslogFilters1
+func (t *LogServiceV190LogService_SyslogFilters_Item) MergeLogServiceV190LogServiceSyslogFilters1(v LogServiceV190LogServiceSyslogFilters1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190LogService_SyslogFilters_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190LogService_SyslogFilters_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190SyslogFacility returns the union data inside the LogServiceV190SyslogFilter_LogFacilities_Item as a LogServiceV190SyslogFacility
+func (t LogServiceV190SyslogFilter_LogFacilities_Item) AsLogServiceV190SyslogFacility() (LogServiceV190SyslogFacility, error) {
+	var body LogServiceV190SyslogFacility
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190SyslogFacility overwrites any union data inside the LogServiceV190SyslogFilter_LogFacilities_Item as the provided LogServiceV190SyslogFacility
+func (t *LogServiceV190SyslogFilter_LogFacilities_Item) FromLogServiceV190SyslogFacility(v LogServiceV190SyslogFacility) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190SyslogFacility performs a merge with any union data inside the LogServiceV190SyslogFilter_LogFacilities_Item, using the provided LogServiceV190SyslogFacility
+func (t *LogServiceV190SyslogFilter_LogFacilities_Item) MergeLogServiceV190SyslogFacility(v LogServiceV190SyslogFacility) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190SyslogFilterLogFacilities1 returns the union data inside the LogServiceV190SyslogFilter_LogFacilities_Item as a LogServiceV190SyslogFilterLogFacilities1
+func (t LogServiceV190SyslogFilter_LogFacilities_Item) AsLogServiceV190SyslogFilterLogFacilities1() (LogServiceV190SyslogFilterLogFacilities1, error) {
+	var body LogServiceV190SyslogFilterLogFacilities1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190SyslogFilterLogFacilities1 overwrites any union data inside the LogServiceV190SyslogFilter_LogFacilities_Item as the provided LogServiceV190SyslogFilterLogFacilities1
+func (t *LogServiceV190SyslogFilter_LogFacilities_Item) FromLogServiceV190SyslogFilterLogFacilities1(v LogServiceV190SyslogFilterLogFacilities1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190SyslogFilterLogFacilities1 performs a merge with any union data inside the LogServiceV190SyslogFilter_LogFacilities_Item, using the provided LogServiceV190SyslogFilterLogFacilities1
+func (t *LogServiceV190SyslogFilter_LogFacilities_Item) MergeLogServiceV190SyslogFilterLogFacilities1(v LogServiceV190SyslogFilterLogFacilities1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190SyslogFilter_LogFacilities_Item) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190SyslogFilter_LogFacilities_Item) UnmarshalJSON(b []byte) error {
+	err := t.union.UnmarshalJSON(b)
+	return err
+}
+
+// AsLogServiceV190SyslogSeverity returns the union data inside the LogServiceV190SyslogFilter_LowestSeverity as a LogServiceV190SyslogSeverity
+func (t LogServiceV190SyslogFilter_LowestSeverity) AsLogServiceV190SyslogSeverity() (LogServiceV190SyslogSeverity, error) {
+	var body LogServiceV190SyslogSeverity
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190SyslogSeverity overwrites any union data inside the LogServiceV190SyslogFilter_LowestSeverity as the provided LogServiceV190SyslogSeverity
+func (t *LogServiceV190SyslogFilter_LowestSeverity) FromLogServiceV190SyslogSeverity(v LogServiceV190SyslogSeverity) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190SyslogSeverity performs a merge with any union data inside the LogServiceV190SyslogFilter_LowestSeverity, using the provided LogServiceV190SyslogSeverity
+func (t *LogServiceV190SyslogFilter_LowestSeverity) MergeLogServiceV190SyslogSeverity(v LogServiceV190SyslogSeverity) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+// AsLogServiceV190SyslogFilterLowestSeverity1 returns the union data inside the LogServiceV190SyslogFilter_LowestSeverity as a LogServiceV190SyslogFilterLowestSeverity1
+func (t LogServiceV190SyslogFilter_LowestSeverity) AsLogServiceV190SyslogFilterLowestSeverity1() (LogServiceV190SyslogFilterLowestSeverity1, error) {
+	var body LogServiceV190SyslogFilterLowestSeverity1
+	err := json.Unmarshal(t.union, &body)
+	return body, err
+}
+
+// FromLogServiceV190SyslogFilterLowestSeverity1 overwrites any union data inside the LogServiceV190SyslogFilter_LowestSeverity as the provided LogServiceV190SyslogFilterLowestSeverity1
+func (t *LogServiceV190SyslogFilter_LowestSeverity) FromLogServiceV190SyslogFilterLowestSeverity1(v LogServiceV190SyslogFilterLowestSeverity1) error {
+	b, err := json.Marshal(v)
+	t.union = b
+	return err
+}
+
+// MergeLogServiceV190SyslogFilterLowestSeverity1 performs a merge with any union data inside the LogServiceV190SyslogFilter_LowestSeverity, using the provided LogServiceV190SyslogFilterLowestSeverity1
+func (t *LogServiceV190SyslogFilter_LowestSeverity) MergeLogServiceV190SyslogFilterLowestSeverity1(v LogServiceV190SyslogFilterLowestSeverity1) error {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	merged, err := runtime.JSONMerge(t.union, b)
+	t.union = merged
+	return err
+}
+
+func (t LogServiceV190SyslogFilter_LowestSeverity) MarshalJSON() ([]byte, error) {
+	b, err := t.union.MarshalJSON()
+	return b, err
+}
+
+func (t *LogServiceV190SyslogFilter_LowestSeverity) UnmarshalJSON(b []byte) error {
 	err := t.union.UnmarshalJSON(b)
 	return err
 }
@@ -12858,6 +15197,36 @@ type ServerInterface interface {
 	// (PUT /redfish/v1/Systems/{ComputerSystemId}/Bios/Settings)
 	PutRedfishV1SystemsComputerSystemIDBiosSettings(w http.ResponseWriter, r *http.Request, computerSystemID string)
 
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/LogServices)
+	GetRedfishV1SystemsComputerSystemIDLogServices(w http.ResponseWriter, r *http.Request, computerSystemID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId})
+	GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId})
+	PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId})
+	PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries)
+	GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string)
+
+	// (POST /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries)
+	PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string)
+
+	// (DELETE /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId})
+	DeleteRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string, logEntryID string)
+
+	// (GET /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId})
+	GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string, logEntryID string)
+
+	// (PATCH /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId})
+	PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string, logEntryID string)
+
+	// (PUT /redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId})
+	PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request, computerSystemID string, logServiceID string, logEntryID string)
+
 	// (GET /redfish/v1/Systems/{ComputerSystemId}/Processors)
 	GetRedfishV1SystemsComputerSystemIDProcessors(w http.ResponseWriter, r *http.Request, computerSystemID string)
 
@@ -13537,6 +15906,383 @@ func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDBiosSettin
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.Handler.PutRedfishV1SystemsComputerSystemIDBiosSettings(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDLogServices operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDLogServices(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDLogServices(w, r, computerSystemID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w, r, computerSystemID, logServiceID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceID operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w, r, computerSystemID, logServiceID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceID operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceID(w, r, computerSystemID, logServiceID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries(w, r, computerSystemID, logServiceID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries operation middleware
+func (siw *ServerInterfaceWrapper) PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries(w, r, computerSystemID, logServiceID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// DeleteRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID operation middleware
+func (siw *ServerInterfaceWrapper) DeleteRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogEntryId" -------------
+	var logEntryID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogEntryId", r.PathValue("LogEntryId"), &logEntryID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogEntryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.DeleteRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w, r, computerSystemID, logServiceID, logEntryID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID operation middleware
+func (siw *ServerInterfaceWrapper) GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogEntryId" -------------
+	var logEntryID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogEntryId", r.PathValue("LogEntryId"), &logEntryID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogEntryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w, r, computerSystemID, logServiceID, logEntryID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID operation middleware
+func (siw *ServerInterfaceWrapper) PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogEntryId" -------------
+	var logEntryID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogEntryId", r.PathValue("LogEntryId"), &logEntryID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogEntryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w, r, computerSystemID, logServiceID, logEntryID)
+	}))
+
+	for _, middleware := range siw.HandlerMiddlewares {
+		handler = middleware(handler)
+	}
+
+	handler.ServeHTTP(w, r)
+}
+
+// PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID operation middleware
+func (siw *ServerInterfaceWrapper) PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w http.ResponseWriter, r *http.Request) {
+
+	var err error
+	_ = err
+
+	// ------------- Path parameter "ComputerSystemId" -------------
+	var computerSystemID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "ComputerSystemId", r.PathValue("ComputerSystemId"), &computerSystemID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "ComputerSystemId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogServiceId" -------------
+	var logServiceID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogServiceId", r.PathValue("LogServiceId"), &logServiceID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogServiceId", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "LogEntryId" -------------
+	var logEntryID string
+
+	err = runtime.BindStyledParameterWithOptions("simple", "LogEntryId", r.PathValue("LogEntryId"), &logEntryID, runtime.BindStyledParameterOptions{ParamLocation: runtime.ParamLocationPath, Explode: false, Required: true, Type: "string", Format: ""})
+	if err != nil {
+		siw.ErrorHandlerFunc(w, r, &InvalidParamFormatError{ParamName: "LogEntryId", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.Handler.PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID(w, r, computerSystemID, logServiceID, logEntryID)
 	}))
 
 	for _, middleware := range siw.HandlerMiddlewares {
@@ -14364,6 +17110,16 @@ func HandlerWithOptions(si ServerInterface, options StdHTTPServerOptions) http.H
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.GetRedfishV1SystemsComputerSystemIDBiosSettings)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PatchRedfishV1SystemsComputerSystemIDBiosSettings)
 	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Bios/Settings", wrapper.PutRedfishV1SystemsComputerSystemIDBiosSettings)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices", wrapper.GetRedfishV1SystemsComputerSystemIDLogServices)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}", wrapper.GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceID)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}", wrapper.PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceID)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}", wrapper.PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries", wrapper.GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries)
+	m.HandleFunc(http.MethodPost+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries", wrapper.PostRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntries)
+	m.HandleFunc(http.MethodDelete+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId}", wrapper.DeleteRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID)
+	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId}", wrapper.GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID)
+	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId}", wrapper.PatchRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID)
+	m.HandleFunc(http.MethodPut+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/LogServices/{LogServiceId}/Entries/{LogEntryId}", wrapper.PutRedfishV1SystemsComputerSystemIDLogServicesLogServiceIDEntriesLogEntryID)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors", wrapper.GetRedfishV1SystemsComputerSystemIDProcessors)
 	m.HandleFunc(http.MethodGet+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId}", wrapper.GetRedfishV1SystemsComputerSystemIDProcessorsProcessorID)
 	m.HandleFunc(http.MethodPatch+" "+options.BaseURL+"/redfish/v1/Systems/{ComputerSystemId}/Processors/{ProcessorId}", wrapper.PatchRedfishV1SystemsComputerSystemIDProcessorsProcessorID)
