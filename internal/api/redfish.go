@@ -59,6 +59,7 @@ type redfishServer struct {
 	ctx          context.Context
 	events       EventSource
 	resets       *resetTracker
+	eventLog     *systemEventLog
 	busyReads    *busyCounter
 
 	databaseRefresh *databaseRefresh
@@ -100,6 +101,7 @@ func WithHTTPClient(client *http.Client) Option {
 }
 
 // WithEventSource sets the Incus event stream, which must not be the client used for requests, watched in the background until the context of WithContext is done.
+// The source must be scoped to the same Incus project as the request client.
 func WithEventSource(source EventSource) Option {
 	return func(s *redfishServer) {
 		s.events = source
@@ -142,6 +144,7 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 		httpClient:   http.DefaultClient,
 		ctx:          context.Background(),
 		resets:       &resetTracker{instanceName: instanceName},
+		eventLog:     &systemEventLog{instanceName: instanceName},
 		busyReads:    &busyCounter{},
 
 		databaseRefresh: &databaseRefresh{},
@@ -194,6 +197,8 @@ func NewRedfishServer(instanceName string, client IncusClient, opts ...Option) *
 	}
 
 	s.resets.observers = append(s.resets.observers, s.databaseRefresh.poweredOn)
+	s.resets.lifecycleObservers = append(s.resets.lifecycleObservers, s.eventLog.record)
+	s.eventLog.watched = s.events != nil
 
 	if s.profile.BIOS.Pending {
 		s.resets.onPowerOn(s.applyPendingOnPowerOn)

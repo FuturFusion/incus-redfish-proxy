@@ -55,6 +55,7 @@ func TestRedfishServer_LogServicesNotFound(t *testing.T) {
 		{url: "/redfish/v1/Systems/test-instance/LogServices/Unknown", client: emptyClient},
 		{url: "/redfish/v1/Systems/test-instance/LogServices/Unknown/Entries", client: emptyClient},
 		{url: "/redfish/v1/Systems/test-instance/LogServices/Unknown/Entries/1", client: emptyClient},
+		{url: "/redfish/v1/Systems/test-instance/LogServices/EventLog/Entries/999", client: emptyClient},
 	}
 
 	for _, tc := range tests {
@@ -90,7 +91,7 @@ func TestRedfishServer_SystemLogServices(t *testing.T) {
 		ids = append(ids, service.ID)
 	}
 
-	require.Equal(t, []string{}, ids, "the system links its log services")
+	require.Equal(t, []string{"EventLog"}, ids, "the system links its log services")
 
 	resp, err := client.Get("/redfish/v1/Systems/test-instance/LogServices")
 	require.NoError(t, err, "get the log service collection")
@@ -102,8 +103,8 @@ func TestRedfishServer_SystemLogServices(t *testing.T) {
 	require.JSONEq(t, `{
 		"@odata.id": "/redfish/v1/Systems/test-instance/LogServices",
 		"@odata.type": "#LogServiceCollection.LogServiceCollection",
-		"Members": [],
-		"Members@odata.count": 0,
+		"Members": [{"@odata.id": "/redfish/v1/Systems/test-instance/LogServices/EventLog"}],
+		"Members@odata.count": 1,
 		"Name": "Log Service Collection"
 	}`, string(body), "the collection lists every log service")
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 // logService is one log of the system. The handlers add the OData fields.
@@ -17,12 +18,22 @@ type logService interface {
 	entry(path string, id string) (LogEntryV1220LogEntry, bool, error)
 }
 
+func findLogEntry(entries []LogEntryV1220LogEntry, id string) (LogEntryV1220LogEntry, bool) {
+	for _, entry := range entries {
+		if entry.ID == id {
+			return entry, true
+		}
+	}
+
+	return LogEntryV1220LogEntry{}, false
+}
+
 func (s redfishServer) logServicesPath() string {
 	return fmt.Sprintf("/redfish/v1/Systems/%s/LogServices", s.instanceName)
 }
 
 func (s redfishServer) logServices() []logService {
-	return []logService{}
+	return []logService{s.eventLog}
 }
 
 func (s redfishServer) lookupLogService(w http.ResponseWriter, computerSystemID string, logServiceID string) (logService, string, bool) {
@@ -70,21 +81,24 @@ func (s redfishServer) GetRedfishV1SystemsComputerSystemIDLogServicesLogServiceI
 		return
 	}
 
-	state := ResourceStatus_State{}
-	_ = state.FromResourceState(ResourceStateEnabled)
-
-	health := ResourceStatus_Health{}
-	_ = health.FromResourceHealth(OK)
-
 	resource := service.resource()
 	resource.OdataID = ref(path)
 	resource.OdataType = ref("#LogService.v1_9_0.LogService")
-	resource.DateTime = ref(s.now().UTC())
+	resource.DateTime = ref(s.now().UTC().Truncate(time.Second))
 	resource.DateTimeLocalOffset = ref("+00:00")
 	resource.Entries = &OdataV4IdRef{OdataID: ref(path + "/Entries")}
 	resource.Persistency = ref(false)
-	resource.ServiceEnabled = ref(true)
-	resource.Status = &ResourceStatus{State: &state, Health: &health}
+
+	if resource.ServiceEnabled == nil {
+		state := ResourceStatus_State{}
+		_ = state.FromResourceState(ResourceStateEnabled)
+
+		health := ResourceStatus_Health{}
+		_ = health.FromResourceHealth(OK)
+
+		resource.ServiceEnabled = ref(true)
+		resource.Status = &ResourceStatus{State: &state, Health: &health}
+	}
 
 	response(w, resource)
 }
