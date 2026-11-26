@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"time"
 
 	config "github.com/lxc/incus/v7/shared/cliconfig"
 
@@ -32,8 +33,14 @@ type Config struct {
 	// HTTPClient downloads virtual media images, defaults to http.DefaultClient.
 	HTTPClient *http.Client
 
-	// Context stops the Incus event watcher goroutine once done, short lived callers (e.g. tests) should set it.
+	// Context aborts the proxy once done. It stops the Incus event watcher and the background work.
+	// It also unmounts the streamed media. The device stays, so the next start mounts the media again.
+	// For an orderly stop, call Handler.Close instead. A Handler.Close after the abort still removes the streamed media device.
 	Context context.Context
+
+	// CloseTimeout is the time Handler.Close waits for the background work, for example a reset. Then Handler.Close cancels it.
+	// A value of zero or less means api.DefaultCloseTimeout (30 seconds).
+	CloseTimeout time.Duration
 
 	// Profile is the name of an embedded profile or the path of a profile file. If empty, the proxy uses "generic".
 	Profile string
@@ -53,10 +60,34 @@ func Profiles() []string {
 	return profile.List()
 }
 
-// NewHandler builds a ready to use http.Handler serving the Redfish API for
+// Handler serves the Redfish API of one Incus instance.
+type Handler struct {
+	service *api.Service
+}
+
+// ServeHTTP serves a Redfish request.
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	h.service.ServeHTTP(w, r)
+}
+
+// ReleaseHeld ends the requests that the unreachable window of the profile holds.
+// Register it with http.Server.RegisterOnShutdown, so the shutdown does not wait for them.
+func (h *Handler) ReleaseHeld() {
+	h.service.ReleaseHeld()
+}
+
+// Close stops the proxy in order. Call it after the HTTP server stopped serving requests.
+// It waits for the background work, cancels it after the close timeout and waits until it stops.
+// Then it ejects the streamed media and stops the Incus event watcher. Other media stays inserted.
+func (h *Handler) Close() error {
+	return h.service.Close()
+}
+
+// NewHandler builds a ready to use Handler serving the Redfish API for
 // the instance described by cfg, using the local Incus client configuration
-// to connect to the remote.
-func NewHandler(cfg Config) (http.Handler, error) {
+// to connect to the remote. It starts an Incus event watcher.
+// Call Handler.Close or end Config.Context to stop it.
+func NewHandler(cfg Config) (*Handler, error) {
 	if cfg.InstanceName == "" {
 		return nil, fmt.Errorf("instance name must not be empty")
 	}
@@ -112,5 +143,16 @@ func NewHandler(cfg Config) (http.Handler, error) {
 	// The project is part of the name, so equally named instances of different projects do not share a directory.
 	mediaDir = filepath.Join(mediaDir, filepath.Base(project)+"_"+filepath.Base(cfg.InstanceName))
 
-	return api.NewHandler(cfg.InstanceName, client, api.WithHTTPClient(cfg.HTTPClient), api.WithContext(cfg.Context), api.WithEventSource(events), api.WithProfile(p), api.WithMediaDir(mediaDir)), nil
+	service := api.NewHandler(
+		cfg.InstanceName,
+		client,
+		api.WithHTTPClient(cfg.HTTPClient),
+		api.WithContext(cfg.Context),
+		api.WithCloseTimeout(cfg.CloseTimeout),
+		api.WithEventSource(events),
+		api.WithProfile(p),
+		api.WithMediaDir(mediaDir),
+	)
+
+	return &Handler{service: service}, nil
 }
