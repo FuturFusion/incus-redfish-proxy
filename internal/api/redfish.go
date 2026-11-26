@@ -2008,7 +2008,7 @@ func (s redfishServer) patchBIOSSettings(w http.ResponseWriter, r *http.Request)
 
 	err = s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
 		if s.bios.requiresStop(request.Attributes) && instance.Status != "Stopped" {
-			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+			return false, statusErrorf(http.StatusConflict, "instance %q is not stopped", s.instanceName)
 		}
 
 		return true, s.bios.apply(instance, put, request.Attributes)
@@ -2405,7 +2405,7 @@ func (s redfishServer) PatchRedfishV1SystemsComputerSystemIDSecureBoot(w http.Re
 	err = s.updateInstance(func(instance *incusapi.Instance, put *incusapi.InstancePut) (bool, error) {
 		running = instance.Status != "Stopped"
 		if running && s.profile.SecureBoot.EnableRequiresPowerOff {
-			return false, statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+			return false, statusErrorf(http.StatusConflict, "instance %q is not stopped", s.instanceName)
 		}
 
 		if put.Config == nil {
@@ -3023,7 +3023,7 @@ func (s redfishServer) getSignatureDatabaseForUpdate(db secureBootDatabase) ([]s
 	}
 
 	if instance.Status != "Stopped" {
-		return nil, nil, "", statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+		return nil, nil, "", statusErrorf(http.StatusConflict, "instance %q is not stopped", s.instanceName)
 	}
 
 	return s.getSignatureDatabase(db)

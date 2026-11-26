@@ -443,7 +443,7 @@ func (s redfishServer) resetKeys(resetKeysType profile.ResetKeysType) error {
 
 	// Incus only allows changes to the UEFI variables of a stopped instance.
 	if instance.Status != "Stopped" {
-		return statusErrorf(http.StatusPreconditionFailed, "instance %q is not stopped", s.instanceName)
+		return statusErrorf(http.StatusConflict, "instance %q is not stopped", s.instanceName)
 	}
 
 	err = s.deleteKeys(resetKeysType)
